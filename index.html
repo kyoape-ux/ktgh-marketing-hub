@@ -902,6 +902,31 @@
           <h3>活動 / 講座成效追蹤</h3>
           <button class="btn btn-primary" onclick="switchSection('event','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增活動</button>
         </div>
+        <!-- 歷史篩選列 -->
+        <div style="padding:10px 20px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #EBF2EE;">
+          <select id="evYearFilter" onchange="renderEvents()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text-main);background:#fff;cursor:pointer;">
+            <option value="all">全部年份</option>
+          </select>
+          <select id="evTypeFilter" onchange="renderEvents()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text-main);background:#fff;cursor:pointer;">
+            <option value="all">全部類型</option>
+            <option value="健康講座">健康講座</option>
+            <option value="媒體活動">媒體活動</option>
+            <option value="義診">義診</option>
+            <option value="展覽">展覽</option>
+            <option value="公益活動">公益活動</option>
+            <option value="內部活動">內部活動</option>
+            <option value="其他">其他</option>
+          </select>
+          <select id="evCampusFilter" onchange="renderEvents()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text-main);background:#fff;cursor:pointer;">
+            <option value="all">全部院區</option>
+            <option value="沙鹿">沙鹿</option>
+            <option value="大甲">大甲</option>
+            <option value="沙鹿+大甲">沙鹿+大甲</option>
+          </select>
+          <input type="text" id="evSearchInput" oninput="renderEvents()" placeholder="搜尋活動名稱…" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text-main);background:#fff;outline:none;min-width:160px;">
+          <span id="evCountLabel" style="font-size:12px;color:var(--text-muted);margin-left:auto;"></span>
+          <button class="btn btn-outline" onclick="clearEvFilters()" style="height:32px;font-size:12px;padding:0 10px;">清除篩選</button>
+        </div>
         <div class="table-wrap">
           <table>
             <thead>
@@ -1554,12 +1579,17 @@ async function syncFromGAS() {
     if (Array.isArray(kols)   && kols.length)   store.kols   = kols;
     saveStore();
     renderOverview();
+    renderPostsList();
+    renderEvents();
+    renderMedia();
+    renderKols();
     const t = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
     setSyncStatus('已同步 ' + t, 'var(--brand)');
     showToast('Sheets 資料同步完成');
   } catch(e) {
-    setSyncStatus('同步失敗', 'var(--warn)');
-    showToast('同步失敗：' + e.message);
+    setSyncStatus('同步失敗 ✕', 'var(--warn)');
+    console.error('[GAS sync error]', e);
+    alert('同步失敗：' + e.message + '\n\n請確認 GAS Web App 已正確部署，或至「設定」頁更新 URL。');
   }
 }
 
@@ -1921,13 +1951,53 @@ function phaseBadge(phase) {
 // ═══════════════════════════════════════════
 //  RENDER EVENTS
 // ═══════════════════════════════════════════
+function clearEvFilters() {
+  const y = document.getElementById('evYearFilter');
+  const t = document.getElementById('evTypeFilter');
+  const c = document.getElementById('evCampusFilter');
+  const s = document.getElementById('evSearchInput');
+  if (y) y.value = 'all';
+  if (t) t.value = 'all';
+  if (c) c.value = 'all';
+  if (s) s.value = '';
+  renderEvents();
+}
+
 function renderEvents() {
   const tbody = document.getElementById('eventListTbody');
-  if (!store.events.length) {
-    tbody.innerHTML = '<tr><td colspan="10"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p>尚未新增活動記錄</p></div></td></tr>';
+
+  // ── 更新年份選單 ──
+  const yearSel = document.getElementById('evYearFilter');
+  if (yearSel) {
+    const cur = yearSel.value;
+    const years = [...new Set(store.events.map(e => (e.date||'').slice(0,4)).filter(Boolean))].sort().reverse();
+    yearSel.innerHTML = '<option value="all">全部年份</option>' +
+      years.map(y => `<option value="${y}"${y===cur?' selected':''}>${y} 年</option>`).join('');
+  }
+
+  // ── 讀取篩選條件 ──
+  const year   = document.getElementById('evYearFilter')?.value   || 'all';
+  const type   = document.getElementById('evTypeFilter')?.value   || 'all';
+  const campus = document.getElementById('evCampusFilter')?.value || 'all';
+  const search = (document.getElementById('evSearchInput')?.value || '').trim().toLowerCase();
+
+  // ── 套用篩選 ──
+  let filtered = store.events.map((e,i)=>({e,i}))
+    .sort((a,b)=>new Date(b.e.date)-new Date(a.e.date));
+  if (year   !== 'all') filtered = filtered.filter(({e}) => (e.date||'').startsWith(year));
+  if (type   !== 'all') filtered = filtered.filter(({e}) => e.type === type);
+  if (campus !== 'all') filtered = filtered.filter(({e}) => e.campus === campus);
+  if (search)           filtered = filtered.filter(({e}) => (e.name||'').toLowerCase().includes(search));
+
+  // ── 計數標籤 ──
+  const countEl = document.getElementById('evCountLabel');
+  if (countEl) countEl.textContent = `共 ${filtered.length} / ${store.events.length} 筆`;
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="11"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p>' + (store.events.length ? '找不到符合條件的活動' : '尚未新增活動記錄') + '</p></div></td></tr>';
     return;
   }
-  tbody.innerHTML = store.events.map((e,i)=>({e,i})).sort((a,b)=>new Date(b.e.date)-new Date(a.e.date)).map(({e,i}) => {
+  tbody.innerHTML = filtered.map(({e,i}) => {
     const rate = e.reg > 0 ? Math.round(e.attend/e.reg*100) : (e.attend > 0 ? '—' : 0);
     const rateStr = typeof rate === 'number' ? `${rate}%` : rate;
     const rateColor = typeof rate === 'number' && rate >= 80 ? 'color:var(--brand);font-weight:700;' : '';
@@ -2221,7 +2291,10 @@ ${store.media.map(m=>`• ${m.date} ${m.name}｜${m.title}`).join('\n')}
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `光田月報_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'-')}.txt`;
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 200);
   showToast('月報已匯出');
 }
 
