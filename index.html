@@ -1481,7 +1481,7 @@
 // ═══════════════════════════════════════════
 //  CONFIG + DATA STORE
 // ═══════════════════════════════════════════
-const STORE_KEY  = 'ktgh_marketing_v1';
+const STORE_KEY  = 'ktgh_marketing_v2';
 const CONFIG_KEY = 'ktgh_config_v1';
 
 let config = loadConfig();
@@ -1817,7 +1817,7 @@ function renderOverview() {
       <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
       <td class="text-mono">${engageRate}%</td>
     </tr>`;
-  }).join('');
+  }).join('') || '<tr><td colspan="9"><div class="empty"><p>暫無貼文資料，請匯入 FB 數據或新增貼文</p></div></td></tr>';
 }
 
 function filterByMonth(posts, month) {
@@ -1826,7 +1826,12 @@ function filterByMonth(posts, month) {
 }
 
 function monthLabel(m) {
-  const map = {'2026-03':'3月','2026-02':'2月','2026-01':'1月','2025-12':'12月'};
+  const map = {
+    '2026-03':'3月','2026-02':'2月','2026-01':'1月',
+    '2025-12':'12月','2025-11':'11月','2025-10':'10月',
+    '2025-09':'9月','2025-08':'8月','2025-07':'7月',
+    '2025-06':'6月','2025-05':'5月','2025-04':'4月',
+  };
   return map[m] || m;
 }
 
