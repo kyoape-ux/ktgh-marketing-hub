@@ -327,6 +327,14 @@
   .ev-kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
   .ev-bar-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:22px; }
 
+  /* ── CAMPAIGN HUB ── */
+  .campaign-card { background:var(--surface); border-radius:14px; border:1.5px solid var(--border); padding:20px 24px; margin-bottom:14px; cursor:pointer; transition:all 0.18s; }
+  .campaign-card:hover { border-color:var(--brand-mid); box-shadow:var(--shadow); transform:translateY(-1px); }
+  .cp-metric { text-align:center; padding:6px 0; }
+  .cp-metric-val { font-family:'Inter',system-ui,sans-serif; font-size:20px; font-weight:800; color:var(--brand); letter-spacing:-0.5px; }
+  .cp-metric-lbl { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .cr-output { font-family:'Courier New',monospace; font-size:12.5px; line-height:1.8; background:var(--bg); border-radius:10px; padding:18px; white-space:pre-wrap; max-height:480px; overflow-y:auto; border:1px solid var(--border); color:var(--text); }
+
   /* ── PROMPT MODAL ── */
   .prompt-output { background:#1A2820; color:#A8D8BE; border-radius:10px; padding:16px; font-size:12.5px; line-height:1.9; font-family:'Noto Sans TC',sans-serif; white-space:pre-wrap; margin:14px 0; max-height:320px; overflow-y:auto; }
   .prompt-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
@@ -374,6 +382,10 @@
     </a>
     <a class="nav-item" onclick="switchSection('media','add')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> 新增媒體記錄
+    </a>
+    <div class="nav-section">成效整合</div>
+    <a class="nav-item" onclick="switchSection('campaign','hub')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Campaign 成果看板
     </a>
     <div class="nav-section">系統</div>
     <a class="nav-item" onclick="switchSection('settings','main')">
@@ -1002,10 +1014,33 @@
           <label>備註</label>
           <textarea id="md-note" rows="2" placeholder="其他補充說明..."></textarea>
         </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>關聯活動 Campaign（選填）</label>
+          <input type="text" id="md-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
+        </div>
         <div style="display:flex;gap:10px;">
           <button class="btn btn-primary" onclick="addMedia()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 儲存媒體記錄</button>
           <button class="btn btn-outline" onclick="switchSection('media','list')">取消</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ══ CAMPAIGN HUB ══ -->
+    <div class="section" id="sec-campaign-hub">
+      <div id="campaignListView">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div>
+            <div style="font-size:11px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;">活動成效整合</div>
+            <h3 style="font-size:18px;font-weight:800;">Campaign 成果看板</h3>
+          </div>
+        </div>
+        <div id="campaignCardGrid"></div>
+      </div>
+      <div id="campaignDetailView" style="display:none;">
+        <button class="btn btn-outline" style="margin-bottom:18px;font-size:12.5px;" onclick="document.getElementById('campaignListView').style.display='';document.getElementById('campaignDetailView').style.display='none';">
+          ← 返回看板列表
+        </button>
+        <div id="campaignDetailContent"></div>
       </div>
     </div>
 
@@ -1112,6 +1147,10 @@
     <div class="form-group">
       <label>FB 永久連結</label>
       <input type="url" id="pm-url" placeholder="https://www.facebook.com/...">
+    </div>
+    <div class="form-group" style="margin-top:4px;">
+      <label>關聯活動 Campaign（選填）</label>
+      <input type="text" id="pm-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
     </div>
     <input type="hidden" id="pm-idx" value="-1">
     <div class="modal-footer">
@@ -1237,6 +1276,21 @@
   </div>
 </div>
 
+<!-- CAMPAIGN REPORT MODAL -->
+<div class="modal-overlay" id="campaignReportModal">
+  <div class="modal-box" style="max-width:680px;">
+    <h3 id="crModalTitle">活動成果報告</h3>
+    <div class="cr-output" id="crOutput"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('campaignReportModal')">關閉</button>
+      <button class="btn btn-primary" onclick="copyCampaignReport()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        複製報告
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- IMPORT PREVIEW MODAL -->
 <div id="importModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;">
   <div style="background:var(--surface);border-radius:18px;padding:32px;max-width:560px;width:90%;box-shadow:var(--shadow-lg);border:1px solid var(--border);">
@@ -1252,6 +1306,8 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<datalist id="campaignDatalist"></datalist>
 
 <script>
 // ═══════════════════════════════════════════
@@ -1447,6 +1503,7 @@ function switchSection(module, sub) {
     'media-add':      ['新增媒體記錄',         '填寫媒體曝光資料'],
     'settings-main':    ['設定',             'Google Sheets 串接與資料管理'],
     'event-dashboard':  ['活動成效看板',      '活動場次、出席率、滿意度分析'],
+    'campaign-hub':     ['Campaign 成果看板', '跨平台活動整合成效追蹤'],
   };
   const key = `${module}-${sub}`;
   if (titles[key]) {
@@ -1459,6 +1516,7 @@ function switchSection(module, sub) {
   if (key === 'event-list')     renderEvents();
   if (key === 'event-dashboard') renderEventDashboard();
   if (key === 'media-list')     renderMedia();
+  if (key === 'campaign-hub')  renderCampaignHub();
 }
 
 // ═══════════════════════════════════════════
@@ -1687,6 +1745,7 @@ function addMedia() {
     reach: +document.getElementById('md-reach').value || 0,
     url: document.getElementById('md-url').value,
     note: document.getElementById('md-note').value,
+    campaign: document.getElementById('md-campaign').value.trim(),
   });
   saveStore();
   _gasWrite('addMedia', store.media[store.media.length - 1]);
@@ -1923,9 +1982,11 @@ function openPostModal(idx) {
   document.getElementById('pm-click').value   = p.click   || '';
   document.getElementById('pm-engage').value  = p.engage  || '';
   document.getElementById('pm-url').value     = p.url     || '';
-  document.getElementById('pm-cat').value     = p.cat     || '衛教類';
+  document.getElementById('pm-cat').value      = p.cat      || '衛教類';
   const defaultImgType = p.img_type || (p.type === '影片' ? '一般影片' : '社群圖文');
-  document.getElementById('pm-imgtype').value = defaultImgType;
+  document.getElementById('pm-imgtype').value  = defaultImgType;
+  document.getElementById('pm-campaign').value = p.campaign || '';
+  updateCampaignDatalist();
   openModal('postModal');
 }
 
@@ -1941,6 +2002,7 @@ function savePost() {
     img_type: imgType,
     type:     (imgType === 'Reels' || imgType === '一般影片') ? '影片' : '相片',
     cat:      document.getElementById('pm-cat').value,
+    campaign: document.getElementById('pm-campaign').value.trim(),
     reach:  +document.getElementById('pm-reach').value  || 0,
     click:  +document.getElementById('pm-click').value  || 0,
     engage: +document.getElementById('pm-engage').value || 0,
@@ -2195,6 +2257,178 @@ ${meta.tips}${extra ? '\n【額外要求】' + extra : ''}
 function copyPrompt() {
   const text = document.getElementById('promptOutput').textContent;
   navigator.clipboard.writeText(text).then(() => showToast('Prompt 已複製到剪貼簿'));
+}
+
+// ═══════════════════════════════════════════
+//  CAMPAIGN HUB
+// ═══════════════════════════════════════════
+function updateCampaignDatalist() {
+  const dl = document.getElementById('campaignDatalist');
+  if (!dl) return;
+  const names = [...new Set(store.events.map(e => e.name))];
+  dl.innerHTML = names.map(n => `<option value="${n}">`).join('');
+}
+
+function renderCampaignHub() {
+  updateCampaignDatalist();
+  document.getElementById('campaignListView').style.display  = '';
+  document.getElementById('campaignDetailView').style.display = 'none';
+
+  const grid = document.getElementById('campaignCardGrid');
+  if (!store.events.length) {
+    grid.innerHTML = `<div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:.4;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p>尚未建立活動記錄<br><small style="font-size:12px;color:var(--text-muted);">請先在「新增活動回報」新增活動，再將 FB 貼文與媒體曝光關聯至該活動</small></p></div>`;
+    return;
+  }
+
+  const sorted = [...store.events].sort((a, b) => new Date(b.date) - new Date(a.date));
+  grid.innerHTML = sorted.map(ev => {
+    const evName = ev.name;
+    const linkedPosts = store.posts.filter(p => p.campaign === evName);
+    const linkedMedia = store.media.filter(m => m.campaign === evName);
+    const fbReach    = linkedPosts.reduce((s, p) => s + (p.reach||0), 0);
+    const mediaReach = linkedMedia.reduce((s, m) => s + (m.reach||0), 0);
+    const totalReach = fbReach + mediaReach;
+    const safe = evName.replace(/'/g, "\\'");
+    return `
+      <div class="campaign-card" onclick="renderCampaignDetail('${safe}')">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+          <div>
+            <div style="font-size:16px;font-weight:800;margin-bottom:4px;">${evName}</div>
+            <div style="font-size:12px;color:var(--text-muted);">${ev.date} &nbsp;·&nbsp; ${ev.type} &nbsp;·&nbsp; ${ev.campus}</div>
+          </div>
+          <button class="btn btn-outline" style="font-size:12px;padding:5px 14px;flex-shrink:0;"
+            onclick="event.stopPropagation();renderCampaignDetail('${safe}')">查看詳情 →</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-top:1px solid var(--border);padding-top:14px;">
+          <div class="cp-metric"><div class="cp-metric-val">${linkedPosts.length}</div><div class="cp-metric-lbl">FB 貼文</div></div>
+          <div class="cp-metric"><div class="cp-metric-val">${linkedMedia.length}</div><div class="cp-metric-lbl">媒體曝光</div></div>
+          <div class="cp-metric"><div class="cp-metric-val">${totalReach ? totalReach.toLocaleString() : '—'}</div><div class="cp-metric-lbl">合計觸及</div></div>
+          <div class="cp-metric"><div class="cp-metric-val">${ev.attend || '—'}</div><div class="cp-metric-lbl">實際出席</div></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderCampaignDetail(name) {
+  const ev = store.events.find(e => e.name === name);
+  if (!ev) return;
+
+  document.getElementById('campaignListView').style.display  = 'none';
+  document.getElementById('campaignDetailView').style.display = '';
+
+  const linkedPosts = store.posts.filter(p => p.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const linkedMedia = store.media.filter(m => m.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const fbReach    = linkedPosts.reduce((s, p) => s + (p.reach||0), 0);
+  const mediaReach = linkedMedia.reduce((s, m) => s + (m.reach||0), 0);
+  const totalReach = fbReach + mediaReach;
+  const attendRate = ev.reg > 0 ? ((ev.attend||0) / ev.reg * 100).toFixed(0) + '%' : '—';
+  const safe = name.replace(/'/g, "\\'");
+
+  const postsHtml = linkedPosts.length
+    ? `<div class="table-wrap"><table>
+        <thead><tr><th>日期</th><th>標題</th><th>風格</th><th>觸及</th><th>互動</th></tr></thead>
+        <tbody>${linkedPosts.map(p => `<tr>
+          <td class="text-mono">${p.date}</td>
+          <td style="max-width:240px;line-height:1.4;font-size:12.5px">${p.title}</td>
+          <td>${typeBadge(p.type, p.img_type)}</td>
+          <td class="text-mono highlight">${(p.reach||0).toLocaleString()}</td>
+          <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`
+    : '<div class="empty" style="padding:22px;"><p>尚無關聯 FB 貼文<br><small style="color:var(--text-muted)">編輯貼文時在「關聯活動」欄填入此活動名稱</small></p></div>';
+
+  const mediaHtml = linkedMedia.length
+    ? `<div class="table-wrap"><table>
+        <thead><tr><th>日期</th><th>媒體名稱</th><th>類型</th><th>標題摘要</th><th>觸及</th></tr></thead>
+        <tbody>${linkedMedia.map(m => `<tr>
+          <td class="text-mono">${m.date}</td>
+          <td style="font-weight:600">${m.name}</td>
+          <td><span class="badge badge-blue">${m.type}</span></td>
+          <td style="max-width:200px;font-size:12.5px">${m.title||'—'}</td>
+          <td class="text-mono highlight">${(m.reach||0).toLocaleString()}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`
+    : '<div class="empty" style="padding:22px;"><p>尚無關聯媒體曝光<br><small style="color:var(--text-muted)">新增媒體記錄時在「關聯活動」欄填入此活動名稱</small></p></div>';
+
+  document.getElementById('campaignDetailContent').innerHTML = `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:22px;font-weight:900;">${name}</div>
+        <div style="font-size:12.5px;color:var(--text-muted);margin-top:4px;">${ev.date} &nbsp;·&nbsp; ${ev.type} &nbsp;·&nbsp; ${ev.campus}${ev.speaker ? ' &nbsp;·&nbsp; ' + ev.speaker : ''}</div>
+      </div>
+      <button class="btn btn-primary" onclick="openCampaignReportModal('${safe}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        產生成果報告
+      </button>
+    </div>
+
+    <div class="ev-kpi-grid" style="margin-bottom:20px;">
+      <div class="kpi-card"><div class="kpi-label">FB 社群觸及</div><div class="kpi-value" style="font-size:26px;">${fbReach.toLocaleString()}</div><div class="kpi-change" style="color:var(--text-muted)">${linkedPosts.length} 篇貼文</div></div>
+      <div class="kpi-card"><div class="kpi-label">媒體新聞觸及</div><div class="kpi-value" style="font-size:26px;">${mediaReach.toLocaleString()}</div><div class="kpi-change" style="color:var(--text-muted)">${linkedMedia.length} 篇報導</div></div>
+      <div class="kpi-card teal2"><div class="kpi-label">跨平台合計觸及</div><div class="kpi-value" style="font-size:26px;color:var(--brand)">${totalReach.toLocaleString()}</div><div class="kpi-change" style="color:var(--text-muted)">社群 + 媒體</div></div>
+      <div class="kpi-card"><div class="kpi-label">實際出席人數</div><div class="kpi-value" style="font-size:26px;">${ev.attend||0}</div><div class="kpi-change" style="color:var(--text-muted)">出席率 ${attendRate}</div></div>
+    </div>
+
+    <div class="table-card" style="margin-bottom:16px;">
+      <div class="table-header"><h3>FB 社群貼文（${linkedPosts.length} 篇）</h3></div>
+      ${postsHtml}
+    </div>
+    <div class="table-card">
+      <div class="table-header"><h3>媒體新聞曝光（${linkedMedia.length} 篇）</h3></div>
+      ${mediaHtml}
+    </div>`;
+}
+
+function openCampaignReportModal(name) {
+  const ev = store.events.find(e => e.name === name);
+  if (!ev) return;
+
+  const linkedPosts = store.posts.filter(p => p.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const linkedMedia = store.media.filter(m => m.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const fbReach    = linkedPosts.reduce((s, p) => s + (p.reach||0), 0);
+  const mediaReach = linkedMedia.reduce((s, m) => s + (m.reach||0), 0);
+  const totalReach = fbReach + mediaReach;
+  const attendRate = ev.reg > 0 ? ((ev.attend||0) / ev.reg * 100).toFixed(0) + '%' : '—';
+  const reelsPosts = linkedPosts.filter(p => p.img_type === 'Reels');
+  const reelsReach = reelsPosts.reduce((s, p) => s + (p.reach||0), 0);
+
+  const lines = [
+    `【活動成果報告】${name}`,
+    `${'═'.repeat(42)}`,
+    ``,
+    `📅 活動日期：${ev.date}`,
+    `🏥 類型：${ev.type}　院區：${ev.campus}`,
+    ev.speaker ? `👤 主講：${ev.speaker}` : null,
+    ``,
+    `📱 社群媒體成效`,
+    `  FB 貼文：${linkedPosts.length} 篇`,
+    ...linkedPosts.map(p => `    • ${p.date}  ${p.title.slice(0,30)}  [${p.img_type||p.type}]  觸及 ${(p.reach||0).toLocaleString()}`),
+    `  FB 社群總觸及：${fbReach.toLocaleString()} 人次`,
+    reelsPosts.length ? `  Reels 短影音：${reelsPosts.length} 支，觸及 ${reelsReach.toLocaleString()} 次` : null,
+    ``,
+    `📰 媒體新聞曝光`,
+    `  報導篇數：${linkedMedia.length} 篇`,
+    ...linkedMedia.map(m => `    • ${m.date}  ${m.name}  ${(m.title||'').slice(0,24)}  觸及 ${(m.reach||0).toLocaleString()}`),
+    `  媒體總觸及：${mediaReach.toLocaleString()} 人次`,
+    ``,
+    `🎯 活動數據`,
+    `  報名人數：${ev.reg||0} 人`,
+    `  實際出席：${ev.attend||0} 人（出席率 ${attendRate}）`,
+    ev.sat ? `  滿意度：${ev.sat} / 5` : null,
+    ``,
+    `📊 整合成效`,
+    `  跨平台合計觸及：${totalReach.toLocaleString()} 人次`,
+    ev.note ? `\n📝 備註\n  ${ev.note}` : null,
+  ].filter(l => l !== null).join('\n');
+
+  document.getElementById('crModalTitle').textContent = `成果報告 ─ ${name}`;
+  document.getElementById('crOutput').textContent = lines;
+  openModal('campaignReportModal');
+}
+
+function copyCampaignReport() {
+  navigator.clipboard.writeText(document.getElementById('crOutput').textContent)
+    .then(() => { showToast('成果報告已複製到剪貼簿'); closeModal('campaignReportModal'); });
 }
 
 // ═══════════════════════════════════════════
