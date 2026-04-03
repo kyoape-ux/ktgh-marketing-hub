@@ -1548,10 +1548,10 @@ async function syncFromGAS() {
       gasGet('getMedia'),
       gasGet('getKols'),
     ]);
-    if (Array.isArray(posts))  store.posts  = posts;
-    if (Array.isArray(events)) store.events = events;
-    if (Array.isArray(media))  store.media  = media;
-    if (Array.isArray(kols))   store.kols   = kols;
+    if (Array.isArray(posts)  && posts.length)  store.posts  = posts;
+    if (Array.isArray(events) && events.length) store.events = events;
+    if (Array.isArray(media)  && media.length)  store.media  = media;
+    if (Array.isArray(kols)   && kols.length)   store.kols   = kols;
     saveStore();
     renderOverview();
     const t = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
