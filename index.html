@@ -1510,7 +1510,7 @@ function loadStore() {
       return d;
     }
   } catch(e) {}
-  return { posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: [] };
+  return { posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: getBuiltinKols() };
 }
 
 function saveStore() {
@@ -1630,6 +1630,35 @@ function getBuiltinPosts() {
     {date:'2026-03-06',title:'女性肺腺癌篩檢講座預告',type:'相片',cat:'活動/講座',reach:2616,click:76,engage:53,month:'2026-03',url:''},
     {date:'2026-03-09',title:'纖維肌痛症講座預告',type:'相片',cat:'活動/講座',reach:1569,click:133,engage:55,month:'2026-03',url:''},
     {date:'2026-03-23',title:'阿長給你的愛Reels',type:'影片',cat:'招募類',reach:2634,click:260,engage:110,month:'2026-03',url:''},
+    // ── Q3 2025 男性健康季 FB 貼文（前期預告 + 事後懶人包）──
+    {date:'2025-07-28',title:'【男人的秘密】泌尿問題活動預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:6165,click:320,engage:185,month:'2025-07',url:'',phase:'前期預告',campaign:'男人的秘密：泌尿問題'},
+    {date:'2025-07-28',title:'【啤酒肚+高膽固醇】中醫體質調理預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:4645,click:210,engage:143,month:'2025-07',url:'',phase:'前期預告',campaign:'依體質解決啤酒肚+高膽固醇'},
+    {date:'2025-08-04',title:'【熟男健康】荷爾蒙與營養照護預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:3821,click:178,engage:112,month:'2025-08',url:'',phase:'前期預告',campaign:'熟男健康：荷爾蒙與營養照護'},
+    {date:'2025-08-08',title:'【肺癌預防】全人照護講座預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:4120,click:195,engage:128,month:'2025-08',url:'',phase:'前期預告',campaign:'肺癌預防與全人照護'},
+    {date:'2025-09-04',title:'【大腸直腸健康】中西醫整合預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:5219,click:263,engage:160,month:'2025-09',url:'',phase:'前期預告',campaign:'大腸直腸健康：中西醫整合'},
+    {date:'2025-09-06',title:'【男性更年期】睡眠性慾精力預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:4724,click:228,engage:145,month:'2025-09',url:'',phase:'前期預告',campaign:'男性更年期：睡眠、性慾、精力'},
+    {date:'2025-09-09',title:'【早發性失智】為什麼我變健忘預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:2421,click:118,engage:89,month:'2025-09',url:'',phase:'前期預告',campaign:'早發性失智：為什麼我變得健忘'},
+    {date:'2025-09-10',title:'【掉髮預防】皮膚科×美容醫學預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:4180,click:200,engage:127,month:'2025-09',url:'',phase:'前期預告',campaign:'掉髮預防與修復'},
+    {date:'2025-08-13',title:'男人的秘密：泌尿問題活動懶人包',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:5367,click:280,engage:210,month:'2025-08',url:'',phase:'事後懶人包',campaign:'男人的秘密：泌尿問題'},
+    {date:'2025-08-13',title:'啤酒肚體質調理活動花絮懶人包',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:5367,click:250,engage:198,month:'2025-08',url:'',phase:'事後懶人包',campaign:'依體質解決啤酒肚+高膽固醇'},
+    {date:'2025-08-18',title:'熟男健康活動花絮整理',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:2207,click:105,engage:89,month:'2025-08',url:'',phase:'事後懶人包',campaign:'熟男健康：荷爾蒙與營養照護'},
+    {date:'2025-08-22',title:'肺癌預防講座活動花絮',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:3538,click:168,engage:132,month:'2025-08',url:'',phase:'事後懶人包',campaign:'肺癌預防與全人照護'},
+    {date:'2025-09-18',title:'大腸直腸健康活動精彩回顧',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:4299,click:202,engage:158,month:'2025-09',url:'',phase:'事後懶人包',campaign:'大腸直腸健康：中西醫整合'},
+    {date:'2025-09-20',title:'男性更年期講座懶人包',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:3402,click:162,engage:128,month:'2025-09',url:'',phase:'事後懶人包',campaign:'男性更年期：睡眠、性慾、精力'},
+    {date:'2025-09-23',title:'早發性失智精彩內容整理懶人包',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:3319,click:158,engage:142,month:'2025-09',url:'',phase:'事後懶人包',campaign:'早發性失智：為什麼我變得健忘'},
+    {date:'2025-09-24',title:'掉髮預防與修復活動花絮',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:2525,click:120,engage:97,month:'2025-09',url:'',phase:'事後懶人包',campaign:'掉髮預防與修復'},
+    {date:'2025-09-27',title:'體能挑戰活動花絮回顧',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:3927,click:185,engage:148,month:'2025-09',url:'',phase:'事後懶人包',campaign:'體能挑戰：你有多強？'},
+    // ── 2025 GWD 全球健康日 FB 貼文（完整 4 篇含互動數據）──
+    {date:'2025-06-12',title:'GWD全球健康日 抽獎活動預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:6596,click:380,engage:178,month:'2025-06',url:'',phase:'前期預告',campaign:'GWD全球健康日'},
+    {date:'2025-06-14',title:'GWD全球健康日 活動當日花絮',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:10612,click:520,engage:286,month:'2025-06',url:'',phase:'活動當日',campaign:'GWD全球健康日'},
+    {date:'2025-06-21',title:'GWD全球健康日 精彩回顧懶人包 ①',type:'相片',img_type:'實拍照片',cat:'活動/講座',reach:4880,click:238,engage:333,month:'2025-06',url:'',phase:'事後懶人包',campaign:'GWD全球健康日'},
+    {date:'2025-06-28',title:'GWD全球健康日 健康生活懶人包 ②',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:4818,click:230,engage:479,month:'2025-06',url:'',phase:'事後懶人包',campaign:'GWD全球健康日'},
+    // ── 2025 Q2 親子/女性 FB 貼文 ──────────────────────────
+    {date:'2025-04-10',title:'如何與青少年溝通講座預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:17640,click:820,engage:543,month:'2025-04',url:'',phase:'前期預告',campaign:'如何與青少年溝通'},
+    {date:'2025-05-10',title:'運動顧骨健康講座預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:17654,click:835,engage:551,month:'2025-05',url:'',phase:'前期預告',campaign:'運動顧骨健康'},
+    {date:'2025-06-06',title:'中西醫整合治過敏講座預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:10707,click:498,engage:332,month:'2025-06',url:'',phase:'前期預告',campaign:'中西醫整合治過敏'},
+    {date:'2025-05-12',title:'促進大腦發育的食物講座預告',type:'相片',img_type:'社群圖文',cat:'活動/講座',reach:10430,click:485,engage:320,month:'2025-05',url:'',phase:'前期預告',campaign:'促進大腦發育的食物'},
+    {date:'2025-06-27',title:'兒童打鼾與過動講座直播',type:'影片',img_type:'一般影片',cat:'活動/講座',reach:8922,click:412,engage:278,month:'2025-06',url:'',phase:'活動當日',campaign:'兒童打鼾與過動'},
     // 12月
     {date:'2025-12-10',title:'全口重建柯百俞醫師案例',type:'相片',cat:'案例類',reach:30292,click:1681,engage:136,month:'2025-12',url:''},
     {date:'2025-12-24',title:'平安夜搜救犬鐵雄慰問病房',type:'相片',cat:'品牌/節慶',reach:19880,click:8934,engage:577,month:'2025-12',url:''},
@@ -1642,11 +1671,60 @@ function getBuiltinPosts() {
 
 function getBuiltinEvents() {
   return [
+    // ── 2026 Q1 女性健康季 ──────────────────────────────────
     {date:'2026-03-06',name:'守護女性健康｜肺腺癌篩檢講座',type:'健康講座',campus:'向上院區',reg:80,attend:65,reach:2616,sat:4.5,speaker:'黃俊雄醫師',note:'現場打卡禮保溫杯反應熱烈'},
     {date:'2026-03-09',name:'纖維肌痛症健康藝術人文系列',type:'健康講座',campus:'向上院區',reg:50,attend:42,reach:1569,sat:4.3,speaker:'柯麗櫻醫師、施宇宸PT',note:''},
     {date:'2026-03-11',name:'乳癌基因秘密講座',type:'健康講座',campus:'向上院區',reg:70,attend:58,reach:1236,sat:4.6,speaker:'廖志斌醫師、王敦正醫師',note:''},
     {date:'2026-03-12',name:'女性心血管照護講座',type:'健康講座',campus:'向上院區',reg:85,attend:72,reach:2085,sat:4.7,speaker:'曾敏昇醫師、陳慧芬個管師',note:'女性健康月系列最高滿意度'},
     {date:'2026-02-02',name:'光田迎春墨香傳情活動',type:'院內活動',campus:'向上院區',reg:0,attend:320,reach:2917,sat:5.0,speaker:'書法名師現場揮毫',note:'現場發放春聯與財神爺互動'},
+    // ── 2025 Q4 銀髮族健康季 ────────────────────────────────
+    {date:'2025-10-10',name:'胸悶？心血管早期照護',type:'健康講座',campus:'向上院區',reg:50,attend:34,reach:0,sat:4.4,speaker:'心臟科、營養科',note:'達成率68%，出席率71%'},
+    {date:'2025-10-24',name:'預防醫學：銀髮族養生照護',type:'健康講座',campus:'向上院區',reg:66,attend:53,reach:0,sat:4.6,speaker:'皮膚科、神經科、運動醫學（外聘專家）',note:'達成率80%，外聘講者拓展大台中受眾20%'},
+    {date:'2025-11-08',name:'好眠護大腦：神經與中醫整合',type:'健康講座',campus:'向上院區',reg:50,attend:45,reach:0,sat:4.8,speaker:'神經科、中醫科',note:'達成率90%，出席率90%，高黏著度話題'},
+    {date:'2025-11-22',name:'超前部署：醫療×照護×財務規劃',type:'健康講座',campus:'向上院區',reg:50,attend:45,reach:0,sat:4.8,speaker:'老年科、社工師、律師（外聘）',note:'達成率90%，律師外聘講者拓展大台中受眾，地理擴散最佳'},
+    {date:'2025-11-29',name:'預防慢性病相關骨質疏鬆',type:'健康講座',campus:'向上院區',reg:50,attend:51,reach:0,sat:4.9,speaker:'血液腫瘤科、營養科',note:'達成率102%！超額報名，銀髮族最受歡迎場次'},
+    {date:'2025-12-06',name:'焦慮與睡眠呼吸中止干擾',type:'健康講座',campus:'向上院區',reg:40,attend:26,reach:0,sat:4.5,speaker:'精神科、耳鼻喉科',note:'達成率65%，出席率74%'},
+    {date:'2025-12-13',name:'103歲的青春秘訣：運動與活力',type:'健康講座',campus:'向上院區',reg:50,attend:35,reach:0,sat:4.8,speaker:'骨科（外聘世界老年運動會羽球冠軍）',note:'達成率70%，外聘世界運動員，受眾橫跨大台中'},
+    {date:'2025-12-20',name:'胃腸道健康：優雅老化',type:'健康講座',campus:'向上院區',reg:50,attend:41,reach:0,sat:4.7,speaker:'肝膽腸胃科、營養科',note:'達成率82%，出席率91%'},
+    // ── 2025 Q3 男性健康季 ──────────────────────────────────
+    {date:'2025-08-06',name:'男人的秘密：泌尿問題',type:'健康講座',campus:'向上院區',reg:50,attend:37,reach:6165,sat:4.6,speaker:'泌尿科、中醫科',note:'向上院區大廳｜達成率74%，FB觸及Q3最高6,165，出席率95%'},
+    {date:'2025-08-06',name:'依體質解決啤酒肚+高膽固醇',type:'健康講座',campus:'向上院區',reg:40,attend:17,reach:4645,sat:4.5,speaker:'中醫科、營養科',note:'向上院區大廳｜達成率43%，到場率100%，事後FB互動↑+722'},
+    {date:'2025-08-11',name:'熟男健康：荷爾蒙與營養照護',type:'健康講座',campus:'向上院區',reg:30,attend:16,reach:3821,sat:4.4,speaker:'血液腫瘤科、營養科',note:'333咖啡廳｜達成率53%'},
+    {date:'2025-08-15',name:'肺癌預防與全人照護',type:'健康講座',campus:'向上院區',reg:50,attend:29,reach:4120,sat:4.6,speaker:'胸腔內科、胸腔外科',note:'向上院區大廳｜達成率58%，到場率100%'},
+    {date:'2025-09-11',name:'大腸直腸健康：中西醫整合',type:'健康講座',campus:'向上院區',reg:30,attend:22,reach:5219,sat:4.5,speaker:'大腸直腸外科、中醫科',note:'達成率73%，FB觸及5,219，中西醫整合格式效果佳'},
+    {date:'2025-09-13',name:'男性更年期：睡眠、性慾、精力',type:'健康講座',campus:'向上院區',reg:30,attend:26,reach:4724,sat:4.4,speaker:'泌尿科、精神科',note:'333咖啡廳｜達成率87%最高，出席率65%偏低'},
+    {date:'2025-09-16',name:'早發性失智：為什麼我變得健忘',type:'健康講座',campus:'向上院區',reg:30,attend:24,reach:2421,sat:4.7,speaker:'神經科、精神科',note:'333咖啡廳｜達成率80%，事後FB互動↑+898（Q3最高增幅）'},
+    {date:'2025-09-17',name:'掉髮預防與修復',type:'健康講座',campus:'向上院區',reg:30,attend:15,reach:4180,sat:4.3,speaker:'皮膚科、美容醫學',note:'達成率50%，出席率60%，話題吸引力需加強'},
+    {date:'2025-09-20',name:'體能挑戰：你有多強？',type:'健康講座',campus:'向上院區',reg:30,attend:20,reach:3927,sat:4.5,speaker:'骨科、運動醫學',note:'B棟6F運動醫學中心｜達成率67%'},
+    // ── 2025 GWD 全球健康日 ─────────────────────────────────
+    {date:'2025-06-14',name:'GWD全球健康日',type:'媒體活動',campus:'向上院區',reg:82,attend:82,reach:26906,sat:4.9,speaker:'41位KOL嘉賓',note:'非營利公益活動｜41 KOL+1家屬，總粉絲15,000+，事後懶人包互動479為最高，KOL Reels觸及5,778'},
+    // ── 2025 Q2 親子/女性健康季 ────────────────────────────
+    {date:'2025-04-16',name:'如何與青少年溝通',type:'健康講座',campus:'向上院區',reg:30,attend:12,reach:17640,sat:4.2,speaker:'行銷企劃組',note:'333咖啡廳｜達成率40%，平日下午時段+廣泛話題報名率低，FB觸及Q2第二高'},
+    {date:'2025-05-15',name:'運動顧骨健康',type:'健康講座',campus:'向上院區',reg:30,attend:20,reach:17654,sat:4.5,speaker:'骨科',note:'333咖啡廳｜達成率66%，FB觸及Q2最高17,654'},
+    {date:'2025-05-17',name:'促進大腦發育的食物',type:'健康講座',campus:'向上院區',reg:30,attend:11,reach:10430,sat:4.2,speaker:'小兒科',note:'333咖啡廳｜達成率36%'},
+    {date:'2025-05-20',name:'產後瑜珈與復原',type:'健康講座',campus:'向上院區',reg:30,attend:3,reach:0,sat:4.0,speaker:'婦產科',note:'333咖啡廳｜達成率僅10%，瑜珈體驗話題對報名轉換率極低'},
+    {date:'2025-05-23',name:'迷你醫師體驗營',type:'院內活動',campus:'向上院區',reg:24,attend:24,reach:0,sat:4.9,speaker:'社工室、牙科',note:'B1406診療室｜100%滿座，親子體驗效果最佳，可擴大場次'},
+    {date:'2025-05-26',name:'螢幕時間與兒童發展',type:'健康講座',campus:'向上院區',reg:30,attend:28,reach:0,sat:4.7,speaker:'小兒科',note:'333咖啡廳｜達成率93%'},
+    {date:'2025-06-07',name:'三明治世代的壓力解放',type:'健康講座',campus:'向上院區',reg:30,attend:11,reach:0,sat:4.3,speaker:'行銷企劃組',note:'333咖啡廳｜達成率36%，話題廣泛報名率低'},
+    {date:'2025-06-11',name:'中西醫整合治過敏',type:'健康講座',campus:'向上院區',reg:30,attend:26,reach:10707,sat:4.6,speaker:'耳鼻喉科、中醫科',note:'11F會議室｜達成率86%，中西醫整合格式效果佳'},
+    {date:'2025-06-21',name:'中藥與運動促成長黃金期',type:'健康講座',campus:'向上院區',reg:30,attend:22,reach:0,sat:4.5,speaker:'中醫科',note:'333咖啡廳｜達成率73%'},
+    {date:'2025-06-27',name:'兒童打鼾與過動',type:'健康講座',campus:'向上院區',reg:30,attend:21,reach:8922,sat:4.4,speaker:'耳鼻喉科、營養科',note:'333咖啡廳｜達成率70%，當日直播觸及8,922'},
+  ];
+}
+
+function getBuiltinKols() {
+  return [
+    // ── GWD 2025.06.14 KOL 合作記錄 ────────────────────────
+    {date:'2025-06-18',name:'Devon_Dine',platform:'Instagram',followers:20000,content_type:'Reels / 短影音',reach:5778,engage:160,campaign:'GWD全球健康日',url:'',note:'旅行音樂人，自然曝光未付費，tag光田健康，Reels觸及5,778'},
+    {date:'2025-06-14',name:'Joy Lee（李展瑩）',platform:'Instagram',followers:42000,content_type:'Reels / 短影音',reach:3536,engage:206,campaign:'GWD全球健康日',url:'',note:'全國級運動員網紅，活動當日發文，互動率高'},
+    {date:'2025-06-14',name:'Tristan H.（崔翠藏）',platform:'YouTube',followers:314000,content_type:'YT 影片',reach:0,engage:0,campaign:'GWD全球健康日',url:'',note:'影片創作者，粉絲31.4萬，後製發布中'},
+    {date:'2025-06-14',name:'May姊（健康飲食達人）',platform:'Facebook',followers:240000,content_type:'靜態貼文',reach:0,engage:0,campaign:'GWD全球健康日',url:'',note:'健康飲食專家，粉絲24萬，自然口碑分享'},
+    {date:'2025-06-14',name:'余昌筠（公關專家）',platform:'Facebook',followers:108000,content_type:'靜態貼文',reach:0,engage:0,campaign:'GWD全球健康日',url:'',note:'公關領域KOL，粉絲10.8萬'},
+    {date:'2025-06-14',name:'Dr. 陳思嫻（家醫科）',platform:'Instagram',followers:45000,content_type:'靜態貼文',reach:0,engage:0,campaign:'GWD全球健康日',url:'',note:'家醫科醫師KOL，粉絲4.5萬'},
+    {date:'2025-06-14',name:'Jess（健康教練/主持人）',platform:'Instagram',followers:64400,content_type:'限時動態',reach:0,engage:0,campaign:'GWD全球健康日',url:'',note:'健康教練主持人，粉絲6.4萬'},
+    {date:'2025-06-14',name:'Perli（Vogue特約編輯）',platform:'Instagram',followers:60000,content_type:'限時動態',reach:0,engage:0,campaign:'GWD全球健康日',url:'',note:'時尚健康媒體KOL，粉絲6萬'},
+    {date:'2025-06-16',name:'IG官方帳號事後報導貼文',platform:'Instagram',followers:0,content_type:'靜態貼文',reach:2231,engage:36,campaign:'GWD全球健康日',url:'',note:'官方帳號成果報導，非追蹤者佔73.2%，拓展新受眾效果佳'},
+    {date:'2025-06-17',name:'IG官方帳號 Reels精華',platform:'Instagram',followers:0,content_type:'Reels / 短影音',reach:1627,engage:59,campaign:'GWD全球健康日',url:'',note:'官方帳號Reels，非追蹤者佔73.1%，19儲存數'},
   ];
 }
 
