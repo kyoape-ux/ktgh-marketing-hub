@@ -1071,7 +1071,7 @@ async function gasGet(action, params = {}) {
 }
 
 async function syncFromGAS() {
-  if (!config.gasUrl) { showToast('請先在設定頁面填入 GAS URL'); return; }
+  if (!config.gasUrl) { switchSection('settings','main'); showToast('請先填入 Google Sheets Web App URL'); return; }
   setSyncStatus('同步中…', 'var(--brand)');
   try {
     const [posts, events, media] = await Promise.all([
