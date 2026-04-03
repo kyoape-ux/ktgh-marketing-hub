@@ -335,6 +335,40 @@
   .cp-metric-lbl { font-size:11px; color:var(--text-muted); margin-top:2px; }
   .cr-output { font-family:'Courier New',monospace; font-size:12.5px; line-height:1.8; background:var(--bg); border-radius:10px; padding:18px; white-space:pre-wrap; max-height:480px; overflow-y:auto; border:1px solid var(--border); color:var(--text); }
 
+  /* ── PHASE ── */
+  .phase-badge { display:inline-flex;align-items:center;padding:2px 9px;border-radius:10px;font-size:10.5px;font-weight:700; }
+  .ph-preview { background:#E3EFFE;color:#2266CC; }
+  .ph-warmup  { background:#FFF3E0;color:#E65100; }
+  .ph-day     { background:#E8F5E9;color:#2E7D32; }
+  .ph-recap   { background:#F3E5F5;color:#7B1FA2; }
+  .ph-normal  { background:#F5F5F5;color:#777; }
+
+  /* ── PREDICT ── */
+  .predict-panel { background:var(--brand-bg);border:1.5px dashed var(--brand-bd);border-radius:12px;padding:16px 18px;margin-top:16px; }
+  .predict-panel h4 { font-size:11.5px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px; }
+  .predict-row { display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:4px 0;border-bottom:1px dashed var(--brand-bd); }
+  .predict-row:last-child { border:none;padding-top:8px;display:block; }
+  .predict-val { font-family:'Inter',system-ui,sans-serif;font-weight:800;color:var(--brand);font-size:13px; }
+
+  /* ── PHASE FLOW ── */
+  .phase-flow { display:flex;align-items:stretch;overflow-x:auto;margin:12px 0 18px; }
+  .pf-item { flex:1;min-width:90px;background:var(--surface);border:1px solid var(--border);padding:12px 8px;text-align:center;position:relative; }
+  .pf-item:not(:last-child)::after { content:'›';position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--brand-mid);z-index:1;background:var(--bg);padding:0 2px; }
+  .pf-item:first-child { border-radius:10px 0 0 10px; }
+  .pf-item:last-child  { border-radius:0 10px 10px 0; }
+  .pf-label { font-size:10px;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px; }
+  .pf-reach { font-family:'Inter',system-ui,sans-serif;font-size:15px;font-weight:800;color:var(--brand); }
+  .pf-engage { font-size:10.5px;color:var(--text-muted);margin-top:2px; }
+  .pf-count  { font-size:10px;background:var(--brand-bg);color:var(--brand);border-radius:6px;padding:1px 6px;margin-top:4px;display:inline-block; }
+  .pf-empty  { color:var(--text-muted);font-size:12px;padding:8px 0; }
+
+  /* ── KOL MODULE ── */
+  .kol-fb   { background:#E8EFF8;color:#1877F2; }
+  .kol-ig   { background:#FCE4EC;color:#C2185B; }
+  .kol-yt   { background:#FFEBEE;color:#D32F2F; }
+  .kol-line { background:#E8F5E9;color:#00A651; }
+  .kol-other{ background:#F5F5F5;color:#666; }
+
   /* ── PROMPT MODAL ── */
   .prompt-output { background:#1A2820; color:#A8D8BE; border-radius:10px; padding:16px; font-size:12.5px; line-height:1.9; font-family:'Noto Sans TC',sans-serif; white-space:pre-wrap; margin:14px 0; max-height:320px; overflow-y:auto; }
   .prompt-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
@@ -386,6 +420,9 @@
     <div class="nav-section">成效整合</div>
     <a class="nav-item" onclick="switchSection('campaign','hub')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Campaign 成果看板
+    </a>
+    <a class="nav-item" onclick="switchSection('kol','list')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> KOL 成效追蹤
     </a>
     <div class="nav-section">系統</div>
     <a class="nav-item" onclick="switchSection('settings','main')">
@@ -891,7 +928,7 @@
           </div>
           <div class="form-group">
             <label>活動類型</label>
-            <select id="ev-type">
+            <select id="ev-type" onchange="updateEventPrediction()">
               <option>健康講座</option>
               <option>義診活動</option>
               <option>院內活動</option>
@@ -929,10 +966,34 @@
             <label>主講醫師/主題</label>
             <input type="text" id="ev-speaker" placeholder="醫師姓名 或 活動主題">
           </div>
+          <div class="form-group">
+            <label>預算（元）</label>
+            <input type="number" id="ev-budget" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>實際支出（元）</label>
+            <input type="number" id="ev-expense" placeholder="0">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>YouTube 影片連結</label>
+            <input type="url" id="ev-yt-url" placeholder="https://youtu.be/...">
+          </div>
+          <div class="form-group">
+            <label>YT 觀看次數</label>
+            <input type="number" id="ev-yt-views" placeholder="0">
+          </div>
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label>備註 / 後記</label>
           <textarea id="ev-note" rows="3" placeholder="活動觀察、現場狀況、改進建議..."></textarea>
+        </div>
+        <div class="predict-panel">
+          <h4>📊 智慧預測（基於 Q2–Q4 2025 歷史數據）</h4>
+          <div class="predict-row"><span>預估報名人數</span><span class="predict-val" id="pred-reg">—</span></div>
+          <div class="predict-row"><span>預估達成率</span><span class="predict-val" id="pred-rate">—</span></div>
+          <div class="predict-row"><span>預估 FB 觸及（每篇）</span><span class="predict-val" id="pred-reach">—</span></div>
+          <div class="predict-row"><span>建議發文時機</span><span class="predict-val" id="pred-timing">活動前 14 天起</span></div>
+          <div class="predict-row"><span id="pred-tip" style="font-size:11.5px;color:var(--text-sub);line-height:1.5"></span></div>
         </div>
         <div style="display:flex;gap:10px;">
           <button class="btn btn-primary" onclick="addEvent()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 儲存活動記錄</button>
@@ -1021,6 +1082,87 @@
         <div style="display:flex;gap:10px;">
           <button class="btn btn-primary" onclick="addMedia()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 儲存媒體記錄</button>
           <button class="btn btn-outline" onclick="switchSection('media','list')">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ KOL LIST ══ -->
+    <div class="section" id="sec-kol-list">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>KOL / 網紅合作成效</h3>
+          <button class="btn btn-primary" onclick="switchSection('kol','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增 KOL 記錄</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>日期</th><th>KOL 名稱</th><th>平台</th><th>粉絲數</th><th>內容類型</th><th>觸及/觀看</th><th>互動</th><th>關聯活動</th><th>連結</th></tr></thead>
+            <tbody id="kolListTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ KOL ADD ══ -->
+    <div class="section" id="sec-kol-add">
+      <div class="event-form">
+        <h3>新增 KOL / 網紅合作記錄</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>KOL 名稱 *</label>
+            <input type="text" id="kl-name" placeholder="e.g. 山谷廣播、May姊">
+          </div>
+          <div class="form-group">
+            <label>合作日期 *</label>
+            <input type="date" id="kl-date">
+          </div>
+          <div class="form-group">
+            <label>社群平台</label>
+            <select id="kl-platform">
+              <option>Facebook</option>
+              <option>Instagram</option>
+              <option>YouTube</option>
+              <option>LINE</option>
+              <option>其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>粉絲 / 訂閱數</label>
+            <input type="number" id="kl-followers" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>內容類型</label>
+            <select id="kl-content">
+              <option>Reels / 短影音</option>
+              <option>靜態貼文</option>
+              <option>限時動態</option>
+              <option>直播</option>
+              <option>YT 影片</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>觸及 / 觀看數</label>
+            <input type="number" id="kl-reach" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>互動次數（讚+留言+分享）</label>
+            <input type="number" id="kl-engage" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>關聯活動 Campaign</label>
+            <input type="text" id="kl-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
+          </div>
+          <div class="form-group">
+            <label>貼文連結 URL</label>
+            <input type="url" id="kl-url" placeholder="https://...">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>備註（合作方式、是否付費、標記說明等）</label>
+          <textarea id="kl-note" rows="2" placeholder="e.g. 自然曝光，未付費，tag 光田健康 + 記者會現場分享"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="addKol()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 儲存 KOL 記錄</button>
+          <button class="btn btn-outline" onclick="switchSection('kol','list')">取消</button>
         </div>
       </div>
     </div>
@@ -1149,6 +1291,16 @@
       <input type="url" id="pm-url" placeholder="https://www.facebook.com/...">
     </div>
     <div class="form-group" style="margin-top:4px;">
+      <label>發佈階段</label>
+      <select id="pm-phase">
+        <option value="一般貼文">一般貼文</option>
+        <option value="前期預告">前期預告（活動前 15+ 天）</option>
+        <option value="倒數預熱">倒數預熱（活動前 3–7 天）</option>
+        <option value="活動當日">活動當日</option>
+        <option value="事後懶人包">事後懶人包</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-top:4px;">
       <label>關聯活動 Campaign（選填）</label>
       <input type="text" id="pm-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
     </div>
@@ -1207,6 +1359,22 @@
         <input type="text" id="em-speaker">
       </div>
       <div class="form-group">
+        <label>預算（元）</label>
+        <input type="number" id="em-budget" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>實際支出（元）</label>
+        <input type="number" id="em-expense" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>YT 觀看次數</label>
+        <input type="number" id="em-yt-views" placeholder="0">
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>YouTube 影片連結</label>
+        <input type="url" id="em-yt-url" placeholder="https://youtu.be/...">
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
         <label>備註</label>
         <input type="text" id="em-note">
       </div>
@@ -1336,9 +1504,13 @@ function saveConfig() {
 function loadStore() {
   try {
     const s = localStorage.getItem(STORE_KEY);
-    if (s) return JSON.parse(s);
+    if (s) {
+      const d = JSON.parse(s);
+      if (!d.kols) d.kols = [];
+      return d;
+    }
   } catch(e) {}
-  return { posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia() };
+  return { posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: [] };
 }
 
 function saveStore() {
@@ -1370,14 +1542,16 @@ async function syncFromGAS() {
   if (!config.gasUrl) { switchSection('settings','main'); showToast('請先填入 Google Sheets Web App URL'); return; }
   setSyncStatus('同步中…', 'var(--brand)');
   try {
-    const [posts, events, media] = await Promise.all([
+    const [posts, events, media, kols] = await Promise.all([
       gasGet('getPosts'),
       gasGet('getEvents'),
       gasGet('getMedia'),
+      gasGet('getKols'),
     ]);
     if (Array.isArray(posts))  store.posts  = posts;
     if (Array.isArray(events)) store.events = events;
     if (Array.isArray(media))  store.media  = media;
+    if (Array.isArray(kols))   store.kols   = kols;
     saveStore();
     renderOverview();
     const t = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
@@ -1394,9 +1568,10 @@ async function pushAllToGAS() {
   const statusEl = document.getElementById('pushStatus');
   if (statusEl) statusEl.textContent = '推送中…';
   try {
-    await gasGet('importPosts', { data: store.posts });
-    await gasGet('bulkAddEvents', { data: store.events });
-    await gasGet('bulkAddMedia',  { data: store.media  });
+    await gasGet('importPosts',   { data: store.posts   });
+    await gasGet('bulkAddEvents', { data: store.events  });
+    await gasGet('bulkAddMedia',  { data: store.media   });
+    await gasGet('bulkAddKols',   { data: store.kols    });
     if (statusEl) statusEl.textContent = '推送完成 ' + new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
     showToast('本機資料已推送至 Google Sheets');
   } catch(e) {
@@ -1504,6 +1679,8 @@ function switchSection(module, sub) {
     'settings-main':    ['設定',             'Google Sheets 串接與資料管理'],
     'event-dashboard':  ['活動成效看板',      '活動場次、出席率、滿意度分析'],
     'campaign-hub':     ['Campaign 成果看板', '跨平台活動整合成效追蹤'],
+    'kol-list':         ['KOL 成效追蹤',      'KOL / 網紅合作觸及與互動'],
+    'kol-add':          ['新增 KOL 記錄',     '填寫 KOL 合作成效資料'],
   };
   const key = `${module}-${sub}`;
   if (titles[key]) {
@@ -1517,6 +1694,8 @@ function switchSection(module, sub) {
   if (key === 'event-dashboard') renderEventDashboard();
   if (key === 'media-list')     renderMedia();
   if (key === 'campaign-hub')  renderCampaignHub();
+  if (key === 'kol-list')      renderKols();
+  if (key === 'kol-add')       updateCampaignDatalist();
 }
 
 // ═══════════════════════════════════════════
@@ -1554,7 +1733,7 @@ function renderOverview() {
       <td><span class="badge badge-gray">${monthLabel(p.month)}</span></td>
       <td style="max-width:260px;line-height:1.4">${p.title}</td>
       <td>${catBadge(p.cat)}</td>
-      <td>${typeBadge(p.type, p.img_type)}</td>
+      <td>${typeBadge(p.type, p.img_type)}${phaseBadge(p.phase)}</td>
       <td class="text-mono highlight">${(p.reach||0).toLocaleString()}</td>
       <td class="text-mono">${(p.click||0).toLocaleString()}</td>
       <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
@@ -1635,7 +1814,7 @@ function renderPostsList() {
       <td class="text-mono">${p.date}</td>
       <td style="max-width:220px;line-height:1.4;font-size:12.5px">${p.title}</td>
       <td>${catBadge(p.cat)}</td>
-      <td>${typeBadge(p.type, p.img_type)}</td>
+      <td>${typeBadge(p.type, p.img_type)}${phaseBadge(p.phase)}</td>
       <td class="text-mono highlight">${(p.reach||0).toLocaleString()}</td>
       <td class="text-mono">${(p.click||0).toLocaleString()}</td>
       <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
@@ -1647,6 +1826,13 @@ function renderPostsList() {
       </td>
     </tr>`;
   }).join('') || '<tr><td colspan="10"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><p>暫無資料</p></div></td></tr>';
+}
+
+function phaseBadge(phase) {
+  if (!phase || phase === '一般貼文') return '';
+  const cfg = { '前期預告':'ph-preview','倒數預熱':'ph-warmup','活動當日':'ph-day','事後懶人包':'ph-recap' };
+  const cls = cfg[phase] || 'ph-normal';
+  return `<span class="phase-badge ${cls}" style="margin-left:3px;">${phase}</span>`;
 }
 
 // ═══════════════════════════════════════════
@@ -1665,7 +1851,7 @@ function renderEvents() {
     const stars = e.sat ? '<span style="color:var(--gold);display:inline-flex;gap:1px;align-items:center;">'+'<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'.repeat(Math.floor(e.sat))+'</span> '+e.sat : '—';
     return `<tr>
       <td class="text-mono">${e.date}</td>
-      <td style="font-weight:600">${e.name}</td>
+      <td style="font-weight:600">${e.name}${e.budget>0?`<br><small style="font-weight:400;color:${e.expense>e.budget?'var(--warn)':'var(--brand)'}">預算${e.budget.toLocaleString()}元${e.expense>0?' / 支出'+e.expense.toLocaleString()+'元':''}</small>`:''}</td>
       <td><span class="badge badge-blue">${e.type}</span></td>
       <td>${e.campus}</td>
       <td class="text-mono">${e.reg||'—'}</td>
@@ -1688,19 +1874,23 @@ function addEvent() {
   if (!name || !date) { showToast('請填寫活動名稱和日期'); return; }
   store.events.push({
     date, name,
-    type: document.getElementById('ev-type').value,
-    campus: document.getElementById('ev-campus').value,
-    reg: +document.getElementById('ev-reg').value || 0,
-    attend: +document.getElementById('ev-attend').value || 0,
-    reach: +document.getElementById('ev-reach').value || 0,
-    sat: +document.getElementById('ev-sat').value || 0,
-    speaker: document.getElementById('ev-speaker').value,
-    note: document.getElementById('ev-note').value,
+    type:     document.getElementById('ev-type').value,
+    campus:   document.getElementById('ev-campus').value,
+    reg:      +document.getElementById('ev-reg').value      || 0,
+    attend:   +document.getElementById('ev-attend').value   || 0,
+    reach:    +document.getElementById('ev-reach').value    || 0,
+    sat:      +document.getElementById('ev-sat').value      || 0,
+    speaker:  document.getElementById('ev-speaker').value,
+    note:     document.getElementById('ev-note').value,
+    budget:   +document.getElementById('ev-budget').value   || 0,
+    expense:  +document.getElementById('ev-expense').value  || 0,
+    yt_url:   document.getElementById('ev-yt-url').value,
+    yt_views: +document.getElementById('ev-yt-views').value || 0,
   });
   saveStore();
   _gasWrite('addEvent', store.events[store.events.length - 1]);
   showToast('活動記錄已儲存');
-  ['ev-name','ev-date','ev-reg','ev-attend','ev-reach','ev-sat','ev-speaker','ev-note'].forEach(id => {
+  ['ev-name','ev-date','ev-reg','ev-attend','ev-reach','ev-sat','ev-speaker','ev-note','ev-budget','ev-expense','ev-yt-url','ev-yt-views'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -1985,6 +2175,7 @@ function openPostModal(idx) {
   document.getElementById('pm-cat').value      = p.cat      || '衛教類';
   const defaultImgType = p.img_type || (p.type === '影片' ? '一般影片' : '社群圖文');
   document.getElementById('pm-imgtype').value  = defaultImgType;
+  document.getElementById('pm-phase').value    = p.phase    || '一般貼文';
   document.getElementById('pm-campaign').value = p.campaign || '';
   updateCampaignDatalist();
   openModal('postModal');
@@ -2002,6 +2193,7 @@ function savePost() {
     img_type: imgType,
     type:     (imgType === 'Reels' || imgType === '一般影片') ? '影片' : '相片',
     cat:      document.getElementById('pm-cat').value,
+    phase:    document.getElementById('pm-phase').value,
     campaign: document.getElementById('pm-campaign').value.trim(),
     reach:  +document.getElementById('pm-reach').value  || 0,
     click:  +document.getElementById('pm-click').value  || 0,
@@ -2047,8 +2239,12 @@ function openEventModal(idx) {
   document.getElementById('em-attend').value  = e.attend  || '';
   document.getElementById('em-reach').value   = e.reach   || '';
   document.getElementById('em-sat').value     = e.sat     || '';
-  document.getElementById('em-speaker').value = e.speaker || '';
-  document.getElementById('em-note').value    = e.note    || '';
+  document.getElementById('em-speaker').value   = e.speaker  || '';
+  document.getElementById('em-budget').value    = e.budget   || '';
+  document.getElementById('em-expense').value   = e.expense  || '';
+  document.getElementById('em-yt-views').value  = e.yt_views || '';
+  document.getElementById('em-yt-url').value    = e.yt_url   || '';
+  document.getElementById('em-note').value      = e.note     || '';
   openModal('eventModal');
 }
 
@@ -2059,14 +2255,18 @@ function saveEventEdit() {
   const idx = +document.getElementById('em-idx').value;
   store.events[idx] = {
     date, name,
-    type:    document.getElementById('em-type').value,
-    campus:  document.getElementById('em-campus').value,
-    reg:     +document.getElementById('em-reg').value     || 0,
-    attend:  +document.getElementById('em-attend').value  || 0,
-    reach:   +document.getElementById('em-reach').value   || 0,
-    sat:     +document.getElementById('em-sat').value     || 0,
-    speaker: document.getElementById('em-speaker').value,
-    note:    document.getElementById('em-note').value,
+    type:     document.getElementById('em-type').value,
+    campus:   document.getElementById('em-campus').value,
+    reg:      +document.getElementById('em-reg').value      || 0,
+    attend:   +document.getElementById('em-attend').value   || 0,
+    reach:    +document.getElementById('em-reach').value    || 0,
+    sat:      +document.getElementById('em-sat').value      || 0,
+    speaker:  document.getElementById('em-speaker').value,
+    note:     document.getElementById('em-note').value,
+    budget:   +document.getElementById('em-budget').value   || 0,
+    expense:  +document.getElementById('em-expense').value  || 0,
+    yt_url:   document.getElementById('em-yt-url').value,
+    yt_views: +document.getElementById('em-yt-views').value || 0,
   };
   saveStore();
   closeModal('eventModal');
@@ -2324,13 +2524,25 @@ function renderCampaignDetail(name) {
   const attendRate = ev.reg > 0 ? ((ev.attend||0) / ev.reg * 100).toFixed(0) + '%' : '—';
   const safe = name.replace(/'/g, "\\'");
 
+  const PHASES = ['前期預告','倒數預熱','活動當日','事後懶人包'];
+  const phaseFlowHtml = linkedPosts.length ? (() => {
+    const items = PHASES.map(ph => {
+      const ps = linkedPosts.filter(p => p.phase === ph);
+      if (!ps.length) return `<div class="pf-item"><div class="pf-label">${ph}</div><div class="pf-empty">—</div></div>`;
+      const tr = ps.reduce((s,p)=>s+(p.reach||0),0);
+      const te = ps.reduce((s,p)=>s+(p.engage||0),0);
+      return `<div class="pf-item"><div class="pf-label">${ph}</div><div class="pf-reach">${tr.toLocaleString()}</div><div class="pf-engage">互動 ${te.toLocaleString()}</div><div class="pf-count">${ps.length} 篇</div></div>`;
+    });
+    return `<div style="font-size:12px;font-weight:600;color:var(--text-sub);margin:0 0 6px;">發文階段流量曲線（觸及人次）</div><div class="phase-flow">${items.join('')}</div>`;
+  })() : '';
+
   const postsHtml = linkedPosts.length
     ? `<div class="table-wrap"><table>
         <thead><tr><th>日期</th><th>標題</th><th>風格</th><th>觸及</th><th>互動</th></tr></thead>
         <tbody>${linkedPosts.map(p => `<tr>
           <td class="text-mono">${p.date}</td>
           <td style="max-width:240px;line-height:1.4;font-size:12.5px">${p.title}</td>
-          <td>${typeBadge(p.type, p.img_type)}</td>
+          <td>${typeBadge(p.type, p.img_type)}${phaseBadge(p.phase)}</td>
           <td class="text-mono highlight">${(p.reach||0).toLocaleString()}</td>
           <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
         </tr>`).join('')}</tbody>
@@ -2369,6 +2581,7 @@ function renderCampaignDetail(name) {
       <div class="kpi-card"><div class="kpi-label">實際出席人數</div><div class="kpi-value" style="font-size:26px;">${ev.attend||0}</div><div class="kpi-change" style="color:var(--text-muted)">出席率 ${attendRate}</div></div>
     </div>
 
+    ${phaseFlowHtml}
     <div class="table-card" style="margin-bottom:16px;">
       <div class="table-header"><h3>FB 社群貼文（${linkedPosts.length} 篇）</h3></div>
       ${postsHtml}
@@ -2429,6 +2642,82 @@ function openCampaignReportModal(name) {
 function copyCampaignReport() {
   navigator.clipboard.writeText(document.getElementById('crOutput').textContent)
     .then(() => { showToast('成果報告已複製到剪貼簿'); closeModal('campaignReportModal'); });
+}
+
+// ═══════════════════════════════════════════
+//  KOL MODULE
+// ═══════════════════════════════════════════
+function renderKols() {
+  updateCampaignDatalist();
+  const tbody = document.getElementById('kolListTbody');
+  if (!store.kols || !store.kols.length) {
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><p>尚未新增 KOL 記錄</p></div></td></tr>';
+    return;
+  }
+  const platCls = { Facebook:'kol-fb', Instagram:'kol-ig', YouTube:'kol-yt', LINE:'kol-line' };
+  tbody.innerHTML = [...store.kols].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(k => {
+    const cls = platCls[k.platform] || 'kol-other';
+    return `<tr>
+      <td class="text-mono">${k.date}</td>
+      <td style="font-weight:600">${k.name}</td>
+      <td><span class="badge ${cls}" style="font-size:11px">${k.platform}</span></td>
+      <td class="text-mono">${(k.followers||0).toLocaleString()}</td>
+      <td><span class="tag tag-status">${k.content_type||'—'}</span></td>
+      <td class="text-mono highlight">${(k.reach||0).toLocaleString()}</td>
+      <td class="text-mono">${(k.engage||0).toLocaleString()}</td>
+      <td style="color:var(--text-sub);font-size:12px">${k.campaign||'—'}</td>
+      <td>${k.url?`<a href="${k.url}" target="_blank" style="color:var(--brand);font-size:12px">連結</a>`:'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function addKol() {
+  const name = document.getElementById('kl-name').value.trim();
+  const date = document.getElementById('kl-date').value;
+  if (!name || !date) { showToast('請填寫 KOL 名稱和日期'); return; }
+  if (!store.kols) store.kols = [];
+  store.kols.push({
+    date, name,
+    platform:     document.getElementById('kl-platform').value,
+    followers:    +document.getElementById('kl-followers').value  || 0,
+    content_type: document.getElementById('kl-content').value,
+    reach:        +document.getElementById('kl-reach').value      || 0,
+    engage:       +document.getElementById('kl-engage').value     || 0,
+    campaign:     document.getElementById('kl-campaign').value.trim(),
+    url:          document.getElementById('kl-url').value,
+    note:         document.getElementById('kl-note').value,
+  });
+  saveStore();
+  _gasWrite('addKol', store.kols[store.kols.length - 1]);
+  showToast('KOL 記錄已儲存');
+  ['kl-name','kl-date','kl-followers','kl-reach','kl-engage','kl-campaign','kl-url','kl-note'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  switchSection('kol','list');
+}
+
+// ═══════════════════════════════════════════
+//  EVENT PREDICTION
+// ═══════════════════════════════════════════
+const EVENT_PREDICT = {
+  '健康講座': { reg:[22,30], rate:'68–80%', reach:'3,800–5,200', tip:'💡 雙科合診格式 + 中西醫整合，達成率高15%；禁忌話題（泌尿/失智/啤酒肚）觸及最高', timing:'活動前 14–21 天起，共 3–4 篇' },
+  '義診活動': { reg:[35,50], rate:'75–90%', reach:'4,500–6,500', tip:'💡 現場即時報名轉換率高；搭配健檢項目吸引沙鹿/龍井以外受眾', timing:'活動前 14 天起' },
+  '院內活動': { reg:[40,60], rate:'70–85%', reach:'3,000–4,500', tip:'💡 院內張貼與候診區推廣效果佳；可結合 LINE 社群推播', timing:'活動前 7–14 天起' },
+  '社區活動': { reg:[20,35], rate:'60–75%', reach:'2,500–4,000', tip:'💡 假日場出席率比平日高12%；外部講者（律師、運動員）可突破地理邊界', timing:'活動前 21 天起，搭配社區公告' },
+  '媒體活動': { reg:[40,82], rate:'80–95%', reach:'8,000–20,000', tip:'💡 KOL 合作可提升觸及 3–5 倍；事後「懶人包」互動通常高於預告貼文', timing:'活動前 14 天起；活動後 24hr 內發懶人包' },
+  '其他':     { reg:[20,30], rate:'60–70%', reach:'2,500–3,500', tip:'💡 建議活動前 14 天開始預告，搭配倒數貼文提升報名率', timing:'活動前 14 天起' },
+};
+
+function updateEventPrediction() {
+  const type = (document.getElementById('ev-type')||{}).value || '健康講座';
+  const p = EVENT_PREDICT[type] || EVENT_PREDICT['其他'];
+  const el = id => document.getElementById(id);
+  if (el('pred-reg'))    el('pred-reg').textContent    = p.reg[0]+'–'+p.reg[1]+' 人';
+  if (el('pred-rate'))   el('pred-rate').textContent   = p.rate;
+  if (el('pred-reach'))  el('pred-reach').textContent  = p.reach;
+  if (el('pred-timing')) el('pred-timing').textContent = p.timing;
+  if (el('pred-tip'))    el('pred-tip').textContent    = p.tip;
 }
 
 // ═══════════════════════════════════════════

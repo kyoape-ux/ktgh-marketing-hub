@@ -22,6 +22,7 @@ function initSheets() {
     'processed_posts': ['id','date','title','type','cat','reach','click','engage','month','url','import_at'],
     'events':  ['date','name','type','campus','reg','attend','reach','sat','speaker','note','created_at'],
     'media':   ['date','name','type','section','title','nature','reach','url','note','created_at'],
+    'kols':    ['date','name','platform','followers','content_type','reach','engage','campaign','url','note','created_at'],
   };
   Object.entries(schemas).forEach(([name, headers]) => {
     let sheet = ss.getSheetByName(name);
@@ -64,6 +65,9 @@ function doGet(e) {
       case 'addMedia':      return jsonResponse(addMedia(data));
       case 'bulkAddEvents': return jsonResponse(bulkAddEvents(data));
       case 'bulkAddMedia':  return jsonResponse(bulkAddMedia(data));
+      case 'getKols':       return jsonResponse(getKols());
+      case 'addKol':        return jsonResponse(addKol(data));
+      case 'bulkAddKols':   return jsonResponse(bulkAddKols(data));
       case 'initSheets':    return jsonResponse(initSheets());
       default:              return errResponse('Unknown action: ' + action);
     }
@@ -195,6 +199,38 @@ function bulkAddMedia(mediaList) {
   if (!mediaList || !mediaList.length) return { added: 0 };
   mediaList.forEach(m => addMedia(m));
   return { added: mediaList.length };
+}
+
+// ── KOL 追蹤 ──────────────────────────────────────────────
+function getKols() {
+  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('kols');
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  const rows    = sheet.getDataRange().getValues();
+  const headers = rows[0];
+  return rows.slice(1).map(r => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = r[i]);
+    return obj;
+  });
+}
+
+function addKol(kol) {
+  if (!kol) return { ok: false };
+  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('kols');
+  sheet.appendRow([
+    kol.date, kol.name, kol.platform, Number(kol.followers)||0,
+    kol.content_type, Number(kol.reach)||0, Number(kol.engage)||0,
+    kol.campaign||'', kol.url||'', kol.note||'', new Date()
+  ]);
+  return { ok: true };
+}
+
+function bulkAddKols(kols) {
+  if (!kols || !kols.length) return { added: 0 };
+  kols.forEach(k => addKol(k));
+  return { added: kols.length };
 }
 
 // ── 自動標籤（規則型）────────────────────────────────
