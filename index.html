@@ -1506,7 +1506,7 @@
 // ═══════════════════════════════════════════
 //  CONFIG + DATA STORE
 // ═══════════════════════════════════════════
-const STORE_KEY  = 'ktgh_marketing_v2';
+const STORE_KEY  = 'ktgh_marketing_v3';
 const CONFIG_KEY = 'ktgh_config_v1';
 
 let config = loadConfig();
@@ -1729,16 +1729,27 @@ function getBuiltinEvents() {
     // ── 2025 GWD 全球健康日 ─────────────────────────────────
     {date:'2025-06-14',name:'GWD全球健康日',type:'媒體活動',campus:'向上院區',reg:82,attend:82,reach:26906,sat:4.9,speaker:'41位KOL嘉賓',note:'非營利公益活動｜41 KOL+1家屬，總粉絲15,000+，事後懶人包互動479為最高，KOL Reels觸及5,778'},
     // ── 2025 Q2 親子/女性健康季 ────────────────────────────
-    {date:'2025-04-16',name:'如何與青少年溝通',type:'健康講座',campus:'向上院區',reg:30,attend:12,reach:17640,sat:4.2,speaker:'行銷企劃組',note:'333咖啡廳｜達成率40%，平日下午時段+廣泛話題報名率低，FB觸及Q2第二高'},
-    {date:'2025-05-15',name:'運動顧骨健康',type:'健康講座',campus:'向上院區',reg:30,attend:20,reach:17654,sat:4.5,speaker:'骨科',note:'333咖啡廳｜達成率66%，FB觸及Q2最高17,654'},
-    {date:'2025-05-17',name:'促進大腦發育的食物',type:'健康講座',campus:'向上院區',reg:30,attend:11,reach:10430,sat:4.2,speaker:'小兒科',note:'333咖啡廳｜達成率36%'},
-    {date:'2025-05-20',name:'產後瑜珈與復原',type:'健康講座',campus:'向上院區',reg:30,attend:3,reach:0,sat:4.0,speaker:'婦產科',note:'333咖啡廳｜達成率僅10%，瑜珈體驗話題對報名轉換率極低'},
-    {date:'2025-05-23',name:'迷你醫師體驗營',type:'院內活動',campus:'向上院區',reg:24,attend:24,reach:0,sat:4.9,speaker:'社工室、牙科',note:'B1406診療室｜100%滿座，親子體驗效果最佳，可擴大場次'},
-    {date:'2025-05-26',name:'螢幕時間與兒童發展',type:'健康講座',campus:'向上院區',reg:30,attend:28,reach:0,sat:4.7,speaker:'小兒科',note:'333咖啡廳｜達成率93%'},
-    {date:'2025-06-07',name:'三明治世代的壓力解放',type:'健康講座',campus:'向上院區',reg:30,attend:11,reach:0,sat:4.3,speaker:'行銷企劃組',note:'333咖啡廳｜達成率36%，話題廣泛報名率低'},
-    {date:'2025-06-11',name:'中西醫整合治過敏',type:'健康講座',campus:'向上院區',reg:30,attend:26,reach:10707,sat:4.6,speaker:'耳鼻喉科、中醫科',note:'11F會議室｜達成率86%，中西醫整合格式效果佳'},
-    {date:'2025-06-21',name:'中藥與運動促成長黃金期',type:'健康講座',campus:'向上院區',reg:30,attend:22,reach:0,sat:4.5,speaker:'中醫科',note:'333咖啡廳｜達成率73%'},
-    {date:'2025-06-27',name:'兒童打鼾與過動',type:'健康講座',campus:'向上院區',reg:30,attend:21,reach:8922,sat:4.4,speaker:'耳鼻喉科、營養科',note:'333咖啡廳｜達成率70%，當日直播觸及8,922'},
+    {date:'2025-04-16',name:'與青少年溝通的藝術',type:'健康講座',campus:'向上院區',reg:30,attend:12,reach:17640,sat:4.2,speaker:'行銷企劃組',note:'333藝廊咖啡廳｜出席率40%，平日下午+廣泛話題報名率低，FB觸及17,640（Q2第二高）'},
+    {date:'2025-05-15',name:'從運動開始，給骨骼好支撐',type:'健康講座',campus:'向上院區',reg:30,attend:20,reach:17654,sat:4.5,speaker:'骨科',note:'333藝廊咖啡廳｜出席率66%，FB觸及Q2最高17,654'},
+    {date:'2025-05-17',name:'兒童健腦大補帖',type:'健康講座',campus:'向上院區',reg:30,attend:11,reach:10430,sat:4.2,speaker:'小兒科',note:'333藝廊咖啡廳｜出席率36%，FB觸及10,430'},
+    {date:'2025-05-20',name:'產後修復必修課，瑜珈放鬆身心！',type:'健康講座',campus:'向上院區',reg:30,attend:3,reach:4166,sat:4.0,speaker:'婦產部',note:'333藝廊咖啡廳｜出席率僅10%，瑜珈體驗報名轉換率極低，FB觸及4,166'},
+    {date:'2025-05-23',name:'小小醫師體驗營',type:'院內活動',campus:'向上院區',reg:24,attend:24,reach:0,sat:4.9,speaker:'社工室、牙科',note:'B1406視聽教室+向上牙科門診區｜100%滿座，親子體驗效果最佳，可擴大場次'},
+    {date:'2025-05-26',name:'3C、親子共讀對兒童發展及腦部發展的影響',type:'健康講座',campus:'向上院區',reg:30,attend:28,reach:3269,sat:4.7,speaker:'小兒科',note:'333藝廊咖啡廳｜出席率93%，FB觸及3,269'},
+    {date:'2025-06-07',name:'「三明治」世代紓壓法',type:'健康講座',campus:'向上院區',reg:30,attend:11,reach:5061,sat:4.3,speaker:'行銷企劃組',note:'333藝廊咖啡廳｜出席率36%，話題廣泛報名率低，FB觸及5,061'},
+    {date:'2025-06-11',name:'中西醫聯手！改善孩子過敏',type:'健康講座',campus:'向上院區',reg:30,attend:26,reach:10707,sat:4.6,speaker:'耳鼻喉頭頸部、中醫部',note:'11F病房會客室｜出席率86%，中西醫整合格式效果佳，FB觸及10,707'},
+    {date:'2025-06-21',name:'中醫、運動二合一，開啟孩子長高黃金期！',type:'健康講座',campus:'向上院區',reg:30,attend:22,reach:3417,sat:4.5,speaker:'中醫部',note:'333藝廊咖啡廳｜出席率73%，FB觸及3,417'},
+    {date:'2025-06-27',name:'孩子打鼾，容易注意力不集中！淺談孩童睡眠呼吸中止症',type:'健康講座',campus:'向上院區',reg:30,attend:21,reach:8922,sat:4.4,speaker:'耳鼻喉頭頸部、營養室',note:'333藝廊咖啡廳｜出席率70%，FB直播8,922觀看，35人在線'},
+    // ── 2025 Q1 #因為在乎 女性健康系列 ─────────────────────
+    {date:'2025-01-22',name:'SHERO\'s Beauty 看見女性內在力量',type:'健康講座',campus:'向上院區',reg:80,attend:95,reach:0,sat:4.8,budget:4720,expense:4720,speaker:'癌症中心 郭集慶主任、邱泓達臨床心理師、癌症希望基金會 吳佳霖主任',note:'A棟大廳+333藝廊咖啡廳 兩場合計｜出席率100%，#因為在乎Q1女性系列'},
+    {date:'2025-02-06',name:'癌友友善關懷社區倡議',type:'公益活動',campus:'向上院區',reg:50,attend:68,reach:0,sat:4.7,budget:3724,expense:2124,speaker:'癌症中心 郭集慶主任',note:'A棟1樓大廳｜出席率100%超額報名，癌症汙名化倡議，#因為在乎Q1女性系列'},
+    {date:'2025-02-15',name:'子宮肌瘤是身心失衡？海扶治療與冥想練習',type:'健康講座',campus:'向上院區',reg:30,attend:14,reach:0,sat:4.5,budget:3060,expense:1040,speaker:'婦產部 蘇棋楓部長、Katryna瑜珈老師',note:'333藝廊咖啡廳｜出席率47%，報名費200元，#因為在乎Q1女性系列'},
+    {date:'2025-02-22',name:'《勇敢與真實》交流分享',type:'媒體活動',campus:'向上院區',reg:264,attend:184,reach:0,sat:4.8,budget:9138,expense:92388,speaker:'杜綉珍 Bonnie Tu（巨大集團/Liv女性自行車品牌創辦人）',note:'B棟14樓國際會議廳｜出席率69%，ALL IN廠商贊助餐飲280份，#因為在乎Q1女性系列'},
+    {date:'2025-02-28',name:'光田人幸福電影日《交換禮物》',type:'公益活動',campus:'沙鹿',reg:40,attend:26,reach:0,sat:4.5,budget:0,expense:0,speaker:'社區組',note:'廣三SOGO百貨18樓 王牌映畫影城｜院外特別場，#因為在乎Q1女性系列'},
+    {date:'2025-03-01',name:'找回妳的專屬節奏，月月安穩不再難',type:'健康講座',campus:'向上院區',reg:30,attend:28,reach:0,sat:4.7,budget:1680,expense:0,speaker:'婦產部 陳嘉霖醫師、ALL IN 高紹庭營養師',note:'333藝廊咖啡廳｜出席率93%，報名費200元，廠商贊助腰果醬禮盒，#因為在乎Q1女性系列'},
+    {date:'2025-03-08',name:'一同戰勝婦女癌症',type:'健康講座',campus:'向上院區',reg:50,attend:53,reach:0,sat:4.8,budget:680,expense:680,speaker:'癌症希望基金會 吳佳霖主任、放射腫瘤科 呂彥德醫師',note:'A棟1樓大廳｜出席率100%超額報名，國際婦女節特別場，#因為在乎Q1女性系列'},
+    {date:'2025-03-15',name:'《交換禮物》影中人交流會 × 全人醫療專家座談',type:'媒體活動',campus:'向上院區',reg:264,attend:239,reach:0,sat:4.9,budget:8120,expense:2720,speaker:'林子平醫師、蔡松彥院長、許瑞云醫師、鄭先安醫師',note:'B棟14樓國際會議廳｜出席率90%，跨域高規格演講，#因為在乎Q1女性系列'},
+    {date:'2025-03-20',name:'下背痛隱形兇手-骨盆底肌，三招讓你從此沒煩惱',type:'健康講座',campus:'向上院區',reg:30,attend:16,reach:0,sat:4.5,budget:100,expense:0,speaker:'骨科運動醫學中心 賴物理治療師',note:'333藝廊咖啡廳｜出席率53%，報名費200元，#因為在乎Q1女性系列'},
+    {date:'2025-03-22',name:'關愛從頭開始：溫柔守護，無憂頭痛',type:'健康講座',campus:'向上院區',reg:30,attend:28,reach:0,sat:4.8,budget:0,expense:0,speaker:'神經內科 林毓慧醫師、中醫部 吳盈醫師',note:'333藝廊咖啡廳｜出席率93%，廠商全額贊助，#因為在乎Q1女性系列'},
   ];
 }
 
