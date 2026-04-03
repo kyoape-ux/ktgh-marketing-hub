@@ -1506,7 +1506,7 @@
 // ═══════════════════════════════════════════
 //  CONFIG + DATA STORE
 // ═══════════════════════════════════════════
-const STORE_KEY  = 'ktgh_marketing_v3';
+const STORE_KEY  = 'ktgh_marketing_v4';
 const CONFIG_KEY = 'ktgh_config_v1';
 
 let config = loadConfig();
@@ -1701,11 +1701,21 @@ function getBuiltinPosts() {
 
 function getBuiltinEvents() {
   return [
+    // ── 2026 Q2 婦幼健康季（規劃中）────────────────────────
+    {date:'2026-05-02',name:'孩子長太快？認識兒童性早熟關鍵',type:'健康講座',campus:'向上院區',reg:40,attend:0,reach:0,sat:0,speaker:'兒童醫學部 鄔翔帆醫師、營養室 楊淑雯主任',note:'Q2婦幼系列｜規劃中'},
+    {date:'2026-05-06',name:'達文西婦癌個案分享',type:'健康講座',campus:'向上院區',reg:0,attend:0,reach:0,sat:0,speaker:'婦產部 蘇棋楓醫師',note:'Q2婦幼系列｜規劃中'},
+    {date:'2026-05-23',name:'生活型態醫療新趨勢｜醫療專業研討會',type:'院內活動',campus:'向上院區',reg:300,attend:0,reach:0,sat:0,speaker:'奇美代表、羅東代表、WorldGym代表',note:'Q2婦幼系列｜醫療人士限定，B棟14樓國際會議廳'},
+    {date:'2026-05-29',name:'孩子姿勢歪了嗎？成長關鍵期小兒脊椎解析',type:'健康講座',campus:'向上院區',reg:40,attend:0,reach:0,sat:0,speaker:'骨科部 謝逸樵醫師、運動醫學中心 林子茹老師',note:'Q2婦幼系列｜規劃中'},
+    {date:'2026-06-13',name:'GWD全球健康日 2026',type:'媒體活動',campus:'向上院區',reg:400,attend:0,reach:0,sat:0,speaker:'行銷企劃組',note:'Q2婦幼系列｜規劃中'},
+    {date:'2026-06-27',name:'繪本奇妙旅程：醫師與治療師帶你讀出大腦力',type:'健康講座',campus:'向上院區',reg:40,attend:0,reach:0,sat:0,speaker:'兒童醫學部 黃婉瑜醫師、兒童發展聯合評估中心 賴可凡老師',note:'Q2婦幼系列｜親子共讀，B棟3樓ENT旁'},
     // ── 2026 Q1 女性健康季 ──────────────────────────────────
     {date:'2026-03-06',name:'守護女性健康｜肺腺癌篩檢講座',type:'健康講座',campus:'向上院區',reg:80,attend:65,reach:2616,sat:4.5,speaker:'黃俊雄醫師',note:'現場打卡禮保溫杯反應熱烈'},
     {date:'2026-03-09',name:'纖維肌痛症健康藝術人文系列',type:'健康講座',campus:'向上院區',reg:50,attend:42,reach:1569,sat:4.3,speaker:'柯麗櫻醫師、施宇宸PT',note:''},
     {date:'2026-03-11',name:'乳癌基因秘密講座',type:'健康講座',campus:'向上院區',reg:70,attend:58,reach:1236,sat:4.6,speaker:'廖志斌醫師、王敦正醫師',note:''},
     {date:'2026-03-12',name:'女性心血管照護講座',type:'健康講座',campus:'向上院區',reg:85,attend:72,reach:2085,sat:4.7,speaker:'曾敏昇醫師、陳慧芬個管師',note:'女性健康月系列最高滿意度'},
+    {date:'2026-03-24',name:'術前術後呼吸攻略，讓妳自在深呼吸！',type:'健康講座',campus:'向上院區',reg:50,attend:0,reach:0,sat:0,speaker:'胸腔外科 江友馨醫師、復健科 陳泰宗醫師',note:'Q1女性系列｜術後肺癌病人'},
+    {date:'2026-03-25',name:'從身體資訊重新認識賀爾蒙治療的關鍵',type:'健康講座',campus:'向上院區',reg:50,attend:0,reach:0,sat:0,speaker:'婦產部 陳穎中醫師、中醫部 周芳伃醫師',note:'Q1女性系列｜更年期後50歲以上女性'},
+    {date:'2026-03-26',name:'每天的痠，不只是累——女性脊椎側彎的隱形警訊',type:'健康講座',campus:'向上院區',reg:50,attend:0,reach:0,sat:0,speaker:'運動醫學中心 林子茹物理治療師、營養室 林淑雯主任',note:'Q1女性系列｜自我檢測+居家改善+飲食'},
     {date:'2026-02-02',name:'光田迎春墨香傳情活動',type:'院內活動',campus:'向上院區',reg:0,attend:320,reach:2917,sat:5.0,speaker:'書法名師現場揮毫',note:'現場發放春聯與財神爺互動'},
     // ── 2025 Q4 銀髮族健康季 ────────────────────────────────
     {date:'2025-10-10',name:'胸悶？心血管早期照護',type:'健康講座',campus:'向上院區',reg:50,attend:34,reach:0,sat:4.4,speaker:'心臟科、營養科',note:'達成率68%，出席率71%'},
