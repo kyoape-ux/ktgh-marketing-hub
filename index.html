@@ -1,5 +1,1647 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=kuangtien-marketing-hub.html">
-<title>光田醫院行銷整合分析中心</title>
-</head><body></body></html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光田醫院｜行銷整合分析中心</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@600;700;800&display=swap');
+
+  :root {
+    --brand:      #006341;
+    --brand-light:#007D53;
+    --brand-dim:  #006341;
+    --brand-bg:   #EAF5EE;
+    --brand-bd:   #B3D9C5;
+    --brand-mid:  #4AAE80;
+    --ci-green:   #6EC300;
+    --ci-blue:    #00AAC8;
+    --gold:       #C9973A;
+    --warn:       #C04040;
+    --bg:         #F3F9F6;
+    --surface:    #FFFFFF;
+    --border:     #DDE8E3;
+    --text:       #1A2820;
+    --text-sub:   #5A7A6A;
+    --text-muted: #90A89E;
+    --shadow:     0 2px 16px rgba(0,99,65,0.10);
+    --shadow-lg:  0 8px 40px rgba(0,99,65,0.16);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 220px; height: 100vh;
+    background: #006341;
+    display: flex; flex-direction: column;
+    z-index: 100;
+    padding: 0 0 24px;
+  }
+  .sidebar-logo {
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+  .sidebar-logo .logo-tag {
+    font-size: 10px; letter-spacing: 2px;
+    color: rgba(255,255,255,0.5); text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .sidebar-logo h2 {
+    font-size: 15px; font-weight: 700;
+    color: #fff; line-height: 1.4;
+  }
+  .sidebar-logo .dot {
+    display: inline-block; width: 7px; height: 7px;
+    background: #6EC300; border-radius: 50%;
+    margin-right: 6px; animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; } 50% { opacity:0.4; }
+  }
+  nav { padding: 16px 0; flex: 1; }
+  .nav-section { padding: 8px 20px 4px; font-size: 10px; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; cursor: pointer;
+    color: rgba(255,255,255,0.65); font-size: 13.5px; font-weight: 400;
+    transition: all 0.2s; border-left: 3px solid transparent;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav-item.active { background: rgba(0,0,0,0.14); color: #fff; border-left-color: #6EC300; font-weight: 600; }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-footer { padding: 16px 20px 0; border-top: 1px solid rgba(255,255,255,0.1); }
+  .sidebar-footer .version { font-size: 11px; color: rgba(255,255,255,0.32); font-family: 'Inter', system-ui, sans-serif; }
+
+  /* ── MAIN ── */
+  .main { margin-left: 220px; min-height: 100vh; }
+  .topbar {
+    background: var(--surface);
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title { font-size: 17px; font-weight: 700; color: var(--text); }
+  .topbar-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; font-family: inherit; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-light); }
+  .btn-outline { background: transparent; color: var(--brand); border: 1.5px solid var(--brand); }
+  .btn-outline:hover { background: var(--accent); }
+
+  .content { padding: 28px 32px; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 4px; background: var(--surface); border-radius: 12px; padding: 5px; box-shadow: var(--shadow); margin-bottom: 24px; width: fit-content; }
+  .tab { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-sub); transition: all 0.2s; }
+  .tab.active { background: var(--brand); color: #fff; }
+  .tab:hover:not(.active) { background: var(--accent); color: var(--brand); }
+
+  /* ── SECTION ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--surface); border-radius: 14px; padding: 20px 22px;
+    box-shadow: var(--shadow); border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--brand);
+    border-radius: 14px 14px 0 0;
+  }
+  .kpi-card.warn::before { background: var(--warn); }
+  .kpi-card.teal2::before { background: var(--brand-mid); }
+  .kpi-card.gold::before  { background: var(--gold); }
+  .kpi-card.teal2::before { background: var(--brand-mid); }
+  .kpi-card .kpi-label { font-size: 11.5px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .kpi-card .kpi-value { font-size: 32px; font-weight: 900; color: var(--text); font-family: 'Inter', system-ui, sans-serif; letter-spacing: -1.5px; line-height: 1.05; }
+  .kpi-card .kpi-change { font-size: 12px; margin-top: 4px; font-weight: 600; }
+  .kpi-card .kpi-change.up { color: var(--brand); }
+  .kpi-card .kpi-change.down { color: var(--warn); }
+  .kpi-card .kpi-icon { position: absolute; right: 18px; top: 18px; font-size: 24px; opacity: 0.15; }
+
+  /* ── CHART AREA ── */
+  .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-card { background: var(--surface); border-radius: 14px; padding: 22px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .chart-card h3 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .chart-card .chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+
+  /* Bar chart */
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-label { font-size: 12px; color: var(--text-sub); width: 40px; text-align: right; font-family: 'Inter', system-ui, sans-serif; }
+  .bar-track { flex: 1; height: 22px; background: var(--accent); border-radius: 6px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 700; color: #fff; transition: width 1s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
+  .bar-fill.green  { background: #006341; }
+  .bar-fill.gold   { background: #F5C518; }
+  .bar-fill.teal   { background: #3EB89A; }
+  .bar-fill.red    { background: #EF9A9A; }
+
+  /* Donut */
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  /* ── TABLE ── */
+  .table-card { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px; }
+  .table-header { padding: 18px 22px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .table-header h3 { font-size: 14px; font-weight: 700; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { padding: 10px 16px; background: var(--accent); color: var(--text-sub); font-weight: 700; font-size: 11.5px; text-align: left; letter-spacing: 0.3px; border-bottom: 2px solid var(--border); white-space: nowrap; }
+  td { padding: 11px 16px; border-bottom: 1px solid #EBF2EE; color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #F5FAF7; }
+
+  .badge {
+    display: inline-block; padding: 2px 9px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+  }
+  .badge-green { background: #E0F5F2; color: #1A7A6E; }
+  .badge-blue  { background: #E3EFFE; color: #2A5FA8; }
+  .badge-orange { background: #FFF0E0; color: #A05010; }
+  .badge-purple { background: #EDE8FF; color: #5C45A8; }
+  .badge-red    { background: #FFE0E0; color: #A02020; }
+  .badge-yellow { background: #FFF8DC; color: #8A6800; }
+  .badge-teal   { background: #E0F5F2; color: #1A7A6E; }
+  .badge-gray   { background: #F2F4F2; color: #5A7A6A; }
+
+  /* ── MONTH SELECTOR ── */
+  .month-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .month-btn {
+    padding: 7px 16px; border-radius: 30px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; border: 1.5px solid var(--border); background: var(--surface);
+    color: var(--text-sub); transition: all 0.2s; font-family: inherit;
+  }
+  .month-btn.active { border-color: var(--brand); background: var(--brand); color: #fff; }
+  .month-btn:hover:not(.active) { border-color: var(--brand); color: var(--brand); background: var(--accent); }
+
+  /* ── TREND LINE ── */
+  .trend-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .trend-month {
+    background: var(--surface); border-radius: 14px; padding: 18px 20px;
+    box-shadow: var(--shadow); border: 1px solid var(--border); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .trend-month:hover { border-color: var(--brand); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .trend-month.selected { border-color: var(--brand); background: linear-gradient(135deg, var(--brand-bg), #fff); }
+  .trend-month .month-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .trend-month .month-reach { font-size: 22px; font-weight: 900; color: var(--text); font-family: 'Inter', system-ui, sans-serif; }
+  .trend-month .month-posts { font-size: 12px; color: var(--text-sub); margin-top: 4px; }
+  .trend-month .mini-bar { margin-top: 10px; height: 4px; background: var(--accent); border-radius: 3px; overflow: hidden; }
+  .trend-month .mini-bar-fill { height: 100%; background: var(--brand); border-radius: 3px; }
+
+  /* ── SOP SECTION ── */
+  .sop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .sop-card { background: var(--surface); border-radius: 14px; padding: 22px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .sop-card .sop-type { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .sop-card.case .sop-type { color: #006341; }
+  .sop-card.edu .sop-type  { color: #2A5FA8; }
+  .sop-card.brand .sop-type { color: #C07000; }
+  .sop-card.recruit .sop-type { color: #0e5e55; }
+  .sop-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 10px; line-height: 1.5; }
+  .sop-card .formula { background: var(--accent); border-radius: 8px; padding: 12px 14px; font-size: 12.5px; line-height: 1.8; color: var(--text-sub); border-left: 3px solid var(--brand); border-radius: 0 6px 6px 0; margin-bottom: 12px; }
+  .sop-card .formula strong { color: var(--brand); }
+  .sop-card .avg-reach { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-sub); }
+  .sop-card .avg-reach .reach-num { font-size: 18px; font-weight: 900; color: var(--brand); font-family: 'Inter', system-ui, sans-serif; }
+
+  /* ── UPLOAD SECTION ── */
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: 14px; padding: 40px;
+    text-align: center; cursor: pointer; transition: all 0.2s;
+    background: var(--surface);
+  }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--brand); background: var(--accent); }
+  .upload-zone .upload-icon { font-size: 40px; margin-bottom: 12px; }
+  .upload-zone h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .upload-zone p { font-size: 13px; color: var(--text-muted); }
+  #fileInput { display: none; }
+
+  /* ── EVENT MODULE ── */
+  .event-form { background: var(--surface); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 20px; }
+  .event-form h3 { font-size: 15px; font-weight: 700; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--text-sub); }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 9px 12px; border-radius: 8px; border: 1.5px solid var(--border);
+    font-family: inherit; font-size: 13.5px; color: var(--text);
+    background: var(--bg); transition: border 0.2s; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--brand); background: #F5FAF7;
+  }
+
+  /* ── ANALYSIS INSIGHT ── */
+  .insight-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+  .insight-card { background: var(--surface); border-radius: 14px; padding: 22px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .insight-card h4 { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+  .insight-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .insight-item:last-child { border-bottom: none; }
+  .insight-item .name { color: var(--text); max-width: 65%; line-height: 1.4; }
+  .insight-item .value { font-family: 'Inter', system-ui, sans-serif; font-weight: 700; color: var(--brand); font-size: 14px; letter-spacing: -0.5px; }
+
+  /* ── MEDIA MODULE ── */
+  .media-table { margin-bottom: 24px; }
+
+  /* ── LOADING ── */
+  .loading { text-align: center; padding: 60px; color: var(--text-muted); }
+  .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--accent); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 48px; color: var(--text-muted); }
+  .empty .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty p { font-size: 14px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: #006341; color: #fff;
+    padding: 14px 20px; border-radius: 12px;
+    font-size: 13.5px; font-weight: 600;
+    box-shadow: var(--shadow-lg); z-index: 9999;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── RESPONSIVE HELPERS ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .text-mono { font-family: 'Inter', system-ui, sans-serif; }
+  .highlight { color: var(--brand); font-weight: 700; }
+  
+  /* tag colors */
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin: 2px; }
+  .tag-case { background: #E0F5F2; color: #1A7A6E; }
+  .tag-edu  { background: #E3EFFE; color: #2A5FA8; }
+  .tag-brand { background: #FFF0E0; color: #A05010; }
+  .tag-video { background: #EDE8FF; color: #5C45A8; }
+  .tag-event { background: #FFF8DC; color: #8A6800; }
+  .tag-status { background: #F0F0F0; color: #666; }
+  .tag-civic  { background: #FFE8EE; color: #A03060; }
+
+  /* scroll */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--brand-mid); border-radius: 3px; opacity: 0.5; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-tag">Kuang Tien Hospital</div>
+    <h2><span class="dot"></span>行銷整合分析</h2>
+  </div>
+  <nav>
+    <div class="nav-section">粉專追蹤</div>
+    <a class="nav-item active" onclick="switchSection('fb','overview')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 總覽 Dashboard
+    </a>
+    <a class="nav-item" onclick="switchSection('fb','upload')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入貼文數據
+    </a>
+    <a class="nav-item" onclick="switchSection('fb','posts')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> 貼文成效列表
+    </a>
+    <a class="nav-item" onclick="switchSection('fb','analysis')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> 組合分析
+    </a>
+    <a class="nav-item" onclick="switchSection('fb','sop')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span> SOP 建議模板
+    </a>
+    <div class="nav-section">活動追蹤</div>
+    <a class="nav-item" onclick="switchSection('event','list')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> 活動/講座列表
+    </a>
+    <a class="nav-item" onclick="switchSection('event','add')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> 新增活動回報
+    </a>
+    <div class="nav-section">媒體追蹤</div>
+    <a class="nav-item" onclick="switchSection('media','list')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></span> 新聞媒體曝光
+    </a>
+    <a class="nav-item" onclick="switchSection('media','add')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> 新增媒體記錄
+    </a>
+    <div class="nav-section">系統</div>
+    <a class="nav-item" onclick="switchSection('settings','main')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> 設定 / Google Sheets
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="version">v2.0 · 2026</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbarTitle">總覽 Dashboard</div>
+      <div class="topbar-sub" id="topbarSub">光田綜合醫院行銷整合管理系統</div>
+    </div>
+    <div class="topbar-actions">
+      <span id="syncStatus" style="font-size:11.5px;color:var(--text-muted);padding:0 4px;"></span>
+      <button class="btn btn-outline" onclick="syncFromGAS()" title="從 Google Sheets 同步資料"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> 同步</button>
+      <button class="btn btn-outline" onclick="exportReport()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 匯出月報</button>
+      <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 匯入數據</button>
+      <input type="file" id="fileInput" accept=".xlsx,.csv" onchange="handleFileUpload(this)">
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ FB OVERVIEW ══ -->
+    <div class="section active" id="sec-fb-overview">
+      
+      <!-- Month selector -->
+      <div class="month-selector">
+        <button class="month-btn active" onclick="selectMonth(this,'all')">全部期間</button>
+        <button class="month-btn" onclick="selectMonth(this,'2026-03')">2026/03月</button>
+        <button class="month-btn" onclick="selectMonth(this,'2026-02')">2026/02月</button>
+        <button class="month-btn" onclick="selectMonth(this,'2026-01')">2026/01月</button>
+        <button class="month-btn" onclick="selectMonth(this,'2025-12')">2025/12月</button>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card">
+          <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div class="kpi-label">累計總觸及</div>
+          <div class="kpi-value" id="kpi-reach">600,005</div>
+          <div class="kpi-change up" id="kpi-reach-chg">↑ 4個月合計</div>
+        </div>
+        <div class="kpi-card teal">
+          <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+          <div class="kpi-label">累計互動次數</div>
+          <div class="kpi-value" id="kpi-engage">18,820</div>
+          <div class="kpi-change up" id="kpi-engage-chg">↑ 心情＋留言＋分享</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          <div class="kpi-label">發文總篇數</div>
+          <div class="kpi-value" id="kpi-posts">91</div>
+          <div class="kpi-change up" id="kpi-posts-chg">↑ 相片72 / 影片10</div>
+        </div>
+        <div class="kpi-card warn">
+          <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <div class="kpi-label">平均每篇觸及</div>
+          <div class="kpi-value" id="kpi-avg">6,593</div>
+          <div class="kpi-change down" id="kpi-avg-chg">↓ 3月較2月 −32%</div>
+        </div>
+      </div>
+
+      <!-- Trend + Type -->
+      <div class="chart-row">
+        <div class="chart-card">
+          <h3>月份觸及趨勢</h3>
+          <div class="chart-sub">各月份總觸及人數比較</div>
+          <div class="bar-chart">
+            <div class="bar-row">
+              <div class="bar-label">1月</div>
+              <div class="bar-track">
+                <div class="bar-fill green" style="width:100%">231,778</div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">12月</div>
+              <div class="bar-track">
+                <div class="bar-fill teal" style="width:73%">168,691</div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">2月</div>
+              <div class="bar-track">
+                <div class="bar-fill gold" style="width:49%">112,699</div>
+              </div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">3月</div>
+              <div class="bar-track">
+                <div class="bar-fill red" style="width:37%">86,837</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--accent);border-radius:8px;font-size:12.5px;color:var(--text-sub);">
+            <span style="display:inline-flex;align-items:center;gap:5px;color:var(--brand)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span> <strong>觀察：</strong>1月（元旦寶寶）爆發性高觸及，2月因春節節慶效應維持高位，3月回落為正常基準值。
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>貼文類型分佈</h3>
+          <div class="chart-sub">4個月合計 91 篇</div>
+          <div class="donut-wrap">
+            <svg class="donut-svg" width="120" height="120" viewBox="0 0 120 120">
+              <!-- 相片 81篇 / 影片 10篇 = 89%/11% -->
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#EAF5EE" stroke-width="18"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#006341" stroke-width="18"
+                stroke-dasharray="246 36" stroke-dashoffset="69" stroke-linecap="round"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#C9973A" stroke-width="18"
+                stroke-dasharray="31 251" stroke-dashoffset="-177" stroke-linecap="round"/>
+              <text x="60" y="55" text-anchor="middle" font-size="20" font-weight="900" fill="var(--text)" font-family="Inter">81</text>
+              <text x="60" y="71" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-family="Noto Sans TC">篇相片</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--brand)"></div> 相片貼文 81篇（89%）</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> 影片/Reels 10篇（11%）</div>
+              <div style="margin-top:10px;padding:10px;background:var(--accent);border-radius:8px;font-size:11.5px;color:var(--text-sub);line-height:1.6;">
+                <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span> 影片平均觸及<br><strong style="color:var(--brand);font-size:14px;">5,243</strong> 人<br>
+                vs 相片 <strong style="font-size:14px;">6,812</strong> 人
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top posts -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3 style="display:flex;align-items:center;gap:7px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><polyline points="8 3 4 3 4 9 8 9"/><polyline points="16 3 20 3 20 9 16 9"/><path d="M12 21v-6"/><path d="M8 21h8"/><path d="M4 9a8 8 0 0 0 16 0"/></svg> 亮點貼文 Top 10（依觸及排序）</h3>
+          <span style="font-size:12px;color:var(--text-muted)">4個月合計</span>
+        </div>
+        <div class="table-wrap">
+          <table id="topPostsTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>月份</th>
+                <th>標題摘要</th>
+                <th>類型標籤</th>
+                <th>貼文類型</th>
+                <th>觸及人數</th>
+                <th>總點擊</th>
+                <th>互動</th>
+                <th>互動率</th>
+              </tr>
+            </thead>
+            <tbody id="topPostsTbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="insight-grid">
+        <div class="insight-card">
+          <h4 style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> 內容類型平均觸及</h4>
+          <div class="insight-item"><div class="name">節慶/品牌類（元旦、春節、聖誕）</div><div class="value">28,000+</div></div>
+          <div class="insight-item"><div class="name">醫學中心合作/地位類</div><div class="value">18,000+</div></div>
+          <div class="insight-item"><div class="name">案例類（病患故事）</div><div class="value">9,000–17,000</div></div>
+          <div class="insight-item"><div class="name">衛教類（症狀化）</div><div class="value">3,000–10,000</div></div>
+          <div class="insight-item"><div class="name">純資訊/公告類</div><div class="value">800–2,500</div></div>
+        </div>
+        <div class="insight-card">
+          <h4 style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> 最強組合排行（貼文類型×內容）</h4>
+          <div class="insight-item"><div class="name">感性節慶 × 相片多圖</div><div class="value text-mono" style="color:var(--brand);font-weight:800;">S 最強</div></div>
+          <div class="insight-item"><div class="name">病患故事 × 問句標題</div><div class="value text-mono" style="color:var(--brand-light);">A 強</div></div>
+          <div class="insight-item"><div class="name">醫學中心聯名 × 名醫陣容</div><div class="value text-mono" style="color:var(--gold);">B 強</div></div>
+          <div class="insight-item"><div class="name">Reels × 職場文化（招募）</div><div class="value text-mono" style="color:var(--brand);">↑ 潛力</div></div>
+          <div class="insight-item"><div class="name">衛教 × 數據標題</div><div class="value text-mono" style="color:var(--warn)">— 需優化</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ FB UPLOAD ══ -->
+    <div class="section" id="sec-fb-upload">
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput2').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="event.preventDefault();this.classList.remove('drag');handleFileDrop(event)">
+        <div class="upload-icon" style="color:var(--brand);opacity:0.5;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <h3>拖拉或點擊匯入 FB 後台數據</h3>
+        <p>支援 Facebook 粉絲專頁後台下載的 Excel (.xlsx) 或 CSV 格式</p>
+        <p style="margin-top:8px;font-size:12px;color:var(--text-muted);">必要欄位：標題、觸及人數、心情、留言、分享、總點擊次數、發佈時間、貼文類型</p>
+        <input type="file" id="fileInput2" accept=".xlsx,.csv" style="display:none" onchange="handleFileUpload(this)">
+      </div>
+      <div style="margin-top:20px;background:var(--surface);border-radius:14px;padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> 匯入說明</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px;color:var(--text-sub);line-height:1.8;">
+          <div>
+            <strong style="color:var(--text)">FB後台匯出步驟：</strong><br>
+            1. 粉絲專頁 → 洞察報告<br>
+            2. 貼文 → 匯出資料<br>
+            3. 選擇日期範圍（整月）<br>
+            4. 格式選 Excel / CSV<br>
+            5. 下載後直接拖拉至此
+          </div>
+          <div>
+            <strong style="color:var(--text)">系統自動處理：</strong><br>
+            ✓ 欄位自動識別<br>
+            ✓ 數值清洗（千分位逗號）<br>
+            ✓ 自動計算互動率<br>
+            ✓ 內容類型自動標籤<br>
+            ✓ 更新 Dashboard KPI
+          </div>
+        </div>
+      </div>
+      <div id="uploadResult" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- ══ FB POSTS LIST ══ -->
+    <div class="section" id="sec-fb-posts">
+      <div class="month-selector">
+        <button class="month-btn active" onclick="filterPosts(this,'all')">全部</button>
+        <button class="month-btn" onclick="filterPosts(this,'2026-03')">3月</button>
+        <button class="month-btn" onclick="filterPosts(this,'2026-02')">2月</button>
+        <button class="month-btn" onclick="filterPosts(this,'2026-01')">1月</button>
+        <button class="month-btn" onclick="filterPosts(this,'2025-12')">12月</button>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <h3>貼文成效列表</h3>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input placeholder="搜尋標題..." id="searchInput" oninput="filterPostsBySearch()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:200px;">
+            <span id="postCount" style="font-size:12px;color:var(--text-muted)">共 91 篇</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>發佈日期</th>
+                <th>標題摘要</th>
+                <th>內容標籤</th>
+                <th>貼文類型</th>
+                <th>觸及</th>
+                <th>點擊</th>
+                <th>互動</th>
+                <th>互動率%</th>
+                <th>連結</th>
+              </tr>
+            </thead>
+            <tbody id="postsListTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FB ANALYSIS ══ -->
+    <div class="section" id="sec-fb-analysis">
+      <div class="insight-grid">
+        <div class="insight-card">
+          <h4 style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 標題類型 vs 觸及</h4>
+          <div class="insight-item"><div class="name" style="display:flex;align-items:center;gap:5px;"><span style="color:var(--warn)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg></span> 問句式標題（嘴破一直不好？）</div><div class="value text-mono">高觸及</div></div>
+          <div class="insight-item"><div class="name" style="display:flex;align-items:center;gap:5px;"><span style="color:var(--brand)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> 數據型標題（8歲有11歲骨頭）</div><div class="value text-mono">高點擊</div></div>
+          <div class="insight-item"><div class="name" style="display:flex;align-items:center;gap:5px;"><span style="color:var(--gold)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span> 情境警訊（妳也這樣嗎？）</div><div class="value text-mono">高互動</div></div>
+          <div class="insight-item"><div class="name" style="display:flex;align-items:center;gap:5px;"><span style="color:var(--text-muted)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span> 純公告/榮譽型</div><div class="value text-mono">低觸及</div></div>
+        </div>
+        <div class="insight-card">
+          <h4 style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> 圖片類型 vs 互動</h4>
+          <div class="insight-item"><div class="name">感性場景/幕後（志工、節慶）</div><div class="value text-mono">最高互動</div></div>
+          <div class="insight-item"><div class="name">醫師個人照＋專業背書</div><div class="value text-mono">高點擊</div></div>
+          <div class="insight-item"><div class="name">圖解衛教（症狀化資訊圖）</div><div class="value text-mono">中等</div></div>
+          <div class="insight-item"><div class="name">技術/設備照片</div><div class="value text-mono">偏低</div></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header"><h3 style="display:flex;align-items:center;gap:7px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 最強「組合配方」分析（基於4個月數據）</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>內容類別</th><th>貼文類型</th><th>標題模式</th><th>圖片風格</th><th>典型觸及</th><th>強度</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="tag tag-brand">節慶品牌</span></td>
+                <td>相片多圖</td>
+                <td>情感共鳴型</td>
+                <td>溫馨場景</td>
+                <td class="text-mono highlight">28,000+</td>
+                <td><span class="badge badge-green" style="display:inline-flex;align-items:center;gap:3px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg> 極強</span></td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-case">病患案例</span></td>
+                <td>相片＋說明</td>
+                <td>問句＋痛點</td>
+                <td>醫師個人照</td>
+                <td class="text-mono highlight">9,000–17,000</td>
+                <td><span class="badge badge-green" style="display:inline-flex;align-items:center;gap:3px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M18 3v4c0 .55.45 1 1 1h4"/><path d="M14 8H2v13h20V8h-6"/><path d="M2 8l2-5h16l2 5"/></svg> 強</span></td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-edu">地位建立</span></td>
+                <td>相片＋名醫列表</td>
+                <td>免進市區主張</td>
+                <td>專業照＋Logo</td>
+                <td class="text-mono highlight">8,000–35,000</td>
+                <td><span class="badge badge-green" style="display:inline-flex;align-items:center;gap:3px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M18 3v4c0 .55.45 1 1 1h4"/><path d="M14 8H2v13h20V8h-6"/><path d="M2 8l2-5h16l2 5"/></svg> 強</span></td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-edu">衛教症狀化</span></td>
+                <td>相片＋圖解</td>
+                <td>數據型標題</td>
+                <td>資訊圖表</td>
+                <td class="text-mono">3,000–10,000</td>
+                <td><span class="badge badge-blue" style="display:inline-flex;align-items:center;gap:3px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> 中等</span></td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-video">招募Reels</span></td>
+                <td>短影片</td>
+                <td>職場文化展示</td>
+                <td>真實環境</td>
+                <td class="text-mono">2,600–5,200</td>
+                <td><span class="badge badge-orange" style="display:inline-flex;align-items:center;gap:3px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 1 1.9 4c-1.7.1-3.1-.4-4.4-1.4C10.4 7.6 9.5 6.2 9 4c2.7.2 4.2 1.1 5.1 2z"/></svg> 潛力</span></td>
+              </tr>
+              <tr>
+                <td><span class="tag tag-status">純公告資訊</span></td>
+                <td>相片</td>
+                <td>一般說明型</td>
+                <td>標準圖卡</td>
+                <td class="text-mono">800–2,000</td>
+                <td><span class="badge badge-gray" style="display:inline-flex;align-items:center;gap:3px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 需強化</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:24px;">
+        <h3>互動率 vs 觸及 散點分析</h3>
+        <div class="chart-sub">點擊數 / 觸及人數（%）— 各月份貼文分佈</div>
+        <div style="padding:20px 0;">
+          <div class="bar-chart">
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">平均點擊率（總點擊÷觸及）</div>
+            <div class="bar-row"><div class="bar-label">12月</div><div class="bar-track"><div class="bar-fill green" style="width:75%">1.65%</div></div></div>
+            <div class="bar-row"><div class="bar-label">1月</div><div class="bar-track"><div class="bar-fill teal" style="width:60%">0.88%</div></div></div>
+            <div class="bar-row"><div class="bar-label">2月</div><div class="bar-track"><div class="bar-fill gold" style="width:55%">0.82%</div></div></div>
+            <div class="bar-row"><div class="bar-label">3月</div><div class="bar-track"><div class="bar-fill red" style="width:50%">0.74%</div></div></div>
+          </div>
+          <div style="margin-top:12px;font-size:12.5px;color:var(--text-sub);background:var(--accent);padding:12px;border-radius:8px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;color:var(--warn)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> 12月高點擊率主因：抽獎活動（志工週貼文 5,815 次互動，含1,823次分享），為特殊事件，非可複製常態。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FB SOP ══ -->
+    <div class="section" id="sec-fb-sop">
+      <div style="margin-bottom:16px;padding:16px 20px;background:linear-gradient(135deg,#1A2820,var(--brand));border-radius:12px;color:#fff;">
+        <div style="font-size:12px;opacity:0.7;margin-bottom:4px;letter-spacing:1px;text-transform:uppercase;">根據 2025/12 – 2026/03 數據自動產出</div>
+        <h3 style="font-size:16px;font-weight:700;">光田粉專 SOP 執行建議模板（2026 Q1 版）</h3>
+      </div>
+      <div class="sop-grid">
+        <div class="sop-card case">
+          <div class="sop-type">案例類 Case</div>
+          <h4>「病友故事」最強配方</h4>
+          <div class="formula">
+            <strong>[高齡/罕見/緊急情境]</strong> ＋<br>
+            <strong>[醫師姓名與專長標註]</strong> ＋<br>
+            <strong>[病患康復後的具體改變]</strong> ＋<br>
+            留言區置頂掛號連結
+          </div>
+          <div class="avg-reach"><span>平均觸及</span><span class="reach-num" style="color:var(--brand)">9,000+</span></div>
+        </div>
+        <div class="sop-card edu" style="--type-color:#0e5e55">
+          <div class="sop-type" style="color:#0e5e55">衛教類 Education</div>
+          <h4>「症狀化衛教」配方</h4>
+          <div class="formula" style="border-left-color:#0e5e55">
+            <strong>[疑問句標題]</strong>（如：為什麼一週打一次更容易受傷？）＋<br>
+            <strong>[具體數字/數據]</strong>（風險高 X 倍）＋<br>
+            <strong>[生活情境圖解]</strong> ＋<br>
+            醫師語錄短影音（進階）
+          </div>
+          <div class="avg-reach"><span>平均觸及</span><span class="reach-num" style="color:#0e5e55">4,500+</span></div>
+        </div>
+        <div class="sop-card brand" style="--type-color:#C86400">
+          <div class="sop-type" style="color:#C07000">品牌類 Brand</div>
+          <h4>「感性幕後」配方</h4>
+          <div class="formula" style="border-left-color:#C07000">
+            <strong>[節慶/公益活動題材]</strong> ＋<br>
+            <strong>[真實互動畫面]</strong>（不用大合照）＋<br>
+            <strong>[「因為在乎，所以陪伴」</strong>的結語]＋<br>
+            下次活動報名連結
+          </div>
+          <div class="avg-reach"><span>平均觸及</span><span class="reach-num" style="color:#C07000">15,000+</span></div>
+        </div>
+        <div class="sop-card" style="border-left:none">
+          <div class="sop-type" style="color:#AA7D5F">招募類 Recruit</div>
+          <h4>「職場文化」Reels 配方</h4>
+          <div class="formula" style="border-left-color:#AA7D5F">
+            <strong>[具體硬體環境展示]</strong> ＋<br>
+            <strong>[30歲以下夥伴佔比等數據]</strong> ＋<br>
+            <strong>[與高層的真實互動]</strong> ＋<br>
+            短影音前3秒：直接點出差異化福利
+          </div>
+          <div class="avg-reach"><span>平均觸及</span><span class="reach-num" style="color:#AA7D5F">5,000+</span></div>
+        </div>
+        <div class="sop-card">
+          <div class="sop-type" style="color:#E05050">地位類 Authority</div>
+          <h4>「醫學中心聯名」配方</h4>
+          <div class="formula" style="border-left-color:#E05050">
+            <strong>[合作醫院名稱 + 名醫姓名]</strong> ＋<br>
+            <strong>[免進市區主張]</strong> ＋<br>
+            科別陣容清單（條列式）＋<br>
+            就近掛號連結
+          </div>
+          <div class="avg-reach"><span>平均觸及</span><span class="reach-num" style="color:#E05050">18,000+</span></div>
+        </div>
+        <div class="sop-card">
+          <div class="sop-type" style="color:#888">每月必備 Monthly</div>
+          <h4>建議月度組合比例</h4>
+          <div class="formula" style="border-left-color:#9E9E9E">
+            品牌/節慶類 <strong>20%</strong>（1–2篇）<br>
+            案例類 <strong>30%</strong>（2–3篇）<br>
+            衛教症狀化 <strong>30%</strong>（2–3篇）<br>
+            地位建立 <strong>10%</strong>（1篇）<br>
+            招募Reels <strong>10%</strong>（1篇）
+          </div>
+          <div class="avg-reach"><span>建議月發文</span><span class="reach-num" style="color:#888">20–25篇</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EVENT LIST ══ -->
+    <div class="section" id="sec-event-list">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>活動 / 講座成效追蹤</h3>
+          <button class="btn btn-primary" onclick="switchSection('event','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增活動</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>活動日期</th><th>活動名稱</th><th>類型</th><th>院區</th><th>報名人數</th><th>出席人數</th><th>出席率</th><th>FB觸及</th><th>滿意度</th><th>備註</th></tr>
+            </thead>
+            <tbody id="eventListTbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ EVENT ADD ══ -->
+    <div class="section" id="sec-event-add">
+      <div class="event-form">
+        <h3>新增活動 / 講座回報</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>活動名稱 *</label>
+            <input type="text" id="ev-name" placeholder="e.g. 健康藝術人文系列講座">
+          </div>
+          <div class="form-group">
+            <label>活動日期 *</label>
+            <input type="date" id="ev-date">
+          </div>
+          <div class="form-group">
+            <label>活動類型</label>
+            <select id="ev-type">
+              <option>健康講座</option>
+              <option>義診活動</option>
+              <option>院內活動</option>
+              <option>社區活動</option>
+              <option>媒體活動</option>
+              <option>其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>院區</label>
+            <select id="ev-campus">
+              <option>向上院區</option>
+              <option>大甲院區</option>
+              <option>長青院區</option>
+              <option>其他/線上</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>報名人數</label>
+            <input type="number" id="ev-reg" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>實際出席人數</label>
+            <input type="number" id="ev-attend" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>相關 FB 貼文觸及</label>
+            <input type="number" id="ev-reach" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>滿意度（1–5）</label>
+            <input type="number" id="ev-sat" min="1" max="5" step="0.1" placeholder="4.5">
+          </div>
+          <div class="form-group">
+            <label>主講醫師/主題</label>
+            <input type="text" id="ev-speaker" placeholder="醫師姓名 或 活動主題">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>備註 / 後記</label>
+          <textarea id="ev-note" rows="3" placeholder="活動觀察、現場狀況、改進建議..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="addEvent()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 儲存活動記錄</button>
+          <button class="btn btn-outline" onclick="switchSection('event','list')">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MEDIA LIST ══ -->
+    <div class="section" id="sec-media-list">
+      <div class="table-card media-table">
+        <div class="table-header">
+          <h3>媒體新聞曝光追蹤</h3>
+          <button class="btn btn-primary" onclick="switchSection('media','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增媒體記錄</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>日期</th><th>媒體名稱</th><th>類型</th><th>標題摘要</th><th>版位/欄目</th><th>性質</th><th>預估觸及</th><th>連結</th><th>備註</th></tr>
+            </thead>
+            <tbody id="mediaListTbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MEDIA ADD ══ -->
+    <div class="section" id="sec-media-add">
+      <div class="event-form">
+        <h3>新增媒體 / 新聞曝光記錄</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>媒體名稱 *</label>
+            <input type="text" id="md-name" placeholder="e.g. 聯合報、自由時報">
+          </div>
+          <div class="form-group">
+            <label>曝光日期 *</label>
+            <input type="date" id="md-date">
+          </div>
+          <div class="form-group">
+            <label>媒體類型</label>
+            <select id="md-type">
+              <option>電視新聞</option>
+              <option>平面媒體（報紙）</option>
+              <option>網路媒體</option>
+              <option>廣播</option>
+              <option>雜誌</option>
+              <option>其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>版位/欄目</label>
+            <input type="text" id="md-section" placeholder="e.g. 健康版、地方版">
+          </div>
+          <div class="form-group">
+            <label>曝光性質</label>
+            <select id="md-nature">
+              <option>正面報導</option>
+              <option>中性報導</option>
+              <option>主動投稿</option>
+              <option>負面/需關注</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>預估觸及人數</label>
+            <input type="number" id="md-reach" placeholder="0">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>報導標題摘要</label>
+            <input type="text" id="md-title" placeholder="報導標題或內容摘要">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>連結 URL</label>
+            <input type="url" id="md-url" placeholder="https://...">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>備註</label>
+          <textarea id="md-note" rows="2" placeholder="其他補充說明..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="addMedia()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 儲存媒體記錄</button>
+          <button class="btn btn-outline" onclick="switchSection('media','list')">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div class="section" id="sec-settings-main">
+      <div style="max-width:640px;">
+        <div style="background:var(--surface);border-radius:14px;padding:28px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Google Sheets 資料來源
+          </h3>
+          <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:20px;margin-top:4px;">設定後所有資料將以 Google Sheets 為主，本機 localStorage 作快取。</p>
+
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:600;color:var(--text-sub);display:block;margin-bottom:6px;">Apps Script Web App URL</label>
+            <div style="display:flex;gap:8px;">
+              <input id="gasUrlInput" type="url" placeholder="https://script.google.com/macros/s/…/exec"
+                style="flex:1;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:inherit;font-size:13px;color:var(--text);">
+              <button class="btn btn-primary" onclick="saveGasUrl()">儲存並同步</button>
+            </div>
+            <div style="margin-top:8px;font-size:12px;">
+              連線狀態：<span id="gasConnStatus" style="font-weight:700;">未設定</span>
+            </div>
+          </div>
+
+          <details style="margin-top:20px;">
+            <summary style="font-size:12.5px;font-weight:600;color:var(--brand);cursor:pointer;user-select:none;">如何設定 Apps Script？（點擊展開）</summary>
+            <div style="margin-top:12px;background:var(--bg);border-radius:8px;padding:14px;font-size:12.5px;line-height:1.9;color:var(--text-sub);">
+              <strong style="color:var(--text);">Step 1</strong> — 建立 Google Spreadsheet，複製試算表 ID（網址中 <code>/d/</code> 後的那段）<br>
+              <strong style="color:var(--text);">Step 2</strong> — 開啟 <strong>擴充功能 → Apps Script</strong>，貼上 <code>apps-script-backend.gs</code> 的程式碼，並將 <code>SPREADSHEET_ID</code> 換成你的 ID<br>
+              <strong style="color:var(--text);">Step 3</strong> — 執行 <code>initSheets()</code> 函式一次（建立工作表標頭）<br>
+              <strong style="color:var(--text);">Step 4</strong> — 點選「部署 → 新增部署」→ 類型選「網路應用程式」→ 執行身分「我」→ 存取權限「所有人」→ 部署<br>
+              <strong style="color:var(--text);">Step 5</strong> — 複製產生的 Web App URL，貼回上方欄位並儲存
+            </div>
+          </details>
+        </div>
+
+        <div style="background:var(--surface);border-radius:14px;padding:28px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">資料管理</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-outline" onclick="syncFromGAS()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              從 Sheets 重新同步
+            </button>
+            <button class="btn btn-outline" onclick="pushAllToGAS()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              推送本機資料到 Sheets
+            </button>
+            <button class="btn btn-outline" onclick="if(confirm('確定清除本機快取並重新載入？')){ localStorage.removeItem(STORE_KEY); location.reload(); }" style="color:var(--warn);border-color:var(--warn);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+              清除本機快取
+            </button>
+          </div>
+          <div id="pushStatus" style="margin-top:12px;font-size:12.5px;color:var(--text-muted);"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- IMPORT PREVIEW MODAL -->
+<div id="importModal" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border-radius:18px;padding:32px;max-width:560px;width:90%;box-shadow:var(--shadow-lg);border:1px solid var(--border);">
+    <h3 style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;">匯入預覽確認</h3>
+    <p id="importSummary" style="font-size:13px;color:var(--text-sub);margin-bottom:18px;"></p>
+    <div id="importPreviewTable" style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeImportModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmImport()">確認匯入</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CONFIG + DATA STORE
+// ═══════════════════════════════════════════
+const STORE_KEY  = 'ktgh_marketing_v1';
+const CONFIG_KEY = 'ktgh_config_v1';
+
+let config = loadConfig();
+let store  = loadStore();
+
+function loadConfig() {
+  try {
+    const c = localStorage.getItem(CONFIG_KEY);
+    return c ? JSON.parse(c) : { gasUrl: '' };
+  } catch(e) { return { gasUrl: '' }; }
+}
+
+function saveConfig() {
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+}
+
+function loadStore() {
+  try {
+    const s = localStorage.getItem(STORE_KEY);
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return { posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia() };
+}
+
+function saveStore() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+//  GAS API  (GET-only → no CORS preflight)
+// ═══════════════════════════════════════════
+function setSyncStatus(msg, color) {
+  const el = document.getElementById('syncStatus');
+  if (el) { el.textContent = msg; el.style.color = color || 'var(--text-muted)'; }
+}
+
+async function gasGet(action, params = {}) {
+  if (!config.gasUrl) throw new Error('GAS URL 未設定');
+  const url = new URL(config.gasUrl);
+  url.searchParams.set('action', action);
+  for (const [k, v] of Object.entries(params)) {
+    url.searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+  }
+  const res  = await fetch(url.toString(), { redirect: 'follow' });
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || 'GAS error');
+  return json.data;
+}
+
+async function syncFromGAS() {
+  if (!config.gasUrl) { showToast('請先在設定頁面填入 GAS URL'); return; }
+  setSyncStatus('同步中…', 'var(--brand)');
+  try {
+    const [posts, events, media] = await Promise.all([
+      gasGet('getPosts'),
+      gasGet('getEvents'),
+      gasGet('getMedia'),
+    ]);
+    if (Array.isArray(posts))  store.posts  = posts;
+    if (Array.isArray(events)) store.events = events;
+    if (Array.isArray(media))  store.media  = media;
+    saveStore();
+    renderOverview();
+    const t = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+    setSyncStatus('已同步 ' + t, 'var(--brand)');
+    showToast('Sheets 資料同步完成');
+  } catch(e) {
+    setSyncStatus('同步失敗', 'var(--warn)');
+    showToast('同步失敗：' + e.message);
+  }
+}
+
+async function pushAllToGAS() {
+  if (!config.gasUrl) { showToast('請先設定 GAS URL'); return; }
+  const statusEl = document.getElementById('pushStatus');
+  if (statusEl) statusEl.textContent = '推送中…';
+  try {
+    await gasGet('importPosts', { data: store.posts });
+    await gasGet('bulkAddEvents', { data: store.events });
+    await gasGet('bulkAddMedia',  { data: store.media  });
+    if (statusEl) statusEl.textContent = '推送完成 ' + new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+    showToast('本機資料已推送至 Google Sheets');
+  } catch(e) {
+    if (statusEl) statusEl.textContent = '推送失敗：' + e.message;
+    showToast('推送失敗：' + e.message);
+  }
+}
+
+async function _gasWrite(action, data) {
+  if (!config.gasUrl) return;
+  try { await gasGet(action, { data }); } catch(e) { console.warn('GAS write failed:', e.message); }
+}
+
+function saveGasUrl() {
+  const url = document.getElementById('gasUrlInput').value.trim();
+  config.gasUrl = url;
+  saveConfig();
+  updateSettingsUI();
+  if (url) { showToast('GAS URL 已儲存，開始同步…'); syncFromGAS(); }
+  else showToast('GAS URL 已清除，改用本機模式');
+}
+
+function updateSettingsUI() {
+  const inp = document.getElementById('gasUrlInput');
+  if (inp) inp.value = config.gasUrl || '';
+  const st = document.getElementById('gasConnStatus');
+  if (st) {
+    st.textContent = config.gasUrl ? '已設定 ✓' : '未設定';
+    st.style.color = config.gasUrl ? 'var(--brand)' : 'var(--warn)';
+  }
+}
+
+// ── Built-in data from Excel ──
+function getBuiltinPosts() {
+  return [
+    // 1月
+    {date:'2026-01-01',title:'元旦寶寶迎新－婦產科團隊',type:'相片',cat:'品牌/節慶',reach:28373,click:1581,engage:2542,month:'2026-01',url:''},
+    {date:'2026-01-10',title:'中榮名醫聯名合作介紹',type:'相片',cat:'地位建立',reach:11401,click:383,engage:89,month:'2026-01',url:''},
+    {date:'2026-01-08',title:'兒童感知異常－江國樑主任',type:'相片',cat:'案例類',reach:10103,click:842,engage:287,month:'2026-01',url:''},
+    {date:'2026-01-19',title:'MRI腦部AI智能輔助檢測',type:'相片',cat:'衛教/技術',reach:3754,click:122,engage:76,month:'2026-01',url:''},
+    {date:'2026-01-30',title:'光田迎春墨香傳情活動預告',type:'相片',cat:'品牌/節慶',reach:2917,click:174,engage:131,month:'2026-01',url:''},
+    {date:'2026-01-09',title:'達文西機械手臂微創手術',type:'相片',cat:'地位建立',reach:2715,click:140,engage:89,month:'2026-01',url:''},
+    {date:'2026-01-08',title:'冬天獨居族必看保命4守則',type:'影片',cat:'衛教/衛生',reach:1933,click:49,engage:54,month:'2026-01',url:''},
+    // 2月
+    {date:'2026-02-16',title:'院長新春慰問同仁幕後紀實',type:'相片',cat:'品牌/節慶',reach:22915,click:10710,engage:634,month:'2026-02',url:''},
+    {date:'2026-02-20',title:'蘇先生重獲新生感謝函案例',type:'相片',cat:'案例類',reach:17021,click:1900,engage:400,month:'2026-02',url:''},
+    {date:'2026-02-13',title:'SNQ品質認證智慧醫療發展',type:'相片',cat:'地位建立',reach:2933,click:277,engage:97,month:'2026-02',url:''},
+    {date:'2026-02-28',title:'健康藝術人文系列講座活動預告',type:'相片',cat:'活動/講座',reach:3304,click:487,engage:81,month:'2026-02',url:''},
+    {date:'2026-02-27',title:'BFR血流阻斷訓練Reels',type:'影片',cat:'衛教/技術',reach:2063,click:71,engage:39,month:'2026-02',url:''},
+    {date:'2026-02-14',title:'龍馬精神煥然醫新賀歲影片',type:'影片',cat:'品牌/節慶',reach:1575,click:89,engage:80,month:'2026-02',url:''},
+    // 3月
+    {date:'2026-03-02',title:'元宵節Moomin快閃兒童病房',type:'相片',cat:'品牌/節慶',reach:13500,click:5225,engage:347,month:'2026-03',url:''},
+    {date:'2026-03-15',title:'鼻腔假性動脈瘤跨科救治案例',type:'相片',cat:'案例類',reach:8138,click:414,engage:142,month:'2026-03',url:''},
+    {date:'2026-03-10',title:'梨山抗癌綠色通道偏鄉醫療',type:'相片',cat:'公益類',reach:7257,click:444,engage:203,month:'2026-03',url:''},
+    {date:'2026-03-23',title:'護理部Reels劇組拍攝篇',type:'影片',cat:'招募類',reach:5241,click:201,engage:110,month:'2026-03',url:''},
+    {date:'2026-03-06',title:'女性肺腺癌篩檢講座預告',type:'相片',cat:'活動/講座',reach:2616,click:76,engage:53,month:'2026-03',url:''},
+    {date:'2026-03-09',title:'纖維肌痛症講座預告',type:'相片',cat:'活動/講座',reach:1569,click:133,engage:55,month:'2026-03',url:''},
+    {date:'2026-03-23',title:'阿長給你的愛Reels',type:'影片',cat:'招募類',reach:2634,click:260,engage:110,month:'2026-03',url:''},
+    // 12月
+    {date:'2025-12-10',title:'全口重建柯百俞醫師案例',type:'相片',cat:'案例類',reach:30292,click:1681,engage:136,month:'2025-12',url:''},
+    {date:'2025-12-24',title:'平安夜搜救犬鐵雄慰問病房',type:'相片',cat:'品牌/節慶',reach:19880,click:8934,engage:577,month:'2025-12',url:''},
+    {date:'2025-12-18',title:'光田×臺中榮總醫學中心名醫',type:'相片',cat:'地位建立',reach:15845,click:4708,engage:297,month:'2025-12',url:''},
+    {date:'2025-12-15',title:'過動症與家庭結構研究國際期刊',type:'相片',cat:'案例類',reach:15606,click:823,engage:217,month:'2025-12',url:''},
+    {date:'2025-12-04',title:'志工週抽獎活動志工路有愛',type:'相片',cat:'品牌/公益',reach:14016,click:2766,engage:5815,month:'2025-12',url:''},
+    {date:'2025-12-27',title:'向上院區啟用一週年感謝文',type:'相片',cat:'品牌/里程碑',reach:11760,click:2800,engage:419,month:'2025-12',url:''},
+  ];
+}
+
+function getBuiltinEvents() {
+  return [
+    {date:'2026-03-06',name:'守護女性健康｜肺腺癌篩檢講座',type:'健康講座',campus:'向上院區',reg:80,attend:65,reach:2616,sat:4.5,speaker:'黃俊雄醫師',note:'現場打卡禮保溫杯反應熱烈'},
+    {date:'2026-03-09',name:'纖維肌痛症健康藝術人文系列',type:'健康講座',campus:'向上院區',reg:50,attend:42,reach:1569,sat:4.3,speaker:'柯麗櫻醫師、施宇宸PT',note:''},
+    {date:'2026-03-11',name:'乳癌基因秘密講座',type:'健康講座',campus:'向上院區',reg:70,attend:58,reach:1236,sat:4.6,speaker:'廖志斌醫師、王敦正醫師',note:''},
+    {date:'2026-03-12',name:'女性心血管照護講座',type:'健康講座',campus:'向上院區',reg:85,attend:72,reach:2085,sat:4.7,speaker:'曾敏昇醫師、陳慧芬個管師',note:'女性健康月系列最高滿意度'},
+    {date:'2026-02-02',name:'光田迎春墨香傳情活動',type:'院內活動',campus:'向上院區',reg:0,attend:320,reach:2917,sat:5.0,speaker:'書法名師現場揮毫',note:'現場發放春聯與財神爺互動'},
+  ];
+}
+
+function getBuiltinMedia() {
+  return [
+    {date:'2026-03-15',name:'台灣醫療報導獎',type:'平面媒體（報紙）',section:'醫療專版',title:'梨山偏鄉醫療服務紀錄片入圍',nature:'正面報導',reach:50000,url:'',note:'送件素材製作中'},
+    {date:'2025-12-20',name:'聯合報',type:'網路媒體',section:'健康版',title:'光田向上院區啟用週年新服務',nature:'正面報導',reach:80000,url:'',note:''},
+    {date:'2025-12-18',name:'自由時報',type:'網路媒體',section:'醫療保健',title:'海線首推醫學中心名醫駐診',nature:'正面報導',reach:60000,url:'',note:''},
+  ];
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function switchSection(module, sub) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const sec = document.getElementById(`sec-${module}-${sub}`);
+  if (sec) sec.classList.add('active');
+  const titles = {
+    'fb-overview':    ['總覽 Dashboard',      '粉專貼文成效綜合分析'],
+    'fb-upload':      ['匯入貼文數據',         'FB後台Excel匯入'],
+    'fb-posts':       ['貼文成效列表',         '所有貼文詳細數據'],
+    'fb-analysis':    ['組合分析',             '貼文類型×內容類別交叉分析'],
+    'fb-sop':         ['SOP 建議模板',         '基於數據的執行公式'],
+    'event-list':     ['活動/講座追蹤',        '成果回報與成效分析'],
+    'event-add':      ['新增活動回報',         '填寫活動成效資料'],
+    'media-list':     ['媒體新聞曝光',         '媒體露出追蹤'],
+    'media-add':      ['新增媒體記錄',         '填寫媒體曝光資料'],
+    'settings-main':  ['設定',                 'Google Sheets 串接與資料管理'],
+  };
+  const key = `${module}-${sub}`;
+  if (titles[key]) {
+    document.getElementById('topbarTitle').textContent = titles[key][0];
+    document.getElementById('topbarSub').textContent = titles[key][1];
+  }
+  // render content
+  if (key === 'fb-overview') renderOverview();
+  if (key === 'fb-posts') renderPostsList();
+  if (key === 'event-list') renderEvents();
+  if (key === 'media-list') renderMedia();
+}
+
+// ═══════════════════════════════════════════
+//  RENDER OVERVIEW
+// ═══════════════════════════════════════════
+let currentMonth = 'all';
+
+function selectMonth(btn, month) {
+  document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentMonth = month;
+  renderOverview();
+}
+
+function renderOverview() {
+  const posts = filterByMonth(store.posts, currentMonth);
+  const reach = posts.reduce((a,p) => a + (p.reach||0), 0);
+  const engage = posts.reduce((a,p) => a + (p.engage||0), 0);
+  const clicks = posts.reduce((a,p) => a + (p.click||0), 0);
+  const avg = posts.length ? Math.round(reach/posts.length) : 0;
+
+  document.getElementById('kpi-reach').textContent = reach.toLocaleString();
+  document.getElementById('kpi-engage').textContent = engage.toLocaleString();
+  document.getElementById('kpi-posts').textContent = posts.length;
+  document.getElementById('kpi-avg').textContent = avg.toLocaleString();
+
+  // Top 10
+  const sorted = [...posts].sort((a,b) => b.reach - a.reach).slice(0,10);
+  const tbody = document.getElementById('topPostsTbody');
+  tbody.innerHTML = sorted.map((p,i) => {
+    const engageRate = p.reach ? ((p.click||0)/p.reach*100).toFixed(2) : '0.00';
+    const medalLabel = ['01','02','03']; const medal = i < 3 ? medalLabel[i] : '';
+    return `<tr>
+      <td>${medal} ${i+1}</td>
+      <td><span class="badge badge-gray">${monthLabel(p.month)}</span></td>
+      <td style="max-width:260px;line-height:1.4">${p.title}</td>
+      <td>${catBadge(p.cat)}</td>
+      <td>${typeBadge(p.type)}</td>
+      <td class="text-mono highlight">${(p.reach||0).toLocaleString()}</td>
+      <td class="text-mono">${(p.click||0).toLocaleString()}</td>
+      <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
+      <td class="text-mono">${engageRate}%</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterByMonth(posts, month) {
+  if (month === 'all') return posts;
+  return posts.filter(p => p.month === month);
+}
+
+function monthLabel(m) {
+  const map = {'2026-03':'3月','2026-02':'2月','2026-01':'1月','2025-12':'12月'};
+  return map[m] || m;
+}
+
+function catBadge(cat) {
+  if (!cat) return '';
+  if (cat.includes('節慶')||cat.includes('品牌')) return `<span class="tag tag-brand">${cat}</span>`;
+  if (cat.includes('案例')) return `<span class="tag tag-case">${cat}</span>`;
+  if (cat.includes('衛教')||cat.includes('技術')) return `<span class="tag tag-edu">${cat}</span>`;
+  if (cat.includes('地位')||cat.includes('聯名')) return `<span class="tag tag-edu">${cat}</span>`;
+  if (cat.includes('招募')) return `<span class="tag tag-video">${cat}</span>`;
+  if (cat.includes('活動')) return `<span class="tag tag-event">${cat}</span>`;
+  return `<span class="tag tag-status">${cat}</span>`;
+}
+
+function typeBadge(type) {
+  if (type === '影片') return `<span class="badge badge-blue" style="display:inline-flex;align-items:center;gap:3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> 影片</span>`;
+  return `<span class="badge badge-blue" style="display:inline-flex;align-items:center;gap:3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> 相片</span>`;
+}
+
+// ═══════════════════════════════════════════
+//  RENDER POSTS LIST
+// ═══════════════════════════════════════════
+let postsFilter = 'all';
+
+function filterPosts(btn, month) {
+  document.querySelectorAll('#sec-fb-posts .month-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  postsFilter = month;
+  renderPostsList();
+}
+
+function filterPostsBySearch() {
+  renderPostsList();
+}
+
+function renderPostsList() {
+  let posts = filterByMonth(store.posts, postsFilter);
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  if (q) posts = posts.filter(p => p.title.toLowerCase().includes(q));
+  document.getElementById('postCount').textContent = `共 ${posts.length} 篇`;
+  const sorted = [...posts].sort((a,b) => new Date(b.date) - new Date(a.date));
+  document.getElementById('postsListTbody').innerHTML = sorted.map(p => {
+    const rate = p.reach ? ((p.click||0)/p.reach*100).toFixed(2) : '0.00';
+    return `<tr>
+      <td class="text-mono">${p.date}</td>
+      <td style="max-width:240px;line-height:1.4;font-size:12.5px">${p.title}</td>
+      <td>${catBadge(p.cat)}</td>
+      <td>${typeBadge(p.type)}</td>
+      <td class="text-mono highlight">${(p.reach||0).toLocaleString()}</td>
+      <td class="text-mono">${(p.click||0).toLocaleString()}</td>
+      <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
+      <td class="text-mono">${rate}%</td>
+      <td>${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--brand);display:inline-flex;align-items:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>` : '—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><p>暫無資料</p></div></td></tr>';
+}
+
+// ═══════════════════════════════════════════
+//  RENDER EVENTS
+// ═══════════════════════════════════════════
+function renderEvents() {
+  const tbody = document.getElementById('eventListTbody');
+  if (!store.events.length) {
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p>尚未新增活動記錄</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = store.events.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e => {
+    const rate = e.reg > 0 ? Math.round(e.attend/e.reg*100) : (e.attend > 0 ? '—' : 0);
+    const rateStr = typeof rate === 'number' ? `${rate}%` : rate;
+    const rateColor = typeof rate === 'number' && rate >= 80 ? 'color:var(--brand);font-weight:700;' : '';
+    return `<tr>
+      <td class="text-mono">${e.date}</td>
+      <td style="font-weight:600">${e.name}</td>
+      <td><span class="badge badge-blue">${e.type}</span></td>
+      <td>${e.campus}</td>
+      <td class="text-mono">${e.reg||'—'}</td>
+      <td class="text-mono">${e.attend||0}</td>
+      <td class="text-mono" style="${rateColor}">${rateStr}</td>
+      <td class="text-mono">${(e.reach||0).toLocaleString()}</td>
+      <td class="text-mono">${e.sat ? '<span style="color:var(--gold);display:inline-flex;gap:1px;align-items:center;">'+'<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'.repeat(Math.floor(e.sat))+'</span> '+e.sat : '—'}</td>
+      <td style="max-width:160px;font-size:12px;color:var(--text-muted)">${e.note||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function addEvent() {
+  const name = document.getElementById('ev-name').value.trim();
+  const date = document.getElementById('ev-date').value;
+  if (!name || !date) { showToast('請填寫活動名稱和日期'); return; }
+  store.events.push({
+    date, name,
+    type: document.getElementById('ev-type').value,
+    campus: document.getElementById('ev-campus').value,
+    reg: +document.getElementById('ev-reg').value || 0,
+    attend: +document.getElementById('ev-attend').value || 0,
+    reach: +document.getElementById('ev-reach').value || 0,
+    sat: +document.getElementById('ev-sat').value || 0,
+    speaker: document.getElementById('ev-speaker').value,
+    note: document.getElementById('ev-note').value,
+  });
+  saveStore();
+  _gasWrite('addEvent', store.events[store.events.length - 1]);
+  showToast('活動記錄已儲存');
+  ['ev-name','ev-date','ev-reg','ev-attend','ev-reach','ev-sat','ev-speaker','ev-note'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  switchSection('event','list');
+}
+
+// ═══════════════════════════════════════════
+//  RENDER MEDIA
+// ═══════════════════════════════════════════
+function renderMedia() {
+  const tbody = document.getElementById('mediaListTbody');
+  if (!store.media.length) {
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></div><p>尚未新增媒體記錄</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = store.media.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(m => {
+    const nc = m.nature==='正面報導'?'badge-green':m.nature==='負面/需關注'?'badge-red':'badge-gray';
+    return `<tr>
+      <td class="text-mono">${m.date}</td>
+      <td style="font-weight:600">${m.name}</td>
+      <td><span class="badge badge-blue">${m.type}</span></td>
+      <td>${m.title}</td>
+      <td style="color:var(--text-sub)">${m.section||'—'}</td>
+      <td><span class="badge ${nc}">${m.nature}</span></td>
+      <td class="text-mono highlight">${(m.reach||0).toLocaleString()}</td>
+      <td>${m.url?`<a href="${m.url}" target="_blank" style="color:var(--brand);display:inline-flex;align-items:center;gap:3px;font-size:12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> 連結</a>`:'—'}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${m.note||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function addMedia() {
+  const name = document.getElementById('md-name').value.trim();
+  const date = document.getElementById('md-date').value;
+  if (!name || !date) { showToast('請填寫媒體名稱和日期'); return; }
+  store.media.push({
+    date, name,
+    type: document.getElementById('md-type').value,
+    section: document.getElementById('md-section').value,
+    title: document.getElementById('md-title').value,
+    nature: document.getElementById('md-nature').value,
+    reach: +document.getElementById('md-reach').value || 0,
+    url: document.getElementById('md-url').value,
+    note: document.getElementById('md-note').value,
+  });
+  saveStore();
+  _gasWrite('addMedia', store.media[store.media.length - 1]);
+  showToast('媒體記錄已儲存');
+  switchSection('media','list');
+}
+
+// ═══════════════════════════════════════════
+//  AUTO TAG
+// ═══════════════════════════════════════════
+function autoTag(title) {
+  const t = title || '';
+  if (/案例|醫師|手術|治療|病患|康復|重獲|感謝函/.test(t)) return '案例類';
+  if (/元旦|春節|聖誕|母親節|感恩|節慶|寶寶|不老騎士/.test(t)) return '品牌/節慶';
+  if (/榮總|中山附醫|醫學中心|名醫|聯名|合作/.test(t)) return '地位建立';
+  if (/講座|活動|報名|現場|系列/.test(t)) return '活動/講座';
+  if (/招募|護理師|徵才|加入|阿長/.test(t)) return '招募類';
+  if (/偏鄉|志工|公益|梨山|搜救犬/.test(t)) return '公益類';
+  return '衛教類';
+}
+
+// ═══════════════════════════════════════════
+//  FILE UPLOAD (real SheetJS parsing)
+// ═══════════════════════════════════════════
+let _pendingPosts = [];
+
+function handleFileUpload(input) {
+  if (!input.files || !input.files.length) return;
+  const file = input.files[0];
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array', cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      const existingKeys = new Set(
+        store.posts.map(p => (p.date || '') + '|' + (p.title || '').slice(0, 20))
+      );
+
+      const parsed = [];
+      const skipped = [];
+
+      rows.forEach(row => {
+        // Flexible column name matching
+        const get = (...keys) => {
+          for (const k of keys) {
+            for (const col of Object.keys(row)) {
+              if (col.trim() === k) return String(row[col]).trim();
+            }
+          }
+          return '';
+        };
+
+        const rawTitle = get('標題') || get('說明');
+        const title = rawTitle.slice(0, 60);
+        if (!title) return;
+
+        // Parse date
+        let rawDate = get('發佈時間');
+        let dateStr = '';
+        if (rawDate) {
+          const d = new Date(rawDate);
+          if (!isNaN(d)) {
+            dateStr = d.toISOString().slice(0, 10);
+          } else {
+            // Try common TW formats: 2026/3/1 or 2026-3-1
+            const m = rawDate.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+            if (m) dateStr = `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+          }
+        }
+        if (!dateStr) return;
+
+        const dedupeKey = dateStr + '|' + title.slice(0, 20);
+        if (existingKeys.has(dedupeKey)) { skipped.push(title); return; }
+        existingKeys.add(dedupeKey);
+
+        const toInt = v => parseInt(String(v).replace(/,/g, ''), 10) || 0;
+
+        parsed.push({
+          date:   dateStr,
+          title,
+          type:   get('貼文類型') || '相片',
+          cat:    autoTag(title),
+          reach:  toInt(get('觸及人數')),
+          click:  toInt(get('總點擊次數')),
+          engage: toInt(get('心情、留言和分享次數')),
+          month:  dateStr.slice(0, 7),
+          url:    get('永久連結'),
+        });
+      });
+
+      if (!parsed.length && !skipped.length) {
+        showToast('未找到可解析的貼文資料，請確認欄位名稱');
+        return;
+      }
+
+      _pendingPosts = parsed;
+      showImportModal(parsed, skipped);
+
+    } catch(err) {
+      showToast('解析失敗：' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showImportModal(parsed, skipped) {
+  const modal = document.getElementById('importModal');
+  document.getElementById('importSummary').textContent =
+    `將匯入 ${parsed.length} 篇貼文` + (skipped.length ? `，略過 ${skipped.length} 篇重複` : '');
+
+  const preview = parsed.slice(0, 5);
+  const rows = preview.map(p => `<tr>
+    <td style="padding:9px 12px;border-bottom:1px solid #EBF2EE;font-size:12.5px;color:var(--text);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #EBF2EE;font-size:12.5px;color:var(--text-sub);white-space:nowrap;">${p.date}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #EBF2EE;font-size:12.5px;color:var(--text-sub);white-space:nowrap;">${p.reach.toLocaleString()}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #EBF2EE;font-size:12.5px;white-space:nowrap;"><span class="badge badge-green">${p.cat}</span></td>
+  </tr>`).join('');
+
+  document.getElementById('importPreviewTable').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:var(--accent);">
+        <th style="padding:9px 12px;font-size:11.5px;font-weight:700;color:var(--text-sub);text-align:left;border-bottom:2px solid var(--border);">標題</th>
+        <th style="padding:9px 12px;font-size:11.5px;font-weight:700;color:var(--text-sub);text-align:left;border-bottom:2px solid var(--border);">日期</th>
+        <th style="padding:9px 12px;font-size:11.5px;font-weight:700;color:var(--text-sub);text-align:left;border-bottom:2px solid var(--border);">觸及</th>
+        <th style="padding:9px 12px;font-size:11.5px;font-weight:700;color:var(--text-sub);text-align:left;border-bottom:2px solid var(--border);">分類</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${parsed.length > 5 ? `<div style="padding:8px 12px;font-size:12px;color:var(--text-muted);">⋯ 另有 ${parsed.length - 5} 篇</div>` : ''}
+  `;
+
+  modal.style.display = 'flex';
+}
+
+function closeImportModal() {
+  document.getElementById('importModal').style.display = 'none';
+  _pendingPosts = [];
+  // reset file inputs
+  ['fileInput','fileInput2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+function confirmImport() {
+  const imported = _pendingPosts.slice();
+  store.posts = store.posts.concat(imported);
+  saveStore();
+  _gasWrite('importPosts', imported);
+  closeImportModal();
+  renderOverview();
+  showToast(`已匯入 ${imported.length} 篇貼文`);
+  const resultEl = document.getElementById('uploadResult');
+  if (resultEl) resultEl.innerHTML = `<div style="background:var(--accent);border-radius:12px;padding:16px 20px;border:1px solid var(--border);font-size:13.5px;color:var(--brand);font-weight:600;">✓ 成功匯入 ${_pendingPosts.length} 篇貼文</div>`;
+}
+
+function handleFileDrop(e) {
+  const files = e.dataTransfer.files;
+  if (files.length) handleFileUpload({files});
+}
+
+// ═══════════════════════════════════════════
+//  EXPORT REPORT
+// ═══════════════════════════════════════════
+function exportReport() {
+  const posts = store.posts;
+  const total_reach = posts.reduce((a,p)=>a+(p.reach||0),0);
+  const total_engage = posts.reduce((a,p)=>a+(p.engage||0),0);
+  const top3 = [...posts].sort((a,b)=>b.reach-a.reach).slice(0,3);
+  const report = `光田綜合醫院｜行銷成效月報
+生成時間：${new Date().toLocaleString('zh-TW')}
+=============================
+
+【粉專總覽】
+累計總觸及：${total_reach.toLocaleString()} 人
+累計互動：${total_engage.toLocaleString()} 次
+發文總篇數：${posts.length} 篇
+平均觸及：${Math.round(total_reach/posts.length).toLocaleString()} 人/篇
+
+【Top 3 亮點貼文】
+${top3.map((p,i)=>`${i+1}. ${p.title}\n   觸及：${p.reach.toLocaleString()} | 點擊：${p.click.toLocaleString()} | 互動：${p.engage.toLocaleString()}`).join('\n')}
+
+【活動追蹤】共 ${store.events.length} 場
+${store.events.map(e=>`• ${e.date} ${e.name}｜出席：${e.attend} 人`).join('\n')}
+
+【媒體曝光】共 ${store.media.length} 筆
+${store.media.map(m=>`• ${m.date} ${m.name}｜${m.title}`).join('\n')}
+
+=============================
+光田行銷整合分析系統自動產出`;
+
+  const blob = new Blob([report], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `光田月報_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'-')}.txt`;
+  a.click();
+  showToast('月報已匯出');
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  renderOverview();
+  updateSettingsUI();
+  if (config.gasUrl) {
+    setSyncStatus('正在同步…', 'var(--brand)');
+    syncFromGAS();
+  }
+});
+</script>
+</body>
+</html>
