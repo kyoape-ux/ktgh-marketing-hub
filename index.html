@@ -8,24 +8,24 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@600;700;800&display=swap');
 
   :root {
-    --brand:      #006341;
-    --brand-light:#007D53;
-    --brand-dim:  #006341;
-    --brand-bg:   #EAF5EE;
-    --brand-bd:   #B3D9C5;
-    --brand-mid:  #4AAE80;
-    --ci-green:   #6EC300;
-    --ci-blue:    #00AAC8;
-    --gold:       #C9973A;
-    --warn:       #C04040;
-    --bg:         #F3F9F6;
+    --brand:      #6D28D9;
+    --brand-light:#7C3AED;
+    --brand-dim:  #5B21B6;
+    --brand-bg:   #F5F3FF;
+    --brand-bd:   #DDD6FE;
+    --brand-mid:  #8B5CF6;
+    --ci-green:   #22C55E;
+    --ci-blue:    #3B82F6;
+    --gold:       #F59E0B;
+    --warn:       #DC2626;
+    --bg:         #F5F5FA;
     --surface:    #FFFFFF;
-    --border:     #DDE8E3;
-    --text:       #1A2820;
-    --text-sub:   #5A7A6A;
-    --text-muted: #90A89E;
-    --shadow:     0 2px 16px rgba(0,99,65,0.10);
-    --shadow-lg:  0 8px 40px rgba(0,99,65,0.16);
+    --border:     #E5E7EB;
+    --text:       #1A1A2E;
+    --text-sub:   #6B7280;
+    --text-muted: #9CA3AF;
+    --shadow:     0 2px 16px rgba(109,40,217,0.08);
+    --shadow-lg:  0 8px 40px rgba(109,40,217,0.12);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,7 +41,7 @@
   .sidebar {
     position: fixed; top: 0; left: 0;
     width: 220px; height: 100vh;
-    background: #006341;
+    background: #1E1B2E;
     display: flex; flex-direction: column;
     z-index: 100;
     padding: 0 0 24px;
@@ -61,7 +61,7 @@
   }
   .sidebar-logo .dot {
     display: inline-block; width: 7px; height: 7px;
-    background: #6EC300; border-radius: 50%;
+    background: #22C55E; border-radius: 50%;
     margin-right: 6px; animation: pulse 2s infinite;
   }
   @keyframes pulse {
@@ -80,7 +80,7 @@
     text-decoration: none;
   }
   .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
-  .nav-item.active { background: rgba(0,0,0,0.14); color: #fff; border-left-color: #6EC300; font-weight: 600; }
+  .nav-item.active { background: rgba(109,40,217,0.25); color: #fff; border-left-color: #8B5CF6; font-weight: 600; }
   .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
   .sidebar-footer { padding: 16px 20px 0; border-top: 1px solid rgba(255,255,255,0.1); }
   .sidebar-footer .version { font-size: 11px; color: rgba(255,255,255,0.32); font-family: 'Inter', system-ui, sans-serif; }
@@ -918,8 +918,13 @@
         </div>
         <!-- 歷史篩選列 -->
         <div style="padding:10px 20px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #EBF2EE;">
-          <select id="evYearFilter" onchange="renderEvents()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text-main);background:#fff;cursor:pointer;">
-            <option value="all">全部年份</option>
+          <select id="evListPeriodType" onchange="updateEvListPeriod()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text);background:#fff;cursor:pointer;">
+            <option value="all">全部期間</option>
+            <option value="year">依年度</option>
+            <option value="quarter">依季度</option>
+            <option value="month">依月份</option>
+          </select>
+          <select id="evListPeriodValue" onchange="applyEvListPeriod()" style="display:none;height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text);background:#fff;cursor:pointer;">
           </select>
           <select id="evTypeFilter" onchange="renderEvents()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text-main);background:#fff;cursor:pointer;">
             <option value="all">全部類型</option>
@@ -933,9 +938,8 @@
           </select>
           <select id="evCampusFilter" onchange="renderEvents()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text-main);background:#fff;cursor:pointer;">
             <option value="all">全部院區</option>
-            <option value="沙鹿">沙鹿</option>
-            <option value="大甲">大甲</option>
-            <option value="沙鹿+大甲">沙鹿+大甲</option>
+            <option value="向上院區">向上院區</option>
+            <option value="大甲院區">大甲院區</option>
           </select>
           <input type="text" id="evSearchInput" oninput="renderEvents()" placeholder="搜尋活動名稱…" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text-main);background:#fff;outline:none;min-width:160px;">
           <span id="evCountLabel" style="font-size:12px;color:var(--text-muted);margin-left:auto;"></span>
@@ -981,8 +985,6 @@
             <select id="ev-campus">
               <option>向上院區</option>
               <option>大甲院區</option>
-              <option>長青院區</option>
-              <option>其他/線上</option>
             </select>
           </div>
           <div class="form-group">
@@ -1466,7 +1468,7 @@
       <div class="form-group">
         <label>院區</label>
         <select id="em-campus">
-          <option>向上院區</option><option>沙鹿院區</option><option>大甲院區</option><option>其他</option>
+          <option>向上院區</option><option>大甲院區</option>
         </select>
       </div>
       <div class="form-group">
@@ -1721,6 +1723,11 @@ async function syncFromGAS() {
         if (r.date) r.date = normalizeDate(r.date);
         if (r.phase && looksLikeDate(r.phase)) r.phase = '';  // phase 不應是日期戳記
       });
+    });
+    // 修正 GAS 預算欄位的時間戳 Bug：budget/expense > 1000000 為時間戳，應清零
+    if (Array.isArray(events)) events.forEach(e => {
+      if (e.budget > 1000000) e.budget = 0;
+      if (e.expense > 1000000) e.expense = 0;
     });
     if (Array.isArray(posts)) posts.forEach(p => {
       if (p.month) p.month = normalizeDate(p.month).slice(0,7);
@@ -2076,6 +2083,24 @@ function applyEvDashPeriod() {
   renderEventDashboard();
 }
 
+let evListFilter = 'all';
+function updateEvListPeriod() {
+  const typeEl = document.getElementById('evListPeriodType');
+  const valEl = document.getElementById('evListPeriodValue');
+  const type = typeEl.value;
+  if (type === 'all') { valEl.style.display = 'none'; evListFilter = 'all'; renderEvents(); return; }
+  valEl.style.display = '';
+  const months = getEventMonths();
+  populatePeriodDropdown(valEl, type, months);
+  applyEvListPeriod();
+}
+function applyEvListPeriod() {
+  const type = document.getElementById('evListPeriodType').value;
+  if (type === 'all') { evListFilter = 'all'; }
+  else { evListFilter = document.getElementById('evListPeriodValue').value; }
+  renderEvents();
+}
+
 function renderOverview() {
   const posts = filterByPeriod(store.posts, currentMonth);
   const reach = posts.reduce((a,p) => a + (p.reach||0), 0);
@@ -2332,11 +2357,14 @@ function phaseBadge(phase) {
 //  RENDER EVENTS
 // ═══════════════════════════════════════════
 function clearEvFilters() {
-  const y = document.getElementById('evYearFilter');
+  const pt = document.getElementById('evListPeriodType');
+  const pv = document.getElementById('evListPeriodValue');
   const t = document.getElementById('evTypeFilter');
   const c = document.getElementById('evCampusFilter');
   const s = document.getElementById('evSearchInput');
-  if (y) y.value = 'all';
+  if (pt) pt.value = 'all';
+  if (pv) { pv.style.display = 'none'; pv.innerHTML = ''; }
+  evListFilter = 'all';
   if (t) t.value = 'all';
   if (c) c.value = 'all';
   if (s) s.value = '';
@@ -2347,17 +2375,7 @@ function renderEvents() {
   const tbody = document.getElementById('eventListTbody');
   if (!tbody) return;
 
-  // ── 更新年份選單 ──
-  const yearSel = document.getElementById('evYearFilter');
-  if (yearSel) {
-    const cur = yearSel.value;
-    const years = [...new Set(store.events.map(e => (e.date||'').slice(0,4)).filter(Boolean))].sort().reverse();
-    yearSel.innerHTML = '<option value="all">全部年份</option>' +
-      years.map(y => `<option value="${y}"${y===cur?' selected':''}>${y} 年</option>`).join('');
-  }
-
   // ── 讀取篩選條件 ──
-  const year   = document.getElementById('evYearFilter')?.value   || 'all';
   const type   = document.getElementById('evTypeFilter')?.value   || 'all';
   const campus = document.getElementById('evCampusFilter')?.value || 'all';
   const search = (document.getElementById('evSearchInput')?.value || '').trim().toLowerCase();
@@ -2365,7 +2383,11 @@ function renderEvents() {
   // ── 套用篩選 ──
   let filtered = store.events.map((e,i)=>({e,i}))
     .sort((a,b)=>new Date(b.e.date)-new Date(a.e.date));
-  if (year   !== 'all') filtered = filtered.filter(({e}) => (e.date||'').startsWith(year));
+  // 期間篩選
+  if (evListFilter !== 'all') {
+    const periodSet = new Set(filterByPeriod(store.events, evListFilter, 'date'));
+    filtered = filtered.filter(({e}) => periodSet.has(e));
+  }
   if (type   !== 'all') filtered = filtered.filter(({e}) => e.type === type);
   if (campus !== 'all') filtered = filtered.filter(({e}) => e.campus === campus);
   if (search)           filtered = filtered.filter(({e}) => (e.name||'').toLowerCase().includes(search));
@@ -2857,28 +2879,66 @@ function renderEventDashboard() {
       </div>`;
     }).join('');
 
-  // Satisfaction chart
-  document.getElementById('evSatChart').innerHTML = [...ev]
-    .filter(e=>e.sat>0)
-    .sort((a,b)=>b.sat-a.sat)
-    .map(e => {
-      const color = e.sat>=4.5?'var(--brand)':e.sat>=3.5?'var(--gold)':'var(--warn)';
+  // Satisfaction chart - dropdown by star rating
+  const satEvents = [...ev].filter(e => e.sat > 0);
+  const starGroups = {5:[], 4:[], 3:[], 2:[], 1:[]};
+  satEvents.forEach(e => { const s = Math.floor(e.sat); if(starGroups[s]) starGroups[s].push(e); });
+
+  const satFilterId = 'evSatStarFilter';
+  let satFilterHtml = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+    <select id="${satFilterId}" onchange="renderSatByFilter()" style="height:32px;padding:0 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:#fff;cursor:pointer;">
+      <option value="all">全部星等</option>
+      <option value="5">★★★★★ 5星 (${starGroups[5].length}場)</option>
+      <option value="4">★★★★☆ 4星 (${starGroups[4].length}場)</option>
+      <option value="3">★★★☆☆ 3星 (${starGroups[3].length}場)</option>
+      <option value="2">★★☆☆☆ 2星 (${starGroups[2].length}場)</option>
+      <option value="1">★☆☆☆☆ 1星 (${starGroups[1].length}場)</option>
+    </select>
+    <span style="font-size:12px;color:var(--text-muted);">共 ${satEvents.length} 場有滿意度資料</span>
+  </div>`;
+
+  const satListId = 'evSatListContainer';
+  document.getElementById('evSatChart').innerHTML = satFilterHtml + `<div id="${satListId}"></div>`;
+  window._satEventsCache = satEvents;
+  renderSatByFilter();
+}
+
+function renderSatByFilter() {
+  const filter = document.getElementById('evSatStarFilter')?.value || 'all';
+  const container = document.getElementById('evSatListContainer');
+  if (!container) return;
+  let list = window._satEventsCache || [];
+  if (filter !== 'all') list = list.filter(e => Math.floor(e.sat) === parseInt(filter));
+  list = [...list].sort((a,b) => b.sat - a.sat);
+
+  if (!list.length) {
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:13px;padding:8px 0;">此星等沒有活動資料</p>';
+    return;
+  }
+
+  const starFill = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  const starEmpty = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+
+  container.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+    <thead><tr style="background:var(--brand-bg);"><th style="padding:8px 10px;text-align:left;font-weight:700;color:var(--text-sub);font-size:11px;">日期</th><th style="padding:8px 10px;text-align:left;font-weight:700;color:var(--text-sub);font-size:11px;">活動名稱</th><th style="padding:8px 10px;text-align:left;font-weight:700;color:var(--text-sub);font-size:11px;">院區</th><th style="padding:8px 10px;text-align:center;font-weight:700;color:var(--text-sub);font-size:11px;">滿意度</th></tr></thead>
+    <tbody>${list.map(e => {
+      const color = e.sat>=4.5?'var(--ci-green)':e.sat>=3.5?'var(--gold)':'var(--warn)';
       const filled = Math.floor(e.sat);
       const empty = 5 - filled;
-      const starFill = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
-      const starEmpty = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
-      const pct = Math.round(e.sat/5*100);
-      return `<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;min-width:190px;">
-        <div style="font-size:11.5px;font-weight:700;color:var(--text-muted);margin-bottom:4px;">${e.date}</div>
-        <div style="font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.4;">${e.name}</div>
-        <div style="display:flex;align-items:center;gap:2px;margin-bottom:6px;">
-          <span style="display:inline-flex;gap:1px;color:${color};">${starFill.repeat(filled)}</span>
-          <span style="display:inline-flex;gap:1px;color:#D4D4D4;">${starEmpty.repeat(empty)}</span>
-          <span style="font-size:18px;font-weight:900;color:${color};margin-left:6px;font-family:'Inter',sans-serif;">${e.sat}</span>
-        </div>
-        <div style="height:4px;background:#E8E8E8;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${color};border-radius:3px;"></div></div>
-      </div>`;
-    }).join('') || '<p style="color:var(--text-muted);font-size:13px;">尚無滿意度資料</p>';
+      return `<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 10px;white-space:nowrap;color:var(--text-sub);">${e.date}</td>
+        <td style="padding:8px 10px;font-weight:600;">${e.name}</td>
+        <td style="padding:8px 10px;color:var(--text-sub);">${e.campus||''}</td>
+        <td style="padding:8px 10px;text-align:center;">
+          <span style="display:inline-flex;align-items:center;gap:2px;">
+            <span style="color:${color};display:inline-flex;gap:1px;">${starFill.repeat(filled)}</span>
+            <span style="color:#D4D4D4;display:inline-flex;gap:1px;">${starEmpty.repeat(empty)}</span>
+            <span style="font-weight:800;color:${color};margin-left:4px;font-size:14px;">${e.sat}</span>
+          </span>
+        </td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
 }
 
 // ═══════════════════════════════════════════
@@ -3526,11 +3586,7 @@ function loadTargetInputs() {
 function exportReport() {
   const posts = store.posts;
   const events = store.events;
-  const total_reach = posts.reduce((a,p)=>a+(p.reach||0),0);
-  const total_engage = posts.reduce((a,p)=>a+(p.engage||0),0);
-  const total_clicks = posts.reduce((a,p)=>a+(p.click||0),0);
-  const top5 = [...posts].sort((a,b)=>(b.reach||0)-(a.reach||0)).slice(0,5);
-  const er = total_reach ? (total_engage/total_reach*100).toFixed(2) : '0.00';
+  const media = store.media || [];
 
   // Monthly breakdown
   const byMonth = {};
@@ -3543,27 +3599,52 @@ function exportReport() {
   posts.forEach(p => { const c = p.cat||'其他'; if(!byCat[c]) byCat[c]={reach:0,count:0}; byCat[c].reach+=(p.reach||0); byCat[c].count++; });
   const catEntries = Object.entries(byCat).sort((a,b)=>b[1].reach-a[1].reach);
 
-  const w = window.open('', '_blank', 'width=900,height=700');
+  // KPIs
+  const total_reach = posts.reduce((a,p)=>a+(p.reach||0),0);
+  const total_engage = posts.reduce((a,p)=>a+(p.engage||0),0);
+  const total_clicks = posts.reduce((a,p)=>a+(p.click||0),0);
+  const er = total_reach ? (total_engage/total_reach*100).toFixed(2) : '0.00';
+  const top5 = [...posts].sort((a,b)=>(b.reach||0)-(a.reach||0)).slice(0,5);
+
+  // Event stats
+  const evTotal = events.length;
+  const evTotalReach = events.reduce((s,e)=>s+(e.reach||0),0);
+  const evWithReg = events.filter(e=>e.reg>0);
+  const evAvgRate = evWithReg.length ? Math.round(evWithReg.reduce((s,e)=>s+e.attend/e.reg*100,0)/evWithReg.length) : 0;
+  const evWithSat = events.filter(e=>e.sat>0);
+  const evAvgSat = evWithSat.length ? (evWithSat.reduce((s,e)=>s+e.sat,0)/evWithSat.length).toFixed(1) : '—';
+
+  // Media stats
+  const mdTotal = media.length;
+  const mdTotalReach = media.reduce((s,m)=>s+(m.reach||0),0);
+
+  const w = window.open('', '_blank', 'width=960,height=750');
   w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>光田醫院 行銷月報</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Inter:wght@700;900&display=swap');
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Noto Sans TC',sans-serif;background:#fff;color:#1A2820;padding:40px 50px;max-width:860px;margin:auto;}
-    h1{font-size:22px;font-weight:900;color:#006341;margin-bottom:4px;}
-    .sub{font-size:12px;color:#888;margin-bottom:24px;}
+    body{font-family:'Noto Sans TC',sans-serif;background:#fff;color:#1A1A2E;padding:40px 50px;max-width:900px;margin:auto;}
+    h1{font-size:22px;font-weight:900;color:#6D28D9;margin-bottom:4px;}
+    .sub{font-size:12px;color:#888;margin-bottom:20px;}
+    .tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid #E5E7EB;}
+    .tab{padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;color:#9CA3AF;margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
+    .tab.active{color:#6D28D9;border-bottom-color:#6D28D9;}
+    .tab:hover{color:#6D28D9;}
+    .tab-content{display:none;} .tab-content.active{display:block;}
     .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
-    .kpi{background:#F6FAF8;border:1px solid #D4E8DC;border-radius:10px;padding:16px;text-align:center;}
+    .kpi{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:16px;text-align:center;}
     .kpi-label{font-size:11px;color:#888;margin-bottom:4px;}
-    .kpi-val{font-size:26px;font-weight:900;color:#006341;font-family:Inter,sans-serif;}
+    .kpi-val{font-size:24px;font-weight:900;color:#6D28D9;font-family:Inter,sans-serif;}
     .kpi-sub{font-size:11px;color:#aaa;margin-top:2px;}
-    h2{font-size:15px;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #EAF5EE;}
+    h2{font-size:15px;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #F5F3FF;color:#1A1A2E;}
     table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:24px;}
-    th{background:#F6FAF8;padding:8px 10px;text-align:left;font-weight:700;font-size:11px;color:#006341;border-bottom:2px solid #D4E8DC;}
+    th{background:#F5F3FF;padding:8px 10px;text-align:left;font-weight:700;font-size:11px;color:#6D28D9;border-bottom:2px solid #DDD6FE;}
     td{padding:7px 10px;border-bottom:1px solid #EEE;}
     .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
     .bar-label{width:50px;text-align:right;font-size:11px;font-weight:700;color:#555;}
-    .bar-track{flex:1;height:22px;background:#EAF5EE;border-radius:4px;overflow:hidden;}
-    .bar-fill{height:100%;background:#006341;border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}
+    .bar-track{flex:1;height:22px;background:#F5F3FF;border-radius:4px;overflow:hidden;}
+    .bar-fill{height:100%;background:#6D28D9;border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}
+    .bar-fill.green{background:#22C55E;} .bar-fill.orange{background:#F59E0B;}
     .footer{margin-top:30px;text-align:center;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;}
     .cat-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px;}
     .cat-dot{width:10px;height:10px;border-radius:2px;display:inline-block;}
@@ -3571,47 +3652,77 @@ function exportReport() {
   </style></head><body>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
     <h1>光田綜合醫院｜行銷成效月報</h1>
-    <button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#006341;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">列印 / 存 PDF</button>
+    <button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#6D28D9;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">列印 / 存 PDF</button>
   </div>
   <div class="sub">報表產出時間：${new Date().toLocaleString('zh-TW')} ｜ 資料範圍：${months[0]||'—'} ~ ${months[months.length-1]||'—'}</div>
 
-  <div class="kpi-row">
-    <div class="kpi"><div class="kpi-label">累計總觸及</div><div class="kpi-val">${total_reach.toLocaleString()}</div><div class="kpi-sub">${posts.length} 篇貼文</div></div>
-    <div class="kpi"><div class="kpi-label">累計互動</div><div class="kpi-val">${total_engage.toLocaleString()}</div><div class="kpi-sub">ER ${er}%</div></div>
-    <div class="kpi"><div class="kpi-label">總點擊</div><div class="kpi-val">${total_clicks.toLocaleString()}</div></div>
-    <div class="kpi"><div class="kpi-label">平均觸及/篇</div><div class="kpi-val">${posts.length?Math.round(total_reach/posts.length).toLocaleString():0}</div></div>
+  <div class="tabs no-print">
+    <button class="tab active" onclick="switchReportTab(this,'rpt-fb')">📊 粉專成效</button>
+    <button class="tab" onclick="switchReportTab(this,'rpt-ev')">📅 活動成效</button>
+    <button class="tab" onclick="switchReportTab(this,'rpt-md')">📰 媒體成效</button>
   </div>
 
-  <h2>月份觸及趨勢</h2>
-  <div style="margin-bottom:24px;">
-    ${months.map(m => {
-      const v = byMonth[m]; const pct = Math.round(v.reach/maxR*100);
-      return `<div class="bar-row"><div class="bar-label">${m.slice(5).replace(/^0/,'')}月</div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(pct,8)}%">${v.reach.toLocaleString()} (${v.count}篇)</div></div></div>`;
-    }).join('')}
+  <!-- FB Tab -->
+  <div class="tab-content active" id="rpt-fb">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">累計總觸及</div><div class="kpi-val">${total_reach.toLocaleString()}</div><div class="kpi-sub">${posts.length} 篇貼文</div></div>
+      <div class="kpi"><div class="kpi-label">累計互動</div><div class="kpi-val">${total_engage.toLocaleString()}</div><div class="kpi-sub">ER ${er}%</div></div>
+      <div class="kpi"><div class="kpi-label">總點擊</div><div class="kpi-val">${total_clicks.toLocaleString()}</div></div>
+      <div class="kpi"><div class="kpi-label">平均觸及/篇</div><div class="kpi-val">${posts.length?Math.round(total_reach/posts.length).toLocaleString():0}</div></div>
+    </div>
+    <h2>月份觸及趨勢</h2>
+    <div style="margin-bottom:24px;">
+      ${months.map(m => {
+        const v = byMonth[m]; const pct = Math.round(v.reach/maxR*100);
+        return '<div class="bar-row"><div class="bar-label">'+m.slice(5).replace(/^0/,'')+'月</div><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(pct,8)+'%">'+v.reach.toLocaleString()+' ('+v.count+'篇)</div></div></div>';
+      }).join('')}
+    </div>
+    <h2>內容類型分布</h2>
+    <div style="margin-bottom:24px;">
+      ${catEntries.map(([cat,v]) => {
+        const colors = {'案例類':'#22C55E','衛教類':'#0EA5E9','品牌/節慶':'#F59E0B','活動/講座':'#6D28D9','招募類':'#EC4899','地位建立':'#EF4444','公益類':'#14B8A6'};
+        const c = colors[cat]||'#888';
+        return '<div class="cat-row"><span class="cat-dot" style="background:'+c+'"></span><strong>'+cat+'</strong> '+v.count+'篇 / 平均觸及 '+Math.round(v.reach/v.count).toLocaleString()+'</div>';
+      }).join('')}
+    </div>
+    <h2>Top 5 貼文</h2>
+    <table><thead><tr><th>#</th><th>日期</th><th>標題</th><th>類型</th><th>觸及</th><th>互動</th></tr></thead>
+    <tbody>${top5.map((p,i) => '<tr><td>'+(i+1)+'</td><td>'+p.date+'</td><td>'+(p.title||'').slice(0,35)+'</td><td>'+(p.cat||'')+'</td><td style="font-weight:700">'+(p.reach||0).toLocaleString()+'</td><td>'+(p.engage||0).toLocaleString()+'</td></tr>').join('')}</tbody></table>
   </div>
 
-  <h2>內容類型分布</h2>
-  <div style="margin-bottom:24px;">
-    ${catEntries.map(([cat,v]) => {
-      const colors = {'案例類':'#006341','衛教類':'#0E5E55','品牌/節慶':'#C07000','活動/講座':'#4A5AC7','招募類':'#AA7D5F','地位建立':'#E05050','公益類':'#2A9D6B'};
-      const c = colors[cat]||'#888';
-      return `<div class="cat-row"><span class="cat-dot" style="background:${c}"></span><strong>${cat}</strong> ${v.count}篇 / 平均觸及 ${Math.round(v.reach/v.count).toLocaleString()}</div>`;
-    }).join('')}
+  <!-- Event Tab -->
+  <div class="tab-content" id="rpt-ev">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">總活動場次</div><div class="kpi-val">${evTotal}場</div></div>
+      <div class="kpi"><div class="kpi-label">平均出席率</div><div class="kpi-val">${evAvgRate}%</div></div>
+      <div class="kpi"><div class="kpi-label">平均滿意度</div><div class="kpi-val">${evAvgSat}★</div></div>
+      <div class="kpi"><div class="kpi-label">累積FB觸及</div><div class="kpi-val">${evTotalReach.toLocaleString()}</div></div>
+    </div>
+    <h2>活動成效列表（共 ${evTotal} 場）</h2>
+    <table><thead><tr><th>日期</th><th>活動名稱</th><th>類型</th><th>院區</th><th>出席</th><th>FB觸及</th><th>滿意度</th></tr></thead>
+    <tbody>${[...events].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e => '<tr><td>'+e.date+'</td><td>'+(e.name||'').slice(0,30)+'</td><td>'+e.type+'</td><td>'+(e.campus||'')+'</td><td>'+(e.attend||0)+'</td><td>'+(e.reach||0).toLocaleString()+'</td><td>'+(e.sat?e.sat+'★':'—')+'</td></tr>').join('')}</tbody></table>
   </div>
 
-  <h2>Top 5 貼文</h2>
-  <table>
-    <thead><tr><th>#</th><th>日期</th><th>標題</th><th>類型</th><th>觸及</th><th>互動</th></tr></thead>
-    <tbody>${top5.map((p,i) => `<tr><td>${i+1}</td><td>${p.date}</td><td>${p.title?.slice(0,35)}</td><td>${p.cat||''}</td><td style="font-weight:700">${(p.reach||0).toLocaleString()}</td><td>${(p.engage||0).toLocaleString()}</td></tr>`).join('')}</tbody>
-  </table>
-
-  <h2>活動成效摘要（共 ${events.length} 場）</h2>
-  <table>
-    <thead><tr><th>日期</th><th>活動名稱</th><th>類型</th><th>出席</th><th>FB觸及</th><th>滿意度</th></tr></thead>
-    <tbody>${[...events].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10).map(e => `<tr><td>${e.date}</td><td>${e.name?.slice(0,25)}</td><td>${e.type}</td><td>${e.attend||0}</td><td>${(e.reach||0).toLocaleString()}</td><td>${e.sat?e.sat+'★':'—'}</td></tr>`).join('')}</tbody>
-  </table>
+  <!-- Media Tab -->
+  <div class="tab-content" id="rpt-md">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">媒體報導總數</div><div class="kpi-val">${mdTotal}則</div></div>
+      <div class="kpi"><div class="kpi-label">累積觸及</div><div class="kpi-val">${mdTotalReach.toLocaleString()}</div></div>
+    </div>
+    <h2>媒體報導列表</h2>
+    <table><thead><tr><th>日期</th><th>媒體名稱</th><th>類型</th><th>標題</th><th>觸及</th></tr></thead>
+    <tbody>${[...media].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(m => '<tr><td>'+(m.date||'')+'</td><td>'+(m.name||'')+'</td><td>'+(m.type||'')+'</td><td>'+(m.title||'').slice(0,35)+'</td><td>'+(m.reach||0).toLocaleString()+'</td></tr>').join('')}</tbody></table>
+  </div>
 
   <div class="footer">光田綜合醫院 行銷組 ｜ 本報表由行銷整合分析中心自動產出</div>
+  <script>
+    function switchReportTab(btn, id) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(id).classList.add('active');
+    }
+  </script>
   </body></html>`);
   w.document.close();
   showToast('月報已開啟，可直接列印或存為 PDF');
