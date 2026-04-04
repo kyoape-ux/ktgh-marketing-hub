@@ -2563,8 +2563,7 @@ function renderOverview() {
   tbody.innerHTML = sorted.map((p,i) => {
     const ctr = p.reach ? ((p.click||0)/p.reach*100).toFixed(2) : '0.00';
     const er = p.reach ? ((p.engage||0)/p.reach*100).toFixed(2) : '0.00';
-    const rankIcons = ['🥇','🥈','🥉'];
-    const rank = i < 3 ? rankIcons[i] : (i+1);
+    const rank = i + 1;
     return `<tr>
       <td>${rank}</td>
       <td><span class="badge badge-gray">${monthLabel(p.month)}</span></td>
