@@ -3584,146 +3584,172 @@ function loadTargetInputs() {
 //  PDF EXPORT
 // ═══════════════════════════════════════════
 function exportReport() {
-  const posts = store.posts;
-  const events = store.events;
-  const media = store.media || [];
-
-  // Monthly breakdown
-  const byMonth = {};
-  posts.forEach(p => { const m = (p.month||'').slice(0,7); if(!m||m.length!==7) return; if(!byMonth[m]) byMonth[m]={reach:0,count:0,engage:0}; byMonth[m].reach+=(p.reach||0); byMonth[m].count++; byMonth[m].engage+=(p.engage||0); });
-  const months = Object.keys(byMonth).sort();
-  const maxR = Math.max(...Object.values(byMonth).map(v=>v.reach||1));
-
-  // Category breakdown
-  const byCat = {};
-  posts.forEach(p => { const c = p.cat||'其他'; if(!byCat[c]) byCat[c]={reach:0,count:0}; byCat[c].reach+=(p.reach||0); byCat[c].count++; });
-  const catEntries = Object.entries(byCat).sort((a,b)=>b[1].reach-a[1].reach);
-
-  // KPIs
-  const total_reach = posts.reduce((a,p)=>a+(p.reach||0),0);
-  const total_engage = posts.reduce((a,p)=>a+(p.engage||0),0);
-  const total_clicks = posts.reduce((a,p)=>a+(p.click||0),0);
-  const er = total_reach ? (total_engage/total_reach*100).toFixed(2) : '0.00';
-  const top5 = [...posts].sort((a,b)=>(b.reach||0)-(a.reach||0)).slice(0,5);
-
-  // Event stats
-  const evTotal = events.length;
-  const evTotalReach = events.reduce((s,e)=>s+(e.reach||0),0);
-  const evWithReg = events.filter(e=>e.reg>0);
-  const evAvgRate = evWithReg.length ? Math.round(evWithReg.reduce((s,e)=>s+e.attend/e.reg*100,0)/evWithReg.length) : 0;
-  const evWithSat = events.filter(e=>e.sat>0);
-  const evAvgSat = evWithSat.length ? (evWithSat.reduce((s,e)=>s+e.sat,0)/evWithSat.length).toFixed(1) : '—';
-
-  // Media stats
-  const mdTotal = media.length;
-  const mdTotalReach = media.reduce((s,m)=>s+(m.reach||0),0);
+  // Serialize data for the report window
+  const rptData = JSON.stringify({
+    posts: store.posts,
+    events: store.events,
+    media: store.media || []
+  });
 
   const w = window.open('', '_blank', 'width=960,height=750');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>光田醫院 行銷月報</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Inter:wght@700;900&display=swap');
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Noto Sans TC',sans-serif;background:#fff;color:#1A1A2E;padding:40px 50px;max-width:900px;margin:auto;}
-    h1{font-size:22px;font-weight:900;color:#6D28D9;margin-bottom:4px;}
-    .sub{font-size:12px;color:#888;margin-bottom:20px;}
-    .tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid #E5E7EB;}
-    .tab{padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;color:#9CA3AF;margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
-    .tab.active{color:#6D28D9;border-bottom-color:#6D28D9;}
-    .tab:hover{color:#6D28D9;}
-    .tab-content{display:none;} .tab-content.active{display:block;}
-    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
-    .kpi{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:16px;text-align:center;}
-    .kpi-label{font-size:11px;color:#888;margin-bottom:4px;}
-    .kpi-val{font-size:24px;font-weight:900;color:#6D28D9;font-family:Inter,sans-serif;}
-    .kpi-sub{font-size:11px;color:#aaa;margin-top:2px;}
-    h2{font-size:15px;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #F5F3FF;color:#1A1A2E;}
-    table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:24px;}
-    th{background:#F5F3FF;padding:8px 10px;text-align:left;font-weight:700;font-size:11px;color:#6D28D9;border-bottom:2px solid #DDD6FE;}
-    td{padding:7px 10px;border-bottom:1px solid #EEE;}
-    .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-    .bar-label{width:50px;text-align:right;font-size:11px;font-weight:700;color:#555;}
-    .bar-track{flex:1;height:22px;background:#F5F3FF;border-radius:4px;overflow:hidden;}
-    .bar-fill{height:100%;background:#6D28D9;border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}
-    .bar-fill.green{background:#22C55E;} .bar-fill.orange{background:#F59E0B;}
-    .footer{margin-top:30px;text-align:center;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;}
-    .cat-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px;}
-    .cat-dot{width:10px;height:10px;border-radius:2px;display:inline-block;}
-    @media print{body{padding:20px 30px;} .no-print{display:none;}}
-  </style></head><body>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-    <h1>光田綜合醫院｜行銷成效月報</h1>
-    <button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#6D28D9;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">列印 / 存 PDF</button>
-  </div>
-  <div class="sub">報表產出時間：${new Date().toLocaleString('zh-TW')} ｜ 資料範圍：${months[0]||'—'} ~ ${months[months.length-1]||'—'}</div>
-
-  <div class="tabs no-print">
-    <button class="tab active" onclick="switchReportTab(this,'rpt-fb')">📊 粉專成效</button>
-    <button class="tab" onclick="switchReportTab(this,'rpt-ev')">📅 活動成效</button>
-    <button class="tab" onclick="switchReportTab(this,'rpt-md')">📰 媒體成效</button>
-  </div>
-
-  <!-- FB Tab -->
-  <div class="tab-content active" id="rpt-fb">
-    <div class="kpi-row">
-      <div class="kpi"><div class="kpi-label">累計總觸及</div><div class="kpi-val">${total_reach.toLocaleString()}</div><div class="kpi-sub">${posts.length} 篇貼文</div></div>
-      <div class="kpi"><div class="kpi-label">累計互動</div><div class="kpi-val">${total_engage.toLocaleString()}</div><div class="kpi-sub">ER ${er}%</div></div>
-      <div class="kpi"><div class="kpi-label">總點擊</div><div class="kpi-val">${total_clicks.toLocaleString()}</div></div>
-      <div class="kpi"><div class="kpi-label">平均觸及/篇</div><div class="kpi-val">${posts.length?Math.round(total_reach/posts.length).toLocaleString():0}</div></div>
-    </div>
-    <h2>月份觸及趨勢</h2>
-    <div style="margin-bottom:24px;">
-      ${months.map(m => {
-        const v = byMonth[m]; const pct = Math.round(v.reach/maxR*100);
-        return '<div class="bar-row"><div class="bar-label">'+m.slice(5).replace(/^0/,'')+'月</div><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(pct,8)+'%">'+v.reach.toLocaleString()+' ('+v.count+'篇)</div></div></div>';
-      }).join('')}
-    </div>
-    <h2>內容類型分布</h2>
-    <div style="margin-bottom:24px;">
-      ${catEntries.map(([cat,v]) => {
-        const colors = {'案例類':'#22C55E','衛教類':'#0EA5E9','品牌/節慶':'#F59E0B','活動/講座':'#6D28D9','招募類':'#EC4899','地位建立':'#EF4444','公益類':'#14B8A6'};
-        const c = colors[cat]||'#888';
-        return '<div class="cat-row"><span class="cat-dot" style="background:'+c+'"></span><strong>'+cat+'</strong> '+v.count+'篇 / 平均觸及 '+Math.round(v.reach/v.count).toLocaleString()+'</div>';
-      }).join('')}
-    </div>
-    <h2>Top 5 貼文</h2>
-    <table><thead><tr><th>#</th><th>日期</th><th>標題</th><th>類型</th><th>觸及</th><th>互動</th></tr></thead>
-    <tbody>${top5.map((p,i) => '<tr><td>'+(i+1)+'</td><td>'+p.date+'</td><td>'+(p.title||'').slice(0,35)+'</td><td>'+(p.cat||'')+'</td><td style="font-weight:700">'+(p.reach||0).toLocaleString()+'</td><td>'+(p.engage||0).toLocaleString()+'</td></tr>').join('')}</tbody></table>
-  </div>
-
-  <!-- Event Tab -->
-  <div class="tab-content" id="rpt-ev">
-    <div class="kpi-row">
-      <div class="kpi"><div class="kpi-label">總活動場次</div><div class="kpi-val">${evTotal}場</div></div>
-      <div class="kpi"><div class="kpi-label">平均出席率</div><div class="kpi-val">${evAvgRate}%</div></div>
-      <div class="kpi"><div class="kpi-label">平均滿意度</div><div class="kpi-val">${evAvgSat}★</div></div>
-      <div class="kpi"><div class="kpi-label">累積FB觸及</div><div class="kpi-val">${evTotalReach.toLocaleString()}</div></div>
-    </div>
-    <h2>活動成效列表（共 ${evTotal} 場）</h2>
-    <table><thead><tr><th>日期</th><th>活動名稱</th><th>類型</th><th>院區</th><th>出席</th><th>FB觸及</th><th>滿意度</th></tr></thead>
-    <tbody>${[...events].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e => '<tr><td>'+e.date+'</td><td>'+(e.name||'').slice(0,30)+'</td><td>'+e.type+'</td><td>'+(e.campus||'')+'</td><td>'+(e.attend||0)+'</td><td>'+(e.reach||0).toLocaleString()+'</td><td>'+(e.sat?e.sat+'★':'—')+'</td></tr>').join('')}</tbody></table>
-  </div>
-
-  <!-- Media Tab -->
-  <div class="tab-content" id="rpt-md">
-    <div class="kpi-row">
-      <div class="kpi"><div class="kpi-label">媒體報導總數</div><div class="kpi-val">${mdTotal}則</div></div>
-      <div class="kpi"><div class="kpi-label">累積觸及</div><div class="kpi-val">${mdTotalReach.toLocaleString()}</div></div>
-    </div>
-    <h2>媒體報導列表</h2>
-    <table><thead><tr><th>日期</th><th>媒體名稱</th><th>類型</th><th>標題</th><th>觸及</th></tr></thead>
-    <tbody>${[...media].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(m => '<tr><td>'+(m.date||'')+'</td><td>'+(m.name||'')+'</td><td>'+(m.type||'')+'</td><td>'+(m.title||'').slice(0,35)+'</td><td>'+(m.reach||0).toLocaleString()+'</td></tr>').join('')}</tbody></table>
-  </div>
-
-  <div class="footer">光田綜合醫院 行銷組 ｜ 本報表由行銷整合分析中心自動產出</div>
-  <scr` + `ipt>
-    function switchReportTab(btn, id) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(id).classList.add('active');
-    }
-  </scr` + `ipt>
-  </body></html>`);
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>光田醫院 行銷月報</title>' +
+  '<style>' +
+    "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Inter:wght@700;900&display=swap');" +
+    '*{margin:0;padding:0;box-sizing:border-box;}' +
+    "body{font-family:'Noto Sans TC',sans-serif;background:#fff;color:#1A1A2E;padding:40px 50px;max-width:900px;margin:auto;}" +
+    'h1{font-size:22px;font-weight:900;color:#6D28D9;margin-bottom:4px;}' +
+    '.sub{font-size:12px;color:#888;margin-bottom:20px;}' +
+    '.tabs{display:flex;gap:0;margin-bottom:0;border-bottom:2px solid #E5E7EB;}' +
+    '.tab{padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;color:#9CA3AF;margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}' +
+    '.tab.active{color:#6D28D9;border-bottom-color:#6D28D9;}' +
+    '.tab:hover{color:#6D28D9;}' +
+    '.tab-content{display:none;} .tab-content.active{display:block;}' +
+    '.filter-bar{display:flex;gap:10px;align-items:center;padding:12px 0;margin-bottom:16px;flex-wrap:wrap;}' +
+    '.filter-bar select{padding:6px 12px;border:1px solid #DDD6FE;border-radius:6px;font-size:13px;font-family:inherit;color:#6D28D9;background:#F5F3FF;cursor:pointer;}' +
+    '.filter-bar label{font-size:12px;color:#888;font-weight:700;}' +
+    '.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}' +
+    '.kpi{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:16px;text-align:center;}' +
+    '.kpi-label{font-size:11px;color:#888;margin-bottom:4px;}' +
+    ".kpi-val{font-size:24px;font-weight:900;color:#6D28D9;font-family:Inter,sans-serif;}" +
+    '.kpi-sub{font-size:11px;color:#aaa;margin-top:2px;}' +
+    'h2{font-size:15px;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #F5F3FF;color:#1A1A2E;}' +
+    'table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:24px;}' +
+    'th{background:#F5F3FF;padding:8px 10px;text-align:left;font-weight:700;font-size:11px;color:#6D28D9;border-bottom:2px solid #DDD6FE;}' +
+    'td{padding:7px 10px;border-bottom:1px solid #EEE;}' +
+    '.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}' +
+    '.bar-label{width:50px;text-align:right;font-size:11px;font-weight:700;color:#555;}' +
+    '.bar-track{flex:1;height:22px;background:#F5F3FF;border-radius:4px;overflow:hidden;}' +
+    '.bar-fill{height:100%;background:#6D28D9;border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}' +
+    '.footer{margin-top:30px;text-align:center;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;}' +
+    '.cat-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12px;}' +
+    '.cat-dot{width:10px;height:10px;border-radius:2px;display:inline-block;}' +
+    '@media print{body{padding:20px 30px;} .no-print{display:none;}}' +
+  '</style></head><body>' +
+  '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+    '<h1>光田綜合醫院｜行銷成效月報</h1>' +
+    '<button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#6D28D9;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">列印 / 存 PDF</button>' +
+  '</div>' +
+  '<div class="sub" id="rpt-sub"></div>' +
+  '<div class="tabs no-print">' +
+    '<button class="tab active" onclick="switchTab(this,\'rpt-fb\')">📊 粉專成效</button>' +
+    '<button class="tab" onclick="switchTab(this,\'rpt-ev\')">📅 活動成效</button>' +
+    '<button class="tab" onclick="switchTab(this,\'rpt-md\')">📰 媒體成效</button>' +
+  '</div>' +
+  '<div class="filter-bar no-print">' +
+    '<label>篩選期間：</label>' +
+    '<select id="rptPeriodType" onchange="updatePeriodValues()">' +
+      '<option value="all">全部期間</option><option value="year">依年度</option><option value="quarter">依季度</option><option value="month">依月份</option>' +
+    '</select>' +
+    '<select id="rptPeriodValue" onchange="rebuildReport()" style="display:none;"></select>' +
+  '</div>' +
+  '<div id="rpt-fb" class="tab-content active"></div>' +
+  '<div id="rpt-ev" class="tab-content"></div>' +
+  '<div id="rpt-md" class="tab-content"></div>' +
+  '<div class="footer">光田綜合醫院 行銷組 ｜ 本報表由行銷整合分析中心自動產出</div>' +
+  '<scr' + 'ipt>' +
+  'var RAW=' + rptData + ';' +
+  'function switchTab(btn,id){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));btn.classList.add("active");document.getElementById(id).classList.add("active");}' +
+  'function filterByPeriod(items,period,field){' +
+    'field=field||"date";' +
+    'if(!period||period==="all")return items;' +
+    'return items.filter(function(it){' +
+      'var d=String(it[field]||it.month||"");' +
+      'if(period.includes("-Q")){var ps=period.split("-Q");var y=ps[0];var q=parseInt(ps[1]);var m=parseInt(d.slice(5,7));return d.startsWith(y)&&m>=((q-1)*3+1)&&m<=(q*3);}' +
+      'if(period.length===7)return d.slice(0,7)===period;' +
+      'if(period.length===4)return d.startsWith(period);' +
+      'return true;' +
+    '});' +
+  '}' +
+  'function getAllDates(){' +
+    'var ds=[];' +
+    'RAW.posts.forEach(function(p){ds.push(p.date||p.month||"");});' +
+    'RAW.events.forEach(function(e){ds.push(e.date||"");});' +
+    'RAW.media.forEach(function(m){ds.push(m.date||m.month||"");});' +
+    'return ds.filter(function(d){return d&&d.length>=7;});' +
+  '}' +
+  'function updatePeriodValues(){' +
+    'var type=document.getElementById("rptPeriodType").value;' +
+    'var sel=document.getElementById("rptPeriodValue");' +
+    'if(type==="all"){sel.style.display="none";rebuildReport();return;}' +
+    'sel.style.display="";sel.innerHTML="";' +
+    'var ds=getAllDates();var opts=new Set();' +
+    'ds.forEach(function(d){' +
+      'if(type==="year")opts.add(d.slice(0,4));' +
+      'else if(type==="quarter"){var y=d.slice(0,4);var m=parseInt(d.slice(5,7));var q=Math.ceil(m/3);opts.add(y+"-Q"+q);}' +
+      'else if(type==="month")opts.add(d.slice(0,7));' +
+    '});' +
+    'var sorted=[].concat(Array.from(opts)).sort().reverse();' +
+    'sorted.forEach(function(v){var o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o);});' +
+    'rebuildReport();' +
+  '}' +
+  'function rebuildReport(){' +
+    'var type=document.getElementById("rptPeriodType").value;' +
+    'var period=type==="all"?"all":document.getElementById("rptPeriodValue").value;' +
+    'var posts=filterByPeriod(RAW.posts,period,"date");' +
+    'var events=filterByPeriod(RAW.events,period,"date");' +
+    'var media=filterByPeriod(RAW.media,period,"date");' +
+    'var periodLabel=period==="all"?"全部期間":period;' +
+    /* Sub header */
+    'document.getElementById("rpt-sub").innerHTML="報表產出時間："+new Date().toLocaleString("zh-TW")+" ｜ 篩選："+periodLabel+" ｜ 貼文 "+posts.length+" 篇 / 活動 "+events.length+" 場 / 媒體 "+media.length+" 則";' +
+    /* FB Tab */
+    'var byMonth={};' +
+    'posts.forEach(function(p){var m=(p.month||"").slice(0,7);if(!m||m.length!==7)return;if(!byMonth[m])byMonth[m]={reach:0,count:0,engage:0};byMonth[m].reach+=(p.reach||0);byMonth[m].count++;byMonth[m].engage+=(p.engage||0);});' +
+    'var months=Object.keys(byMonth).sort();' +
+    'var maxR=Math.max.apply(null,Object.values(byMonth).map(function(v){return v.reach||1;}));if(!isFinite(maxR))maxR=1;' +
+    'var byCat={};' +
+    'posts.forEach(function(p){var c=p.cat||"其他";if(!byCat[c])byCat[c]={reach:0,count:0};byCat[c].reach+=(p.reach||0);byCat[c].count++;});' +
+    'var catEntries=Object.entries(byCat).sort(function(a,b){return b[1].reach-a[1].reach;});' +
+    'var total_reach=posts.reduce(function(a,p){return a+(p.reach||0);},0);' +
+    'var total_engage=posts.reduce(function(a,p){return a+(p.engage||0);},0);' +
+    'var total_clicks=posts.reduce(function(a,p){return a+(p.click||0);},0);' +
+    'var er=total_reach?(total_engage/total_reach*100).toFixed(2):"0.00";' +
+    'var top5=[].concat(posts).sort(function(a,b){return(b.reach||0)-(a.reach||0);}).slice(0,5);' +
+    'var catColors={"案例類":"#22C55E","衛教類":"#0EA5E9","品牌/節慶":"#F59E0B","活動/講座":"#6D28D9","招募類":"#EC4899","地位建立":"#EF4444","公益類":"#14B8A6"};' +
+    'var fbH="<div class=\\"kpi-row\\">"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">累計總觸及</div><div class=\\"kpi-val\\">"+total_reach.toLocaleString()+"</div><div class=\\"kpi-sub\\">"+posts.length+" 篇貼文</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">累計互動</div><div class=\\"kpi-val\\">"+total_engage.toLocaleString()+"</div><div class=\\"kpi-sub\\">ER "+er+"%</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">總點擊</div><div class=\\"kpi-val\\">"+total_clicks.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均觸及/篇</div><div class=\\"kpi-val\\">"+(posts.length?Math.round(total_reach/posts.length).toLocaleString():"0")+"</div></div>"' +
+      '+"</div>";' +
+    'fbH+="<h2>月份觸及趨勢</h2><div style=\\"margin-bottom:24px\\">";' +
+    'months.forEach(function(m){var v=byMonth[m];var pct=Math.round(v.reach/maxR*100);fbH+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">"+m.slice(5).replace(/^0/,"")+"月</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:"+Math.max(pct,8)+"%\\">"+v.reach.toLocaleString()+" ("+v.count+"篇)</div></div></div>";});' +
+    'fbH+="</div><h2>內容類型分布</h2><div style=\\"margin-bottom:24px\\">";' +
+    'catEntries.forEach(function(e){var cat=e[0],v=e[1];var c=catColors[cat]||"#888";fbH+="<div class=\\"cat-row\\"><span class=\\"cat-dot\\" style=\\"background:"+c+"\\"></span><strong>"+cat+"</strong> "+v.count+"篇 / 平均觸及 "+Math.round(v.reach/v.count).toLocaleString()+"</div>";});' +
+    'fbH+="</div><h2>Top 5 貼文</h2><table><thead><tr><th>#</th><th>日期</th><th>標題</th><th>類型</th><th>觸及</th><th>互動</th></tr></thead><tbody>";' +
+    'top5.forEach(function(p,i){fbH+="<tr><td>"+(i+1)+"</td><td>"+p.date+"</td><td>"+(p.title||"").slice(0,35)+"</td><td>"+(p.cat||"")+"</td><td style=\\"font-weight:700\\">"+(p.reach||0).toLocaleString()+"</td><td>"+(p.engage||0).toLocaleString()+"</td></tr>";});' +
+    'fbH+="</tbody></table>";' +
+    'document.getElementById("rpt-fb").innerHTML=fbH;' +
+    /* Event Tab */
+    'var evTotal=events.length;' +
+    'var evTotalReach=events.reduce(function(s,e){return s+(e.reach||0);},0);' +
+    'var evWithReg=events.filter(function(e){return e.reg>0;});' +
+    'var evAvgRate=evWithReg.length?Math.round(evWithReg.reduce(function(s,e){return s+e.attend/e.reg*100;},0)/evWithReg.length):0;' +
+    'var evWithSat=events.filter(function(e){return e.sat>0;});' +
+    'var evAvgSat=evWithSat.length?(evWithSat.reduce(function(s,e){return s+e.sat;},0)/evWithSat.length).toFixed(1):"—";' +
+    'var evH="<div class=\\"kpi-row\\">"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">總活動場次</div><div class=\\"kpi-val\\">"+evTotal+"場</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均出席率</div><div class=\\"kpi-val\\">"+evAvgRate+"%</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均滿意度</div><div class=\\"kpi-val\\">"+evAvgSat+"★</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">累積FB觸及</div><div class=\\"kpi-val\\">"+evTotalReach.toLocaleString()+"</div></div>"' +
+      '+"</div>";' +
+    'evH+="<h2>活動成效列表（共 "+evTotal+" 場）</h2><table><thead><tr><th>日期</th><th>活動名稱</th><th>類型</th><th>院區</th><th>出席</th><th>FB觸及</th><th>滿意度</th></tr></thead><tbody>";' +
+    '[].concat(events).sort(function(a,b){return new Date(b.date)-new Date(a.date);}).forEach(function(e){evH+="<tr><td>"+e.date+"</td><td>"+(e.name||"").slice(0,30)+"</td><td>"+e.type+"</td><td>"+(e.campus||"")+"</td><td>"+(e.attend||0)+"</td><td>"+(e.reach||0).toLocaleString()+"</td><td>"+(e.sat?e.sat+"★":"—")+"</td></tr>";});' +
+    'evH+="</tbody></table>";' +
+    'document.getElementById("rpt-ev").innerHTML=evH;' +
+    /* Media Tab */
+    'var mdTotal=media.length;' +
+    'var mdTotalReach=media.reduce(function(s,m){return s+(m.reach||0);},0);' +
+    'var mdH="<div class=\\"kpi-row\\">"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">媒體報導總數</div><div class=\\"kpi-val\\">"+mdTotal+"則</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">累積觸及</div><div class=\\"kpi-val\\">"+mdTotalReach.toLocaleString()+"</div></div>"' +
+      '+"</div>";' +
+    'mdH+="<h2>媒體報導列表</h2><table><thead><tr><th>日期</th><th>媒體名稱</th><th>類型</th><th>標題</th><th>觸及</th></tr></thead><tbody>";' +
+    '[].concat(media).sort(function(a,b){return new Date(b.date)-new Date(a.date);}).forEach(function(m){mdH+="<tr><td>"+(m.date||"")+"</td><td>"+(m.name||"")+"</td><td>"+(m.type||"")+"</td><td>"+(m.title||"").slice(0,35)+"</td><td>"+(m.reach||0).toLocaleString()+"</td></tr>";});' +
+    'mdH+="</tbody></table>";' +
+    'document.getElementById("rpt-md").innerHTML=mdH;' +
+  '}' +
+  'rebuildReport();' +
+  '</scr' + 'ipt></body></html>');
   w.document.close();
   showToast('月報已開啟，可直接列印或存為 PDF');
 }
