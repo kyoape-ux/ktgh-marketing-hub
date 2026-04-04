@@ -1574,8 +1574,12 @@ async function syncFromGAS() {
       gasGet('getMedia'),
       gasGet('getKols'),
     ]);
-    // 確保 Sheets 回傳的貼文有 month 欄位
-    if (Array.isArray(posts)) posts.forEach(p => { if (!p.month && p.date) p.month = String(p.date).slice(0,7); });
+    // 正規化 Sheets 回傳的日期（ISO→yyyy-MM-dd）及補齊 month
+    function normalizeDate(d) { return d ? String(d).slice(0,10) : ''; }
+    [posts, events, media, kols].forEach(arr => {
+      if (Array.isArray(arr)) arr.forEach(r => { if (r.date) r.date = normalizeDate(r.date); });
+    });
+    if (Array.isArray(posts)) posts.forEach(p => { if (!p.month && p.date) p.month = p.date.slice(0,7); });
     store.posts  = mergeData(getBuiltinPosts(),  posts,  p => (p.date||'')+'|'+(p.title||''));
     store.events = mergeData(getBuiltinEvents(), events, e => (e.date||'')+'|'+(e.name||''));
     store.media  = mergeData(getBuiltinMedia(),  media,  m => (m.date||'')+'|'+(m.name||''));
