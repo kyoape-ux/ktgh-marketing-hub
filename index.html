@@ -106,15 +106,16 @@
   .btn-primary:hover { background: var(--brand-light); }
   .btn-outline { background: transparent; color: var(--brand); border: 1.5px solid var(--brand); }
   .btn-outline:hover { background: var(--brand-bg); }
-  /* Colorful header action buttons */
-  .topbar-actions .btn-sheets  { background: #059669; color: #fff; border: none; }
-  .topbar-actions .btn-sheets:hover  { background: #047857; }
-  .topbar-actions .btn-sync    { background: #3B82F6; color: #fff; border: none; }
-  .topbar-actions .btn-sync:hover    { background: #2563EB; }
-  .topbar-actions .btn-export  { background: #F59E0B; color: #fff; border: none; }
-  .topbar-actions .btn-export:hover  { background: #D97706; }
-  .topbar-actions .btn-import  { background: linear-gradient(135deg, #EC4899, #8B5CF6); color: #fff; border: none; }
-  .topbar-actions .btn-import:hover  { background: linear-gradient(135deg, #DB2777, #7C3AED); }
+  /* Header action buttons — capsule outline style */
+  .topbar-actions .btn-sheets,
+  .topbar-actions .btn-sync,
+  .topbar-actions .btn-export,
+  .topbar-actions .btn-import { background: transparent; border: 1.5px solid var(--brand); color: var(--brand); border-radius: 20px; }
+  .topbar-actions .btn-sheets:hover,
+  .topbar-actions .btn-sync:hover,
+  .topbar-actions .btn-export:hover { background: var(--brand-bg); }
+  .topbar-actions .btn-import { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .topbar-actions .btn-import:hover { background: var(--brand-dim); }
 
   .content { padding: 28px 32px; }
 
