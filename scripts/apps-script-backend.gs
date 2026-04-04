@@ -1,39 +1,45 @@
 /**
- * 光田醫院行銷分析系統 — Google Apps Script 後端 v2
+ * 光田醫院行銷分析系統 — Google Apps Script 後端 v3
  *
  * 部署方式：
- *   Apps Script → 部署 → 新增部署 → 類型：網路應用程式
- *   執行身分：我（你的 Google 帳號）
- *   存取權限：所有人（含匿名使用者）← 讓 GitHub Pages 能 fetch
+ *   1. 開啟 Google 試算表 → 擴充功能 → Apps Script
+ *   2. 將此檔案內容全部貼上（取代預設的 Code.gs）
+ *   3. 將下方 SPREADSHEET_ID 換成你的試算表 ID
+ *   4. 先執行一次 initSheets()（建立工作表與標頭）
+ *   5. 部署 → 新增部署 → 類型：網路應用程式
+ *      執行身分：我 ／ 存取權限：所有人（含匿名）
+ *   6. 複製 Web App URL 貼到前台「設定」頁
  *
- * 全部使用 GET 請求，避免 CORS preflight 問題。
+ * ★ 工作人員可直接在 Google Sheets 編輯資料，
+ *   前台「同步」時會自動讀取最新內容。
  *
- * Sheets 結構（同一個 Google Spreadsheet）：
- *   工作表: processed_posts, events, media
+ * Sheets 工作表：processed_posts, events, media, kols
  */
 
 // ── 設定 ──────────────────────────────────────────────
 const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE'; // ← 換成你的試算表 ID
 
+// ── 欄位定義（與前台完全對應）──────────────────────────
+const SCHEMAS = {
+  'processed_posts': ['date','title','type','img_type','cat','reach','click','engage','month','url','phase','campaign'],
+  'events':  ['date','name','type','campus','reg','attend','reach','sat','speaker','note','budget','expense'],
+  'media':   ['date','name','type','section','title','nature','reach','url','note','campaign'],
+  'kols':    ['date','name','platform','followers','content_type','reach','engage','campaign','url','note'],
+};
+
 // ── 初始化工作表（第一次部署後手動執行一次）────────────
 function initSheets() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const schemas = {
-    'processed_posts': ['id','date','title','type','cat','reach','click','engage','month','url','import_at'],
-    'events':  ['date','name','type','campus','reg','attend','reach','sat','speaker','note','created_at'],
-    'media':   ['date','name','type','section','title','nature','reach','url','note','created_at'],
-    'kols':    ['date','name','platform','followers','content_type','reach','engage','campaign','url','note','created_at'],
-  };
-  Object.entries(schemas).forEach(([name, headers]) => {
+  Object.entries(SCHEMAS).forEach(([name, headers]) => {
     let sheet = ss.getSheetByName(name);
     if (!sheet) sheet = ss.insertSheet(name);
-    if (sheet.getLastRow() === 0) {
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-      sheet.getRange(1, 1, 1, headers.length)
-           .setBackground('#006341').setFontColor('#ffffff').setFontWeight('bold');
-    }
+    // 永遠覆寫標頭確保最新欄位
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    sheet.getRange(1, 1, 1, headers.length)
+         .setBackground('#006341').setFontColor('#ffffff').setFontWeight('bold');
+    sheet.setFrozenRows(1);
   });
-  return 'Sheets initialized';
+  return 'Sheets initialized with v3 schema (' + Object.keys(SCHEMAS).join(', ') + ')';
 }
 
 // ── 回應包裝 ──────────────────────────────────────────
@@ -57,17 +63,21 @@ function doGet(e) {
     const data   = raw ? JSON.parse(raw) : null;
 
     switch (action) {
-      case 'getPosts':      return jsonResponse(getPosts(e.parameter));
-      case 'getEvents':     return jsonResponse(getEvents());
-      case 'getMedia':      return jsonResponse(getMedia());
-      case 'importPosts':   return jsonResponse(importPosts(data));
-      case 'addEvent':      return jsonResponse(addEvent(data));
-      case 'addMedia':      return jsonResponse(addMedia(data));
-      case 'bulkAddEvents': return jsonResponse(bulkAddEvents(data));
-      case 'bulkAddMedia':  return jsonResponse(bulkAddMedia(data));
-      case 'getKols':       return jsonResponse(getKols());
-      case 'addKol':        return jsonResponse(addKol(data));
-      case 'bulkAddKols':   return jsonResponse(bulkAddKols(data));
+      // 讀取
+      case 'getPosts':      return jsonResponse(readSheet('processed_posts'));
+      case 'getEvents':     return jsonResponse(readSheet('events'));
+      case 'getMedia':      return jsonResponse(readSheet('media'));
+      case 'getKols':       return jsonResponse(readSheet('kols'));
+      // 寫入（單筆）
+      case 'addEvent':      return jsonResponse(addRow('events', data));
+      case 'addMedia':      return jsonResponse(addRow('media', data));
+      case 'addKol':        return jsonResponse(addRow('kols', data));
+      // 批量寫入（去重）
+      case 'importPosts':   return jsonResponse(bulkUpsert('processed_posts', data, r => (r.date||'')+'|'+(r.title||'')));
+      case 'bulkAddEvents': return jsonResponse(bulkUpsert('events', data, r => (r.date||'')+'|'+(r.name||'')));
+      case 'bulkAddMedia':  return jsonResponse(bulkUpsert('media', data, r => (r.date||'')+'|'+(r.name||'')));
+      case 'bulkAddKols':   return jsonResponse(bulkUpsert('kols', data, r => (r.date||'')+'|'+(r.name||'')));
+      // 管理
       case 'initSheets':    return jsonResponse(initSheets());
       default:              return errResponse('Unknown action: ' + action);
     }
@@ -76,171 +86,101 @@ function doGet(e) {
   }
 }
 
-// doPost 保留，實際轉交 doGet 處理
 function doPost(e) { return doGet(e); }
 
-// ── 讀取貼文 ─────────────────────────────────────────
-function getPosts(params) {
+// ═══════════════════════════════════════════════════════
+//  通用讀取：工作表 → JSON 陣列
+// ═══════════════════════════════════════════════════════
+function readSheet(sheetName) {
   const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName('processed_posts');
+  const sheet = ss.getSheetByName(sheetName);
   if (!sheet || sheet.getLastRow() < 2) return [];
   const rows    = sheet.getDataRange().getValues();
   const headers = rows[0];
-
-  let posts = rows.slice(1).map(r => {
+  return rows.slice(1).filter(r => r.some(c => c !== '' && c !== null)).map(r => {
     const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i]);
+    headers.forEach((h, i) => {
+      let v = r[i];
+      // 日期格式化
+      if (h === 'date' && v instanceof Date) {
+        v = Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+      }
+      // 數字欄位確保是數字
+      if (['reach','click','engage','reg','attend','sat','budget','expense','followers'].includes(h)) {
+        v = Number(v) || 0;
+      }
+      obj[h] = v;
+    });
     return obj;
-  }).filter(p => Number(p.reach) > 0);
-
-  if (params && params.month && params.month !== 'all') {
-    posts = posts.filter(p => p.month === params.month);
-  }
-  return posts;
+  });
 }
 
-// ── 匯入 FB 貼文（去重）──────────────────────────────
-function importPosts(rows) {
-  if (!rows || !rows.length) return { imported: 0, skipped: 0 };
-  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName('processed_posts');
+// ═══════════════════════════════════════════════════════
+//  通用寫入：單筆新增
+// ═══════════════════════════════════════════════════════
+function addRow(sheetName, data) {
+  if (!data) return { ok: false, error: 'No data' };
+  const ss      = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet   = ss.getSheetByName(sheetName);
+  const headers = SCHEMAS[sheetName];
+  const row = headers.map(h => data[h] !== undefined ? data[h] : '');
+  sheet.appendRow(row);
+  return { ok: true };
+}
 
-  // 建立去重 key (date + title前20字)
-  const existing = new Set();
+// ═══════════════════════════════════════════════════════
+//  通用批量寫入（去重 upsert）
+//  ★ 核心：已存在的 row 會「更新」，不存在的才「新增」
+//  ★ 工作人員在 Sheets 手動新增的資料也會保留
+// ═══════════════════════════════════════════════════════
+function bulkUpsert(sheetName, dataArr, keyFn) {
+  if (!dataArr || !dataArr.length) return { added: 0, updated: 0, total: 0 };
+  const ss      = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet   = ss.getSheetByName(sheetName);
+  const headers = SCHEMAS[sheetName];
+
+  // 讀取現有資料，建立 key → rowIndex 對照
+  const existingMap = new Map();
   if (sheet.getLastRow() > 1) {
-    const allVals = sheet.getRange(2, 1, sheet.getLastRow()-1, sheet.getLastColumn()).getValues();
-    const hdrs    = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    const dIdx = hdrs.indexOf('date');
-    const tIdx = hdrs.indexOf('title');
-    allVals.forEach(r => existing.add((r[dIdx]||'') + '|' + String(r[tIdx]||'').slice(0,20)));
+    const allVals = sheet.getRange(2, 1, sheet.getLastRow()-1, headers.length).getValues();
+    allVals.forEach((row, idx) => {
+      const obj = {};
+      headers.forEach((h, i) => {
+        let v = row[i];
+        if (h === 'date' && v instanceof Date) {
+          v = Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+        }
+        obj[h] = v;
+      });
+      existingMap.set(keyFn(obj), idx + 2); // +2 因為 row 1 是標頭
+    });
   }
 
+  let added = 0, updated = 0;
   const newRows = [];
-  rows.forEach(r => {
-    const key = (r.date||'') + '|' + String(r.title||'').slice(0,20);
-    if (existing.has(key)) return;
-    existing.add(key);
-    newRows.push([
-      r.id || '', r.date, r.title, r.type || '相片',
-      r.cat || autoTagRule(r.title),
-      Number(r.reach)||0, Number(r.click)||0, Number(r.engage)||0,
-      r.month || (r.date||'').slice(0,7), r.url || '',
-      new Date()
-    ]);
+
+  dataArr.forEach(d => {
+    const key = keyFn(d);
+    const rowData = headers.map(h => d[h] !== undefined ? d[h] : '');
+    const existingRowIdx = existingMap.get(key);
+
+    if (existingRowIdx) {
+      // 已存在 → 更新該列
+      sheet.getRange(existingRowIdx, 1, 1, headers.length).setValues([rowData]);
+      updated++;
+    } else {
+      // 不存在 → 加入待新增
+      newRows.push(rowData);
+      existingMap.set(key, true); // 防止同批次重複
+      added++;
+    }
   });
 
+  // 批量新增（比逐列 append 快很多）
   if (newRows.length) {
-    sheet.getRange(sheet.getLastRow()+1, 1, newRows.length, newRows[0].length)
+    sheet.getRange(sheet.getLastRow()+1, 1, newRows.length, headers.length)
          .setValues(newRows);
   }
-  return { imported: newRows.length, skipped: rows.length - newRows.length };
-}
 
-// ── 活動記錄 ─────────────────────────────────────────
-function getEvents() {
-  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName('events');
-  if (!sheet || sheet.getLastRow() < 2) return [];
-  const rows    = sheet.getDataRange().getValues();
-  const headers = rows[0];
-  return rows.slice(1).map(r => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i]);
-    return obj;
-  });
-}
-
-function addEvent(event) {
-  if (!event) return { ok: false };
-  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName('events');
-  sheet.appendRow([
-    event.date, event.name, event.type, event.campus,
-    Number(event.reg)||0, Number(event.attend)||0,
-    Number(event.reach)||0, Number(event.sat)||0,
-    event.speaker||'', event.note||'', new Date()
-  ]);
-  return { ok: true };
-}
-
-function bulkAddEvents(events) {
-  if (!events || !events.length) return { added: 0 };
-  events.forEach(ev => addEvent(ev));
-  return { added: events.length };
-}
-
-// ── 媒體曝光 ─────────────────────────────────────────
-function getMedia() {
-  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName('media');
-  if (!sheet || sheet.getLastRow() < 2) return [];
-  const rows    = sheet.getDataRange().getValues();
-  const headers = rows[0];
-  return rows.slice(1).map(r => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i]);
-    return obj;
-  });
-}
-
-function addMedia(media) {
-  if (!media) return { ok: false };
-  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName('media');
-  sheet.appendRow([
-    media.date, media.name, media.type, media.section||'',
-    media.title, media.nature, Number(media.reach)||0,
-    media.url||'', media.note||'', new Date()
-  ]);
-  return { ok: true };
-}
-
-function bulkAddMedia(mediaList) {
-  if (!mediaList || !mediaList.length) return { added: 0 };
-  mediaList.forEach(m => addMedia(m));
-  return { added: mediaList.length };
-}
-
-// ── KOL 追蹤 ──────────────────────────────────────────────
-function getKols() {
-  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName('kols');
-  if (!sheet || sheet.getLastRow() < 2) return [];
-  const rows    = sheet.getDataRange().getValues();
-  const headers = rows[0];
-  return rows.slice(1).map(r => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i]);
-    return obj;
-  });
-}
-
-function addKol(kol) {
-  if (!kol) return { ok: false };
-  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName('kols');
-  sheet.appendRow([
-    kol.date, kol.name, kol.platform, Number(kol.followers)||0,
-    kol.content_type, Number(kol.reach)||0, Number(kol.engage)||0,
-    kol.campaign||'', kol.url||'', kol.note||'', new Date()
-  ]);
-  return { ok: true };
-}
-
-function bulkAddKols(kols) {
-  if (!kols || !kols.length) return { added: 0 };
-  kols.forEach(k => addKol(k));
-  return { added: kols.length };
-}
-
-// ── 自動標籤（規則型）────────────────────────────────
-function autoTagRule(title) {
-  const t = title || '';
-  if (/案例|醫師|手術|治療|病患|康復|重獲|感謝函/.test(t)) return '案例類';
-  if (/元旦|春節|聖誕|母親節|感恩|節慶|寶寶|不老騎士/.test(t)) return '品牌/節慶';
-  if (/榮總|中山附醫|醫學中心|名醫|聯名|合作/.test(t))        return '地位建立';
-  if (/講座|活動|報名|現場|系列/.test(t))                      return '活動/講座';
-  if (/招募|護理師|徵才|加入|阿長/.test(t))                    return '招募類';
-  if (/偏鄉|志工|公益|梨山|搜救犬/.test(t))                   return '公益類';
-  return '衛教類';
+  return { added, updated, total: sheet.getLastRow() - 1 };
 }
