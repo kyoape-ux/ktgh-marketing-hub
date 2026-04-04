@@ -1506,7 +1506,12 @@ const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbwFXUogmT8PgJFr
 function loadConfig() {
   try {
     const c = localStorage.getItem(CONFIG_KEY);
-    if (c) return JSON.parse(c);
+    if (c) {
+      const parsed = JSON.parse(c);
+      // 強制更新為最新 DEFAULT_GAS_URL（避免舊 URL 不支援新功能）
+      parsed.gasUrl = DEFAULT_GAS_URL;
+      return parsed;
+    }
   } catch(e) {}
   return { gasUrl: DEFAULT_GAS_URL };
 }
@@ -1573,7 +1578,7 @@ async function syncFromGAS() {
       gasGet('getPosts'),
       gasGet('getEvents'),
       gasGet('getMedia'),
-      gasGet('getKols'),
+      gasGet('getKols').catch(() => []),
     ]);
     // 正規化 Sheets 回傳的日期（ISO→yyyy-MM-dd）及補齊 month
     function normalizeDate(d) { return d ? String(d).slice(0,10) : ''; }
@@ -1878,8 +1883,9 @@ function renderOverview() {
   document.getElementById('kpi-avg').textContent = avg.toLocaleString();
 
   // Top 10
-  const sorted = [...posts].sort((a,b) => b.reach - a.reach).slice(0,10);
+  const sorted = [...posts].sort((a,b) => (b.reach||0) - (a.reach||0)).slice(0,10);
   const tbody = document.getElementById('topPostsTbody');
+  if (!tbody) return;
   tbody.innerHTML = sorted.map((p,i) => {
     const engageRate = p.reach ? ((p.click||0)/p.reach*100).toFixed(2) : '0.00';
     const medalLabel = ['01','02','03']; const medal = i < 3 ? medalLabel[i] : '';
@@ -2030,6 +2036,7 @@ function clearEvFilters() {
 
 function renderEvents() {
   const tbody = document.getElementById('eventListTbody');
+  if (!tbody) return;
 
   // ── 更新年份選單 ──
   const yearSel = document.getElementById('evYearFilter');
@@ -2338,10 +2345,10 @@ function exportReport() {
 累計總觸及：${total_reach.toLocaleString()} 人
 累計互動：${total_engage.toLocaleString()} 次
 發文總篇數：${posts.length} 篇
-平均觸及：${Math.round(total_reach/posts.length).toLocaleString()} 人/篇
+平均觸及：${posts.length ? Math.round(total_reach/posts.length).toLocaleString() : 0} 人/篇
 
 【Top 3 亮點貼文】
-${top3.map((p,i)=>`${i+1}. ${p.title}\n   觸及：${p.reach.toLocaleString()} | 點擊：${p.click.toLocaleString()} | 互動：${p.engage.toLocaleString()}`).join('\n')}
+${top3.map((p,i)=>`${i+1}. ${p.title}\n   觸及：${(p.reach||0).toLocaleString()} | 點擊：${(p.click||0).toLocaleString()} | 互動：${(p.engage||0).toLocaleString()}`).join('\n')}
 
 【活動追蹤】共 ${store.events.length} 場
 ${store.events.map(e=>`• ${e.date} ${e.name}｜出席：${e.attend} 人`).join('\n')}
