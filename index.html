@@ -166,7 +166,7 @@
   .bar-label { font-size: 12px; color: var(--text-sub); width: 40px; text-align: right; font-family: 'Inter', system-ui, sans-serif; }
   .bar-track { flex: 1; height: 22px; background: var(--accent); border-radius: 6px; overflow: hidden; position: relative; }
   .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 700; color: #fff; transition: width 1s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
-  .bar-fill.green  { background: #1E3A5F; }
+  .bar-fill.green  { background: #60A5FA; }
   .bar-fill.gold   { background: #F5C518; }
   .bar-fill.teal   { background: #3EB89A; }
   .bar-fill.red    { background: #EF9A9A; }
@@ -2529,13 +2529,13 @@ function renderOverview() {
     const byCat = {};
     posts.forEach(p => { const c = p.cat||'其他'; if(!byCat[c]) byCat[c]={reach:0,count:0,engage:0}; byCat[c].reach+=(p.reach||0); byCat[c].count++; byCat[c].engage+=(p.engage||0); });
     const catEntries = Object.entries(byCat).map(([cat,v])=>({cat,avg:Math.round(v.reach/v.count),count:v.count,er:v.reach?(v.engage/v.reach*100).toFixed(1):'0'})).sort((a,b)=>b.avg-a.avg);
-    const catHtml = catEntries.slice(0,6).map(c => `<div class="insight-item"><div class="name">${c.cat} <small style="color:var(--text-muted)">(${c.count}篇)</small></div><div class="value" style="color:#1E3A5F">${c.avg.toLocaleString()} <small style="color:var(--text-muted)">ER ${c.er}%</small></div></div>`).join('');
+    const catHtml = catEntries.slice(0,6).map(c => `<div class="insight-item"><div class="name">${c.cat} <small style="color:var(--text-muted)">(${c.count}篇)</small></div><div class="value">${c.avg.toLocaleString()} <small style="color:var(--text-muted)">ER ${c.er}%</small></div></div>`).join('');
 
     // Top combinations (img_type × cat)
     const combos = {};
     posts.forEach(p => { const it = p.img_type||p.type||'相片'; const c = p.cat||'其他'; const k = `${it} × ${c}`; if(!combos[k]) combos[k]={reach:0,count:0}; combos[k].reach+=(p.reach||0); combos[k].count++; });
     const comboEntries = Object.entries(combos).filter(([,v])=>v.count>=2).map(([k,v])=>({k,avg:Math.round(v.reach/v.count),count:v.count})).sort((a,b)=>b.avg-a.avg);
-    const rankLabels = [{t:'S 最強',c:'#1E3A5F'},{t:'A 強',c:'#2563EB'},{t:'B 中上',c:'#60A5FA'},{t:'C 普通',c:'var(--text-muted)'},{t:'D 待優化',c:'var(--warn)'}];
+    const rankLabels = [{t:'S 最強',c:'var(--brand)'},{t:'A 強',c:'#2A9D6B'},{t:'B 中上',c:'var(--gold)'},{t:'C 普通',c:'var(--text-muted)'},{t:'D 待優化',c:'var(--warn)'}];
     const comboHtml = comboEntries.slice(0,5).map((c,i) => {
       const r = rankLabels[Math.min(i, rankLabels.length-1)];
       return `<div class="insight-item"><div class="name">${c.k} <small style="color:var(--text-muted)">(${c.count}篇 avg ${c.avg.toLocaleString()})</small></div><div class="value text-mono" style="color:${r.c};font-weight:800;">${r.t}</div></div>`;
