@@ -106,18 +106,18 @@
   .btn-primary:hover { background: var(--brand-light); }
   .btn-outline { background: transparent; color: var(--brand); border: 1.5px solid var(--brand); }
   .btn-outline:hover { background: var(--brand-bg); }
-  /* Header action buttons — capsule outline style (gray) */
+  /* Header action buttons — capsule outline style (green) */
   .topbar-actions .btn-sheets,
   .topbar-actions .btn-sync,
   .topbar-actions .btn-export,
   .topbar-actions .btn-outline,
-  .topbar-actions .btn-import { background: transparent; border: 1.5px solid #9CA3AF; color: #6B7280; border-radius: 20px; }
+  .topbar-actions .btn-import { background: transparent; border: 1.5px solid var(--brand); color: var(--brand); border-radius: 20px; }
   .topbar-actions .btn-sheets:hover,
   .topbar-actions .btn-sync:hover,
   .topbar-actions .btn-export:hover,
-  .topbar-actions .btn-outline:hover { background: #F3F4F6; }
-  .topbar-actions .btn-import { background: #6B7280; color: #fff; border-color: #6B7280; }
-  .topbar-actions .btn-import:hover { background: #4B5563; }
+  .topbar-actions .btn-outline:hover { background: var(--brand-bg); }
+  .topbar-actions .btn-import { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .topbar-actions .btn-import:hover { background: var(--brand-dim); }
 
   .content { padding: 28px 32px; }
 
@@ -2563,9 +2563,10 @@ function renderOverview() {
   tbody.innerHTML = sorted.map((p,i) => {
     const ctr = p.reach ? ((p.click||0)/p.reach*100).toFixed(2) : '0.00';
     const er = p.reach ? ((p.engage||0)/p.reach*100).toFixed(2) : '0.00';
-    const medalLabel = ['01','02','03']; const medal = i < 3 ? medalLabel[i] : '';
+    const rankIcons = ['🥇','🥈','🥉'];
+    const rank = i < 3 ? rankIcons[i] : (i+1);
     return `<tr>
-      <td>${medal} ${i+1}</td>
+      <td>${rank}</td>
       <td><span class="badge badge-gray">${monthLabel(p.month)}</span></td>
       <td style="max-width:260px;line-height:1.4">${p.title}</td>
       <td>${catBadge(p.cat)}</td>
@@ -4166,7 +4167,7 @@ function applyPermissions() {
   // Show role badge in topbar
   const badge = document.getElementById('roleBadge');
   if (badge) {
-    const colors = { admin:'#4B5563', editor:'#6B7280', viewer:'#9CA3AF' };
+    const colors = { admin:'#059669', editor:'#10B981', viewer:'#9CA3AF' };
     badge.textContent = ROLE_LABELS[role] || '';
     badge.style.color = colors[role] || '#9CA3AF';
     badge.style.borderColor = colors[role] || '#9CA3AF';
