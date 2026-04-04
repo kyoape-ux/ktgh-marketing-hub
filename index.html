@@ -433,6 +433,22 @@
   .kpi-target { margin-top:6px; }
   .kpi-target-bar { height:4px; background:var(--accent); border-radius:2px; overflow:hidden; margin-top:4px; }
   .kpi-target-fill { height:100%; border-radius:2px; transition:width 0.5s; }
+
+  /* ── GUIDE STYLES ── */
+  .guide-toc-item { display:block;padding:8px 20px;font-size:13px;color:#6B7280;cursor:pointer;text-decoration:none;border-left:3px solid transparent;transition:all .15s; }
+  .guide-toc-item:hover { background:#ECFDF5;color:#059669; }
+  .guide-toc-item.active { background:#ECFDF5;color:#059669;border-left-color:#059669;font-weight:600; }
+  .guide-sec { display:none; }
+  .guide-sec.active { display:block; }
+  .guide-sec h3 { font-size:17px;font-weight:800;color:#1A1A2E;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #ECFDF5; }
+  .guide-sec h4 { font-size:14px;font-weight:700;color:#059669;margin:16px 0 8px; }
+  .guide-sec p { font-size:13.5px;line-height:1.8;color:#374151;margin-bottom:10px; }
+  .guide-sec ul, .guide-sec ol { font-size:13.5px;line-height:1.9;color:#374151;margin:0 0 12px 20px; }
+  .guide-sec li { margin-bottom:4px; }
+  .guide-tip { background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:12px 16px;font-size:12.5px;color:#047857;margin:12px 0;line-height:1.7; }
+  .guide-table { width:100%;border-collapse:collapse;font-size:13px;margin:12px 0; }
+  .guide-table th { background:#F7FAF9;padding:8px 12px;text-align:left;font-weight:700;font-size:12px;color:#059669;border-bottom:2px solid #A7F3D0; }
+  .guide-table td { padding:8px 12px;border-bottom:1px solid #E5E7EB; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -464,6 +480,255 @@
     <div style="display:flex;gap:8px;">
       <button onclick="closePwModal()" style="flex:1;padding:10px;border:1.5px solid #E5E7EB;border-radius:8px;background:#fff;color:#6B7280;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;">取消</button>
       <button onclick="confirmPw()" style="flex:1;padding:10px;border:none;border-radius:8px;background:#059669;color:#fff;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;">確認</button>
+    </div>
+  </div>
+</div>
+
+<!-- GUIDE MODAL -->
+<div id="guideOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:#fff;border-radius:16px;width:780px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;">
+    <!-- Guide Header -->
+    <div style="padding:24px 28px 16px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <h2 style="font-size:18px;font-weight:800;color:#1A1A2E;display:flex;align-items:center;gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          使用指南 — 操作手冊
+        </h2>
+        <p style="font-size:12px;color:#9CA3AF;margin-top:2px;">光田綜合醫院 行銷整合分析中心 完整功能說明</p>
+      </div>
+      <button onclick="closeGuide()" style="background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;color:#9CA3AF;" title="關閉">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <!-- Guide Sidebar + Content -->
+    <div style="display:flex;flex:1;overflow:hidden;">
+      <!-- TOC -->
+      <div id="guideToc" style="width:200px;background:#F7FAF9;border-right:1px solid #E5E7EB;padding:16px 0;overflow-y:auto;flex-shrink:0;">
+        <a class="guide-toc-item active" onclick="showGuideSection(this,'gs-overview')">📋 系統總覽</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-login')">🔐 登入與權限</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-dashboard')">📊 總覽 Dashboard</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-import')">📥 匯入貼文數據</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-posts')">📝 貼文成效列表</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-analysis')">🔍 組合分析</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-calendar')">📅 內容日曆</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-ab')">⚡ A/B 分析</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-predict')">🔮 貼文預測</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-sop')">📑 SOP 建議模板</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-evdash')">🏥 活動成效看板</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-evlist')">📋 活動/講座列表</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-evadd')">➕ 新增活動回報</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-media')">📰 新聞媒體曝光</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-export')">📤 匯出月報</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-sync')">☁️ Google Sheets 同步</a>
+        <a class="guide-toc-item" onclick="showGuideSection(this,'gs-settings')">⚙️ 設定管理</a>
+      </div>
+      <!-- Content -->
+      <div id="guideContent" style="flex:1;overflow-y:auto;padding:24px 28px;">
+
+        <div class="guide-sec active" id="gs-overview">
+          <h3>系統總覽</h3>
+          <p>「行銷整合分析中心」是光田綜合醫院行銷組的一站式數據管理平台，涵蓋：</p>
+          <ul>
+            <li><b>Facebook 粉專追蹤</b> — 貼文觸及、互動、點擊等 KPI 分析</li>
+            <li><b>活動/講座追蹤</b> — 報名、出席、滿意度、預算管理</li>
+            <li><b>新聞媒體曝光</b> — 媒體報導記錄與觸及統計</li>
+            <li><b>Campaign / KOL</b> — 行銷活動成果與 KOL 合作追蹤</li>
+          </ul>
+          <div class="guide-tip">所有資料與 Google Sheets 雙向同步，本機 localStorage 作為快取，確保離線時也能查看。</div>
+        </div>
+
+        <div class="guide-sec" id="gs-login">
+          <h3>登入與權限</h3>
+          <p>進入系統時會出現登入選單，分為三種角色：</p>
+          <table class="guide-table">
+            <thead><tr><th>角色</th><th>密碼</th><th>權限範圍</th></tr></thead>
+            <tbody>
+              <tr><td><b>🔑 組長</b></td><td>需輸入密碼</td><td>最高權限：檢視、編輯、刪除、同步、系統設定</td></tr>
+              <tr><td><b>✏️ 組員</b></td><td>需輸入密碼</td><td>可編輯：檢視、新增、編輯、刪除內容</td></tr>
+              <tr><td><b>👁 唯讀</b></td><td>免密碼</td><td>僅瀏覽：只能查看資料，無法修改</td></tr>
+            </tbody>
+          </table>
+          <div class="guide-tip">登入狀態僅在目前分頁有效，關閉分頁或重新整理後需重新登入。右上角會顯示目前角色徽章。</div>
+        </div>
+
+        <div class="guide-sec" id="gs-dashboard">
+          <h3>總覽 Dashboard</h3>
+          <p>進入系統後的首頁，提供整體 KPI 概覽：</p>
+          <ul>
+            <li><b>四大 KPI 卡片</b> — 累計總觸及、互動次數、發文總篇數、平均每篇觸及</li>
+            <li><b>月份觸及趨勢</b> — 橫條圖顯示每月觸及量與貼文數</li>
+            <li><b>貼文類型分佈</b> — 甜甜圈圖顯示相片 vs 影片比例</li>
+            <li><b>亮點貼文</b> — 自動篩選觸及最高的前 3 篇</li>
+          </ul>
+          <h4>期間篩選</h4>
+          <p>左上角下拉選單可依「全部期間 / 年度 / 季度 / 月份」篩選，所有卡片與圖表會即時更新。</p>
+        </div>
+
+        <div class="guide-sec" id="gs-import">
+          <h3>匯入貼文數據</h3>
+          <p>支援從 Facebook 後台匯出的 Excel (.xlsx) 或 CSV 檔案批量匯入。</p>
+          <h4>操作步驟</h4>
+          <ol>
+            <li>點擊右上角「<b>+ 匯入數據</b>」按鈕</li>
+            <li>選擇 Facebook 匯出的 .xlsx 或 .csv 檔案</li>
+            <li>系統自動解析欄位並匯入</li>
+            <li>匯入完成後自動跳轉至貼文列表</li>
+          </ol>
+          <div class="guide-tip">匯入時會自動比對日期+標題避免重複。建議每月初從 FB 後台匯出上月數據。</div>
+        </div>
+
+        <div class="guide-sec" id="gs-posts">
+          <h3>貼文成效列表</h3>
+          <p>以表格形式列出所有貼文，可進行搜尋、篩選、排序。</p>
+          <h4>功能說明</h4>
+          <ul>
+            <li><b>搜尋</b> — 輸入關鍵字即時過濾標題</li>
+            <li><b>期間篩選</b> — 依年度/季度/月份篩選</li>
+            <li><b>新增貼文</b> — 手動新增單篇貼文（需編輯權限）</li>
+            <li><b>編輯 / 刪除</b> — 點擊列表中的操作按鈕（需編輯權限）</li>
+          </ul>
+          <p>每篇貼文記錄：日期、標題、類型、內容分類、觸及、互動、點擊、分享等指標。</p>
+        </div>
+
+        <div class="guide-sec" id="gs-analysis">
+          <h3>組合分析</h3>
+          <p>交叉比對多維度數據，找出最佳內容策略：</p>
+          <ul>
+            <li><b>類型 × 分類</b> — 相片/影片在不同內容分類下的表現</li>
+            <li><b>趨勢對比</b> — 不同時間段的觸及與互動變化</li>
+          </ul>
+        </div>
+
+        <div class="guide-sec" id="gs-calendar">
+          <h3>內容日曆</h3>
+          <p>以月曆視圖呈現貼文發布時間，方便掌握發文節奏：</p>
+          <ul>
+            <li>每日格內顯示當天發布的貼文數量</li>
+            <li>可用「← 上月 / 下月 →」按鈕切換月份</li>
+            <li>點擊日期可查看該日貼文詳情</li>
+          </ul>
+        </div>
+
+        <div class="guide-sec" id="gs-ab">
+          <h3>A/B 分析</h3>
+          <p>對比兩篇貼文的成效數據，判斷哪種策略更有效：</p>
+          <ol>
+            <li>從下拉選單選擇「貼文 A」和「貼文 B」</li>
+            <li>系統自動顯示觸及、互動、點擊等指標的對比</li>
+            <li>以視覺化長條圖呈現差異</li>
+          </ol>
+        </div>
+
+        <div class="guide-sec" id="gs-predict">
+          <h3>貼文預測</h3>
+          <p>根據歷史數據預測下一篇貼文的預期表現：</p>
+          <ul>
+            <li>選擇貼文類型與內容分類</li>
+            <li>系統顯示預估觸及、互動率、最佳發布時段</li>
+          </ul>
+        </div>
+
+        <div class="guide-sec" id="gs-sop">
+          <h3>SOP 建議模板</h3>
+          <p>根據不同內容分類提供標準作業流程建議：</p>
+          <ul>
+            <li>每個 SOP 卡片包含：發文前準備、撰文要點、發布策略、成效追蹤</li>
+            <li>可作為新進人員教育訓練參考</li>
+          </ul>
+        </div>
+
+        <div class="guide-sec" id="gs-evdash">
+          <h3>活動成效看板</h3>
+          <p>活動/講座的綜合 KPI 儀表板：</p>
+          <ul>
+            <li><b>四大 KPI</b> — 總場次、平均出席率、平均滿意度、累積 FB 觸及</li>
+            <li><b>活動類型分布</b> — 各類型活動的場次與出席率</li>
+            <li><b>月份趨勢</b> — 每月活動場次與觸及</li>
+            <li><b>滿意度分布</b> — 下拉選單依星等歸類活動</li>
+          </ul>
+          <h4>期間篩選</h4>
+          <p>頂部下拉選單可依年度/季度/月份篩選，所有數據即時更新。</p>
+        </div>
+
+        <div class="guide-sec" id="gs-evlist">
+          <h3>活動/講座列表</h3>
+          <p>以表格形式列出所有活動記錄：</p>
+          <ul>
+            <li><b>篩選</b> — 期間（年/季/月）、活動類型、院區（向上/大甲）</li>
+            <li><b>排序</b> — 依日期由新到舊</li>
+            <li><b>操作</b> — 點擊「編輯」修改活動資料、「刪除」移除記錄（需編輯權限）</li>
+          </ul>
+          <p>每筆活動記錄包含：日期、名稱、類型、院區、報名人數、出席人數、FB 觸及、預算、支出、滿意度。</p>
+        </div>
+
+        <div class="guide-sec" id="gs-evadd">
+          <h3>新增活動回報</h3>
+          <p>活動結束後，由組員填寫活動成效數據（需編輯權限）：</p>
+          <ol>
+            <li>點擊側邊欄「新增活動回報」或列表頁的「+ 新增活動」</li>
+            <li>填寫活動名稱、日期、類型、院區</li>
+            <li>填入報名人數、出席人數、FB 觸及數</li>
+            <li>填入預算、實際支出、滿意度評分（1-5 星）</li>
+            <li>點擊「儲存活動記錄」</li>
+          </ol>
+          <div class="guide-tip">系統會根據活動類型自動提供預估數據（報名人數、出席率、觸及預測）供參考。</div>
+        </div>
+
+        <div class="guide-sec" id="gs-media">
+          <h3>新聞媒體曝光</h3>
+          <p>記錄與管理所有媒體報導：</p>
+          <ul>
+            <li><b>媒體列表</b> — 查看所有媒體報導記錄</li>
+            <li><b>新增媒體記錄</b> — 填寫媒體名稱、類型、報導標題、日期、觸及數、連結</li>
+          </ul>
+          <p>媒體類型包含：電視、網路新聞、報紙、雜誌、廣播等。</p>
+        </div>
+
+        <div class="guide-sec" id="gs-export">
+          <h3>匯出月報</h3>
+          <p>一鍵產出精美的行銷成效月報，可列印或存為 PDF：</p>
+          <ol>
+            <li>點擊右上角「📥 匯出月報」按鈕</li>
+            <li>月報以新視窗開啟，包含三個分頁：
+              <ul>
+                <li><b>粉專成效</b> — KPI、月份趨勢、類型分布、Top 5 貼文</li>
+                <li><b>活動成效</b> — KPI、完整活動列表</li>
+                <li><b>媒體成效</b> — KPI、媒體報導列表</li>
+              </ul>
+            </li>
+            <li><b>期間篩選</b> — 頂部可依年度/季度/月份篩選報表範圍</li>
+            <li>點擊「列印 / 存 PDF」按鈕輸出</li>
+          </ol>
+          <div class="guide-tip">月報配色為穩重的深綠色系，適合列印與正式簡報使用。</div>
+        </div>
+
+        <div class="guide-sec" id="gs-sync">
+          <h3>Google Sheets 同步</h3>
+          <p>系統透過 Google Apps Script (GAS) 與 Google Sheets 雲端資料庫雙向同步：</p>
+          <h4>同步方式</h4>
+          <ul>
+            <li><b>自動同步</b> — 每次載入頁面時自動從 Sheets 拉取最新資料</li>
+            <li><b>手動同步</b> — 點擊右上角「同步」按鈕立即更新</li>
+            <li><b>推送資料</b> — 在設定頁面可將本機資料推送回 Sheets</li>
+          </ul>
+          <h4>Google Sheets 按鈕</h4>
+          <p>點擊右上角「Google Sheets」可直接開啟原始試算表查看或編輯原始資料。</p>
+        </div>
+
+        <div class="guide-sec" id="gs-settings">
+          <h3>設定管理（僅限組長）</h3>
+          <p>側邊欄最下方的「設定 / Google Sheets」：</p>
+          <ul>
+            <li><b>GAS URL 設定</b> — 設定 Google Apps Script Web App URL，啟用雲端同步</li>
+            <li><b>KPI 目標值</b> — 設定每月觸及目標、互動率目標等</li>
+            <li><b>重新同步</b> — 從 Sheets 重新拉取資料</li>
+            <li><b>推送至 Sheets</b> — 將本機資料推送到 Google Sheets</li>
+            <li><b>清除快取</b> — 清除本機 localStorage 資料並重新載入</li>
+          </ul>
+          <div class="guide-tip">⚠️ 設定功能僅限組長角色可操作。GAS URL 變更會影響整個團隊的資料同步。</div>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>
@@ -549,6 +814,7 @@
       <button class="btn btn-export" onclick="exportReport()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 匯出月報</button>
       <button class="btn btn-import" data-perm="edit" onclick="document.getElementById('fileInput').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 匯入數據</button>
       <input type="file" id="fileInput" accept=".xlsx,.csv" onchange="handleFileUpload(this)">
+      <button class="btn btn-outline" onclick="openGuide()" title="使用指南" style="border-radius:20px;padding:6px 14px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 使用指南</button>
     </div>
   </div>
 
@@ -3822,6 +4088,22 @@ function updateEventPrediction() {
   if (el('pred-reach'))  el('pred-reach').textContent  = p.reach;
   if (el('pred-timing')) el('pred-timing').textContent = p.timing;
   if (el('pred-tip'))    el('pred-tip').textContent    = p.tip;
+}
+
+// ═══════════════════════════════════════════
+//  GUIDE (User Manual)
+// ═══════════════════════════════════════════
+function openGuide() {
+  document.getElementById('guideOverlay').style.display = 'flex';
+}
+function closeGuide() {
+  document.getElementById('guideOverlay').style.display = 'none';
+}
+function showGuideSection(btn, id) {
+  document.querySelectorAll('.guide-toc-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.guide-sec').forEach(s => s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
 }
 
 // ═══════════════════════════════════════════
