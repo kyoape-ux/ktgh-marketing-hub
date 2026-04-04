@@ -1706,10 +1706,26 @@ async function syncFromGAS() {
     ]);
     // 正規化 Sheets 回傳的日期（ISO→yyyy-MM-dd）及補齊 month
     function normalizeDate(d) { return d ? String(d).slice(0,10) : ''; }
-    [posts, events, media, kols].forEach(arr => {
-      if (Array.isArray(arr)) arr.forEach(r => { if (r.date) r.date = normalizeDate(r.date); });
+    function looksLikeDate(v) { return /^\d{4}-\d{2}-\d{2}/.test(String(v||'')); }
+    // 修正 GAS 欄位偏移：若 date 為空且 title 看起來像日期，前3欄向左平移
+    if (Array.isArray(posts)) posts.forEach(p => {
+      if (!p.date && looksLikeDate(p.title)) {
+        p.date     = p.title;   // ISO date string
+        p.title    = p.type;    // actual title text
+        p.type     = p.img_type; // "相片"/"影片"
+        p.img_type = '';         // original value lost in shift
+      }
     });
-    if (Array.isArray(posts)) posts.forEach(p => { if (!p.month && p.date) p.month = p.date.slice(0,7); });
+    [posts, events, media, kols].forEach(arr => {
+      if (Array.isArray(arr)) arr.forEach(r => {
+        if (r.date) r.date = normalizeDate(r.date);
+        if (r.phase && looksLikeDate(r.phase)) r.phase = '';  // phase 不應是日期戳記
+      });
+    });
+    if (Array.isArray(posts)) posts.forEach(p => {
+      if (p.month) p.month = normalizeDate(p.month).slice(0,7);
+      if (!p.month && p.date) p.month = p.date.slice(0,7);
+    });
     store.posts  = mergeData(getBuiltinPosts(),  posts,  p => (p.date||'')+'|'+(p.title||''));
     store.events = mergeData(getBuiltinEvents(), events, e => (e.date||'')+'|'+(e.name||''));
     store.media  = mergeData(getBuiltinMedia(),  media,  m => (m.date||'')+'|'+(m.name||''));
