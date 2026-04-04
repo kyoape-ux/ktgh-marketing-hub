@@ -438,11 +438,41 @@
 </head>
 <body>
 
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+  <div style="background:#fff;border-radius:16px;padding:40px 36px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
+    <div style="width:56px;height:56px;background:#ECFDF5;border-radius:14px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h2 style="font-size:20px;font-weight:800;color:#1A1A2E;margin-bottom:4px;">行銷整合分析中心</h2>
+    <p style="font-size:13px;color:#9CA3AF;margin-bottom:24px;">請選擇登入身份</p>
+    <div id="loginMsg" style="font-size:12px;color:#DC2626;margin-bottom:12px;min-height:18px;"></div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button onclick="loginAs('admin')" style="padding:12px;border:1.5px solid #059669;border-radius:10px;background:#ECFDF5;color:#059669;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s;">🔑 組長登入（最高權限）</button>
+      <button onclick="loginAs('editor')" style="padding:12px;border:1.5px solid #3B82F6;border-radius:10px;background:#EFF6FF;color:#3B82F6;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s;">✏️ 組員登入（可編輯）</button>
+      <button onclick="loginAs('viewer')" style="padding:12px;border:1.5px solid #9CA3AF;border-radius:10px;background:#F9FAFB;color:#6B7280;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s;">👁 唯讀瀏覽</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div id="pwModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:#fff;border-radius:14px;padding:32px 28px;width:340px;box-shadow:0 16px 48px rgba(0,0,0,0.2);text-align:center;">
+    <h3 id="pwTitle" style="font-size:16px;font-weight:700;margin-bottom:16px;color:#1A1A2E;">請輸入密碼</h3>
+    <input id="pwInput" type="password" placeholder="請輸入密碼" style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:8px;outline:none;transition:border .2s;" onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#E5E7EB'" onkeydown="if(event.key==='Enter')confirmPw()">
+    <div id="pwError" style="font-size:12px;color:#DC2626;margin-bottom:12px;min-height:16px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closePwModal()" style="flex:1;padding:10px;border:1.5px solid #E5E7EB;border-radius:8px;background:#fff;color:#6B7280;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;">取消</button>
+      <button onclick="confirmPw()" style="flex:1;padding:10px;border:none;border-radius:8px;background:#059669;color:#fff;font-weight:600;cursor:pointer;font-family:inherit;font-size:13px;">確認</button>
+    </div>
+  </div>
+</div>
+
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-tag">Kuang Tien Hospital</div>
-    <h2><span class="dot"></span>行銷整合分析</h2>
+    <div class="logo-tag">KTGH Marketing</div>
+    <h2><span class="dot"></span>行銷整合分析中心</h2>
   </div>
   <nav>
     <div class="nav-section">粉專追蹤</div>
@@ -477,14 +507,14 @@
     <a class="nav-item" onclick="switchSection('event','list')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> 活動/講座列表
     </a>
-    <a class="nav-item" onclick="switchSection('event','add')">
+    <a class="nav-item" data-perm="edit" onclick="switchSection('event','add')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> 新增活動回報
     </a>
     <div class="nav-section">媒體追蹤</div>
     <a class="nav-item" onclick="switchSection('media','list')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></span> 新聞媒體曝光
     </a>
-    <a class="nav-item" onclick="switchSection('media','add')">
+    <a class="nav-item" data-perm="edit" onclick="switchSection('media','add')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> 新增媒體記錄
     </a>
     <div class="nav-section">成效整合</div>
@@ -512,11 +542,12 @@
       <div class="topbar-sub" id="topbarSub">光田綜合醫院行銷整合管理系統</div>
     </div>
     <div class="topbar-actions">
+      <span id="roleBadge" style="display:none;font-size:11px;font-weight:700;padding:3px 10px;border:1.5px solid;border-radius:12px;margin-right:4px;"></span>
       <span id="syncStatus" style="font-size:11.5px;color:var(--text-muted);padding:0 4px;"></span>
       <a href="https://docs.google.com/spreadsheets/d/1MtKTbrcoxP7-YVUB0rILdYrM3vOh_O0JXqEWNdJFrKI/edit" target="_blank" class="btn btn-sheets" title="開啟 Google Sheets 資料庫" style="text-decoration:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg> Google Sheets</a>
-      <button class="btn btn-sync" onclick="syncFromGAS()" title="從 Google Sheets 同步資料"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> 同步</button>
+      <button class="btn btn-sync" data-perm="edit" onclick="syncFromGAS()" title="從 Google Sheets 同步資料"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> 同步</button>
       <button class="btn btn-export" onclick="exportReport()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 匯出月報</button>
-      <button class="btn btn-import" onclick="document.getElementById('fileInput').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 匯入數據</button>
+      <button class="btn btn-import" data-perm="edit" onclick="document.getElementById('fileInput').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 匯入數據</button>
       <input type="file" id="fileInput" accept=".xlsx,.csv" onchange="handleFileUpload(this)">
     </div>
   </div>
@@ -669,7 +700,7 @@
           <div style="display:flex;gap:8px;align-items:center;">
             <input placeholder="搜尋標題..." id="searchInput" oninput="filterPostsBySearch()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:200px;">
             <span id="postCount" style="font-size:12px;color:var(--text-muted)"></span>
-            <button class="btn btn-primary" onclick="openPostModal(-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增貼文</button>
+            <button class="btn btn-primary" data-perm="edit" onclick="openPostModal(-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增貼文</button>
           </div>
         </div>
         <div class="table-wrap">
@@ -924,7 +955,7 @@
       <div class="table-card">
         <div class="table-header">
           <h3>活動 / 講座成效追蹤</h3>
-          <button class="btn btn-primary" onclick="switchSection('event','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增活動</button>
+          <button class="btn btn-primary" data-perm="edit" onclick="switchSection('event','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增活動</button>
         </div>
         <!-- 歷史篩選列 -->
         <div style="padding:10px 20px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #EBF2EE;">
@@ -1058,7 +1089,7 @@
       <div class="table-card media-table">
         <div class="table-header">
           <h3>媒體新聞曝光追蹤</h3>
-          <button class="btn btn-primary" onclick="switchSection('media','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增媒體記錄</button>
+          <button class="btn btn-primary" data-perm="edit" onclick="switchSection('media','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增媒體記錄</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -1142,7 +1173,7 @@
       <div class="table-card">
         <div class="table-header">
           <h3>KOL / 網紅合作成效</h3>
-          <button class="btn btn-primary" onclick="switchSection('kol','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增 KOL 記錄</button>
+          <button class="btn btn-primary" data-perm="edit" onclick="switchSection('kol','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增 KOL 記錄</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -1321,7 +1352,7 @@
             <div style="display:flex;gap:8px;">
               <input id="gasUrlInput" type="url" placeholder="https://script.google.com/macros/s/…/exec"
                 style="flex:1;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);font-family:inherit;font-size:13px;color:var(--text);">
-              <button class="btn btn-primary" onclick="saveGasUrl()">儲存並同步</button>
+              <button class="btn btn-primary" data-perm="admin" onclick="saveGasUrl()">儲存並同步</button>
             </div>
             <div style="margin-top:8px;font-size:12px;">
               連線狀態：<span id="gasConnStatus" style="font-weight:700;">未設定</span>
@@ -1786,6 +1817,7 @@ async function _gasWrite(action, data) {
 }
 
 function saveGasUrl() {
+  if (!isAdmin()) { showToast('僅組長可修改設定'); return; }
   const url = document.getElementById('gasUrlInput').value.trim();
   config.gasUrl = url;
   saveConfig();
@@ -2442,6 +2474,7 @@ function renderEvents() {
 }
 
 function addEvent() {
+  if (!requireEdit()) return;
   const name = document.getElementById('ev-name').value.trim();
   const date = document.getElementById('ev-date').value;
   if (!name || !date) { showToast('請填寫活動名稱和日期'); return; }
@@ -2496,6 +2529,7 @@ function renderMedia() {
 }
 
 function addMedia() {
+  if (!requireEdit()) return;
   const name = document.getElementById('md-name').value.trim();
   const date = document.getElementById('md-date').value;
   if (!name || !date) { showToast('請填寫媒體名稱和日期'); return; }
@@ -2719,6 +2753,7 @@ function openPostModal(idx) {
 }
 
 function savePost() {
+  if (!requireEdit()) return;
   const title = document.getElementById('pm-title').value.trim();
   const date  = document.getElementById('pm-date').value;
   if (!title || !date) { showToast('請填寫標題和日期'); return; }
@@ -2753,6 +2788,7 @@ function savePost() {
 }
 
 function deletePost(idx) {
+  if (!requireEdit()) return;
   if (!confirm(`確定刪除「${store.posts[idx].title}」？`)) return;
   store.posts.splice(idx, 1);
   saveStore();
@@ -2786,6 +2822,7 @@ function openEventModal(idx) {
 }
 
 function saveEventEdit() {
+  if (!requireEdit()) return;
   const name = document.getElementById('em-name').value.trim();
   const date = document.getElementById('em-date').value;
   if (!name || !date) { showToast('請填寫活動名稱和日期'); return; }
@@ -2812,6 +2849,7 @@ function saveEventEdit() {
 }
 
 function deleteEvent(idx) {
+  if (!requireEdit()) return;
   if (!confirm(`確定刪除「${store.events[idx].name}」？`)) return;
   store.events.splice(idx, 1);
   saveStore();
@@ -3263,6 +3301,7 @@ function renderKols() {
 }
 
 function addKol() {
+  if (!requireEdit()) return;
   const name = document.getElementById('kl-name').value.trim();
   const date = document.getElementById('kl-date').value;
   if (!name || !date) { showToast('請填寫 KOL 名稱和日期'); return; }
@@ -3786,18 +3825,95 @@ function updateEventPrediction() {
 }
 
 // ═══════════════════════════════════════════
+//  PERMISSION SYSTEM
+// ═══════════════════════════════════════════
+const ROLE_KEY = 'ktgh_role';
+const PW_MAP = { admin: 'ktghadmin2026', editor: 'ktgh20662088' };
+const ROLE_LABELS = { admin: '組長', editor: '組員', viewer: '唯讀' };
+
+function getRole() { return sessionStorage.getItem(ROLE_KEY) || ''; }
+function canEdit() { const r = getRole(); return r === 'admin' || r === 'editor'; }
+function isAdmin() { return getRole() === 'admin'; }
+
+let pendingRole = '';
+function loginAs(role) {
+  if (role === 'viewer') {
+    sessionStorage.setItem(ROLE_KEY, 'viewer');
+    document.getElementById('loginOverlay').style.display = 'none';
+    applyPermissions();
+    return;
+  }
+  pendingRole = role;
+  document.getElementById('pwModal').style.display = 'flex';
+  document.getElementById('pwTitle').textContent = (role === 'admin' ? '組長' : '組員') + '登入 — 請輸入密碼';
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  setTimeout(() => document.getElementById('pwInput').focus(), 100);
+}
+
+function confirmPw() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw === PW_MAP[pendingRole]) {
+    sessionStorage.setItem(ROLE_KEY, pendingRole);
+    document.getElementById('pwModal').style.display = 'none';
+    document.getElementById('loginOverlay').style.display = 'none';
+    applyPermissions();
+  } else {
+    document.getElementById('pwError').textContent = '密碼錯誤，請重新輸入';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+function closePwModal() {
+  document.getElementById('pwModal').style.display = 'none';
+  pendingRole = '';
+}
+
+function requireEdit(action) {
+  if (canEdit()) return true;
+  showToast('唯讀模式，無法執行此操作');
+  return false;
+}
+
+function applyPermissions() {
+  const role = getRole();
+  // Show role badge in topbar
+  const badge = document.getElementById('roleBadge');
+  if (badge) {
+    const colors = { admin:'#059669', editor:'#3B82F6', viewer:'#9CA3AF' };
+    badge.textContent = ROLE_LABELS[role] || '';
+    badge.style.color = colors[role] || '#9CA3AF';
+    badge.style.borderColor = colors[role] || '#9CA3AF';
+    badge.style.display = 'inline-block';
+  }
+  // Hide edit/add/delete elements for viewer
+  document.querySelectorAll('[data-perm="edit"]').forEach(el => {
+    el.style.display = canEdit() ? '' : 'none';
+  });
+  // Hide admin-only elements
+  document.querySelectorAll('[data-perm="admin"]').forEach(el => {
+    el.style.display = isAdmin() ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
 const PUSH_FLAG = 'ktgh_pushed_v5';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Check if already logged in this session
+  if (getRole()) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    applyPermissions();
+  }
   renderOverview();
   renderEvents();
   updateSettingsUI();
   if (config.gasUrl) {
     setSyncStatus('正在同步…', 'var(--brand)');
     if (!localStorage.getItem(PUSH_FLAG)) {
-      // First load with v4: push all builtin data to Sheets, then sync back
       pushAllToGAS()
         .then(() => { localStorage.setItem(PUSH_FLAG, '1'); })
         .catch(() => {})
