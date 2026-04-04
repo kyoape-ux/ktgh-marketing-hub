@@ -1826,10 +1826,10 @@ function renderOverview() {
   document.getElementById('kpi-avg').textContent = avg.toLocaleString();
 
   // KPI change indicators (dynamic MoM)
-  const months = [...new Set(posts.map(p=>p.month).filter(Boolean))].sort();
+  const months = [...new Set(posts.map(p=>(p.month||'').slice(0,7)).filter(m=>m.length===7))].sort();
   if (months.length >= 2) {
     const last = months[months.length-1], prev = months[months.length-2];
-    const lastPosts = posts.filter(p=>p.month===last), prevPosts = posts.filter(p=>p.month===prev);
+    const lastPosts = posts.filter(p=>(p.month||'').slice(0,7)===last), prevPosts = posts.filter(p=>(p.month||'').slice(0,7)===prev);
     const lastReach = lastPosts.reduce((a,p)=>a+(p.reach||0),0), prevReach = prevPosts.reduce((a,p)=>a+(p.reach||0),0);
     const lastEngage = lastPosts.reduce((a,p)=>a+(p.engage||0),0), prevEngage = prevPosts.reduce((a,p)=>a+(p.engage||0),0);
     const lastAvg = lastPosts.length ? Math.round(lastReach/lastPosts.length) : 0;
@@ -1845,7 +1845,7 @@ function renderOverview() {
 
   // Dynamic trend bar chart
   const byMonth = {};
-  posts.forEach(p => { const m = p.month; if(!m) return; if(!byMonth[m]) byMonth[m]={reach:0,count:0,engage:0}; byMonth[m].reach+=(p.reach||0); byMonth[m].count++; byMonth[m].engage+=(p.engage||0); });
+  posts.forEach(p => { const m = (p.month||'').slice(0,7); if(!m||m.length!==7) return; if(!byMonth[m]) byMonth[m]={reach:0,count:0,engage:0}; byMonth[m].reach+=(p.reach||0); byMonth[m].count++; byMonth[m].engage+=(p.engage||0); });
   const sortedMonths = Object.keys(byMonth).sort();
   const maxMonthReach = Math.max(...Object.values(byMonth).map(v=>v.reach||1));
   const barColors = ['green','teal','gold','red','green','teal'];
