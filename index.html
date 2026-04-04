@@ -106,16 +106,18 @@
   .btn-primary:hover { background: var(--brand-light); }
   .btn-outline { background: transparent; color: var(--brand); border: 1.5px solid var(--brand); }
   .btn-outline:hover { background: var(--brand-bg); }
-  /* Header action buttons — capsule outline style */
+  /* Header action buttons — capsule outline style (blue) */
   .topbar-actions .btn-sheets,
   .topbar-actions .btn-sync,
   .topbar-actions .btn-export,
-  .topbar-actions .btn-import { background: transparent; border: 1.5px solid var(--brand); color: var(--brand); border-radius: 20px; }
+  .topbar-actions .btn-outline,
+  .topbar-actions .btn-import { background: transparent; border: 1.5px solid #3B82F6; color: #3B82F6; border-radius: 20px; }
   .topbar-actions .btn-sheets:hover,
   .topbar-actions .btn-sync:hover,
-  .topbar-actions .btn-export:hover { background: var(--brand-bg); }
-  .topbar-actions .btn-import { background: var(--brand); color: #fff; border-color: var(--brand); }
-  .topbar-actions .btn-import:hover { background: var(--brand-dim); }
+  .topbar-actions .btn-export:hover,
+  .topbar-actions .btn-outline:hover { background: #EFF6FF; }
+  .topbar-actions .btn-import { background: #3B82F6; color: #fff; border-color: #3B82F6; }
+  .topbar-actions .btn-import:hover { background: #2563EB; }
 
   .content { padding: 28px 32px; }
 
@@ -4163,7 +4165,7 @@ function applyPermissions() {
   // Show role badge in topbar
   const badge = document.getElementById('roleBadge');
   if (badge) {
-    const colors = { admin:'#059669', editor:'#3B82F6', viewer:'#9CA3AF' };
+    const colors = { admin:'#2563EB', editor:'#3B82F6', viewer:'#9CA3AF' };
     badge.textContent = ROLE_LABELS[role] || '';
     badge.style.color = colors[role] || '#9CA3AF';
     badge.style.borderColor = colors[role] || '#9CA3AF';
