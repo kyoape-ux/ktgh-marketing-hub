@@ -67,7 +67,10 @@
   @keyframes pulse {
     0%,100% { opacity:1; } 50% { opacity:0.4; }
   }
-  nav { padding: 16px 0; flex: 1; }
+  nav { padding: 16px 0; flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; }
+  nav::-webkit-scrollbar { width: 4px; }
+  nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+  nav::-webkit-scrollbar-track { background: transparent; }
   .nav-section { padding: 8px 20px 4px; font-size: 10px; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); text-transform: uppercase; }
   .nav-item {
     display: flex; align-items: center; gap: 10px;
@@ -513,8 +516,16 @@
     <!-- ══ FB OVERVIEW ══ -->
     <div class="section active" id="sec-fb-overview">
       
-      <!-- Month selector (dynamic) -->
-      <div class="month-selector" id="overviewMonthSelector"></div>
+      <!-- Period selector (dynamic) -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;" id="overviewPeriodSelector">
+        <select id="ovPeriodType" onchange="updateOverviewPeriod()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:600;color:var(--text);background:var(--surface);cursor:pointer;">
+          <option value="all">全部期間</option>
+          <option value="year">依年度</option>
+          <option value="quarter">依季度</option>
+          <option value="month">依月份</option>
+        </select>
+        <select id="ovPeriodValue" onchange="applyOverviewPeriod()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;color:var(--text);background:var(--surface);cursor:pointer;display:none;"></select>
+      </div>
 
       <!-- KPI cards -->
       <div class="kpi-grid" id="kpiGrid">
@@ -633,7 +644,15 @@
 
     <!-- ══ FB POSTS LIST ══ -->
     <div class="section" id="sec-fb-posts">
-      <div class="month-selector" id="postsMonthSelector"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <select id="postsPeriodType" onchange="updatePostsPeriod()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:600;color:var(--text);background:var(--surface);cursor:pointer;">
+          <option value="all">全部期間</option>
+          <option value="year">依年度</option>
+          <option value="quarter">依季度</option>
+          <option value="month">依月份</option>
+        </select>
+        <select id="postsPeriodValue" onchange="applyPostsPeriod()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;color:var(--text);background:var(--surface);cursor:pointer;display:none;"></select>
+      </div>
       <div class="table-card">
         <div class="table-header">
           <h3>貼文成效列表</h3>
@@ -861,6 +880,15 @@
     <!-- ══ EVENT LIST ══ -->
     <!-- ══ EVENT DASHBOARD ══ -->
     <div class="section" id="sec-event-dashboard">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <select id="evDashPeriodType" onchange="updateEvDashPeriod()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:600;color:var(--text);background:var(--surface);cursor:pointer;">
+          <option value="all">全部期間</option>
+          <option value="year">依年度</option>
+          <option value="quarter">依季度</option>
+          <option value="month">依月份</option>
+        </select>
+        <select id="evDashPeriodValue" onchange="applyEvDashPeriod()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;color:var(--text);background:var(--surface);cursor:pointer;display:none;"></select>
+      </div>
       <div class="ev-kpi-grid" id="evKpiGrid"></div>
       <div class="ev-bar-grid">
         <div class="chart-card">
@@ -1201,7 +1229,7 @@
       <div id="abResults"></div>
     </div>
 
-    <!-- ═��� POST PREDICTION ══ -->
+    <!-- ══ POST PREDICTION ══ -->
     <div class="section" id="sec-fb-predict">
       <div style="margin-bottom:20px;">
         <h3 style="font-size:18px;font-weight:800;margin-bottom:4px;">貼文成效預測</h3>
@@ -1309,7 +1337,7 @@
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
             <div class="form-group">
               <label style="font-size:12px;font-weight:600;">月觸及目標</label>
-              <input type="number" id="target-reach" placeholder="���：200000" value="" style="padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;width:100%;">
+              <input type="number" id="target-reach" placeholder="例：200000" value="" style="padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;width:100%;">
             </div>
             <div class="form-group">
               <label style="font-size:12px;font-weight:600;">月互動目標</label>
@@ -1608,16 +1636,24 @@ function saveConfig() {
   localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
 }
 
+function sanitizeDates(data) {
+  const strip = d => d ? String(d).replace(/T[\d:.]+Z?$/,'').slice(0,10) : '';
+  const stripMonth = m => m ? String(m).replace(/T[\d:.]+Z?$/,'').slice(0,7) : '';
+  if (Array.isArray(data.posts)) data.posts.forEach(p => { if(p.date) p.date=strip(p.date); if(p.month) p.month=stripMonth(p.month); });
+  if (Array.isArray(data.events)) data.events.forEach(e => { if(e.date) e.date=strip(e.date); });
+  if (Array.isArray(data.media)) data.media.forEach(m => { if(m.date) m.date=strip(m.date); if(m.month) m.month=stripMonth(m.month); });
+  return data;
+}
 function loadStore() {
   try {
     const s = localStorage.getItem(STORE_KEY);
     if (s) {
       const d = JSON.parse(s);
       if (!d.kols) d.kols = [];
-      return d;
+      return sanitizeDates(d);
     }
   } catch(e) {}
-  return { posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: getBuiltinKols() };
+  return sanitizeDates({ posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: getBuiltinKols() });
 }
 
 function saveStore() {
@@ -1940,33 +1976,92 @@ function switchSection(module, sub) {
 // ═══════════════════════════════════════════
 let currentMonth = 'all';
 
-function selectMonth(btn, month) {
-  document.querySelectorAll('.month-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentMonth = month;
+// ── Shared Period Helper ──
+function getPostMonths() {
+  return [...new Set(store.posts.map(p => (p.month||p.date||'').slice(0,7)).filter(m => m.length === 7))].sort();
+}
+function getEventMonths() {
+  return [...new Set(store.events.map(e => (e.date||'').slice(0,7)).filter(m => m.length === 7))].sort();
+}
+function buildPeriodOptions(months) {
+  const years = [...new Set(months.map(m => m.slice(0,4)))].sort().reverse();
+  const quarters = [...new Set(months.map(m => { const q = Math.ceil(parseInt(m.slice(5,7))/3); return m.slice(0,4)+'-Q'+q; }))].sort().reverse();
+  const monthsSorted = [...months].sort().reverse();
+  return { years, quarters, months: monthsSorted };
+}
+function filterByPeriod(items, period, dateField) {
+  if (period === 'all') return items;
+  const df = dateField || 'month';
+  return items.filter(item => {
+    const d = df === 'date' ? (item.date||'').slice(0,7) : (item[df]||item.date||'').slice(0,7);
+    if (period.includes('-Q')) {
+      const [y, q] = period.split('-Q');
+      const m = parseInt(d.slice(5,7));
+      return d.startsWith(y) && Math.ceil(m/3) === parseInt(q);
+    }
+    if (period.length === 4) return d.startsWith(period);
+    return d === period;
+  });
+}
+function populatePeriodDropdown(selectEl, type, allMonths) {
+  const opts = buildPeriodOptions(allMonths);
+  let html = '';
+  if (type === 'year') html = opts.years.map(y => `<option value="${y}">${y} 年</option>`).join('');
+  else if (type === 'quarter') html = opts.quarters.map(q => `<option value="${q}">${q.replace('-Q',' 年 Q')} 季</option>`).join('');
+  else if (type === 'month') html = opts.months.map(m => `<option value="${m}">${m.slice(0,4)} 年 ${parseInt(m.slice(5,7))} 月</option>`).join('');
+  selectEl.innerHTML = html;
+  selectEl.style.display = type === 'all' ? 'none' : '';
+}
+
+// ── Overview Period ──
+function updateOverviewPeriod() {
+  const type = document.getElementById('ovPeriodType').value;
+  const valEl = document.getElementById('ovPeriodValue');
+  if (type === 'all') { valEl.style.display = 'none'; currentMonth = 'all'; renderOverview(); return; }
+  populatePeriodDropdown(valEl, type, getPostMonths());
+  applyOverviewPeriod();
+}
+function applyOverviewPeriod() {
+  const type = document.getElementById('ovPeriodType').value;
+  if (type === 'all') { currentMonth = 'all'; }
+  else { currentMonth = document.getElementById('ovPeriodValue').value; }
   renderOverview();
 }
 
-function renderOverviewMonths() {
-  const container = document.getElementById('overviewMonthSelector');
-  if (!container) return;
-  const months = [...new Set(store.posts.map(p => p.month).filter(Boolean))].sort().reverse();
-  const years = [...new Set(months.map(m => m.slice(0,4)))].sort().reverse();
-  let html = `<button class="month-btn${currentMonth==='all'?' active':''}" onclick="selectMonth(this,'all')">全部期間</button>`;
-  for (const year of years) {
-    const yMonths = months.filter(m => m.startsWith(year));
-    html += `<span style="display:inline-flex;align-items:center;margin-left:12px;margin-right:2px;font-size:11px;color:var(--text-muted);font-weight:700;letter-spacing:0.5px;">${year}</span>`;
-    for (const m of yMonths) {
-      const label = m.slice(5,7).replace(/^0/,'') + '月';
-      html += `<button class="month-btn${currentMonth===m?' active':''}" onclick="selectMonth(this,'${m}')">${label}</button>`;
-    }
-  }
-  container.innerHTML = html;
+// ── Posts Period ──
+let postsFilter = 'all';
+function updatePostsPeriod() {
+  const type = document.getElementById('postsPeriodType').value;
+  const valEl = document.getElementById('postsPeriodValue');
+  if (type === 'all') { valEl.style.display = 'none'; postsFilter = 'all'; renderPostsList(); return; }
+  populatePeriodDropdown(valEl, type, getPostMonths());
+  applyPostsPeriod();
+}
+function applyPostsPeriod() {
+  const type = document.getElementById('postsPeriodType').value;
+  if (type === 'all') { postsFilter = 'all'; }
+  else { postsFilter = document.getElementById('postsPeriodValue').value; }
+  renderPostsList();
+}
+
+// ── Event Dashboard Period ──
+let evDashFilter = 'all';
+function updateEvDashPeriod() {
+  const type = document.getElementById('evDashPeriodType').value;
+  const valEl = document.getElementById('evDashPeriodValue');
+  if (type === 'all') { valEl.style.display = 'none'; evDashFilter = 'all'; renderEventDashboard(); return; }
+  populatePeriodDropdown(valEl, type, getEventMonths());
+  applyEvDashPeriod();
+}
+function applyEvDashPeriod() {
+  const type = document.getElementById('evDashPeriodType').value;
+  if (type === 'all') { evDashFilter = 'all'; }
+  else { evDashFilter = document.getElementById('evDashPeriodValue').value; }
+  renderEventDashboard();
 }
 
 function renderOverview() {
-  renderOverviewMonths();
-  const posts = filterByMonth(store.posts, currentMonth);
+  const posts = filterByPeriod(store.posts, currentMonth);
   const reach = posts.reduce((a,p) => a + (p.reach||0), 0);
   const engage = posts.reduce((a,p) => a + (p.engage||0), 0);
   const clicks = posts.reduce((a,p) => a + (p.click||0), 0);
@@ -2131,11 +2226,6 @@ function renderOverview() {
   }).join('') || '<tr><td colspan="9"><div class="empty"><p>暫無貼文資料，請匯入 FB 數據或新增貼文</p></div></td></tr>';
 }
 
-function filterByMonth(posts, month) {
-  if (month === 'all') return posts;
-  return posts.filter(p => p.month === month);
-}
-
 function monthLabel(m) {
   const map = {
     '2026-03':'3月','2026-02':'2月','2026-01':'1月',
@@ -2174,49 +2264,24 @@ function typeBadge(type, imgType) {
 // ═══════════════════════════════════════════
 //  RENDER POSTS LIST
 // ═══════════════════════════════════════════
-let postsFilter = 'all';
-
-function filterPosts(btn, month) {
-  document.querySelectorAll('#sec-fb-posts .month-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  postsFilter = month;
-  renderPostsList();
-}
-
 function filterPostsBySearch() {
   renderPostsList();
 }
 
-function renderPostsMonths() {
-  const container = document.getElementById('postsMonthSelector');
-  if (!container) return;
-  const months = [...new Set(store.posts.map(p => p.month).filter(Boolean))].sort().reverse();
-  const years = [...new Set(months.map(m => m.slice(0,4)))].sort().reverse();
-  let html = `<button class="month-btn${postsFilter==='all'?' active':''}" onclick="filterPosts(this,'all')">全部</button>`;
-  for (const year of years) {
-    const yMonths = months.filter(m => m.startsWith(year));
-    html += `<span style="display:inline-flex;align-items:center;margin-left:12px;margin-right:2px;font-size:11px;color:var(--text-muted);font-weight:700;letter-spacing:0.5px;">${year}</span>`;
-    for (const m of yMonths) {
-      const label = m.slice(5,7).replace(/^0/,'') + '月';
-      html += `<button class="month-btn${postsFilter===m?' active':''}" onclick="filterPosts(this,'${m}')">${label}</button>`;
-    }
-  }
-  container.innerHTML = html;
-}
-
 function renderPostsList() {
-  renderPostsMonths();
-  let posts = filterByMonth(store.posts, postsFilter);
+  let posts = filterByPeriod(store.posts, postsFilter);
   const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
   if (q) posts = posts.filter(p => p.title.toLowerCase().includes(q));
   document.getElementById('postCount').textContent = `共 ${posts.length} 篇`;
   // Build sorted index map so edit/delete know the real store index
+  const periodFiltered = filterByPeriod(store.posts, postsFilter);
+  const periodSet = new Set(periodFiltered);
   const sorted = [...store.posts]
     .map((p, i) => ({ p, i }))
     .filter(({ p }) => {
-      const monthOk = postsFilter === 'all' || p.month === postsFilter;
+      const periodOk = periodSet.has(p);
       const qOk = !q || p.title.toLowerCase().includes(q);
-      return monthOk && qOk;
+      return periodOk && qOk;
     })
     .sort((a, b) => new Date(b.p.date) - new Date(a.p.date));
 
@@ -2710,7 +2775,7 @@ function deleteEvent(idx) {
 //  EVENT DASHBOARD
 // ═══════════════════════════════════════════
 function renderEventDashboard() {
-  const ev = store.events;
+  const ev = filterByPeriod(store.events, evDashFilter, 'date');
   if (!ev.length) {
     document.getElementById('evKpiGrid').innerHTML = '<p style="color:var(--text-muted);font-size:13px;">尚無活動資料</p>';
     return;
@@ -2777,7 +2842,7 @@ function renderEventDashboard() {
     }).join('');
 
   // Satisfaction chart
-  document.getElementById('evSatChart').innerHTML = [...store.events]
+  document.getElementById('evSatChart').innerHTML = [...ev]
     .filter(e=>e.sat>0)
     .sort((a,b)=>b.sat-a.sat)
     .map(e => {
@@ -3213,7 +3278,7 @@ function renderCalendar() {
 
 // ═══════════════════════════════════════════
 //  A/B ANALYSIS
-// ═════════════════════════════════════���═════
+// ═══════════════════════════════════════════
 function renderABAnalysis() {
   const el = document.getElementById('abResults');
   if (!el) return;
@@ -3241,7 +3306,7 @@ function renderABAnalysis() {
         <div class="ab-side ${aWin?'winner':'loser'}">
           <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:${aWin?'var(--brand)':'var(--text-sub)'}">${labelA} <small style="opacity:0.7">(${a.n}篇)</small></div>
           <div class="ab-metric" style="color:${aWin?'var(--brand)':'var(--text-sub)'}">${a.avgReach.toLocaleString()}</div>
-          <div class="ab-label">平���觸及</div>
+          <div class="ab-label">平均觸及</div>
           <div style="margin-top:8px;font-size:12px;color:var(--text-sub)">互動率 <strong>${a.avgER}%</strong></div>
         </div>
         <div class="ab-vs">VS</div>
@@ -3287,7 +3352,7 @@ function renderABAnalysis() {
 
   el.innerHTML =
     abCard('標題策略：問句式 vs 陳述式', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', questionPosts, '問句式標題', statementPosts, '陳述式標題') +
-    abCard('貼文形式：相片 vs 影片/Reels', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg>', photoPosts, '相片貼文', videoPosts, '影���/Reels') +
+    abCard('貼文形式：相片 vs 影片/Reels', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg>', photoPosts, '相片貼文', videoPosts, '影片/Reels') +
     abCard('發布時機：平日 vs 週末', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>', weekday, '平日（一～五）', weekend, '週末（六日）') +
     abCard('活動關聯：有 Campaign vs 無', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07"/></svg>', withCampaign, '有關聯活動', noCampaign, '無關聯活動') +
     abCard('內容類型：案例類 vs 衛教類', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>', casePosts, '案例類', eduPosts, '衛教類') +
@@ -3342,7 +3407,7 @@ function runPrediction() {
   });
 
   if (!totalWeight) {
-    el.innerHTML = '<div class="pred-card"><p style="color:var(--text-muted);text-align:center;padding:20px;">資料不���，請先匯入更多貼文數據</p></div>';
+    el.innerHTML = '<div class="pred-card"><p style="color:var(--text-muted);text-align:center;padding:20px;">資料不足，請先匯入更多貼文數據</p></div>';
     return;
   }
 
@@ -3489,10 +3554,10 @@ function exportReport() {
     @media print{body{padding:20px 30px;} .no-print{display:none;}}
   </style></head><body>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-    <h1>光田綜合醫院｜���銷成效月報</h1>
+    <h1>光田綜合醫院｜行銷成效月報</h1>
     <button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#006341;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">列印 / 存 PDF</button>
   </div>
-  <div class="sub">報表產出時間：${new Date().toLocaleString('zh-TW')} ��� 資料範圍：${months[0]||'—'} ~ ${months[months.length-1]||'—'}</div>
+  <div class="sub">報表產出時間：${new Date().toLocaleString('zh-TW')} ｜ 資料範圍：${months[0]||'—'} ~ ${months[months.length-1]||'—'}</div>
 
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-label">累計總觸及</div><div class="kpi-val">${total_reach.toLocaleString()}</div><div class="kpi-sub">${posts.length} 篇貼文</div></div>
