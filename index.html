@@ -1962,6 +1962,12 @@ function loadStore() {
     if (s) {
       const d = JSON.parse(s);
       if (!d.kols) d.kols = [];
+      // 自我修復：去除因先前同步 bug 造成的 date+title 完全重複
+      const dedup = (arr, keyFn) => { if (!Array.isArray(arr)) return []; const seen = new Set(); return arr.filter(x => { const k = keyFn(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
+      d.posts  = dedup(d.posts,  p => (p.date||'')+'|'+(p.title||''));
+      d.events = dedup(d.events, e => (e.date||'')+'|'+(e.name||''));
+      d.media  = dedup(d.media,  m => (m.date||'')+'|'+(m.name||''));
+      d.kols   = dedup(d.kols,   k => (k.date||'')+'|'+(k.name||''));
       return sanitizeDates(d);
     }
   } catch(e) {}
@@ -2043,10 +2049,18 @@ async function syncFromGAS() {
       if (p.month) p.month = normalizeDate(p.month).slice(0,7);
       if (!p.month && p.date) p.month = p.date.slice(0,7);
     });
-    store.posts  = mergeData(getBuiltinPosts(),  posts,  p => (p.date||'')+'|'+(p.title||''));
-    store.events = mergeData(getBuiltinEvents(), events, e => (e.date||'')+'|'+(e.name||''));
-    store.media  = mergeData(getBuiltinMedia(),  media,  m => (m.date||'')+'|'+(m.name||''));
-    store.kols   = mergeData(getBuiltinKols(),   kols,   k => (k.date||'')+'|'+(k.name||''));
+    // 同步邏輯：GAS 為真實資料的唯一來源，不與 demo 內建資料合併
+    // （合併會因 GAS 回傳 ISO 日期被時區轉換差 1 天，導致同一筆貼文重複出現）
+    store.posts  = Array.isArray(posts)  && posts.length  ? posts  : getBuiltinPosts();
+    store.events = Array.isArray(events) && events.length ? events : getBuiltinEvents();
+    store.media  = Array.isArray(media)  && media.length  ? media  : getBuiltinMedia();
+    store.kols   = Array.isArray(kols)   && kols.length   ? kols   : getBuiltinKols();
+    // 同一份資料內若有完全相同的 date+title 才去重（防止 GAS 端資料本身重複）
+    const dedup = (arr, keyFn) => { const seen = new Set(); return arr.filter(x => { const k = keyFn(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
+    store.posts  = dedup(store.posts,  p => (p.date||'')+'|'+(p.title||''));
+    store.events = dedup(store.events, e => (e.date||'')+'|'+(e.name||''));
+    store.media  = dedup(store.media,  m => (m.date||'')+'|'+(m.name||''));
+    store.kols   = dedup(store.kols,   k => (k.date||'')+'|'+(k.name||''));
     saveStore();
     renderOverview();
     renderPostsList();
