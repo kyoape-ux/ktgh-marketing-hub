@@ -793,6 +793,9 @@
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> KOL 成效追蹤
     </a>
     <div class="nav-section">系統</div>
+    <a class="nav-item" onclick="switchSection('settings','backup')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></span> 資料備份還原
+    </a>
     <a class="nav-item" onclick="switchSection('settings','main')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> 設定 / Google Sheets
     </a>
@@ -1606,6 +1609,45 @@
       </div>
     </div>
 
+    <!-- ══ BACKUP & RESTORE ══ -->
+    <div class="section" id="sec-settings-backup">
+      <div style="max-width:900px;">
+        <div style="background:var(--surface);border-radius:14px;padding:28px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+            本機自動備份（最近 5 份）
+          </h3>
+          <p style="font-size:12.5px;color:var(--text-sub);margin-bottom:16px;line-height:1.6;">
+            系統會在以下時機自動建立本機快照：<br>
+            ・ 每次 Google Sheets 同步之前<br>
+            ・ 每次推送/匯入貼文之前<br>
+            ・ 每次刪除貼文或活動之前<br>
+            快照僅保存在本裝置的瀏覽器中，最多保留最近 5 份。
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+            <button class="btn btn-outline" data-perm="edit" onclick="manualSnapshot()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              立即建立快照
+            </button>
+            <button class="btn btn-outline" onclick="downloadBackupJson()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              下載備份檔（JSON）
+            </button>
+            <button class="btn btn-outline" data-perm="admin" onclick="refreshBackupList()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+              重新整理
+            </button>
+          </div>
+          <div id="backupList"></div>
+        </div>
+        <div style="background:var(--surface);border-radius:14px;padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:10px;">已刪除資料（軟刪除）</h3>
+          <p style="font-size:12.5px;color:var(--text-sub);margin-bottom:12px;line-height:1.6;">刪除的貼文/活動不會真正消失，會標記為「已刪除」。在此可還原。</p>
+          <div id="trashList"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ SETTINGS ══ -->
     <div class="section" id="sec-settings-main">
       <div style="max-width:640px;">
@@ -1962,8 +2004,8 @@ function loadStore() {
     if (s) {
       const d = JSON.parse(s);
       if (!d.kols) d.kols = [];
-      // 自我修復：去除因先前同步 bug 造成的 date+title 完全重複
-      const dedup = (arr, keyFn) => { if (!Array.isArray(arr)) return []; const seen = new Set(); return arr.filter(x => { const k = keyFn(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
+      // 自我修復：去除因先前同步 bug 造成的 date+title 完全重複（忽略已軟刪除的）
+      const dedup = (arr, keyFn) => { if (!Array.isArray(arr)) return []; const seen = new Set(); return arr.filter(x => { if (x && x.deleted_at) return true; const k = keyFn(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
       d.posts  = dedup(d.posts,  p => (p.date||'')+'|'+(p.title||''));
       d.events = dedup(d.events, e => (e.date||'')+'|'+(e.name||''));
       d.media  = dedup(d.media,  m => (m.date||'')+'|'+(m.name||''));
@@ -1974,8 +2016,189 @@ function loadStore() {
   return sanitizeDates({ posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: getBuiltinKols() });
 }
 
+// 取得有效（未被軟刪除）的資料 — 所有渲染/統計都應使用這些 getter
+function activePosts()  { return (store.posts  || []).filter(x => !x.deleted_at); }
+function activeEvents() { return (store.events || []).filter(x => !x.deleted_at); }
+function activeMedia()  { return (store.media  || []).filter(x => !x.deleted_at); }
+function activeKols()   { return (store.kols   || []).filter(x => !x.deleted_at); }
+
 function saveStore() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+//  ROLLING SNAPSHOTS (防誤刪/誤寫保險機制)
+// ═══════════════════════════════════════════
+const SNAP_KEY = 'ktgh_marketing_snapshots_v1';
+const MAX_SNAPSHOTS = 5;
+
+function loadSnapshots() {
+  try { return JSON.parse(localStorage.getItem(SNAP_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveSnapshots(arr) {
+  try { localStorage.setItem(SNAP_KEY, JSON.stringify(arr)); } catch(e) {
+    // 空間不足：丟掉最舊的再試
+    if (arr.length > 1) { saveSnapshots(arr.slice(-Math.floor(arr.length/2))); }
+  }
+}
+function takeSnapshot(reason) {
+  const snaps = loadSnapshots();
+  snaps.push({
+    ts: new Date().toISOString(),
+    reason: reason || '手動備份',
+    role: getRole() || 'unknown',
+    data: {
+      posts:  store.posts  || [],
+      events: store.events || [],
+      media:  store.media  || [],
+      kols:   store.kols   || [],
+    },
+  });
+  // 保留最近 N 份
+  while (snaps.length > MAX_SNAPSHOTS) snaps.shift();
+  saveSnapshots(snaps);
+}
+function restoreSnapshot(idx) {
+  const snaps = loadSnapshots();
+  if (idx < 0 || idx >= snaps.length) return false;
+  const snap = snaps[idx];
+  // 還原前先備份「當下」狀態，避免回不去
+  takeSnapshot('還原前自動備份');
+  store.posts  = snap.data.posts  || [];
+  store.events = snap.data.events || [];
+  store.media  = snap.data.media  || [];
+  store.kols   = snap.data.kols   || [];
+  saveStore();
+  return true;
+}
+function formatSnapTs(iso) {
+  try { return new Date(iso).toLocaleString('zh-TW', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }); }
+  catch(e) { return iso; }
+}
+
+function manualSnapshot() {
+  if (!requireEdit()) return;
+  takeSnapshot('手動建立');
+  showToast('已建立快照');
+  renderBackupSection();
+}
+
+function downloadBackupJson() {
+  const payload = {
+    exported_at: new Date().toISOString(),
+    role: getRole() || 'unknown',
+    store: {
+      posts:  store.posts  || [],
+      events: store.events || [],
+      media:  store.media  || [],
+      kols:   store.kols   || [],
+    },
+    snapshots: loadSnapshots(),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  a.href = url; a.download = `ktgh-backup-${ts}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('備份檔已下載');
+}
+
+function refreshBackupList() { renderBackupSection(); showToast('已重新整理'); }
+
+function doRestoreSnapshot(idx) {
+  if (!requireEdit()) return;
+  const snaps = loadSnapshots();
+  const snap = snaps[idx];
+  if (!snap) { showToast('找不到該備份'); return; }
+  const msg = `確定還原到這份備份？\n\n時間：${formatSnapTs(snap.ts)}\n原因：${snap.reason}\n內容：貼文 ${(snap.data.posts||[]).length} / 活動 ${(snap.data.events||[]).length} / 媒體 ${(snap.data.media||[]).length}\n\n還原前系統會先自動備份當下狀態。`;
+  if (!confirm(msg)) return;
+  if (restoreSnapshot(idx)) {
+    renderOverview(); renderPostsList(); renderEvents(); renderMedia(); renderKols();
+    renderBackupSection();
+    showToast('已還原');
+  } else {
+    showToast('還原失敗');
+  }
+}
+
+function restoreDeleted(type, stableKey) {
+  if (!requireEdit()) return;
+  const arr = store[type];
+  if (!Array.isArray(arr)) return;
+  const item = arr.find(x => (x.date||'')+'|'+(x.title||x.name||'') === stableKey);
+  if (!item) { showToast('找不到項目'); return; }
+  delete item.deleted_at;
+  delete item.deleted_by;
+  saveStore();
+  renderOverview(); renderPostsList(); renderEvents(); renderMedia();
+  renderBackupSection();
+  showToast('已還原該筆資料');
+}
+
+function permanentlyDelete(type, stableKey) {
+  if (!isAdmin()) { showToast('僅組長可永久刪除'); return; }
+  if (!confirm('此動作無法復原，確定永久刪除該筆資料？')) return;
+  const arr = store[type];
+  if (!Array.isArray(arr)) return;
+  const i = arr.findIndex(x => (x.date||'')+'|'+(x.title||x.name||'') === stableKey);
+  if (i === -1) return;
+  takeSnapshot('永久刪除前');
+  arr.splice(i, 1);
+  saveStore();
+  renderBackupSection();
+  showToast('已永久刪除');
+}
+
+function renderBackupSection() {
+  const bl = document.getElementById('backupList');
+  if (bl) {
+    const snaps = loadSnapshots();
+    if (!snaps.length) {
+      bl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:12px;background:var(--accent);border-radius:8px;">尚無快照。第一次同步或匯入後就會自動建立。</div>';
+    } else {
+      bl.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' +
+        [...snaps].reverse().map((s, revIdx) => {
+          const realIdx = snaps.length - 1 - revIdx;
+          const p = (s.data.posts||[]).length, e = (s.data.events||[]).length, m = (s.data.media||[]).length, k = (s.data.kols||[]).length;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--accent);border:1px solid var(--border);border-radius:10px;gap:10px;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">${formatSnapTs(s.ts)} <span style="font-size:11px;color:var(--text-muted);font-weight:500;">· ${s.reason}</span></div>
+              <div style="font-size:11.5px;color:var(--text-sub);margin-top:2px;">貼文 ${p} / 活動 ${e} / 媒體 ${m} / KOL ${k} · 操作者 ${s.role}</div>
+            </div>
+            <button class="btn btn-outline" data-perm="edit" style="padding:6px 14px;font-size:12px;" onclick="doRestoreSnapshot(${realIdx})">還原</button>
+          </div>`;
+        }).join('') + '</div>';
+    }
+  }
+  const tl = document.getElementById('trashList');
+  if (tl) {
+    const trashed = [];
+    (store.posts||[]).forEach(p => { if (p.deleted_at) trashed.push({ type:'posts', label:p.title, at:p.deleted_at, by:p.deleted_by, key:(p.date||'')+'|'+(p.title||'') }); });
+    (store.events||[]).forEach(e => { if (e.deleted_at) trashed.push({ type:'events', label:e.name, at:e.deleted_at, by:e.deleted_by, key:(e.date||'')+'|'+(e.name||'') }); });
+    (store.media||[]).forEach(m => { if (m.deleted_at) trashed.push({ type:'media', label:m.title||m.name, at:m.deleted_at, by:m.deleted_by, key:(m.date||'')+'|'+(m.name||'') }); });
+    if (!trashed.length) {
+      tl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:12px;background:var(--accent);border-radius:8px;">回收筒是空的。</div>';
+    } else {
+      trashed.sort((a,b) => new Date(b.at) - new Date(a.at));
+      tl.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px;">' +
+        trashed.map(t => {
+          const tLabel = { posts:'貼文', events:'活動', media:'媒體' }[t.type] || t.type;
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--accent);border:1px solid var(--border);border-radius:10px;gap:10px;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12.5px;font-weight:600;color:var(--text);"><span class="badge badge-gray" style="margin-right:6px;">${tLabel}</span>${t.label||'(無標題)'}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">刪除時間 ${formatSnapTs(t.at)} · by ${t.by||'—'}</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="action-btn edit" data-perm="edit" onclick="restoreDeleted('${t.type}','${t.key.replace(/'/g,"\\'")}')">還原</button>
+              <button class="action-btn del" data-perm="admin" onclick="permanentlyDelete('${t.type}','${t.key.replace(/'/g,"\\'")}')">永久刪除</button>
+            </div>
+          </div>`;
+        }).join('') + '</div>';
+    }
+  }
+  if (typeof applyPermissions === 'function') applyPermissions();
 }
 
 // ═══════════════════════════════════════════
@@ -2015,6 +2238,8 @@ async function gasGet(action, params = {}) {
 async function syncFromGAS() {
   if (!config.gasUrl) { switchSection('settings','main'); showToast('請先填入 Google Sheets Web App URL'); return; }
   setSyncStatus('同步中…', 'var(--brand)');
+  // 同步前先自動快照本機當下狀態，萬一 GAS 回傳異常可還原
+  takeSnapshot('GAS 同步前');
   try {
     const [posts, events, media, kols] = await Promise.all([
       gasGet('getPosts'),
@@ -2079,8 +2304,16 @@ async function syncFromGAS() {
 
 async function pushAllToGAS() {
   if (!config.gasUrl) { showToast('請先設定 GAS URL'); return; }
+  if (!isAdmin()) { showToast('僅組長可執行「推送全部資料到 Sheets」'); return; }
+  // 二次確認：大量寫入會覆蓋 Sheets，需輸入確認字串
+  const confirmWord = '推送覆蓋';
+  const msg = `警告：此動作會將本機全部資料推送到 Google Sheets，可能覆蓋 Sheets 端既有資料。\n\n本機目前：\n・貼文 ${activePosts().length} 篇\n・活動 ${activeEvents().length} 場\n・媒體 ${activeMedia().length} 則\n・KOL  ${activeKols().length} 筆\n\n請輸入「${confirmWord}」以繼續：`;
+  const input = prompt(msg);
+  if (input !== confirmWord) { showToast('已取消推送'); return; }
   const statusEl = document.getElementById('pushStatus');
   if (statusEl) statusEl.textContent = '推送中…';
+  // 推送前先自動快照本機狀態
+  takeSnapshot('推送到 Sheets 前');
   try {
     await gasGet('importPosts',   { data: store.posts   });
     await gasGet('bulkAddEvents', { data: store.events  });
@@ -2294,6 +2527,7 @@ function switchSection(module, sub) {
     'media-list':     ['媒體新聞曝光',         '媒體露出追蹤'],
     'media-add':      ['新增媒體記錄',         '填寫媒體曝光資料'],
     'settings-main':    ['設定',             'Google Sheets 串接與資料管理'],
+    'settings-backup':  ['資料備份還原',      '本機自動快照與軟刪除回收筒'],
     'event-dashboard':  ['活動成效看板',      '活動場次、出席率、滿意度分析'],
     'campaign-hub':     ['Campaign 成果看板', '跨平台活動整合成效追蹤'],
     'kol-list':         ['KOL 成效追蹤',      'KOL / 網紅合作觸及與互動'],
@@ -2315,6 +2549,7 @@ function switchSection(module, sub) {
   if (key === 'kol-add')       updateCampaignDatalist();
   if (key === 'fb-calendar')   renderCalendar();
   if (key === 'fb-ab')         renderABAnalysis();
+  if (key === 'settings-backup') renderBackupSection();
   if (key === 'fb-predict')    runPrediction();
   if (key === 'settings-main') loadTargetInputs();
 }
@@ -2326,10 +2561,10 @@ let currentMonth = 'all';
 
 // ── Shared Period Helper ──
 function getPostMonths() {
-  return [...new Set(store.posts.map(p => (p.month||p.date||'').slice(0,7)).filter(m => m.length === 7))].sort();
+  return [...new Set(activePosts().map(p => (p.month||p.date||'').slice(0,7)).filter(m => m.length === 7))].sort();
 }
 function getEventMonths() {
-  return [...new Set(store.events.map(e => (e.date||'').slice(0,7)).filter(m => m.length === 7))].sort();
+  return [...new Set(activeEvents().map(e => (e.date||'').slice(0,7)).filter(m => m.length === 7))].sort();
 }
 function buildPeriodOptions(months) {
   const years = [...new Set(months.map(m => m.slice(0,4)))].sort().reverse();
@@ -2427,7 +2662,7 @@ function applyEvListPeriod() {
 }
 
 function renderOverview() {
-  const posts = filterByPeriod(store.posts, currentMonth);
+  const posts = filterByPeriod(activePosts(), currentMonth);
   const reach = posts.reduce((a,p) => a + (p.reach||0), 0);
   const engage = posts.reduce((a,p) => a + (p.engage||0), 0);
   const clicks = posts.reduce((a,p) => a + (p.click||0), 0);
@@ -2635,16 +2870,18 @@ function filterPostsBySearch() {
 }
 
 function renderPostsList() {
-  let posts = filterByPeriod(store.posts, postsFilter);
+  const active = activePosts();
+  let posts = filterByPeriod(active, postsFilter);
   const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
   if (q) posts = posts.filter(p => p.title.toLowerCase().includes(q));
   document.getElementById('postCount').textContent = `共 ${posts.length} 篇`;
   // Build sorted index map so edit/delete know the real store index
-  const periodFiltered = filterByPeriod(store.posts, postsFilter);
+  const periodFiltered = filterByPeriod(active, postsFilter);
   const periodSet = new Set(periodFiltered);
   const sorted = [...store.posts]
     .map((p, i) => ({ p, i }))
     .filter(({ p }) => {
+      if (p.deleted_at) return false;
       const periodOk = periodSet.has(p);
       const qOk = !q || p.title.toLowerCase().includes(q);
       return periodOk && qOk;
@@ -2707,10 +2944,11 @@ function renderEvents() {
 
   // ── 套用篩選 ──
   let filtered = store.events.map((e,i)=>({e,i}))
+    .filter(({e}) => !e.deleted_at)
     .sort((a,b)=>new Date(b.e.date)-new Date(a.e.date));
   // 期間篩選
   if (evListFilter !== 'all') {
-    const periodSet = new Set(filterByPeriod(store.events, evListFilter, 'date'));
+    const periodSet = new Set(filterByPeriod(activeEvents(), evListFilter, 'date'));
     filtered = filtered.filter(({e}) => periodSet.has(e));
   }
   if (type   !== 'all') filtered = filtered.filter(({e}) => e.type === type);
@@ -2719,7 +2957,7 @@ function renderEvents() {
 
   // ── 計數標籤 ──
   const countEl = document.getElementById('evCountLabel');
-  if (countEl) countEl.textContent = `共 ${filtered.length} / ${store.events.length} 筆`;
+  if (countEl) countEl.textContent = `共 ${filtered.length} / ${activeEvents().length} 筆`;
 
   if (!filtered.length) {
     tbody.innerHTML = '<tr><td colspan="11"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p>' + (store.events.length ? '找不到符合條件的活動' : '尚未新增活動記錄') + '</p></div></td></tr>';
@@ -2791,11 +3029,12 @@ function addEvent() {
 // ═══════════════════════════════════════════
 function renderMedia() {
   const tbody = document.getElementById('mediaListTbody');
-  if (!store.media.length) {
+  const list = activeMedia();
+  if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></div><p>尚未新增媒體記錄</p></div></td></tr>';
     return;
   }
-  tbody.innerHTML = store.media.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(m => {
+  tbody.innerHTML = list.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(m => {
     const nc = m.nature==='正面報導'?'badge-green':m.nature==='負面/需關注'?'badge-red':'badge-gray';
     return `<tr>
       <td class="text-mono">${m.date}</td>
@@ -2978,13 +3217,24 @@ function closeImportModal() {
 }
 
 function confirmImport() {
+  if (!requireEdit()) return;
   const imported = _pendingPosts.slice();
+  // 二次確認：明確告知將新增的筆數
+  const confirmWord = '確認匯入';
+  const input = prompt(`即將新增 ${imported.length} 篇貼文到資料庫。\n此動作會同步寫入 Google Sheets。\n\n請輸入「${confirmWord}」以繼續：`);
+  if (input !== confirmWord) {
+    showToast('已取消匯入');
+    return;
+  }
+  // 匯入前自動快照（保險）
+  takeSnapshot(`匯入 ${imported.length} 筆前`);
   store.posts = store.posts.concat(imported);
   saveStore();
   _gasWrite('importPosts', imported);
   closeImportModal();
   renderOverview();
-  showToast(`已匯入 ${imported.length} 篇貼文`);
+  renderPostsList();
+  showToast(`已匯入 ${imported.length} 篇貼文（已建立還原點）`);
   const resultEl = document.getElementById('uploadResult');
   if (resultEl) resultEl.innerHTML = `<div style="background:var(--accent);border-radius:12px;padding:16px 20px;border:1px solid var(--border);font-size:13.5px;color:var(--brand);font-weight:600;">✓ 成功匯入 ${_pendingPosts.length} 篇貼文</div>`;
 }
@@ -3072,12 +3322,16 @@ function savePost() {
 
 function deletePost(idx) {
   if (!requireEdit()) return;
-  if (!confirm(`確定刪除「${store.posts[idx].title}」？`)) return;
-  store.posts.splice(idx, 1);
+  const p = store.posts[idx];
+  if (!p) return;
+  if (!confirm(`確定刪除「${p.title}」？\n\n（採軟刪除，可從「資料備份」還原）`)) return;
+  takeSnapshot('刪除貼文前');
+  p.deleted_at = new Date().toISOString();
+  p.deleted_by = getRole() || 'unknown';
   saveStore();
   renderPostsList();
   renderOverview();
-  showToast('貼文已刪除');
+  showToast('貼文已刪除（可從資料備份還原）');
 }
 
 // ═══════════════════════════════════════════
@@ -3133,18 +3387,22 @@ function saveEventEdit() {
 
 function deleteEvent(idx) {
   if (!requireEdit()) return;
-  if (!confirm(`確定刪除「${store.events[idx].name}」？`)) return;
-  store.events.splice(idx, 1);
+  const e = store.events[idx];
+  if (!e) return;
+  if (!confirm(`確定刪除「${e.name}」？\n\n（採軟刪除，可從「資料備份」還原）`)) return;
+  takeSnapshot('刪除活動前');
+  e.deleted_at = new Date().toISOString();
+  e.deleted_by = getRole() || 'unknown';
   saveStore();
   renderEvents();
-  showToast('活動已刪除');
+  showToast('活動已刪除（可從資料備份還原）');
 }
 
 // ═══════════════════════════════════════════
 //  EVENT DASHBOARD
 // ═══════════════════════════════════════════
 function renderEventDashboard() {
-  const ev = filterByPeriod(store.events, evDashFilter, 'date');
+  const ev = filterByPeriod(activeEvents(), evDashFilter, 'date');
   if (!ev.length) {
     document.getElementById('evKpiGrid').innerHTML = '<p style="color:var(--text-muted);font-size:13px;">尚無活動資料</p>';
     return;
@@ -3371,7 +3629,7 @@ function copyPrompt() {
 function updateCampaignDatalist() {
   const dl = document.getElementById('campaignDatalist');
   if (!dl) return;
-  const names = [...new Set(store.events.map(e => e.name))];
+  const names = [...new Set(activeEvents().map(e => e.name))];
   dl.innerHTML = names.map(n => `<option value="${n}">`).join('');
 }
 
@@ -3381,16 +3639,17 @@ function renderCampaignHub() {
   document.getElementById('campaignDetailView').style.display = 'none';
 
   const grid = document.getElementById('campaignCardGrid');
-  if (!store.events.length) {
+  const evList = activeEvents();
+  if (!evList.length) {
     grid.innerHTML = `<div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:.4;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p>尚未建立活動記錄<br><small style="font-size:12px;color:var(--text-muted);">請先在「新增活動回報」新增活動，再將 FB 貼文與媒體曝光關聯至該活動</small></p></div>`;
     return;
   }
 
-  const sorted = [...store.events].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sorted = [...evList].sort((a, b) => new Date(b.date) - new Date(a.date));
   grid.innerHTML = sorted.map(ev => {
     const evName = ev.name;
-    const linkedPosts = store.posts.filter(p => p.campaign === evName);
-    const linkedMedia = store.media.filter(m => m.campaign === evName);
+    const linkedPosts = activePosts().filter(p => p.campaign === evName);
+    const linkedMedia = activeMedia().filter(m => m.campaign === evName);
     const fbReach    = linkedPosts.reduce((s, p) => s + (p.reach||0), 0);
     const mediaReach = linkedMedia.reduce((s, m) => s + (m.reach||0), 0);
     const totalReach = fbReach + mediaReach;
@@ -3416,14 +3675,14 @@ function renderCampaignHub() {
 }
 
 function renderCampaignDetail(name) {
-  const ev = store.events.find(e => e.name === name);
+  const ev = activeEvents().find(e => e.name === name);
   if (!ev) return;
 
   document.getElementById('campaignListView').style.display  = 'none';
   document.getElementById('campaignDetailView').style.display = '';
 
-  const linkedPosts = store.posts.filter(p => p.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
-  const linkedMedia = store.media.filter(m => m.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const linkedPosts = activePosts().filter(p => p.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const linkedMedia = activeMedia().filter(m => m.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
   const fbReach    = linkedPosts.reduce((s, p) => s + (p.reach||0), 0);
   const mediaReach = linkedMedia.reduce((s, m) => s + (m.reach||0), 0);
   const totalReach = fbReach + mediaReach;
@@ -3499,11 +3758,11 @@ function renderCampaignDetail(name) {
 }
 
 function openCampaignReportModal(name) {
-  const ev = store.events.find(e => e.name === name);
+  const ev = activeEvents().find(e => e.name === name);
   if (!ev) return;
 
-  const linkedPosts = store.posts.filter(p => p.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
-  const linkedMedia = store.media.filter(m => m.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const linkedPosts = activePosts().filter(p => p.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const linkedMedia = activeMedia().filter(m => m.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
   const fbReach    = linkedPosts.reduce((s, p) => s + (p.reach||0), 0);
   const mediaReach = linkedMedia.reduce((s, m) => s + (m.reach||0), 0);
   const totalReach = fbReach + mediaReach;
@@ -3556,12 +3815,13 @@ function copyCampaignReport() {
 function renderKols() {
   updateCampaignDatalist();
   const tbody = document.getElementById('kolListTbody');
-  if (!store.kols || !store.kols.length) {
+  const list = activeKols();
+  if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="11"><div class="empty"><p>尚未新增 KOL 記錄</p></div></td></tr>';
     return;
   }
   const platCls = { Facebook:'kol-fb', Instagram:'kol-ig', YouTube:'kol-yt', LINE:'kol-line' };
-  tbody.innerHTML = [...store.kols].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(k => {
+  tbody.innerHTML = [...list].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(k => {
     const cls = platCls[k.platform] || 'kol-other';
     const er = k.reach ? (k.engage/k.reach*100).toFixed(1) : '—';
     const erColor = er !== '—' ? (parseFloat(er)>=3?'var(--brand)':parseFloat(er)>=1?'var(--gold)':'var(--warn)') : '';
@@ -3633,7 +3893,7 @@ function renderCalendar() {
   const prefix = `${calYear}-${mm}`;
   titleEl.textContent = `${calYear} 年 ${calMonth+1} 月`;
 
-  const posts = store.posts.filter(p => (p.date||'').startsWith(prefix));
+  const posts = activePosts().filter(p => (p.date||'').startsWith(prefix));
   const firstDay = new Date(calYear, calMonth, 1).getDay();
   const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
   const today = new Date(); const todayStr = today.toISOString().slice(0,10);
@@ -3690,7 +3950,7 @@ function renderCalendar() {
 function renderABAnalysis() {
   const el = document.getElementById('abResults');
   if (!el) return;
-  const posts = store.posts;
+  const posts = activePosts();
 
   // Helper
   const stats = (arr) => {
@@ -3778,7 +4038,7 @@ function runPrediction() {
   const titleStyle = document.getElementById('pred-titlestyle')?.value || 'statement';
   const phase = document.getElementById('pred-phase')?.value || '一般貼文';
 
-  const posts = store.posts;
+  const posts = activePosts();
 
   // Filter matching posts
   const byCat = posts.filter(p => p.cat === cat);
@@ -3918,9 +4178,9 @@ function loadTargetInputs() {
 function exportReport() {
   // Serialize data for the report window
   const rptData = JSON.stringify({
-    posts: store.posts,
-    events: store.events,
-    media: store.media || []
+    posts: activePosts(),
+    events: activeEvents(),
+    media: activeMedia()
   });
 
   const w = window.open('', '_blank', 'width=960,height=750');
