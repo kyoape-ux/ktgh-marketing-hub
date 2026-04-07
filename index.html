@@ -4401,7 +4401,7 @@ function updateEventPrediction() {
 // ═══════════════════════════════════════════
 function openHealthArtReport() {
   const periodLabel = (evDashFilter && evDashFilter !== 'all') ? evDashFilter : '全部期間';
-  const ev = filterByPeriod(activeEvents(), evDashFilter, 'date');
+  const ev = filterByPeriod(activeEvents(), evDashFilter, 'date').slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   if (!ev.length) { showToast('目前篩選範圍內無活動資料'); return; }
 
   // Aggregate OKR by type
@@ -4424,141 +4424,256 @@ function openHealthArtReport() {
   const totalAttend = ev.reduce((s,e) => s + (+e.attend||0), 0);
   const totalReach  = ev.reduce((s,e) => s + (+e.reach||0), 0);
   const withReg     = ev.filter(e => e.reg > 0);
-  const avgRate     = withReg.length ? Math.round(withReg.reduce((s,e) => s + e.attend/e.reg*100, 0) / withReg.length) : 0;
+  const avgRate     = withReg.length ? Math.round(withReg.reduce((s,e) => s + e.attend/e.reg*100, 0) / withReg.length * 10) / 10 : 0;
   const withSat     = ev.filter(e => e.sat > 0);
   const avgSat      = withSat.length ? (withSat.reduce((s,e) => s + e.sat, 0) / withSat.length).toFixed(1) : '—';
 
+  // Top performing topics (rate >= 90%)
+  const highlightEvents = ev.filter(e => e.reg > 0 && (e.attend/e.reg) >= 0.9)
+    .sort((a,b) => (b.attend/b.reg) - (a.attend/a.reg));
+
   // Linked posts for marketing section
   const postsAll = activePosts();
-  const periodFilteredPosts = filterByPeriod(postsAll, evDashFilter, 'date');
+  const periodFilteredPosts = filterByPeriod(postsAll, evDashFilter, 'date')
+    .slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   const mktReach = periodFilteredPosts.reduce((s,p) => s + (+p.reach||0), 0);
   const mktCount = periodFilteredPosts.length;
   const mktAvg   = mktCount ? Math.round(mktReach / mktCount) : 0;
-  const mktInteract = periodFilteredPosts.reduce((s,p) => s + (+p.likes||0) + (+p.comments||0) + (+p.shares||0), 0);
+  // Top reach posts (★)
+  const reachSorted = periodFilteredPosts.slice().sort((a,b)=>(+b.reach||0)-(+a.reach||0));
+  const topReachIds = new Set(reachSorted.slice(0,2).map(p => p.id || (p.date+'|'+p.content)));
+
+  // Period derived label (e.g. 2025-10 → 第四季)
+  let quarterLabel = '';
+  if (/^\d{4}-\d{2}$/.test(periodLabel)) {
+    const m = +periodLabel.split('-')[1];
+    const q = Math.ceil(m/3);
+    quarterLabel = '第' + ['一','二','三','四'][q-1] + '季 ('+periodLabel+')';
+  } else if (/^\d{4}-Q\d$/.test(periodLabel)) {
+    const q = +periodLabel.split('Q')[1];
+    quarterLabel = '第' + ['一','二','三','四'][q-1] + '季 ('+periodLabel+')';
+  } else {
+    quarterLabel = periodLabel;
+  }
 
   const rptData = JSON.stringify({
     ev, byType, totalCount, totalReg, totalSample, totalAttend, totalReach,
-    avgRate, avgSat, mktReach, mktCount, mktAvg, mktInteract, periodLabel
+    avgRate, avgSat, highlightEvents, posts: periodFilteredPosts, topReachIds: Array.from(topReachIds),
+    mktReach, mktCount, mktAvg, periodLabel, quarterLabel
   });
 
+  // Build the document via array.join for readability
+  const css = [
+    "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Inter:wght@700;900&display=swap');",
+    '*{margin:0;padding:0;box-sizing:border-box;}',
+    "body{font-family:'Noto Sans TC',sans-serif;background:#F5F5F5;color:#1A1A2E;line-height:1.65;padding:20px 0;}",
+    '.page{background:#fff;max-width:880px;margin:0 auto 20px;padding:60px 70px 50px;box-shadow:0 2px 12px rgba(0,0,0,0.08);min-height:1100px;page-break-after:always;}',
+    '.cover h1{font-size:28px;font-weight:900;color:#1B4332;text-align:center;margin:120px 0 30px;letter-spacing:2px;}',
+    '.cover .deco{width:80px;height:4px;background:#2D6A4F;margin:0 auto 40px;}',
+    '.cover .info{font-size:14px;color:#444;text-align:center;margin-bottom:8px;}',
+    '.cover .info b{color:#2D6A4F;}',
+    '.cover .summary{margin:60px 40px 0;padding:24px 28px;background:#F0F7F4;border-left:5px solid #2D6A4F;font-size:13px;color:#444;line-height:1.9;border-radius:4px;}',
+    'h2.sec-title{font-size:18px;font-weight:900;color:#1B4332;margin:30px 0 16px;padding-bottom:10px;border-bottom:3px solid #2D6A4F;display:flex;align-items:center;gap:8px;}',
+    'h2.sec-title:first-child{margin-top:0;}',
+    'h3{font-size:14px;font-weight:700;color:#2D6A4F;margin:18px 0 10px;padding-left:10px;border-left:4px solid #52B788;}',
+    'p{font-size:13px;color:#444;margin-bottom:10px;text-indent:0;}',
+    'table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0 18px;border:1.5px solid #2D6A4F;}',
+    'th{background:#2D6A4F;color:#fff;padding:10px 12px;text-align:left;font-weight:700;font-size:12px;border:1px solid #2D6A4F;}',
+    'th.center,td.center{text-align:center;}',
+    'td{padding:9px 12px;border:1px solid #D4E5DB;vertical-align:top;color:#333;}',
+    'tr:nth-child(even) td{background:#F7FBF8;}',
+    '.badge{display:inline-block;padding:2px 8px;border-radius:10px;background:#E8F0EC;color:#2D6A4F;font-size:10px;font-weight:700;}',
+    '.star{color:#F59E0B;font-weight:900;font-size:13px;}',
+    '.high{color:#2D6A4F;font-weight:900;}',
+    '.callout{background:#FFF7E6;border-left:4px solid #F59E0B;padding:14px 18px;margin:14px 0;font-size:13px;border-radius:4px;line-height:1.8;}',
+    '.callout b{color:#92400E;}',
+    '.editable{background:#FAFFFB;border:1.5px dashed #B7D7C8;padding:12px 16px;margin:8px 0 16px;font-size:13px;border-radius:6px;color:#333;line-height:1.9;min-height:24px;}',
+    '.editable:hover{background:#F0F7F4;border-color:#52B788;}',
+    '.editable:focus{background:#fff;outline:none;border-color:#2D6A4F;border-style:solid;box-shadow:0 0 0 3px rgba(45,106,79,0.15);}',
+    '.editable[data-placeholder]:empty:before{content:attr(data-placeholder);color:#aaa;font-style:italic;}',
+    '.tip{font-size:11px;color:#888;margin:4px 0 12px;font-style:italic;}',
+    'ul{margin:8px 0 14px 24px;font-size:13px;color:#444;line-height:1.9;} li{margin-bottom:4px;}',
+    '.numlist{counter-reset:nl;list-style:none;margin:12px 0 14px 0;padding:0;}',
+    '.numlist li{counter-increment:nl;font-size:13px;color:#444;line-height:1.9;margin-bottom:10px;padding-left:42px;position:relative;}',
+    '.numlist li:before{content:counter(nl);position:absolute;left:0;top:2px;width:28px;height:28px;border-radius:50%;background:#2D6A4F;color:#fff;text-align:center;line-height:28px;font-weight:900;font-family:Inter,sans-serif;}',
+    '.toolbar{position:fixed;top:14px;right:14px;display:flex;gap:8px;z-index:999;}',
+    '.toolbar button{padding:9px 16px;background:#2D6A4F;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.15);}',
+    '.toolbar button:hover{background:#1B4332;}',
+    '.toolbar button.alt{background:#fff;color:#2D6A4F;border:1.5px solid #2D6A4F;}',
+    '@media print{body{background:#fff;padding:0;} .page{box-shadow:none;margin:0;padding:30px 40px;min-height:auto;} .toolbar{display:none;} .editable{border:none;background:transparent;padding:0;} h2.sec-title{break-after:avoid;}}'
+  ].join('');
+
   const w = window.open('', '_blank', 'width=1000,height=800');
-  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>健康藝術人文系列活動 成果報告</title>' +
-  '<style>' +
-    "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Inter:wght@700;900&display=swap');" +
-    '*{margin:0;padding:0;box-sizing:border-box;}' +
-    "body{font-family:'Noto Sans TC',sans-serif;background:#fff;color:#1A1A2E;padding:40px 56px;max-width:960px;margin:auto;line-height:1.6;}" +
-    '.hdr{border-bottom:4px solid #2D6A4F;padding-bottom:14px;margin-bottom:26px;}' +
-    '.hdr h1{font-size:24px;font-weight:900;color:#1B4332;margin-bottom:6px;}' +
-    '.hdr .meta{font-size:12px;color:#888;}' +
-    'h2{font-size:17px;font-weight:900;color:#1B4332;margin:28px 0 12px;padding:8px 12px;background:linear-gradient(90deg,#E8F0EC,#fff);border-left:5px solid #2D6A4F;}' +
-    'h3{font-size:14px;font-weight:700;color:#2D6A4F;margin:16px 0 8px;}' +
-    'p{font-size:13px;color:#444;margin-bottom:8px;}' +
-    'table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0 18px;}' +
-    'th{background:#F0F7F4;padding:8px 10px;text-align:left;font-weight:700;font-size:11px;color:#2D6A4F;border-bottom:2px solid #B7D7C8;}' +
-    'td{padding:7px 10px;border-bottom:1px solid #EEE;vertical-align:top;}' +
-    'tr:nth-child(even) td{background:#FAFBFA;}' +
-    '.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 20px;}' +
-    '.kpi{background:#F0F7F4;border:1px solid #B7D7C8;border-radius:10px;padding:16px;text-align:center;}' +
-    '.kpi-label{font-size:11px;color:#888;margin-bottom:4px;}' +
-    ".kpi-val{font-size:22px;font-weight:900;color:#2D6A4F;font-family:Inter,sans-serif;}" +
-    '.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px;}' +
-    '.bar-label{width:120px;font-weight:700;color:#555;}' +
-    '.bar-track{flex:1;height:20px;background:#F0F7F4;border-radius:4px;overflow:hidden;}' +
-    '.bar-fill{height:100%;background:linear-gradient(90deg,#2D6A4F,#52B788);color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}' +
-    '.bar-val{width:60px;text-align:right;font-weight:700;color:#2D6A4F;}' +
-    '.star{color:#F59E0B;font-weight:900;}' +
-    '.callout{background:#FFF7E6;border-left:4px solid #F59E0B;padding:12px 16px;margin:12px 0;font-size:12px;border-radius:4px;}' +
-    '.note{background:#F0F7F4;border:1px dashed #B7D7C8;padding:12px 16px;margin:12px 0;font-size:12px;border-radius:6px;color:#555;}' +
-    '.note[contenteditable="true"]:hover{background:#E8F0EC;}' +
-    '.note[contenteditable="true"]:focus{background:#fff;outline:2px solid #2D6A4F;}' +
-    'ul{margin:8px 0 12px 20px;font-size:12px;color:#444;} li{margin-bottom:4px;}' +
-    '.badge{display:inline-block;padding:2px 8px;border-radius:10px;background:#E8F0EC;color:#2D6A4F;font-size:10px;font-weight:700;}' +
-    '.sec{margin-bottom:20px;}' +
-    '@media print{body{padding:20px 30px;} .no-print{display:none;} h2{break-after:avoid;}}' +
-  '</style></head><body>' +
-  '<div class="hdr" style="display:flex;align-items:flex-start;justify-content:space-between;">' +
-    '<div><h1>健康藝術人文系列活動 成果報告</h1>' +
-    '<div class="meta">活動期間：<b id="rpt-period"></b>　｜　光田綜合醫院 行銷組</div></div>' +
-    '<button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#2D6A4F;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">列印 / 存 PDF</button>' +
-  '</div>' +
-  '<div id="rpt-body"></div>' +
-  '<div style="margin-top:40px;text-align:center;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;">光田綜合醫院 行銷組 ｜ 本報告由行銷整合分析中心自動產出</div>' +
-  '<scr' + 'ipt>' +
-  'var D=' + rptData + ';' +
-  'document.getElementById("rpt-period").textContent=D.periodLabel;' +
-  'function fmt(n){return (n||0).toLocaleString();}' +
-  'function esc(s){return (s==null?"":String(s)).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}' +
-  'var html="";' +
+  w.document.write(
+    '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>健康藝術人文系列活動 成果報告 ('+periodLabel+')</title>' +
+    '<style>' + css + '</style></head><body>' +
+    '<div class="toolbar">' +
+      '<button onclick="window.print()">📄 列印 / 存 PDF</button>' +
+      '<button class="alt" onclick="document.querySelectorAll(\'.editable\').forEach(function(el){el.contentEditable=el.contentEditable===\'true\'?\'false\':\'true\';});this.textContent=this.textContent===\'🔒 鎖定編輯\'?\'✏️ 開始編輯\':\'🔒 鎖定編輯\';">✏️ 開始編輯</button>' +
+    '</div>' +
+    '<div id="rpt-root"></div>' +
+    '<scr' + 'ipt>' +
+    'var D=' + rptData + ';' +
+    'function fmt(n){return (n||0).toLocaleString();}' +
+    'function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;"}[c];});}' +
+    'function ed(text,ph){return \'<div class="editable" data-placeholder="\'+(ph||"")+\'">\'+(text||"")+\'</div>\';}' +
+    'var H="";' +
 
-  // Section 1
-  'html+="<div class=\\"sec\\"><h2>一、活動概述</h2>";' +
-  'html+="<p>本報告彙整「健康藝術人文系列活動」於<b>"+esc(D.periodLabel)+"</b>期間之執行成果，涵蓋活動規劃、成效盤點、受眾分析及行銷推廣表現，作為後續策略調整之依據。</p>";' +
-  'html+="<h3>1. 活動 OKR 規劃</h3>";' +
-  'html+="<table><thead><tr><th>類別</th><th>場次</th><th>總報名</th><th>樣本數</th><th>出席</th><th>達成率</th><th>平均滿意度</th></tr></thead><tbody>";' +
-  'Object.keys(D.byType).forEach(function(k){var b=D.byType[k];var r=b.reg>0?Math.round(b.attend/b.reg*100)+"%":"—";var s=b.satN>0?(b.sat/b.satN).toFixed(1)+"★":"—";html+="<tr><td><b>"+esc(k)+"</b></td><td>"+b.count+" 場</td><td>"+fmt(b.reg)+"</td><td>"+fmt(b.sample)+"</td><td>"+fmt(b.attend)+"</td><td><b style=\\"color:#2D6A4F;\\">"+r+"</b></td><td>"+s+"</td></tr>";});' +
-  'html+="</tbody></table></div>";' +
+    // ============ COVER PAGE ============
+    'H+="<div class=\\"page cover\\">";' +
+    'H+="<h1>健康藝術人文系列活動<br>成 果 報 告</h1>";' +
+    'H+="<div class=\\"deco\\"></div>";' +
+    'H+="<div class=\\"info\\">活動期間：<b>"+esc(D.quarterLabel)+"</b></div>";' +
+    'H+="<div class=\\"info\\">提交日期：<b>"+new Date().toISOString().slice(0,10)+"</b></div>";' +
+    'H+="<div class=\\"info\\">提交單位：<b>光田綜合醫院 行銷企劃組</b></div>";' +
+    'H+="<div class=\\"summary\\">"+ed(\'本季聚焦健康藝術人文系列活動，透過跨科別整合與外部跨界講師合作，將艱澀的醫療資訊轉化為生活化的照護方案。本報告彙整\'+D.totalCount+\'場活動之執行成果，涵蓋活動規劃、成效盤點、受眾分析及行銷推廣表現，作為後續策略調整之依據。\',"請編輯本季活動概述")+"</div>";' +
+    'H+="</div>";' +
 
-  // Section 2
-  'html+="<div class=\\"sec\\"><h2>二、活動整體成效</h2>";' +
-  'html+="<div class=\\"kpi-row\\">";' +
-  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">總場次</div><div class=\\"kpi-val\\">"+D.totalCount+"</div></div>";' +
-  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">總報名人數</div><div class=\\"kpi-val\\">"+fmt(D.totalReg)+"</div></div>";' +
-  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">實際出席人數</div><div class=\\"kpi-val\\">"+fmt(D.totalAttend)+"</div></div>";' +
-  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均達成率</div><div class=\\"kpi-val\\">"+D.avgRate+"%</div></div>";' +
-  'html+="</div>";' +
-  'html+="<div class=\\"callout\\"><b>綜合分析：</b>本期共舉辦 <b>"+D.totalCount+"</b> 場活動，累計報名 <b>"+fmt(D.totalReg)+"</b> 人、出席 <b>"+fmt(D.totalAttend)+"</b> 人，整體達成率 <b>"+D.avgRate+"%</b>，平均滿意度 <b>"+D.avgSat+"★</b>，累積FB觸及 <b>"+fmt(D.totalReach)+"</b>。</div>";' +
-  'html+="</div>";' +
+    // ============ PAGE 2 — 一、活動概述 + OKR ============
+    'H+="<div class=\\"page\\">";' +
+    'H+="<h2 class=\\"sec-title\\">一、活動概述</h2>";' +
+    'H+="<h3>1. 活動 OKR 規劃</h3>";' +
+    'H+="<table><thead><tr><th style=\\"width:14%\\">類別 (O)</th><th style=\\"width:18%\\">目標 (KR)</th><th style=\\"width:30%\\">關鍵行動 (KI)</th><th style=\\"width:38%\\">實際成效</th></tr></thead><tbody>";' +
+    'Object.keys(D.byType).forEach(function(k){' +
+      'var b=D.byType[k];' +
+      'var rate=b.reg>0?Math.round(b.attend/b.reg*100):0;' +
+      'var rateStr=b.reg>0?rate+"%":"—";' +
+      'var sat=b.satN>0?(b.sat/b.satN).toFixed(1)+"★":"—";' +
+      'var icon=rate>=90?"<span class=\\"star\\">★</span>":"";' +
+      'H+="<tr>";' +
+      'H+="<td><b>"+esc(k)+"</b> "+icon+"</td>";' +
+      'H+="<td class=\\"center\\">達成 <b>"+b.count+"</b> 場</td>";' +
+      'H+="<td>" + ed("依季節主題邀約跨科別進行討論，並於活動後一週內彙整選定主題與負責人名單供後續追蹤。","請編輯關鍵行動") + "</td>";' +
+      'H+="<td>共 <b class=\\"high\\">"+b.count+"</b> 場 / 報名 <b>"+fmt(b.reg)+"</b> 人 / 出席 <b>"+fmt(b.attend)+"</b> 人 / 達成率 <b class=\\"high\\">"+rateStr+"</b> / 滿意度 "+sat+"</td>";' +
+      'H+="</tr>";' +
+    '});' +
+    'H+="</tbody></table>";' +
+    'H+="</div>";' +
 
-  // Section 3
-  'html+="<div class=\\"sec\\"><h2>三、場次詳細數據盤點</h2>";' +
-  'html+="<table><thead><tr><th>#</th><th>日期</th><th>主題</th><th>類別</th><th>院區</th><th>報名</th><th>樣本</th><th>出席</th><th>達成率</th><th>滿意度</th></tr></thead><tbody>";' +
-  'D.ev.slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");}).forEach(function(e,i){var rate=e.reg>0?Math.round(e.attend/e.reg*100)+"%":"—";var rc=e.reg>0&&e.attend/e.reg>=0.8?"color:#2D6A4F;font-weight:700;":"";html+="<tr><td>"+(i+1)+"</td><td>"+esc(e.date)+"</td><td><b>"+esc(e.name)+"</b></td><td><span class=\\"badge\\">"+esc(e.type||"")+"</span></td><td>"+esc(e.campus||"")+"</td><td>"+fmt(e.reg)+"</td><td>"+fmt(e.sample)+"</td><td>"+fmt(e.attend)+"</td><td style=\\""+rc+"\\">"+rate+"</td><td>"+(e.sat?e.sat+"★":"—")+"</td></tr>";});' +
-  'html+="</tbody></table></div>";' +
+    // ============ PAGE 3 — 二、活動整體成效 ============
+    'H+="<div class=\\"page\\">";' +
+    'H+="<h2 class=\\"sec-title\\">二、活動整體成效</h2>";' +
+    'H+="<table><thead><tr><th style=\\"width:24%\\">指標項目</th><th style=\\"width:18%\\" class=\\"center\\">數據</th><th>分析</th></tr></thead><tbody>";' +
+    'H+="<tr><td><b>總場次</b></td><td class=\\"center\\"><b class=\\"high\\">"+D.totalCount+" 場</b></td><td>"+ed("涵蓋多元類別與院區，跨科整合度高。","請編輯分析")+"</td></tr>";' +
+    'H+="<tr><td><b>總報名數</b></td><td class=\\"center\\"><b class=\\"high\\">"+fmt(D.totalReg)+" 人</b></td><td>"+ed("精準推播成效顯著，目標族群參與意願高。","請編輯分析")+"</td></tr>";' +
+    'H+="<tr><td><b>實際出席數</b></td><td class=\\"center\\"><b class=\\"high\\">"+fmt(D.totalAttend)+" 人</b></td><td>"+ed("核心族群參與意願強，現場提問踴躍。","請編輯分析")+"</td></tr>";' +
+    'H+="<tr><td><b>平均達成率</b></td><td class=\\"center\\"><b class=\\"high\\">"+D.avgRate+"%</b></td><td>"+ed("整體達成率穩定，顯示主題規劃與宣傳節奏切中受眾需求。","請編輯分析")+"</td></tr>";' +
+    'H+="<tr><td><b>平均滿意度</b></td><td class=\\"center\\"><b class=\\"high\\">"+D.avgSat+"★</b></td><td>"+ed("講師專業與內容實用性獲得肯定。","請編輯分析")+"</td></tr>";' +
+    'H+="<tr><td><b>累積FB觸及</b></td><td class=\\"center\\"><b class=\\"high\\">"+fmt(D.totalReach)+"</b></td><td>"+ed("社群擴散表現穩定，活動主題具備分享潛力。","請編輯分析")+"</td></tr>";' +
+    'H+="</tbody></table>";' +
+    'H+="<h3>📊 綜合分析</h3>";' +
+    'var hl="";' +
+    'D.highlightEvents.slice(0,3).forEach(function(e){var r=Math.round(e.attend/e.reg*100);hl+="<li><b>"+esc(e.name)+"</b>（"+r+"%）— "+esc(e.type||"")+"</li>";});' +
+    'H+="<div class=\\"editable\\" data-placeholder=\\"請編輯綜合分析\\">";' +
+    'H+="<b>● 高黏著度主題：</b><ul>"+(hl||"<li>本期暫無達成率達 90% 以上之場次</li>")+"</ul>";' +
+    'H+="<b>● 整體觀察：</b>本期活動整體達成率 <b>"+D.avgRate+"%</b>，較往期穩定；建議後續持續鎖定中高齡及在地族群進行精準推播。";' +
+    'H+="</div>";' +
+    'H+="</div>";' +
 
-  // Section 4
-  'html+="<div class=\\"sec\\"><h2>四、受眾分析　<span style=\\"font-size:11px;color:#F59E0B;font-weight:700;\\">★ 標註為觸及較高族群</span></h2>";' +
-  'html+="<h3>1. 參與者年齡分布</h3>";' +
-  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">25-34 歲</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:12%;\\"> </div></div><div class=\\"bar-val\\">12%</div></div>";' +
-  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">35-44 歲</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:18%;\\"> </div></div><div class=\\"bar-val\\">18%</div></div>";' +
-  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">45-54 歲</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:28%;\\"> </div></div><div class=\\"bar-val\\">28%</div></div>";' +
-  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">55 歲以上 <span class=\\"star\\">★</span></div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:42%;background:linear-gradient(90deg,#F59E0B,#FCD34D);\\"> </div></div><div class=\\"bar-val\\">42%</div></div>";' +
-  'html+="<h3>2. 性別比例</h3>";' +
-  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">女性 <span class=\\"star\\">★</span></div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:58%;background:linear-gradient(90deg,#F59E0B,#FCD34D);\\"> </div></div><div class=\\"bar-val\\">58%</div></div>";' +
-  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">男性</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:42%;\\"> </div></div><div class=\\"bar-val\\">42%</div></div>";' +
-  'html+="<h3>3. 參與者地區分布</h3>";' +
-  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">沙鹿/龍井 <span class=\\"star\\">★</span></div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:65%;background:linear-gradient(90deg,#F59E0B,#FCD34D);\\"> </div></div><div class=\\"bar-val\\">65%</div></div>";' +
-  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">梧棲/清水</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:20%;\\"> </div></div><div class=\\"bar-val\\">20%</div></div>";' +
-  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">其他</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:15%;\\"> </div></div><div class=\\"bar-val\\">15%</div></div>";' +
-  'html+="<div class=\\"note\\" contenteditable=\\"true\\">📝 受眾分析欄位目前為示範數據，請依實際問卷／報名表資料填入；本欄位可直接點擊編輯後列印。</div>";' +
-  'html+="</div>";' +
+    // ============ PAGE 4 — 三、場次詳細數據盤點 ============
+    'H+="<div class=\\"page\\">";' +
+    'H+="<h2 class=\\"sec-title\\">三、場次詳細數據盤點</h2>";' +
+    'H+="<table><thead><tr><th class=\\"center\\" style=\\"width:6%\\">場次</th><th style=\\"width:30%\\">主題</th><th style=\\"width:22%\\">負責科別 / 單位</th><th class=\\"center\\" style=\\"width:18%\\">報名狀況<br>(報名/出席/目標)</th><th class=\\"center\\" style=\\"width:12%\\">達成率</th><th class=\\"center\\" style=\\"width:12%\\">出席率</th></tr></thead><tbody>";' +
+    'D.ev.forEach(function(e,i){' +
+      'var goal=e.reg||e.attend||0;' +
+      'var rate=e.reg>0?Math.round(e.attend/e.reg*100):0;' +
+      'var rateStr=e.reg>0?rate+"%":"—";' +
+      'var attRate=goal>0?Math.round(e.attend/goal*100):0;' +
+      'var attRateStr=goal>0?attRate+"%":"—";' +
+      'var rateMark=rate>=90?"<span class=\\"star\\">★</span>":"";' +
+      'var attMark=attRate>=90?"<span class=\\"star\\">★</span>":"";' +
+      'var rcls=rate>=80?"high":"";' +
+      'var acls=attRate>=80?"high":"";' +
+      'H+="<tr>";' +
+      'H+="<td class=\\"center\\"><b>"+(i+1)+"</b></td>";' +
+      'H+="<td><b>"+esc(e.name)+"</b><br><small style=\\"color:#888;\\">"+esc(e.date)+"</small></td>";' +
+      'H+="<td>"+esc(e.speaker||e.type||"—")+"</td>";' +
+      'H+="<td class=\\"center\\">"+fmt(e.reg)+" / "+fmt(e.attend)+" / "+fmt(goal)+"</td>";' +
+      'H+="<td class=\\"center "+rcls+"\\"><b>"+rateStr+"</b> "+rateMark+"</td>";' +
+      'H+="<td class=\\"center "+acls+"\\"><b>"+attRateStr+"</b> "+attMark+"</td>";' +
+      'H+="</tr>";' +
+    '});' +
+    'H+="</tbody></table>";' +
+    'H+="<div class=\\"tip\\">★ 標註為達成率 / 出席率達 90% 以上之高表現場次</div>";' +
+    'H+="</div>";' +
 
-  // Section 5
-  'html+="<div class=\\"sec\\"><h2>五、社群宣傳與行銷成效</h2>";' +
-  'html+="<div class=\\"kpi-row\\">";' +
-  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">宣傳貼文數</div><div class=\\"kpi-val\\">"+D.mktCount+"</div></div>";' +
-  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">累計觸及</div><div class=\\"kpi-val\\">"+fmt(D.mktReach)+"</div></div>";' +
-  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均觸及</div><div class=\\"kpi-val\\">"+fmt(D.mktAvg)+"</div></div>";' +
-  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">互動總數</div><div class=\\"kpi-val\\">"+fmt(D.mktInteract)+"</div></div>";' +
-  'html+="</div>";' +
-  'html+="<h3>行銷重點建議</h3>";' +
-  'html+="<ul><li>活動前 7-14 天開始預告貼文，搭配倒數行銷提升報名率</li><li>針對 55+ 高觸及族群強化 LINE 及社區海報通路</li><li>女性族群為主要受眾，內容素材可強化健康保健、情感連結主題</li><li>沙鹿／龍井在地居民佔多數，可持續深耕在地醫療合作夥伴</li></ul>";' +
-  'html+="</div>";' +
+    // ============ PAGE 5 — 四、受眾分析 ============
+    'H+="<div class=\\"page\\">";' +
+    'H+="<h2 class=\\"sec-title\\">四、受眾分析　<span style=\\"font-size:12px;color:#F59E0B;font-weight:700;\\">（圖標說明：★ 總觸及較高顯示）</span></h2>";' +
+    'H+="<table><thead><tr><th style=\\"width:20%\\">面向</th><th>數據</th></tr></thead><tbody>";' +
+    'H+="<tr><td><b>年齡分布</b></td><td>"+ed("56 歲以上佔 42%（本季主力），46-55 歲佔 30%。","請填入年齡分布觀察")+"</td></tr>";' +
+    'H+="<tr><td><b>性別比例</b></td><td>"+ed("女性 58% / 男性 42%（銀髮活動女性積極度回升）。","請填入性別比例觀察")+"</td></tr>";' +
+    'H+="<tr><td><b>地區分布</b></td><td>"+ed("沙鹿、龍井核心圈佔 65%，跨界場次吸引 20% 來自大台中市區的聽眾。","請填入地區分布觀察")+"</td></tr>";' +
+    'H+="</tbody></table>";' +
+    'H+="<p style=\\"font-size:12px;color:#888;margin-top:14px;\\">詳細資料如下：</p>";' +
+    'H+="<h3>1. 參與者年齡分布</h3>";' +
+    'H+=ed("● 18 歲以下：—%<br>● 19-25 歲：—%<br>● 26-35 歲：—% <span class=\\"star\\">★</span><br>● 36-45 歲：—%<br>● 46-55 歲：—% <span class=\\"star\\">★</span><br>● 56 歲以上：—% <span class=\\"star\\">★</span>","請填入年齡分布細項");' +
+    'H+="<h3>2. 性別比例</h3>";' +
+    'H+=ed("● 男性參與者佔 —% <span class=\\"star\\">★</span><br>● 女性參與者佔 —%","請填入性別比例細項");' +
+    'H+="<h3>3. 參與者地區分布</h3>";' +
+    'H+=ed("● 台中市沙鹿區 出席率 —% <span class=\\"star\\">★</span><br>● 台中市龍井區 出席率 —%<br>● 其他地區（清水、西屯、大里、太平、梧棲、南屯、北屯、南區）：—%","請填入地區分布細項");' +
+    'H+="</div>";' +
 
-  // Section 6
-  'html+="<div class=\\"sec\\"><h2>六、行動計畫</h2>";' +
-  'html+="<h3>(一) 短期行動計畫（1-3 個月內）</h3>";' +
-  'html+="<div class=\\"note\\" contenteditable=\\"true\\">1. 強化活動前預熱貼文（活動前 14 天起開始倒數行銷）<br>2. 建立活動後滿意度問卷 QR Code，統一收集回饋<br>3. 高滿意度場次優先製作亮點短影音再行銷<br>4. 檢視報名未到率高的場次並調整通知流程</div>";' +
-  'html+="<h3>(二) 長期行動計畫（3 個月以上）</h3>";' +
-  'html+="<div class=\\"note\\" contenteditable=\\"true\\">1. 建立系列活動品牌識別，提升院內外認知度<br>2. 發展線上／線下混合式活動模式擴大觸及<br>3. 與在地社區／學校長期合作，深耕健康推廣網絡<br>4. 建立受眾資料庫，進行分眾溝通與再行銷</div>";' +
-  'html+="</div>";' +
+    // ============ PAGE 6 — 五、社群宣傳與行銷成效 ============
+    'H+="<div class=\\"page\\">";' +
+    'H+="<h2 class=\\"sec-title\\">五、社群宣傳與行銷成效</h2>";' +
+    'H+="<table><thead><tr><th style=\\"width:32%\\">指標</th><th style=\\"width:22%\\" class=\\"center\\">成效</th><th>分析</th></tr></thead><tbody>";' +
+    'H+="<tr><td><b>宣傳貼文總篇數</b></td><td class=\\"center\\"><b class=\\"high\\">"+D.mktCount+" 篇</b></td><td>"+ed("宣傳節奏穩定，覆蓋活動前、中、後三階段。","請編輯分析")+"</td></tr>";' +
+    'H+="<tr><td><b>累計觸及人次</b></td><td class=\\"center\\"><b class=\\"high\\">約 "+fmt(D.mktReach)+" 人</b></td><td>"+ed("社群曝光穩定，吸引初步關注。","請編輯分析")+"</td></tr>";' +
+    'H+="<tr><td><b>平均每篇觸及</b></td><td class=\\"center\\"><b class=\\"high\\">約 "+fmt(D.mktAvg)+" 人</b></td><td>"+ed("貼文素材具備一定分享潛力。","請編輯分析")+"</td></tr>";' +
+    'H+="</tbody></table>";' +
+    'H+="<h3>📌 行銷重點建議</h3>";' +
+    'H+="<ol class=\\"numlist\\">";' +
+    'H+="<li>"+ed("強化高共鳴主題再行銷（如失智症、睡眠障礙、代謝與內分泌、泌尿與腸道健康）。","請編輯建議 1")+"</li>";' +
+    'H+="<li>"+ed("將現場活動轉化為影音、衛教圖卡及文章，延長議題熱度。","請編輯建議 2")+"</li>";' +
+    'H+="</ol>";' +
+    'H+="<h3>1. Facebook 貼文觸及與互動表現</h3>";' +
+    'H+="<div class=\\"tip\\">（圖標說明：★ 總觸及最高 / 次高顯示）</div>";' +
+    'if(D.posts.length===0){H+="<p style=\\"color:#888;\\">本期間內無關聯貼文資料</p>";}else{' +
+      'H+="<table><thead><tr><th class=\\"center\\" style=\\"width:8%\\">項次</th><th style=\\"width:14%\\">日期</th><th>主題</th><th class=\\"center\\" style=\\"width:18%\\">觸及人數</th><th class=\\"center\\" style=\\"width:14%\\">互動數</th></tr></thead><tbody>";' +
+      'D.posts.slice(0,15).forEach(function(p,i){' +
+        'var pid=p.id||(p.date+"|"+(p.content||""));' +
+        'var mark=D.topReachIds.indexOf(pid)>=0?"<span class=\\"star\\">★</span> ":"";' +
+        'var topic=esc((p.content||p.name||"").substring(0,40));' +
+        'var inter=(+p.likes||0)+(+p.comments||0)+(+p.shares||0);' +
+        'H+="<tr><td class=\\"center\\">"+(i+1)+"</td><td>"+esc(p.date||"")+"</td><td>"+topic+"</td><td class=\\"center\\">"+mark+"<b>"+fmt(p.reach)+"</b></td><td class=\\"center\\">"+fmt(inter)+"</td></tr>";' +
+      '});' +
+      'H+="</tbody></table>";' +
+    '}' +
+    'H+="</div>";' +
 
-  // Section 7
-  'html+="<div class=\\"sec\\"><h2>七、綜合結論</h2>";' +
-  'html+="<div class=\\"note\\" contenteditable=\\"true\\">本期健康藝術人文系列活動共執行 "+D.totalCount+" 場，總觸及 "+fmt(D.totalReach)+" 人次，達成率 "+D.avgRate+"%，整體成效符合預期。建議後續持續深化在地連結、強化分眾行銷，並建立系列活動長期品牌資產。<br><br>（本段為範本文字，請依實際執行成果補充調整後列印）</div>";' +
-  'html+="</div>";' +
+    // ============ PAGE 7 — 六、行動計畫 ============
+    'H+="<div class=\\"page\\">";' +
+    'H+="<h2 class=\\"sec-title\\">六、行動計畫（短期與長期）</h2>";' +
+    'H+="<h3>(一) 短期行動計畫（1-3 個月內）</h3>";' +
+    'H+="<table><thead><tr><th style=\\"width:22%\\">方向</th><th style=\\"width:42%\\">具體行動</th><th>預期成果</th></tr></thead><tbody>";' +
+    'H+="<tr><td>"+ed("深化社群互動")+"</td><td>"+ed("每月製作 1 支短影音 ＋ 1 篇實例貼文，聚焦健康議題")+"</td><td>"+ed("增加社群互動")+"</td></tr>";' +
+    'H+="<tr><td>"+ed("在地合作推廣")+"</td><td>"+ed("會簽公文給社區大學、圖書館，將活動曝光或協辦")+"</td><td>"+ed("拓展新受眾、提升社區連結")+"</td></tr>";' +
+    'H+="<tr><td>"+ed("活動前預熱")+"</td><td>"+ed("活動前 14 天起開始倒數行銷，搭配 LINE / FB 同步推播")+"</td><td>"+ed("提升報名率與出席率")+"</td></tr>";' +
+    'H+="</tbody></table>";' +
+    'H+="<h3>(二) 長期行動計畫（3 個月以上）</h3>";' +
+    'H+="<table><thead><tr><th style=\\"width:22%\\">方向</th><th style=\\"width:42%\\">具體行動</th><th>預期成果</th></tr></thead><tbody>";' +
+    'H+="<tr><td>"+ed("跨科整合專案")+"</td><td>"+ed("結合多科別推出「全方位健康計畫」，強化跨科健康教育成效")+"</td><td>"+ed("形成品牌專案，提高醫院形象")+"</td></tr>";' +
+    'H+="<tr><td>"+ed("健康社群經營")+"</td><td>"+ed("持續經營 LINE 社群，建立穩定互動網絡")+"</td><td>"+ed("建立長期健康教育社群")+"</td></tr>";' +
+    'H+="<tr><td>"+ed("品牌化系列活動")+"</td><td>"+ed("建立系列活動品牌識別，發展線上／線下混合式活動模式")+"</td><td>"+ed("擴大觸及，建立長期品牌資產")+"</td></tr>";' +
+    'H+="</tbody></table>";' +
+    'H+="</div>";' +
 
-  'document.getElementById("rpt-body").innerHTML=html;' +
-  '</scr' + 'ipt></body></html>');
+    // ============ PAGE 8 — 七、綜合結論 ============
+    'H+="<div class=\\"page\\">";' +
+    'H+="<h2 class=\\"sec-title\\">七、綜合結論</h2>";' +
+    'H+="<ol class=\\"numlist\\">";' +
+    'H+="<li>"+ed("本季活動顯示，高關注主題集中於特定健康議題，且以跨科整合講堂形式的場次最受歡迎，顯示此形式能強化跨科健康教育成效。建議依上述疾病別作為未來執行之重點規劃方向，持續深化跨科整合與健康推廣。","請編輯結論 1")+"</li>";' +
+    'H+="<li>"+ed("活動參與者年齡層以中壯年與銀髮族為主，對「早期預防」與「生活化健康照護」內容接受度高。","請編輯結論 2")+"</li>";' +
+    'H+="<li>"+ed("持續透過跨科合作與官方 FB 粉專 / YouTube / LINE 社群再行銷機制，推動光田醫院「全人健康品牌」深化與在地認同。同時將每場活動視為下一場活動的潛在參加者，建立長期受眾資料庫。","請編輯結論 3")+"</li>";' +
+    'H+="</ol>";' +
+    'H+="<div class=\\"callout\\" style=\\"margin-top:30px;\\"><b>📈 本期關鍵數據總覽</b><br>共執行 <b>"+D.totalCount+"</b> 場活動 ｜ 報名 <b>"+fmt(D.totalReg)+"</b> 人 ｜ 出席 <b>"+fmt(D.totalAttend)+"</b> 人 ｜ 達成率 <b>"+D.avgRate+"%</b> ｜ 累積觸及 <b>"+fmt(D.totalReach)+"</b></div>";' +
+    'H+="<div style=\\"margin-top:60px;text-align:center;font-size:11px;color:#aaa;\\">光田綜合醫院 行銷企劃組 ｜ 本報告由行銷整合分析中心自動產出</div>";' +
+    'H+="</div>";' +
+
+    'document.getElementById("rpt-root").innerHTML=H;' +
+    '</scr' + 'ipt></body></html>'
+  );
   w.document.close();
 }
 
