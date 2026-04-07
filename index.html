@@ -4443,23 +4443,41 @@ function openHealthArtReport() {
   const reachSorted = periodFilteredPosts.slice().sort((a,b)=>(+b.reach||0)-(+a.reach||0));
   const topReachIds = new Set(reachSorted.slice(0,2).map(p => p.id || (p.date+'|'+p.content)));
 
-  // Period derived label (e.g. 2025-10 → 第四季)
-  let quarterLabel = '';
+  // Period derived label (e.g. 2025-10 → 第四季) + quarter index
+  let quarterLabel = '', quarterIdx = 0;
   if (/^\d{4}-\d{2}$/.test(periodLabel)) {
     const m = +periodLabel.split('-')[1];
-    const q = Math.ceil(m/3);
-    quarterLabel = '第' + ['一','二','三','四'][q-1] + '季 ('+periodLabel+')';
+    quarterIdx = Math.ceil(m/3);
+    quarterLabel = '第' + ['一','二','三','四'][quarterIdx-1] + '季 ('+periodLabel+')';
   } else if (/^\d{4}-Q\d$/.test(periodLabel)) {
-    const q = +periodLabel.split('Q')[1];
-    quarterLabel = '第' + ['一','二','三','四'][q-1] + '季 ('+periodLabel+')';
+    quarterIdx = +periodLabel.split('Q')[1];
+    quarterLabel = '第' + ['一','二','三','四'][quarterIdx-1] + '季 ('+periodLabel+')';
   } else {
-    quarterLabel = periodLabel;
+    // Try to infer quarter from majority of events
+    const monthCounts = {};
+    ev.forEach(e => {
+      const m = +(e.date||'').slice(5,7);
+      if (m) { const q = Math.ceil(m/3); monthCounts[q] = (monthCounts[q]||0) + 1; }
+    });
+    let topQ = 0, topN = 0;
+    Object.keys(monthCounts).forEach(q => { if (monthCounts[q] > topN) { topN = monthCounts[q]; topQ = +q; } });
+    quarterIdx = topQ;
+    quarterLabel = topQ ? ('第' + ['一','二','三','四'][topQ-1] + '季 ('+periodLabel+')') : periodLabel;
   }
+
+  // 季度主題與目標族群（依 OKR 規劃）
+  const QUARTER_THEMES = {
+    1: { audience:'女性', audienceShort:'女性族群', topics:['睡眠與情緒','荷爾蒙調節','骨骼保健','美容醫學','心血管風險管理','甲狀腺與代謝'] },
+    2: { audience:'親子', audienceShort:'親子家庭', topics:['孕產婦健康','兒童生長與發展','呼吸道照護','婦科疾病預防','營養飲食教育','疫苗與感染預防'] },
+    3: { audience:'男性', audienceShort:'男性族群', topics:['心血管保健','壓力管理','肝膽腸胃','泌尿與攝護腺','運動訓練與預防','代謝症候群'] },
+    4: { audience:'中高齡', audienceShort:'中高齡族群', topics:['慢性病整合照護','肌少症','認知退化預防','癌症篩檢','社交連結','睡眠品質與生活型態'] },
+  };
+  const theme = QUARTER_THEMES[quarterIdx] || null;
 
   const rptData = JSON.stringify({
     ev, byType, totalCount, totalReg, totalSample, totalAttend, totalReach,
     avgRate, avgSat, highlightEvents, posts: periodFilteredPosts, topReachIds: Array.from(topReachIds),
-    mktReach, mktCount, mktAvg, periodLabel, quarterLabel
+    mktReach, mktCount, mktAvg, periodLabel, quarterLabel, quarterIdx, theme
   });
 
   // Build the document via array.join for readability
@@ -4526,12 +4544,25 @@ function openHealthArtReport() {
     'H+="<div class=\\"info\\">活動期間：<b>"+esc(D.quarterLabel)+"</b></div>";' +
     'H+="<div class=\\"info\\">提交日期：<b>"+new Date().toISOString().slice(0,10)+"</b></div>";' +
     'H+="<div class=\\"info\\">提交單位：<b>光田綜合醫院 行銷企劃組</b></div>";' +
-    'H+="<div class=\\"summary\\">"+ed(\'本季聚焦健康藝術人文系列活動，透過跨科別整合與外部跨界講師合作，將艱澀的醫療資訊轉化為生活化的照護方案。本報告彙整\'+D.totalCount+\'場活動之執行成果，涵蓋活動規劃、成效盤點、受眾分析及行銷推廣表現，作為後續策略調整之依據。\',"請編輯本季活動概述")+"</div>";' +
+    'var coverText="";' +
+    'if(D.theme){' +
+      'coverText="本季（"+D.quarterLabel+"）健康藝術人文系列活動聚焦「<b>"+D.theme.audience+"</b>」族群，主軸涵蓋 "+D.theme.topics.map(function(t){return "<b>"+t+"</b>";}).join("、")+" 等核心議題。透過跨科別醫師、營養師、物理治療師及外部跨界講師合作，將艱澀的醫療資訊轉化為生活化的照護方案。本報告彙整 <b>"+D.totalCount+"</b> 場活動之執行成果，涵蓋活動規劃、成效盤點、受眾分析及行銷推廣表現，作為後續策略調整之依據。";' +
+    '}else{' +
+      'coverText="本報告彙整健康藝術人文系列活動於 "+D.periodLabel+" 期間之執行成果，共 "+D.totalCount+" 場，涵蓋活動規劃、成效盤點、受眾分析及行銷推廣表現，作為後續策略調整之依據。";' +
+    '}' +
+    'H+="<div class=\\"summary\\"><div class=\\"editable\\" data-placeholder=\\"請編輯本季活動概述\\" style=\\"background:transparent;border:none;padding:0;\\">"+coverText+"</div></div>";' +
     'H+="</div>";' +
 
     // ============ PAGE 2 — 一、活動概述 + OKR ============
     'H+="<div class=\\"page\\">";' +
     'H+="<h2 class=\\"sec-title\\">一、活動概述</h2>";' +
+    'if(D.theme){' +
+      'H+="<table style=\\"margin-bottom:20px;\\"><thead><tr><th style=\\"width:20%\\" class=\\"center\\">本季主軸</th><th>內容</th></tr></thead><tbody>";' +
+      'H+="<tr><td class=\\"center\\"><b>季度</b></td><td><b class=\\"high\\">"+esc(D.quarterLabel)+"</b></td></tr>";' +
+      'H+="<tr><td class=\\"center\\"><b>目標族群</b></td><td><b class=\\"high\\" style=\\"font-size:14px;\\">"+esc(D.theme.audience)+"</b>　("+esc(D.theme.audienceShort)+")</td></tr>";' +
+      'H+="<tr><td class=\\"center\\"><b>核心主題</b></td><td>"+D.theme.topics.map(function(t){return \'<span class="badge" style="margin:2px 4px 2px 0;padding:4px 10px;font-size:11px;">\'+esc(t)+\'</span>\';}).join("")+"</td></tr>";' +
+      'H+="</tbody></table>";' +
+    '}' +
     'H+="<h3>1. 活動 OKR 規劃</h3>";' +
     'H+="<table><thead><tr><th style=\\"width:14%\\">類別 (O)</th><th style=\\"width:18%\\">目標 (KR)</th><th style=\\"width:30%\\">關鍵行動 (KI)</th><th style=\\"width:38%\\">實際成效</th></tr></thead><tbody>";' +
     'Object.keys(D.byType).forEach(function(k){' +
@@ -4662,9 +4693,11 @@ function openHealthArtReport() {
     // ============ PAGE 8 — 七、綜合結論 ============
     'H+="<div class=\\"page\\">";' +
     'H+="<h2 class=\\"sec-title\\">七、綜合結論</h2>";' +
+    'var c1=D.theme?("本季鎖定「<b>"+D.theme.audience+"</b>」族群，主題涵蓋 "+D.theme.topics.slice(0,3).join("、")+" 等議題，顯示以跨科整合講堂形式的場次最受歡迎，能強化跨科健康教育成效。建議依此族群偏好持續規劃，深化跨科整合與健康推廣。"):("本季活動顯示，高關注主題集中於特定健康議題，且以跨科整合講堂形式的場次最受歡迎，顯示此形式能強化跨科健康教育成效。");' +
+    'var c2=D.theme?("活動參與者以「<b>"+D.theme.audienceShort+"</b>」為主，對「早期預防」與「生活化健康照護」內容接受度高，後續可延伸 "+D.theme.topics.slice(3).join("、")+" 等延伸主題進行深化。"):("活動參與者年齡層以中壯年與銀髮族為主，對「早期預防」與「生活化健康照護」內容接受度高。");' +
     'H+="<ol class=\\"numlist\\">";' +
-    'H+="<li>"+ed("本季活動顯示，高關注主題集中於特定健康議題，且以跨科整合講堂形式的場次最受歡迎，顯示此形式能強化跨科健康教育成效。建議依上述疾病別作為未來執行之重點規劃方向，持續深化跨科整合與健康推廣。","請編輯結論 1")+"</li>";' +
-    'H+="<li>"+ed("活動參與者年齡層以中壯年與銀髮族為主，對「早期預防」與「生活化健康照護」內容接受度高。","請編輯結論 2")+"</li>";' +
+    'H+="<li>"+ed(c1,"請編輯結論 1")+"</li>";' +
+    'H+="<li>"+ed(c2,"請編輯結論 2")+"</li>";' +
     'H+="<li>"+ed("持續透過跨科合作與官方 FB 粉專 / YouTube / LINE 社群再行銷機制，推動光田醫院「全人健康品牌」深化與在地認同。同時將每場活動視為下一場活動的潛在參加者，建立長期受眾資料庫。","請編輯結論 3")+"</li>";' +
     'H+="</ol>";' +
     'H+="<div class=\\"callout\\" style=\\"margin-top:30px;\\"><b>📈 本期關鍵數據總覽</b><br>共執行 <b>"+D.totalCount+"</b> 場活動 ｜ 報名 <b>"+fmt(D.totalReg)+"</b> 人 ｜ 出席 <b>"+fmt(D.totalAttend)+"</b> 人 ｜ 達成率 <b>"+D.avgRate+"%</b> ｜ 累積觸及 <b>"+fmt(D.totalReach)+"</b></div>";' +
