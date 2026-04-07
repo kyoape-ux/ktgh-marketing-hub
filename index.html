@@ -1201,6 +1201,11 @@
           <option value="month">依月份</option>
         </select>
         <select id="evDashPeriodValue" onchange="applyEvDashPeriod()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;color:var(--text);background:var(--surface);cursor:pointer;display:none;"></select>
+        <div style="flex:1;"></div>
+        <button class="btn btn-primary" onclick="openHealthArtReport()" style="display:inline-flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          一鍵生成 健康藝術人文系列 成果報告
+        </button>
       </div>
       <div class="ev-kpi-grid" id="evKpiGrid"></div>
       <div class="ev-bar-grid">
@@ -1303,6 +1308,10 @@
           <div class="form-group">
             <label>報名人數</label>
             <input type="number" id="ev-reg" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>填寫報名（樣本數）</label>
+            <input type="number" id="ev-sample" placeholder="0">
           </div>
           <div class="form-group">
             <label>實際出席人數</label>
@@ -1826,6 +1835,10 @@
       <div class="form-group">
         <label>報名人數</label>
         <input type="number" id="em-reg" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label>填寫報名（樣本數）</label>
+        <input type="number" id="em-sample" placeholder="0">
       </div>
       <div class="form-group">
         <label>出席人數</label>
@@ -3004,6 +3017,7 @@ function addEvent() {
     type:     document.getElementById('ev-type').value,
     campus:   document.getElementById('ev-campus').value,
     reg:      +document.getElementById('ev-reg').value      || 0,
+    sample:   +document.getElementById('ev-sample').value   || 0,
     attend:   +document.getElementById('ev-attend').value   || 0,
     reach:    +document.getElementById('ev-reach').value    || 0,
     sat:      +document.getElementById('ev-sat').value      || 0,
@@ -3017,7 +3031,7 @@ function addEvent() {
   saveStore();
   _gasWrite('addEvent', store.events[store.events.length - 1]);
   showToast('活動記錄已儲存');
-  ['ev-name','ev-date','ev-reg','ev-attend','ev-reach','ev-sat','ev-speaker','ev-note','ev-budget','ev-expense','ev-yt-url','ev-yt-views'].forEach(id => {
+  ['ev-name','ev-date','ev-reg','ev-sample','ev-attend','ev-reach','ev-sat','ev-speaker','ev-note','ev-budget','ev-expense','ev-yt-url','ev-yt-views'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -3346,6 +3360,7 @@ function openEventModal(idx) {
   document.getElementById('em-type').value    = e.type    || '健康講座';
   document.getElementById('em-campus').value  = e.campus  || '向上院區';
   document.getElementById('em-reg').value     = e.reg     || '';
+  document.getElementById('em-sample').value  = e.sample  || '';
   document.getElementById('em-attend').value  = e.attend  || '';
   document.getElementById('em-reach').value   = e.reach   || '';
   document.getElementById('em-sat').value     = e.sat     || '';
@@ -3365,10 +3380,12 @@ function saveEventEdit() {
   if (!name || !date) { showToast('請填寫活動名稱和日期'); return; }
   const idx = +document.getElementById('em-idx').value;
   store.events[idx] = {
+    ...(store.events[idx]||{}),
     date, name,
     type:     document.getElementById('em-type').value,
     campus:   document.getElementById('em-campus').value,
     reg:      +document.getElementById('em-reg').value      || 0,
+    sample:   +document.getElementById('em-sample').value   || 0,
     attend:   +document.getElementById('em-attend').value   || 0,
     reach:    +document.getElementById('em-reach').value    || 0,
     sat:      +document.getElementById('em-sat').value      || 0,
@@ -3409,16 +3426,22 @@ function renderEventDashboard() {
   }
   const totalCount  = ev.length;
   const totalReach  = ev.reduce((s,e) => s + (e.reach||0), 0);
+  const totalReg    = ev.reduce((s,e) => s + (e.reg||0), 0);
+  const totalSample = ev.reduce((s,e) => s + (e.sample||0), 0);
+  const totalAttend = ev.reduce((s,e) => s + (e.attend||0), 0);
   const withReg     = ev.filter(e => e.reg > 0);
   const avgRate     = withReg.length ? Math.round(withReg.reduce((s,e) => s + e.attend/e.reg*100, 0) / withReg.length) : 0;
   const withSat     = ev.filter(e => e.sat > 0);
   const avgSat      = withSat.length ? (withSat.reduce((s,e) => s + e.sat, 0) / withSat.length).toFixed(1) : '—';
 
   document.getElementById('evKpiGrid').innerHTML = [
-    { label:'總活動場次', value: totalCount+'場', icon:'📅', color:'--brand' },
-    { label:'平均出席率', value: avgRate+'%',     icon:'👥', color:'--ci-blue' },
-    { label:'平均滿意度', value: avgSat+'★',      icon:'⭐', color:'--gold' },
-    { label:'累積FB觸及', value: totalReach.toLocaleString(), icon:'📣', color:'--brand-mid' },
+    { label:'總活動場次', value: totalCount+'場',              color:'--brand' },
+    { label:'總報名人數', value: totalReg.toLocaleString()+'人', color:'--ci-blue' },
+    { label:'填寫報名（樣本）', value: totalSample.toLocaleString()+'人', color:'--brand-mid' },
+    { label:'實際出席人數', value: totalAttend.toLocaleString()+'人', color:'--brand' },
+    { label:'平均達成率', value: avgRate+'%',                  color:'--ci-blue' },
+    { label:'平均滿意度', value: avgSat+'★',                   color:'--gold' },
+    { label:'累積FB觸及', value: totalReach.toLocaleString(),  color:'--brand-mid' },
   ].map(k => `
     <div class="kpi-card">
       <div class="kpi-label">${k.label}</div>
@@ -4371,6 +4394,172 @@ function updateEventPrediction() {
   if (el('pred-reach'))  el('pred-reach').textContent  = p.reach;
   if (el('pred-timing')) el('pred-timing').textContent = p.timing;
   if (el('pred-tip'))    el('pred-tip').textContent    = p.tip;
+}
+
+// ═══════════════════════════════════════════
+//  HEALTH & ART SERIES REPORT (一鍵生成 成果報告)
+// ═══════════════════════════════════════════
+function openHealthArtReport() {
+  const periodLabel = (evDashFilter && evDashFilter !== 'all') ? evDashFilter : '全部期間';
+  const ev = filterByPeriod(activeEvents(), evDashFilter, 'date');
+  if (!ev.length) { showToast('目前篩選範圍內無活動資料'); return; }
+
+  // Aggregate OKR by type
+  const byType = {};
+  ev.forEach(e => {
+    const t = e.type || '其他';
+    if (!byType[t]) byType[t] = { count:0, reg:0, sample:0, attend:0, reach:0, sat:0, satN:0 };
+    byType[t].count++;
+    byType[t].reg    += (+e.reg||0);
+    byType[t].sample += (+e.sample||0);
+    byType[t].attend += (+e.attend||0);
+    byType[t].reach  += (+e.reach||0);
+    if (e.sat > 0) { byType[t].sat += (+e.sat); byType[t].satN++; }
+  });
+
+  // Overall KPIs
+  const totalCount  = ev.length;
+  const totalReg    = ev.reduce((s,e) => s + (+e.reg||0), 0);
+  const totalSample = ev.reduce((s,e) => s + (+e.sample||0), 0);
+  const totalAttend = ev.reduce((s,e) => s + (+e.attend||0), 0);
+  const totalReach  = ev.reduce((s,e) => s + (+e.reach||0), 0);
+  const withReg     = ev.filter(e => e.reg > 0);
+  const avgRate     = withReg.length ? Math.round(withReg.reduce((s,e) => s + e.attend/e.reg*100, 0) / withReg.length) : 0;
+  const withSat     = ev.filter(e => e.sat > 0);
+  const avgSat      = withSat.length ? (withSat.reduce((s,e) => s + e.sat, 0) / withSat.length).toFixed(1) : '—';
+
+  // Linked posts for marketing section
+  const postsAll = activePosts();
+  const periodFilteredPosts = filterByPeriod(postsAll, evDashFilter, 'date');
+  const mktReach = periodFilteredPosts.reduce((s,p) => s + (+p.reach||0), 0);
+  const mktCount = periodFilteredPosts.length;
+  const mktAvg   = mktCount ? Math.round(mktReach / mktCount) : 0;
+  const mktInteract = periodFilteredPosts.reduce((s,p) => s + (+p.likes||0) + (+p.comments||0) + (+p.shares||0), 0);
+
+  const rptData = JSON.stringify({
+    ev, byType, totalCount, totalReg, totalSample, totalAttend, totalReach,
+    avgRate, avgSat, mktReach, mktCount, mktAvg, mktInteract, periodLabel
+  });
+
+  const w = window.open('', '_blank', 'width=1000,height=800');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>健康藝術人文系列活動 成果報告</title>' +
+  '<style>' +
+    "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Inter:wght@700;900&display=swap');" +
+    '*{margin:0;padding:0;box-sizing:border-box;}' +
+    "body{font-family:'Noto Sans TC',sans-serif;background:#fff;color:#1A1A2E;padding:40px 56px;max-width:960px;margin:auto;line-height:1.6;}" +
+    '.hdr{border-bottom:4px solid #2D6A4F;padding-bottom:14px;margin-bottom:26px;}' +
+    '.hdr h1{font-size:24px;font-weight:900;color:#1B4332;margin-bottom:6px;}' +
+    '.hdr .meta{font-size:12px;color:#888;}' +
+    'h2{font-size:17px;font-weight:900;color:#1B4332;margin:28px 0 12px;padding:8px 12px;background:linear-gradient(90deg,#E8F0EC,#fff);border-left:5px solid #2D6A4F;}' +
+    'h3{font-size:14px;font-weight:700;color:#2D6A4F;margin:16px 0 8px;}' +
+    'p{font-size:13px;color:#444;margin-bottom:8px;}' +
+    'table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0 18px;}' +
+    'th{background:#F0F7F4;padding:8px 10px;text-align:left;font-weight:700;font-size:11px;color:#2D6A4F;border-bottom:2px solid #B7D7C8;}' +
+    'td{padding:7px 10px;border-bottom:1px solid #EEE;vertical-align:top;}' +
+    'tr:nth-child(even) td{background:#FAFBFA;}' +
+    '.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 20px;}' +
+    '.kpi{background:#F0F7F4;border:1px solid #B7D7C8;border-radius:10px;padding:16px;text-align:center;}' +
+    '.kpi-label{font-size:11px;color:#888;margin-bottom:4px;}' +
+    ".kpi-val{font-size:22px;font-weight:900;color:#2D6A4F;font-family:Inter,sans-serif;}" +
+    '.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px;}' +
+    '.bar-label{width:120px;font-weight:700;color:#555;}' +
+    '.bar-track{flex:1;height:20px;background:#F0F7F4;border-radius:4px;overflow:hidden;}' +
+    '.bar-fill{height:100%;background:linear-gradient(90deg,#2D6A4F,#52B788);color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}' +
+    '.bar-val{width:60px;text-align:right;font-weight:700;color:#2D6A4F;}' +
+    '.star{color:#F59E0B;font-weight:900;}' +
+    '.callout{background:#FFF7E6;border-left:4px solid #F59E0B;padding:12px 16px;margin:12px 0;font-size:12px;border-radius:4px;}' +
+    '.note{background:#F0F7F4;border:1px dashed #B7D7C8;padding:12px 16px;margin:12px 0;font-size:12px;border-radius:6px;color:#555;}' +
+    '.note[contenteditable="true"]:hover{background:#E8F0EC;}' +
+    '.note[contenteditable="true"]:focus{background:#fff;outline:2px solid #2D6A4F;}' +
+    'ul{margin:8px 0 12px 20px;font-size:12px;color:#444;} li{margin-bottom:4px;}' +
+    '.badge{display:inline-block;padding:2px 8px;border-radius:10px;background:#E8F0EC;color:#2D6A4F;font-size:10px;font-weight:700;}' +
+    '.sec{margin-bottom:20px;}' +
+    '@media print{body{padding:20px 30px;} .no-print{display:none;} h2{break-after:avoid;}}' +
+  '</style></head><body>' +
+  '<div class="hdr" style="display:flex;align-items:flex-start;justify-content:space-between;">' +
+    '<div><h1>健康藝術人文系列活動 成果報告</h1>' +
+    '<div class="meta">活動期間：<b id="rpt-period"></b>　｜　光田綜合醫院 行銷組</div></div>' +
+    '<button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#2D6A4F;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">列印 / 存 PDF</button>' +
+  '</div>' +
+  '<div id="rpt-body"></div>' +
+  '<div style="margin-top:40px;text-align:center;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;">光田綜合醫院 行銷組 ｜ 本報告由行銷整合分析中心自動產出</div>' +
+  '<scr' + 'ipt>' +
+  'var D=' + rptData + ';' +
+  'document.getElementById("rpt-period").textContent=D.periodLabel;' +
+  'function fmt(n){return (n||0).toLocaleString();}' +
+  'function esc(s){return (s==null?"":String(s)).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}' +
+  'var html="";' +
+
+  // Section 1
+  'html+="<div class=\\"sec\\"><h2>一、活動概述</h2>";' +
+  'html+="<p>本報告彙整「健康藝術人文系列活動」於<b>"+esc(D.periodLabel)+"</b>期間之執行成果，涵蓋活動規劃、成效盤點、受眾分析及行銷推廣表現，作為後續策略調整之依據。</p>";' +
+  'html+="<h3>1. 活動 OKR 規劃</h3>";' +
+  'html+="<table><thead><tr><th>類別</th><th>場次</th><th>總報名</th><th>樣本數</th><th>出席</th><th>達成率</th><th>平均滿意度</th></tr></thead><tbody>";' +
+  'Object.keys(D.byType).forEach(function(k){var b=D.byType[k];var r=b.reg>0?Math.round(b.attend/b.reg*100)+"%":"—";var s=b.satN>0?(b.sat/b.satN).toFixed(1)+"★":"—";html+="<tr><td><b>"+esc(k)+"</b></td><td>"+b.count+" 場</td><td>"+fmt(b.reg)+"</td><td>"+fmt(b.sample)+"</td><td>"+fmt(b.attend)+"</td><td><b style=\\"color:#2D6A4F;\\">"+r+"</b></td><td>"+s+"</td></tr>";});' +
+  'html+="</tbody></table></div>";' +
+
+  // Section 2
+  'html+="<div class=\\"sec\\"><h2>二、活動整體成效</h2>";' +
+  'html+="<div class=\\"kpi-row\\">";' +
+  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">總場次</div><div class=\\"kpi-val\\">"+D.totalCount+"</div></div>";' +
+  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">總報名人數</div><div class=\\"kpi-val\\">"+fmt(D.totalReg)+"</div></div>";' +
+  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">實際出席人數</div><div class=\\"kpi-val\\">"+fmt(D.totalAttend)+"</div></div>";' +
+  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均達成率</div><div class=\\"kpi-val\\">"+D.avgRate+"%</div></div>";' +
+  'html+="</div>";' +
+  'html+="<div class=\\"callout\\"><b>綜合分析：</b>本期共舉辦 <b>"+D.totalCount+"</b> 場活動，累計報名 <b>"+fmt(D.totalReg)+"</b> 人、出席 <b>"+fmt(D.totalAttend)+"</b> 人，整體達成率 <b>"+D.avgRate+"%</b>，平均滿意度 <b>"+D.avgSat+"★</b>，累積FB觸及 <b>"+fmt(D.totalReach)+"</b>。</div>";' +
+  'html+="</div>";' +
+
+  // Section 3
+  'html+="<div class=\\"sec\\"><h2>三、場次詳細數據盤點</h2>";' +
+  'html+="<table><thead><tr><th>#</th><th>日期</th><th>主題</th><th>類別</th><th>院區</th><th>報名</th><th>樣本</th><th>出席</th><th>達成率</th><th>滿意度</th></tr></thead><tbody>";' +
+  'D.ev.slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");}).forEach(function(e,i){var rate=e.reg>0?Math.round(e.attend/e.reg*100)+"%":"—";var rc=e.reg>0&&e.attend/e.reg>=0.8?"color:#2D6A4F;font-weight:700;":"";html+="<tr><td>"+(i+1)+"</td><td>"+esc(e.date)+"</td><td><b>"+esc(e.name)+"</b></td><td><span class=\\"badge\\">"+esc(e.type||"")+"</span></td><td>"+esc(e.campus||"")+"</td><td>"+fmt(e.reg)+"</td><td>"+fmt(e.sample)+"</td><td>"+fmt(e.attend)+"</td><td style=\\""+rc+"\\">"+rate+"</td><td>"+(e.sat?e.sat+"★":"—")+"</td></tr>";});' +
+  'html+="</tbody></table></div>";' +
+
+  // Section 4
+  'html+="<div class=\\"sec\\"><h2>四、受眾分析　<span style=\\"font-size:11px;color:#F59E0B;font-weight:700;\\">★ 標註為觸及較高族群</span></h2>";' +
+  'html+="<h3>1. 參與者年齡分布</h3>";' +
+  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">25-34 歲</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:12%;\\"> </div></div><div class=\\"bar-val\\">12%</div></div>";' +
+  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">35-44 歲</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:18%;\\"> </div></div><div class=\\"bar-val\\">18%</div></div>";' +
+  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">45-54 歲</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:28%;\\"> </div></div><div class=\\"bar-val\\">28%</div></div>";' +
+  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">55 歲以上 <span class=\\"star\\">★</span></div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:42%;background:linear-gradient(90deg,#F59E0B,#FCD34D);\\"> </div></div><div class=\\"bar-val\\">42%</div></div>";' +
+  'html+="<h3>2. 性別比例</h3>";' +
+  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">女性 <span class=\\"star\\">★</span></div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:58%;background:linear-gradient(90deg,#F59E0B,#FCD34D);\\"> </div></div><div class=\\"bar-val\\">58%</div></div>";' +
+  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">男性</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:42%;\\"> </div></div><div class=\\"bar-val\\">42%</div></div>";' +
+  'html+="<h3>3. 參與者地區分布</h3>";' +
+  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">沙鹿/龍井 <span class=\\"star\\">★</span></div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:65%;background:linear-gradient(90deg,#F59E0B,#FCD34D);\\"> </div></div><div class=\\"bar-val\\">65%</div></div>";' +
+  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">梧棲/清水</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:20%;\\"> </div></div><div class=\\"bar-val\\">20%</div></div>";' +
+  'html+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">其他</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:15%;\\"> </div></div><div class=\\"bar-val\\">15%</div></div>";' +
+  'html+="<div class=\\"note\\" contenteditable=\\"true\\">📝 受眾分析欄位目前為示範數據，請依實際問卷／報名表資料填入；本欄位可直接點擊編輯後列印。</div>";' +
+  'html+="</div>";' +
+
+  // Section 5
+  'html+="<div class=\\"sec\\"><h2>五、社群宣傳與行銷成效</h2>";' +
+  'html+="<div class=\\"kpi-row\\">";' +
+  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">宣傳貼文數</div><div class=\\"kpi-val\\">"+D.mktCount+"</div></div>";' +
+  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">累計觸及</div><div class=\\"kpi-val\\">"+fmt(D.mktReach)+"</div></div>";' +
+  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均觸及</div><div class=\\"kpi-val\\">"+fmt(D.mktAvg)+"</div></div>";' +
+  'html+="<div class=\\"kpi\\"><div class=\\"kpi-label\\">互動總數</div><div class=\\"kpi-val\\">"+fmt(D.mktInteract)+"</div></div>";' +
+  'html+="</div>";' +
+  'html+="<h3>行銷重點建議</h3>";' +
+  'html+="<ul><li>活動前 7-14 天開始預告貼文，搭配倒數行銷提升報名率</li><li>針對 55+ 高觸及族群強化 LINE 及社區海報通路</li><li>女性族群為主要受眾，內容素材可強化健康保健、情感連結主題</li><li>沙鹿／龍井在地居民佔多數，可持續深耕在地醫療合作夥伴</li></ul>";' +
+  'html+="</div>";' +
+
+  // Section 6
+  'html+="<div class=\\"sec\\"><h2>六、行動計畫</h2>";' +
+  'html+="<h3>(一) 短期行動計畫（1-3 個月內）</h3>";' +
+  'html+="<div class=\\"note\\" contenteditable=\\"true\\">1. 強化活動前預熱貼文（活動前 14 天起開始倒數行銷）<br>2. 建立活動後滿意度問卷 QR Code，統一收集回饋<br>3. 高滿意度場次優先製作亮點短影音再行銷<br>4. 檢視報名未到率高的場次並調整通知流程</div>";' +
+  'html+="<h3>(二) 長期行動計畫（3 個月以上）</h3>";' +
+  'html+="<div class=\\"note\\" contenteditable=\\"true\\">1. 建立系列活動品牌識別，提升院內外認知度<br>2. 發展線上／線下混合式活動模式擴大觸及<br>3. 與在地社區／學校長期合作，深耕健康推廣網絡<br>4. 建立受眾資料庫，進行分眾溝通與再行銷</div>";' +
+  'html+="</div>";' +
+
+  // Section 7
+  'html+="<div class=\\"sec\\"><h2>七、綜合結論</h2>";' +
+  'html+="<div class=\\"note\\" contenteditable=\\"true\\">本期健康藝術人文系列活動共執行 "+D.totalCount+" 場，總觸及 "+fmt(D.totalReach)+" 人次，達成率 "+D.avgRate+"%，整體成效符合預期。建議後續持續深化在地連結、強化分眾行銷，並建立系列活動長期品牌資產。<br><br>（本段為範本文字，請依實際執行成果補充調整後列印）</div>";' +
+  'html+="</div>";' +
+
+  'document.getElementById("rpt-body").innerHTML=html;' +
+  '</scr' + 'ipt></body></html>');
+  w.document.close();
 }
 
 // ═══════════════════════════════════════════
