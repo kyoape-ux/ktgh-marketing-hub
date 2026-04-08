@@ -867,10 +867,10 @@
     </a>
     </div></div>
     <div class="nav-group" data-key="crosstag">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>跨通路標籤</span><span class="chevron">▼</span></div>
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>跨傳達管道標籤</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('crosstag','stats')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> 標籤跨通路分析
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> 標籤跨傳達管道分析
     </a>
     <a class="nav-item" onclick="switchSection('crosstag','library')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="12" width="18" height="4" rx="1"/><line x1="3" y1="20" x2="21" y2="20"/></svg></span> 共用標籤字典
@@ -1536,7 +1536,7 @@
           <input type="text" id="md-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
         </div>
         <div class="form-group" style="margin-bottom:16px;">
-          <label>跨通路標籤（可多選，逗號分隔）</label>
+          <label>跨傳達管道標籤（可多選，逗號分隔）</label>
           <input type="text" id="md-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
         </div>
         <div style="display:flex;gap:10px;">
@@ -1770,7 +1770,7 @@
         <div id="clinicMatrixWrap"></div>
       </div>
       <div style="margin-top:12px;background:#F0F7F4;border-left:4px solid var(--brand);padding:12px 16px;border-radius:6px;font-size:12px;color:var(--text-sub);line-height:1.7;">
-        💡 <b>使用說明</b>：這張矩陣對應紙本「門診表傳達管道」表。每列是題材、每欄是通路，點擊儲存格切換 ✓/✗。點擊題材名稱可編輯詳細資料與標籤。
+        💡 <b>使用說明</b>：這張矩陣對應紙本「門診表傳達管道」表。每列是題材、每欄是傳達管道，點擊儲存格切換 ✓/✗。點擊題材名稱可編輯詳細資料與標籤。
       </div>
     </div>
 
@@ -1906,10 +1906,10 @@
       </div>
     </div>
 
-    <!-- ══ 跨通路 — 標籤統計 ══ -->
+    <!-- ══ 跨傳達管道 — 標籤統計 ══ -->
     <div class="section" id="sec-crosstag-stats">
       <div style="background:#EEF7F2;border-left:4px solid #2D6A4F;padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:12.5px;line-height:1.7;color:#1B4332;">
-        <b>💡 使用情境</b>：例如選擇 <b>「LDCT」</b> 標籤，可一次看出此主題在 FB 貼文、活動/講座、新聞曝光、門診表、LINE 貼文、SEO 關鍵字等所有通路做了幾次、累積觸及與成效。
+        <b>💡 使用情境</b>：例如選擇 <b>「LDCT」</b> 標籤，可一次看出此主題在 FB 貼文、活動/講座、新聞曝光、門診表、LINE 貼文、SEO 關鍵字等所有傳達管道做了幾次、累積觸及與成效。
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <label style="font-size:12px;font-weight:600;color:var(--text-sub);">選擇標籤：</label>
@@ -1922,15 +1922,16 @@
           <option value="quarter">近 3 個月</option>
           <option value="month">近 30 天</option>
         </select>
+        <button class="btn" onclick="openCrossTagReport()" style="background:#2D6A4F;color:#fff;margin-left:auto;">📊 一鍵產出推廣報告</button>
       </div>
       <div id="crossTagContent"></div>
     </div>
 
-    <!-- ══ 跨通路 — 共用標籤字典 ══ -->
+    <!-- ══ 跨傳達管道 — 共用標籤字典 ══ -->
     <div class="section" id="sec-crosstag-library">
       <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:16px;">
         <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">＋ 新增共用標籤</h3>
-        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">此處建立的標籤，可在貼文 / 活動 / 新聞 / 門診表 / LINE 貼文 / SEO 任一列表中套用，用於跨通路統計。</p>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">此處建立的標籤，可在貼文 / 活動 / 新聞 / 門診表 / LINE 貼文 / SEO 任一列表中套用，用於跨傳達管道統計。</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input id="crossNewTagName" type="text" placeholder="e.g. LDCT、達文西、健檢" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
           <select id="crossNewTagCategory" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
@@ -2150,7 +2151,7 @@
       <input type="text" id="pm-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
     </div>
     <div class="form-group" style="margin-top:4px;">
-      <label>跨通路標籤（可多選，用逗號分隔；例：LDCT, 達文西）</label>
+      <label>跨傳達管道標籤（可多選，用逗號分隔；例：LDCT, 達文西）</label>
       <input type="text" id="pm-tags" list="crossTagDatalist" placeholder="輸入標籤名稱，逗號分隔">
       <div id="pm-tags-preview" style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;"></div>
     </div>
@@ -2233,7 +2234,7 @@
         <input type="text" id="em-note">
       </div>
       <div class="form-group" style="grid-column:1/-1">
-        <label>跨通路標籤（可多選，逗號分隔）</label>
+        <label>跨傳達管道標籤（可多選，逗號分隔）</label>
         <input type="text" id="em-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
       </div>
     </div>
@@ -2348,10 +2349,10 @@ const STORE_KEY  = 'ktgh_marketing_v5';
 // 內容編輯組（負責主題企劃與撰稿）
 const CONTENT_OWNERS = ['宜靜','俊佑','嘉珊','藝漩','詠瑜'];
 
-// 通路執行組（負責各通路素材製作與上架）
+// 傳達管道執行組（負責各傳達管道素材製作與上架）
 const CHANNEL_OWNERS = { '菁':'海報設計', '翊':'數位內容', '喬':'上傳執行', '琪':'FB社群' };
 
-// 通路清單（16 項，依手寫表整理）
+// 傳達管道清單（16 項，依手寫表整理）
 const MEDIA_CHANNELS = [
   { key:'poster_xs_a2', group:'向上院區', label:'海報 A2', owner:'菁', spec:'200-300字 / A2' },
   { key:'poster_xs_a3', group:'向上院區', label:'海報 A3', owner:'菁', spec:'200-300字 / A3' },
@@ -2364,11 +2365,11 @@ const MEDIA_CHANNELS = [
   { key:'poster_dj_a4', group:'大甲院區', label:'海報 A4', owner:'菁', spec:'200-300字 / A4' },
   { key:'tv_card',      group:'3院區通用', label:'電視圖卡', owner:'翊', spec:'30字 / 800×1080' },
   { key:'epaper',       group:'3院區通用', label:'電子海報機', owner:'翊 / 喬上傳', spec:'300字' },
-  { key:'eip_banner',   group:'數位通路', label:'EIP Banner', owner:'翊', spec:'—' },
-  { key:'web_page',     group:'數位通路', label:'官網', owner:'翊', spec:'SEO 架構長文' },
-  { key:'web_banner',   group:'數位通路', label:'官網 Banner', owner:'翊', spec:'30字 / 896px寬' },
-  { key:'fb_post',      group:'數位通路', label:'FB 粉專貼文', owner:'琪', spec:'—' },
-  { key:'ticker',       group:'數位通路', label:'跑馬燈', owner:'喬', spec:'—' },
+  { key:'eip_banner',   group:'數位傳達管道', label:'EIP Banner', owner:'翊', spec:'—' },
+  { key:'web_page',     group:'數位傳達管道', label:'官網', owner:'翊', spec:'SEO 架構長文' },
+  { key:'web_banner',   group:'數位傳達管道', label:'官網 Banner', owner:'翊', spec:'30字 / 896px寬' },
+  { key:'fb_post',      group:'數位傳達管道', label:'FB 粉專貼文', owner:'琪', spec:'—' },
+  { key:'ticker',       group:'數位傳達管道', label:'跑馬燈', owner:'喬', spec:'—' },
   { key:'th_poster_a2', group:'通霄光田', label:'海報 A2', owner:'菁', spec:'300字' },
   { key:'th_poster_a3', group:'通霄光田', label:'海報 A3', owner:'菁', spec:'300字' },
   { key:'th_poster_a4', group:'通霄光田', label:'海報 A4', owner:'菁', spec:'300字' },
@@ -2994,18 +2995,18 @@ function switchSection(module, sub) {
     'campaign-hub':     ['Campaign 成果看板', '跨平台活動整合成效追蹤'],
     'kol-list':         ['KOL 成效追蹤',      'KOL / 網紅合作觸及與互動'],
     'kol-add':          ['新增 KOL 記錄',     '填寫 KOL 合作成效資料'],
-    'clinic-matrix':    ['月度傳達矩陣',      '門診表每月題材 × 通路布署追蹤'],
+    'clinic-matrix':    ['月度傳達矩陣',      '門診表每月題材 × 傳達管道布署追蹤'],
     'clinic-items':     ['題材列表',          '所有門診表題材主檔（可依標籤篩選）'],
     'clinic-tags':      ['標籤管理',          '題材標籤字典維護'],
-    'clinic-stats':     ['標籤統計分析',      '依標籤撈出歷年宣傳成果與通路涵蓋率'],
+    'clinic-stats':     ['標籤統計分析',      '依標籤撈出歷年宣傳成果與傳達管道涵蓋率'],
     'web-overview':     ['官網 GA4 儀表板',    '流量來源、使用者、工作階段、轉換分析'],
     'web-seo':          ['SEO 關鍵字列表',     'Search Console 關鍵字成效追蹤'],
     'web-import':       ['匯入 GA4 / GSC 數據','手動輸入或 JSON 批次匯入官網指標'],
     'line-overview':    ['LINE 儀表板',       'LINE@ 好友、訊息觸及、點擊成效'],
     'line-posts':       ['LINE 貼文列表',      '所有 LINE 官方帳號推播記錄'],
     'line-import':      ['匯入 LINE 數據',     '手動輸入或 JSON 批次匯入 LINE 指標'],
-    'crosstag-stats':   ['標籤跨通路分析',      '依單一標籤統計所有通路執行次數與成效'],
-    'crosstag-library': ['共用標籤字典',        '管理跨通路共用的標籤'],
+    'crosstag-stats':   ['標籤跨傳達管道分析',      '依單一標籤統計所有傳達管道執行次數與成效'],
+    'crosstag-library': ['共用標籤字典',        '管理跨傳達管道共用的標籤'],
   };
   const key = `${module}-${sub}`;
   if (titles[key]) {
@@ -4795,7 +4796,7 @@ function clinicCopyPrevMonth() {
   activeMediaItems().filter(x => x.month === prev).forEach(src => {
     store.mediaItems.push({
       ...src, id: 'mi_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-      month: current, channels: {}, // 重置通路勾選
+      month: current, channels: {}, // 重置傳達管道勾選
       created_at: new Date().toISOString(),
       deleted_at: null, deleted_by: null
     });
@@ -4874,7 +4875,7 @@ function clinicEditItem(idx) {
         </div>
         <div class="form-group" style="margin-bottom:12px;"><label>媒體連結 / 檔案 URL</label><input id="ce-url" type="url" value="${(it.media_url||'').replace(/"/g,'&quot;')}" placeholder="https://..."></div>
         <div class="form-group" style="margin-bottom:12px;"><label>備註</label><textarea id="ce-note" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;">${it.note||''}</textarea></div>
-        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-sub);display:block;margin-bottom:6px;">通路布署</label><div style="background:#FAFBFA;border:1px solid var(--border);border-radius:8px;padding:12px;">${chHtml}</div></div>
+        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-sub);display:block;margin-bottom:6px;">傳達管道布署</label><div style="background:#FAFBFA;border:1px solid var(--border);border-radius:8px;padding:12px;">${chHtml}</div></div>
         <div style="display:flex;justify-content:flex-end;gap:8px;"><button class="btn btn-outline" onclick="closeClinicEdit()">取消</button><button class="btn btn-primary" onclick="clinicSaveItem(${idx})">儲存</button></div>
       </div>
     </div>`;
@@ -4948,7 +4949,7 @@ function renderClinicItems() {
         <div>${nature}</div>
         ${it.media_source?`<div style="font-size:11px;color:#888;margin-top:4px;">📰 ${it.media_source}${it.media_url?' · <a href="'+it.media_url+'" target="_blank" style="color:#2D6A4F;">連結</a>':''}</div>`:''}
       </div>
-      <div style="text-align:right;"><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">已布署 ${channelCount} 通路</div><button class="action-btn edit" onclick="clinicEditItem(${idx})">編輯</button><button class="action-btn del" onclick="clinicDeleteItem(${idx})" data-perm="edit" style="margin-left:4px;">刪除</button></div>
+      <div style="text-align:right;"><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">已布署 ${channelCount} 傳達管道</div><button class="action-btn edit" onclick="clinicEditItem(${idx})">編輯</button><button class="action-btn del" onclick="clinicDeleteItem(${idx})" data-perm="edit" style="margin-left:4px;">刪除</button></div>
     </div>`;
   }).join('');
   applyPermissions();
@@ -5010,7 +5011,7 @@ function renderClinicStats() {
   // 月度分布
   const byMonth = {};
   items.forEach(x => { byMonth[x.month] = (byMonth[x.month]||0) + 1; });
-  // 通路涵蓋率
+  // 傳達管道涵蓋率
   const chStats = {};
   MEDIA_CHANNELS.forEach(c => { chStats[c.key] = { ...c, count: 0 }; });
   items.forEach(x => { Object.keys(x.channels||{}).forEach(k => { if (x.channels[k] && chStats[k]) chStats[k].count++; }); });
@@ -5027,12 +5028,12 @@ function renderClinicStats() {
       <div>${Object.keys(byMonth).sort().map(m => `<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;"><div style="min-width:80px;font-size:12px;font-weight:700;color:#2D6A4F;">${m}</div><div style="flex:1;height:24px;background:#F0F7F4;border-radius:4px;position:relative;"><div style="position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,#2D6A4F,#52B788);width:${Math.min(byMonth[m]*20,100)}%;border-radius:4px;"></div></div><div style="min-width:40px;font-size:12px;font-weight:700;">${byMonth[m]} 次</div></div>`).join('')}</div>
     </div>
     <div style="background:var(--surface);border-radius:10px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
-      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📢 通路涵蓋率（${total} 次中使用了幾次）</h3>
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📢 傳達管道涵蓋率（${total} 次中使用了幾次）</h3>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">${Object.values(chStats).filter(c=>c.count>0).sort((a,b)=>b.count-a.count).map(c => `<div style="display:flex;align-items:center;gap:8px;font-size:12px;"><div style="min-width:140px;">${c.group} ${c.label}</div><div style="flex:1;height:16px;background:#F0F7F4;border-radius:3px;"><div style="height:100%;background:linear-gradient(90deg,#2D6A4F,#52B788);width:${c.count/total*100}%;border-radius:3px;"></div></div><div style="min-width:60px;text-align:right;font-weight:700;">${c.count}/${total} (${Math.round(c.count/total*100)}%)</div></div>`).join('')}</div>
     </div>
     <div style="background:var(--surface);border-radius:10px;padding:20px;border:1px solid var(--border);">
       <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📋 所有題材清單</h3>
-      <table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr><th style="padding:8px;text-align:left;background:#F0F7F4;">月份</th><th style="padding:8px;text-align:left;background:#F0F7F4;">頁碼</th><th style="padding:8px;text-align:left;background:#F0F7F4;">主題</th><th style="padding:8px;text-align:left;background:#F0F7F4;">負責人</th><th style="padding:8px;text-align:center;background:#F0F7F4;">通路數</th></tr></thead><tbody>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr><th style="padding:8px;text-align:left;background:#F0F7F4;">月份</th><th style="padding:8px;text-align:left;background:#F0F7F4;">頁碼</th><th style="padding:8px;text-align:left;background:#F0F7F4;">主題</th><th style="padding:8px;text-align:left;background:#F0F7F4;">負責人</th><th style="padding:8px;text-align:center;background:#F0F7F4;">傳達管道數</th></tr></thead><tbody>
       ${items.map(x => { const idx = store.mediaItems.indexOf(x); const cc = Object.values(x.channels||{}).filter(v=>v).length; return `<tr><td style="padding:8px;border-bottom:1px solid #eee;">${x.month||''}</td><td style="padding:8px;border-bottom:1px solid #eee;">${x.page_no||'—'}</td><td style="padding:8px;border-bottom:1px solid #eee;"><a href="javascript:clinicEditItem(${idx})" style="color:#2D6A4F;text-decoration:none;font-weight:600;">${x.title||''}</a></td><td style="padding:8px;border-bottom:1px solid #eee;">${x.content_owner||''}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${cc}</td></tr>`; }).join('')}
       </tbody></table>
     </div>`;
@@ -5065,7 +5066,7 @@ function clinicPrintMatrix() {
 }
 
 // ═══════════════════════════════════════════
-//  通路總覽 — GA4 / LINE / GSC
+//  傳達管道總覽 — GA4 / LINE / GSC
 // ═══════════════════════════════════════════
 function saveGaDaily() {
   if (!requireEdit()) return;
@@ -5249,7 +5250,7 @@ function _renderChannelOverview_LEGACY() {
   if (!gaF.length && !lineF.length && !scF.length) {
     wrap.innerHTML = `<div style="padding:60px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);">
       <div style="font-size:48px;margin-bottom:12px;">📊</div>
-      <h3 style="font-size:16px;color:var(--text);margin-bottom:8px;">尚無任何通路數據</h3>
+      <h3 style="font-size:16px;color:var(--text);margin-bottom:8px;">尚無任何傳達管道數據</h3>
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">請先到「匯入 GA4 / LINE 數據」頁面新增資料</p>
       <button class="btn btn-primary" onclick="switchSection('channel','import')">前往匯入</button>
     </div>`;
@@ -5718,7 +5719,7 @@ function renderCrossTagStats() {
 
   const totalCount = postsHit.length + eventsHit.length + mediaHit.length + clinicHit.length + linePostsHit.length + seoHit.length;
   if (!totalCount) {
-    wrap.innerHTML = `<div style="padding:60px;text-align:center;color:var(--text-muted);font-size:13px;">此標籤在選定期間內尚無任何通路記錄。</div>`;
+    wrap.innerHTML = `<div style="padding:60px;text-align:center;color:var(--text-muted);font-size:13px;">此標籤在選定期間內尚無任何傳達管道記錄。</div>`;
     return;
   }
 
@@ -5746,7 +5747,7 @@ function renderCrossTagStats() {
     <div style="background:linear-gradient(135deg,#2D6A4F,#52B788);border-radius:14px;padding:24px;color:#fff;margin-bottom:18px;">
       <div style="font-size:12px;opacity:.85;margin-bottom:4px;">標籤</div>
       <div style="font-size:28px;font-weight:900;margin-bottom:4px;">#${tagName}</div>
-      <div style="font-size:13px;opacity:.9;">跨通路共執行 <b style="font-size:18px;">${totalCount}</b> 次</div>
+      <div style="font-size:13px;opacity:.9;">跨傳達管道共執行 <b style="font-size:18px;">${totalCount}</b> 次</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:20px;">
       ${channels.map(c => `
@@ -5781,8 +5782,168 @@ function renderCrossTagDetailTable(title, items, mapper) {
 }
 
 // ═══════════════════════════════════════════
+//  跨傳達管道：標籤一鍵推廣報告（A4 / 可列印）
+// ═══════════════════════════════════════════
+function openCrossTagReport() {
+  const sel = document.getElementById('crossTagSelect');
+  const tagName = sel && sel.value;
+  if (!tagName) { showToast('請先選擇一個標籤'); return; }
+  const periodSel = document.getElementById('crossTagPeriod');
+  const period = (periodSel && periodSel.value) || 'all';
+  const periodLabel = { all:'全部期間', year:'近 12 個月', quarter:'近 3 個月', month:'近 30 天' }[period] || '全部期間';
+
+  const cutoff = (() => {
+    if (period === 'all') return null;
+    const d = new Date();
+    if (period === 'year') d.setFullYear(d.getFullYear()-1);
+    else if (period === 'quarter') d.setMonth(d.getMonth()-3);
+    else if (period === 'month') d.setDate(d.getDate()-30);
+    return d.toISOString().slice(0,10);
+  })();
+  const inP = (s) => !cutoff || (s||'') >= cutoff;
+  const tagObj = (store.mediaTags||[]).find(t => t.name === tagName);
+
+  const postsHit  = (store.posts||[]).filter(p => !p.deleted_at && (p.tags||[]).includes(tagName) && inP(p.date));
+  const eventsHit = (store.events||[]).filter(e => !e.deleted_at && (e.tags||[]).includes(tagName) && inP(e.date));
+  const mediaHit  = (store.media||[]).filter(m => !m.deleted_at && (m.tags||[]).includes(tagName) && inP(m.date));
+  const clinicHit = (store.mediaItems||[]).filter(m => !m.deleted_at && (m.tags||[]).some(t => t === tagName || (tagObj && t === tagObj.id)) && inP(m.month));
+  const lineHit   = (store.linePosts||[]).filter(p => !p.deleted_at && (p.tags||[]).includes(tagName) && inP(p.date));
+  const seoHit    = (store.seoKeywords||[]).filter(k => !k.deleted_at && (k.tags||[]).includes(tagName));
+
+  const totalCount = postsHit.length + eventsHit.length + mediaHit.length + clinicHit.length + lineHit.length + seoHit.length;
+
+  const postsReach  = postsHit.reduce((s,p)=>s+(+p.reach||0),0);
+  const postsEngage = postsHit.reduce((s,p)=>s+(+p.engage||0),0);
+  const eventsReg   = eventsHit.reduce((s,e)=>s+(+e.reg||0),0);
+  const eventsAttend= eventsHit.reduce((s,e)=>s+(+e.attend||0),0);
+  const mediaReach  = mediaHit.reduce((s,m)=>s+(+m.reach||0),0);
+  const lineReach   = lineHit.reduce((s,p)=>s+(+p.reach||0),0);
+  const lineClick   = lineHit.reduce((s,p)=>s+(+p.click||0),0);
+  const seoImpr     = seoHit.reduce((s,k)=>s+(+k.impressions||0),0);
+  const seoClicks   = seoHit.reduce((s,k)=>s+(+k.clicks||0),0);
+  const totalReach  = postsReach + mediaReach + lineReach + seoImpr;
+
+  const channels = [
+    { icon:'📱', name:'FB 粉專貼文',   count:postsHit.length,  metric:'觸及 '+postsReach.toLocaleString()+' / 互動 '+postsEngage.toLocaleString(), color:'#1877F2' },
+    { icon:'🎤', name:'活動 / 講座',   count:eventsHit.length, metric:'報名 '+eventsReg+' / 出席 '+eventsAttend, color:'#F59E0B' },
+    { icon:'📰', name:'新聞媒體曝光',  count:mediaHit.length,  metric:'累計觸及 '+mediaReach.toLocaleString(), color:'#DC2626' },
+    { icon:'📋', name:'門診表題材',    count:clinicHit.length, metric:clinicHit.length+' 次刊登', color:'#2D6A4F' },
+    { icon:'💬', name:'LINE 貼文',     count:lineHit.length,   metric:'觸及 '+lineReach.toLocaleString()+' / 點擊 '+lineClick.toLocaleString(), color:'#00B900' },
+    { icon:'🔍', name:'SEO 關鍵字',    count:seoHit.length,    metric:'曝光 '+seoImpr.toLocaleString()+' / 點擊 '+seoClicks.toLocaleString(), color:'#1E40AF' },
+  ];
+
+  const esc = s => String(s==null?'':s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+  // Build channel cards
+  const maxC = Math.max(1, ...channels.map(c => c.count));
+  let cardsHtml = '<div class="kpi-row">';
+  channels.forEach(c => {
+    cardsHtml += '<div class="kpi" style="border-left:5px solid '+c.color+';">'
+      + '<div class="kpi-label">'+c.icon+' '+c.name+'</div>'
+      + '<div class="kpi-val" style="color:'+c.color+';">'+c.count+'</div>'
+      + '<div class="kpi-sub">'+esc(c.metric)+'</div></div>';
+  });
+  cardsHtml += '</div>';
+
+  // Channel coverage bar
+  let coverHtml = '<h2>📊 各傳達管道執行次數</h2>';
+  channels.forEach(c => {
+    const pct = Math.round(c.count / maxC * 100);
+    coverHtml += '<div class="bar-row"><div class="bar-label">'+esc(c.name)+'</div>'
+      + '<div class="bar-track"><div class="bar-fill" style="width:'+Math.max(pct,3)+'%;background:linear-gradient(90deg,'+c.color+','+c.color+'cc);">'+c.count+' 次</div></div></div>';
+  });
+
+  // Detail tables builder
+  const tbl = (title, items, cols, rowMap) => {
+    if (!items.length) return '';
+    let h = '<h2>'+title+'<span style="color:#888;font-weight:400;font-size:13px;">（'+items.length+' 筆）</span></h2>';
+    h += '<table><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';
+    items.forEach(it => {
+      const r = rowMap(it);
+      h += '<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>';
+    });
+    h += '</tbody></table>';
+    return h;
+  };
+
+  const detailHtml =
+    tbl('📱 FB 粉專貼文明細', postsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+        ['日期','標題','類型','觸及','互動'],
+        p => [p.date||'', p.title||'', p.cat||'', (p.reach||0).toLocaleString(), (p.engage||0).toLocaleString()]) +
+    tbl('🎤 活動 / 講座明細', eventsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+        ['日期','活動名稱','類型','院區','報名/出席','FB觸及'],
+        e => [e.date||'', e.name||'', e.type||'', e.campus||'', (e.reg||0)+'/'+(e.attend||0), (e.reach||0).toLocaleString()]) +
+    tbl('📰 新聞媒體曝光明細', mediaHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+        ['日期','媒體','類型','標題','觸及'],
+        m => [m.date||'', m.name||'', m.type||'', m.title||'', (m.reach||0).toLocaleString()]) +
+    tbl('📋 門診表題材刊登', clinicHit.sort((a,b)=>(b.month||'').localeCompare(a.month||'')),
+        ['月份','頁碼','題材','科別','負責人'],
+        m => [m.month||'', m.page||'', m.title||'', m.dept||'', m.owner||'']) +
+    tbl('💬 LINE 貼文明細', lineHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+        ['日期','標題','類型','觸及','點擊'],
+        p => [p.date||'', p.title||'', p.type||'', (p.reach||0).toLocaleString(), (p.click||0).toLocaleString()]) +
+    tbl('🔍 SEO 關鍵字佈局', seoHit,
+        ['關鍵字','曝光','點擊','排名','備註'],
+        k => [k.keyword||'', (k.impressions||0).toLocaleString(), (k.clicks||0).toLocaleString(), k.position||'—', k.note||'']);
+
+  const w = window.open('', '_blank', 'width=1040,height=820,scrollbars=yes');
+  if (!w) { showToast('請允許彈出視窗'); return; }
+
+  const htmlStr = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>推廣報告 - '+esc(tagName)+'</title>'
+    + '<style>'
+    + "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');"
+    + '*{margin:0;padding:0;box-sizing:border-box;}'
+    + "body{font-family:'Noto Sans TC',sans-serif;background:#EEF2F0;color:#1A1A2E;padding:20px;}"
+    + '.toolbar{position:fixed;top:14px;right:14px;z-index:99;display:flex;gap:8px;}'
+    + '.toolbar button{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;}'
+    + '.btn-print{background:#2D6A4F;color:#fff;} .btn-close{background:#888;color:#fff;}'
+    + '.page{max-width:960px;margin:0 auto;background:#fff;padding:48px 56px;box-shadow:0 4px 24px rgba(0,0,0,.08);border-radius:6px;}'
+    + '.hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:4px solid #2D6A4F;padding-bottom:14px;margin-bottom:24px;}'
+    + '.hdr h1{font-size:24px;color:#1B4332;font-weight:900;}'
+    + '.hdr .meta{font-size:12px;color:#666;text-align:right;line-height:1.6;}'
+    + '.hero{background:linear-gradient(135deg,#2D6A4F,#52B788);border-radius:14px;padding:24px 28px;color:#fff;margin-bottom:24px;}'
+    + '.hero .label{font-size:12px;opacity:.85;}'
+    + '.hero .tag{font-size:36px;font-weight:900;margin:4px 0 8px;}'
+    + '.hero .stat{font-size:14px;opacity:.95;}'
+    + '.hero .stat b{font-size:22px;}'
+    + 'h2{font-size:15px;font-weight:700;margin:24px 0 10px;padding:6px 12px;border-left:4px solid #2D6A4F;background:#F0F7F4;color:#1B4332;}'
+    + '.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:8px;}'
+    + '.kpi{background:#F8FAF9;border:1px solid #E5E7EB;border-radius:10px;padding:14px;}'
+    + '.kpi-label{font-size:11px;color:#666;margin-bottom:4px;font-weight:600;}'
+    + '.kpi-val{font-size:26px;font-weight:900;line-height:1.1;}'
+    + '.kpi-sub{font-size:11px;color:#888;margin-top:4px;}'
+    + 'table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:8px;}'
+    + 'th{background:#F0F7F4;padding:7px 8px;text-align:left;font-weight:700;font-size:11px;color:#1B4332;border-bottom:2px solid #2D6A4F;}'
+    + 'td{padding:6px 8px;border-bottom:1px solid #EEE;}'
+    + '.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}'
+    + '.bar-label{width:120px;text-align:right;font-size:11px;font-weight:700;color:#555;}'
+    + '.bar-track{flex:1;height:22px;background:#F0F7F4;border-radius:4px;overflow:hidden;}'
+    + '.bar-fill{height:100%;border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}'
+    + '.footer{margin-top:32px;padding-top:14px;border-top:1px solid #eee;text-align:center;font-size:11px;color:#999;}'
+    + '@media print{body{background:#fff;padding:0;} .toolbar{display:none;} .page{box-shadow:none;border-radius:0;padding:24px 32px;max-width:none;}}'
+    + '</style></head><body>'
+    + '<div class="toolbar"><button class="btn-print" onclick="window.print()">🖨 列印 / 存 PDF</button><button class="btn-close" onclick="window.close()">關閉</button></div>'
+    + '<div class="page">'
+    + '<div class="hdr"><h1>📢 標籤推廣成果報告</h1>'
+    + '<div class="meta">產出時間：'+new Date().toLocaleString('zh-TW')+'<br>篩選期間：'+esc(periodLabel)+'</div></div>'
+    + '<div class="hero"><div class="label">推廣主題標籤</div>'
+    + '<div class="tag">#'+esc(tagName)+'</div>'
+    + '<div class="stat">跨傳達管道共執行 <b>'+totalCount+'</b> 次｜累計曝光觸及 <b>'+totalReach.toLocaleString()+'</b></div></div>'
+    + '<h2>📌 各傳達管道執行概覽</h2>'
+    + cardsHtml
+    + coverHtml
+    + (totalCount === 0 ? '<div style="padding:40px;text-align:center;color:#888;">此標籤在選定期間內尚無任何傳達管道記錄。</div>' : detailHtml)
+    + '<div class="footer">光田綜合醫院 行銷組 ｜ 標籤跨傳達管道分析報告 ｜ 由行銷整合分析中心自動產出</div>'
+    + '</div></body></html>';
+
+  w.document.write(htmlStr);
+  w.document.close();
+  showToast('推廣報告已開啟，可直接列印或存為 PDF');
+}
+
+// ═══════════════════════════════════════════
 //  UNIFIED CHANNEL REPORT GENERATOR
-//  每個通路一鍵產生 A4 報表（可列印/存 PDF）
+//  每個傳達管道一鍵產生 A4 報表（可列印/存 PDF）
 // ═══════════════════════════════════════════
 function openChannelReport(channel) {
   const CH = {
@@ -5795,7 +5956,7 @@ function openChannelReport(channel) {
     kol:   { title:'KOL 合作成效報表',     color:'#7C3AED' },
   };
   const cfg = CH[channel];
-  if (!cfg) { showToast('未知的通路類型'); return; }
+  if (!cfg) { showToast('未知的傳達管道類型'); return; }
 
   // 讀取期間
   const periodLabel = (() => {
@@ -5808,7 +5969,7 @@ function openChannelReport(channel) {
   const now = new Date();
   const stamp = now.toLocaleDateString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit' });
 
-  // ── 依通路建立 body ──
+  // ── 依傳達管道建立 body ──
   let body = '';
   try {
     if (channel === 'fb')    body = _rptFb(periodLabel);
@@ -5866,7 +6027,7 @@ function openChannelReport(channel) {
   w.document.open(); w.document.write(html); w.document.close();
 }
 
-// ── 各通路報表內容產生器 ──
+// ── 各傳達管道報表內容產生器 ──
 function _rptFilterByPeriod(items, period, dateField) {
   if (!period || period === '全部期間') return items;
   const f = dateField || 'date';
@@ -5996,7 +6157,7 @@ function _rptClinic(period) {
   const list = _rptFilterByPeriod(activeMediaItems(), period, 'month');
   if (!list.length) return '<div class="empty">此期間無門診表題材</div>';
   const total = list.length;
-  // 通路涵蓋率
+  // 傳達管道涵蓋率
   const channels = (typeof MEDIA_CHANNELS !== 'undefined' ? MEDIA_CHANNELS : []);
   const chCoverage = {};
   channels.forEach(c => { chCoverage[c.label || c.key] = 0; });
@@ -6019,14 +6180,14 @@ function _rptClinic(period) {
   return _rptKpiCards([
     { label:'題材總數', val: total + ' 則' },
     { label:'涵蓋月份', val: Object.keys(byMonth).length + ' 個月' },
-    { label:'平均通路佈署', val: avgChannels + ' 個/則' },
+    { label:'平均傳達管道佈署', val: avgChannels + ' 個/則' },
     { label:'涉及科別', val: Object.keys(byDept).length + ' 科' },
   ]) +
-  '<h2>📡 通路涵蓋率 Top 15</h2>' + _rptBarChart(chRows) +
+  '<h2>📡 傳達管道涵蓋率 Top 15</h2>' + _rptBarChart(chRows) +
   '<h2>🏥 科別分布 Top 10</h2>' + _rptBarChart(deptRows) +
   '<h2>📅 月度題材數</h2>' + _rptBarChart(monthRows) +
   '<h2>📋 題材明細</h2>' +
-  '<table><thead><tr><th>月份</th><th>頁碼</th><th>題材標題</th><th>科別</th><th>負責人</th><th>通路數</th></tr></thead><tbody>' +
+  '<table><thead><tr><th>月份</th><th>頁碼</th><th>題材標題</th><th>科別</th><th>負責人</th><th>傳達管道數</th></tr></thead><tbody>' +
   [...list].sort((a,b)=>(b.month||'').localeCompare(a.month||'')).map(it => {
     const chCount = Object.values(it.channels||{}).filter(Boolean).length;
     return '<tr><td>' + (it.month||'') + '</td><td style="text-align:center;">' + (it.page_no||'') + '</td><td style="font-weight:600;">' + (it.title||'') + '</td><td>' + (it.dept||'') + '</td><td>' + (it.owner||'') + '</td><td style="text-align:center;">' + chCount + '</td></tr>';
@@ -6127,11 +6288,18 @@ function _rptKol(period) {
 //  PDF EXPORT
 // ═══════════════════════════════════════════
 function exportReport() {
-  // Serialize data for the report window
+  // Serialize data for the report window — 包含全部 8 個傳達管道
   const rptData = JSON.stringify({
     posts: activePosts(),
     events: activeEvents(),
-    media: activeMedia()
+    media: activeMedia(),
+    clinic: (typeof activeMediaItems==='function'? activeMediaItems() : (store.mediaItems||[]).filter(x=>!x.deleted_at)),
+    linePosts: (typeof activeLinePosts==='function'? activeLinePosts() : (store.linePosts||[]).filter(x=>!x.deleted_at)),
+    seo: (typeof activeSeoKeywords==='function'? activeSeoKeywords() : (store.seoKeywords||[]).filter(x=>!x.deleted_at)),
+    kol: (store.kols||[]).filter(x=>!x.deleted_at),
+    web: (store.webMetrics||[]).filter(x=>!x.deleted_at),
+    search: (store.searchMetrics||[]).filter(x=>!x.deleted_at),
+    line: (store.lineMetrics||[]).filter(x=>!x.deleted_at)
   });
 
   const w = window.open('', '_blank', 'width=960,height=750');
@@ -6181,6 +6349,10 @@ function exportReport() {
     '<button class="tab active" onclick="switchTab(this,\'rpt-fb\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>粉專成效</button>' +
     '<button class="tab" onclick="switchTab(this,\'rpt-ev\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>活動成效</button>' +
     '<button class="tab" onclick="switchTab(this,\'rpt-md\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>媒體成效</button>' +
+    '<button class="tab" onclick="switchTab(this,\'rpt-cl\')">📋 門診表</button>' +
+    '<button class="tab" onclick="switchTab(this,\'rpt-ln\')">💬 LINE@</button>' +
+    '<button class="tab" onclick="switchTab(this,\'rpt-wb\')">🌐 官網/SEO</button>' +
+    '<button class="tab" onclick="switchTab(this,\'rpt-kl\')">🎬 KOL</button>' +
   '</div>' +
   '<div class="filter-bar no-print">' +
     '<label>篩選期間：</label>' +
@@ -6192,6 +6364,10 @@ function exportReport() {
   '<div id="rpt-fb" class="tab-content active"></div>' +
   '<div id="rpt-ev" class="tab-content"></div>' +
   '<div id="rpt-md" class="tab-content"></div>' +
+  '<div id="rpt-cl" class="tab-content"></div>' +
+  '<div id="rpt-ln" class="tab-content"></div>' +
+  '<div id="rpt-wb" class="tab-content"></div>' +
+  '<div id="rpt-kl" class="tab-content"></div>' +
   '<div class="footer">光田綜合醫院 行銷組 ｜ 本報表由行銷整合分析中心自動產出</div>' +
   '<scr' + 'ipt>' +
   'var RAW=' + rptData + ';' +
@@ -6212,6 +6388,11 @@ function exportReport() {
     'RAW.posts.forEach(function(p){ds.push(p.date||p.month||"");});' +
     'RAW.events.forEach(function(e){ds.push(e.date||"");});' +
     'RAW.media.forEach(function(m){ds.push(m.date||m.month||"");});' +
+    '(RAW.clinic||[]).forEach(function(c){ds.push(c.month||"");});' +
+    '(RAW.linePosts||[]).forEach(function(p){ds.push(p.date||"");});' +
+    '(RAW.web||[]).forEach(function(w){ds.push(w.date||"");});' +
+    '(RAW.line||[]).forEach(function(l){ds.push(l.date||"");});' +
+    '(RAW.kol||[]).forEach(function(k){ds.push(k.date||"");});' +
     'return ds.filter(function(d){return d&&d.length>=7;});' +
   '}' +
   'function updatePeriodValues(){' +
@@ -6237,7 +6418,10 @@ function exportReport() {
     'var media=filterByPeriod(RAW.media,period,"date");' +
     'var periodLabel=period==="all"?"全部期間":period;' +
     /* Sub header */
-    'document.getElementById("rpt-sub").innerHTML="報表產出時間："+new Date().toLocaleString("zh-TW")+" ｜ 篩選："+periodLabel+" ｜ 貼文 "+posts.length+" 篇 / 活動 "+events.length+" 場 / 媒體 "+media.length+" 則";' +
+    'var _cl=filterByPeriod(RAW.clinic||[],period,"month").length;' +
+    'var _ln=filterByPeriod(RAW.linePosts||[],period,"date").length;' +
+    'var _kl=filterByPeriod(RAW.kol||[],period,"date").length;' +
+    'document.getElementById("rpt-sub").innerHTML="報表產出時間："+new Date().toLocaleString("zh-TW")+" ｜ 篩選："+periodLabel+" ｜ 貼文 "+posts.length+" / 活動 "+events.length+" / 媒體 "+media.length+" / 門診表 "+_cl+" / LINE "+_ln+" / KOL "+_kl;' +
     /* FB Tab */
     'var byMonth={};' +
     'posts.forEach(function(p){var m=(p.month||"").slice(0,7);if(!m||m.length!==7)return;if(!byMonth[m])byMonth[m]={reach:0,count:0,engage:0};byMonth[m].reach+=(p.reach||0);byMonth[m].count++;byMonth[m].engage+=(p.engage||0);});' +
@@ -6297,6 +6481,88 @@ function exportReport() {
     '[].concat(media).sort(function(a,b){return new Date(b.date)-new Date(a.date);}).forEach(function(m){mdH+="<tr><td>"+(m.date||"")+"</td><td>"+(m.name||"")+"</td><td>"+(m.type||"")+"</td><td>"+(m.title||"").slice(0,35)+"</td><td>"+(m.reach||0).toLocaleString()+"</td></tr>";});' +
     'mdH+="</tbody></table>";' +
     'document.getElementById("rpt-md").innerHTML=mdH;' +
+    /* Clinic Tab */
+    'var clinic=filterByPeriod(RAW.clinic||[],period,"month");' +
+    'var clTotal=clinic.length;' +
+    'var clChannelCount=clinic.reduce(function(s,c){var ch=c.channels||{};return s+Object.keys(ch).filter(function(k){return ch[k];}).length;},0);' +
+    'var clAvg=clTotal?(clChannelCount/clTotal).toFixed(1):"0";' +
+    'var clMonths=Array.from(new Set(clinic.map(function(c){return c.month||"";}).filter(Boolean)));' +
+    'var clChByCh={};' +
+    'clinic.forEach(function(c){var ch=c.channels||{};Object.keys(ch).forEach(function(k){if(ch[k]){if(!clChByCh[k])clChByCh[k]=0;clChByCh[k]++;}});});' +
+    'var clChEntries=Object.entries(clChByCh).sort(function(a,b){return b[1]-a[1];}).slice(0,15);' +
+    'var clMaxCh=Math.max.apply(null,clChEntries.map(function(e){return e[1];}));if(!isFinite(clMaxCh))clMaxCh=1;' +
+    'var clH="<div class=\\"kpi-row\\">"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">題材總則數</div><div class=\\"kpi-val\\">"+clTotal+" 則</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">涵蓋月份</div><div class=\\"kpi-val\\">"+clMonths.length+" 月</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">總傳達管道布署</div><div class=\\"kpi-val\\">"+clChannelCount+" 次</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均每則布署</div><div class=\\"kpi-val\\">"+clAvg+" 個</div></div>"' +
+      '+"</div>";' +
+    'clH+="<h2>📡 傳達管道涵蓋率 Top 15</h2>";' +
+    'clChEntries.forEach(function(e){var pct=Math.round(e[1]/clMaxCh*100);clH+="<div class=\\"bar-row\\"><div class=\\"bar-label\\">"+e[0]+"</div><div class=\\"bar-track\\"><div class=\\"bar-fill\\" style=\\"width:"+Math.max(pct,8)+"%\\">"+e[1]+" 次</div></div></div>";});' +
+    'clH+="<h2>題材明細</h2><table><thead><tr><th>月份</th><th>頁碼</th><th>題材</th><th>科別</th><th>負責人</th><th>傳達管道數</th></tr></thead><tbody>";' +
+    '[].concat(clinic).sort(function(a,b){return(b.month||"").localeCompare(a.month||"");}).forEach(function(c){var ch=c.channels||{};var n=Object.keys(ch).filter(function(k){return ch[k];}).length;clH+="<tr><td>"+(c.month||"")+"</td><td>"+(c.page||"")+"</td><td>"+(c.title||"")+"</td><td>"+(c.dept||"")+"</td><td>"+(c.owner||"")+"</td><td style=\\"text-align:center;font-weight:700\\">"+n+"</td></tr>";});' +
+    'clH+="</tbody></table>";' +
+    'document.getElementById("rpt-cl").innerHTML=clH;' +
+    /* LINE Tab */
+    'var lnPosts=filterByPeriod(RAW.linePosts||[],period,"date");' +
+    'var lnDaily=filterByPeriod(RAW.line||[],period,"date");' +
+    'var lnReach=lnPosts.reduce(function(s,p){return s+(+p.reach||0);},0);' +
+    'var lnClick=lnPosts.reduce(function(s,p){return s+(+p.click||0);},0);' +
+    'var lnFriendsLatest=lnDaily.length?(lnDaily[lnDaily.length-1].friends||0):0;' +
+    'var lnFriendsFirst=lnDaily.length?(lnDaily[0].friends||0):0;' +
+    'var lnGrowth=lnFriendsLatest-lnFriendsFirst;' +
+    'var lnH="<div class=\\"kpi-row\\">"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">好友數</div><div class=\\"kpi-val\\">"+lnFriendsLatest.toLocaleString()+"</div><div class=\\"kpi-sub\\">期間 "+(lnGrowth>=0?"+":"")+lnGrowth+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">LINE 貼文數</div><div class=\\"kpi-val\\">"+lnPosts.length+" 則</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">累計觸及</div><div class=\\"kpi-val\\">"+lnReach.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">累計點擊</div><div class=\\"kpi-val\\">"+lnClick.toLocaleString()+"</div></div>"' +
+      '+"</div>";' +
+    'lnH+="<h2>LINE 貼文列表</h2><table><thead><tr><th>日期</th><th>標題</th><th>類型</th><th>觸及</th><th>點擊</th></tr></thead><tbody>";' +
+    '[].concat(lnPosts).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).forEach(function(p){lnH+="<tr><td>"+(p.date||"")+"</td><td>"+(p.title||"").slice(0,40)+"</td><td>"+(p.type||"")+"</td><td>"+(p.reach||0).toLocaleString()+"</td><td>"+(p.click||0).toLocaleString()+"</td></tr>";});' +
+    'lnH+="</tbody></table>";' +
+    'document.getElementById("rpt-ln").innerHTML=lnH;' +
+    /* Web Tab */
+    'var wbDaily=filterByPeriod(RAW.web||[],period,"date");' +
+    'var wbPV=wbDaily.reduce(function(s,d){return s+(+d.pv||0);},0);' +
+    'var wbUV=wbDaily.reduce(function(s,d){return s+(+d.users||0);},0);' +
+    'var wbSessions=wbDaily.reduce(function(s,d){return s+(+d.sessions||0);},0);' +
+    'var wbBounceArr=wbDaily.filter(function(d){return d.bounce;});' +
+    'var wbBounce=wbBounceArr.length?(wbBounceArr.reduce(function(s,d){return s+(+d.bounce||0);},0)/wbBounceArr.length).toFixed(1):"—";' +
+    'var seoAll=(RAW.seo||[]);' +
+    'var seoImpr=seoAll.reduce(function(s,k){return s+(+k.impressions||0);},0);' +
+    'var seoClicks=seoAll.reduce(function(s,k){return s+(+k.clicks||0);},0);' +
+    'var wbH="<div class=\\"kpi-row\\">"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">官網 PV</div><div class=\\"kpi-val\\">"+wbPV.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">UV 使用者</div><div class=\\"kpi-val\\">"+wbUV.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">工作階段</div><div class=\\"kpi-val\\">"+wbSessions.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均跳出率</div><div class=\\"kpi-val\\">"+wbBounce+"%</div></div>"' +
+      '+"</div>";' +
+    'wbH+="<div class=\\"kpi-row\\" style=\\"margin-top:8px\\">"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">SEO 關鍵字數</div><div class=\\"kpi-val\\">"+seoAll.length+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">關鍵字曝光</div><div class=\\"kpi-val\\">"+seoImpr.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">關鍵字點擊</div><div class=\\"kpi-val\\">"+seoClicks.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均 CTR</div><div class=\\"kpi-val\\">"+(seoImpr?(seoClicks/seoImpr*100).toFixed(2)+"%":"—")+"</div></div>"' +
+      '+"</div>";' +
+    'wbH+="<h2>SEO 關鍵字 Top 15</h2><table><thead><tr><th>關鍵字</th><th>曝光</th><th>點擊</th><th>排名</th><th>備註</th></tr></thead><tbody>";' +
+    '[].concat(seoAll).sort(function(a,b){return(b.impressions||0)-(a.impressions||0);}).slice(0,15).forEach(function(k){wbH+="<tr><td>"+(k.keyword||"")+"</td><td>"+(k.impressions||0).toLocaleString()+"</td><td>"+(k.clicks||0).toLocaleString()+"</td><td>"+(k.position||"—")+"</td><td>"+(k.note||"")+"</td></tr>";});' +
+    'wbH+="</tbody></table>";' +
+    'document.getElementById("rpt-wb").innerHTML=wbH;' +
+    /* KOL Tab */
+    'var kol=filterByPeriod(RAW.kol||[],period,"date");' +
+    'var kolNames=Array.from(new Set(kol.map(function(k){return k.name||"";}).filter(Boolean)));' +
+    'var kolFans=kol.reduce(function(s,k){return s+(+k.fans||0);},0);' +
+    'var kolReach=kol.reduce(function(s,k){return s+(+k.reach||0);},0);' +
+    'var kolEngage=kol.reduce(function(s,k){return s+(+k.engage||0);},0);' +
+    'var kolH="<div class=\\"kpi-row\\">"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">合作 KOL 數</div><div class=\\"kpi-val\\">"+kolNames.length+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">總粉絲覆蓋</div><div class=\\"kpi-val\\">"+kolFans.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">總觸及/觀看</div><div class=\\"kpi-val\\">"+kolReach.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">總互動</div><div class=\\"kpi-val\\">"+kolEngage.toLocaleString()+"</div></div>"' +
+      '+"</div>";' +
+    'kolH+="<h2>KOL 合作明細</h2><table><thead><tr><th>日期</th><th>KOL</th><th>平台</th><th>粉絲</th><th>觸及</th><th>互動</th></tr></thead><tbody>";' +
+    '[].concat(kol).sort(function(a,b){return(b.date||"").localeCompare(a.date||"");}).forEach(function(k){kolH+="<tr><td>"+(k.date||"")+"</td><td>"+(k.name||"")+"</td><td>"+(k.platform||"")+"</td><td>"+(k.fans||0).toLocaleString()+"</td><td>"+(k.reach||0).toLocaleString()+"</td><td>"+(k.engage||0).toLocaleString()+"</td></tr>";});' +
+    'kolH+="</tbody></table>";' +
+    'document.getElementById("rpt-kl").innerHTML=kolH;' +
   '}' +
   'rebuildReport();' +
   '</scr' + 'ipt></body></html>');
