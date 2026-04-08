@@ -6009,20 +6009,41 @@ function openVideoModal(idx) {
   const v = isNew ? {} : store.videoItems[idx];
   const tagsStr = (v.tags||[]).join(', ');
   const html = `
-    <div class="modal-overlay" id="videoModal" style="display:flex;">
-      <div class="modal-card" style="max-width:560px;">
-        <div class="modal-header"><h3>${isNew?'新增':'編輯'}影片</h3><button class="modal-close" onclick="document.getElementById('videoModal').remove()">×</button></div>
-        <div class="modal-body">
-          <div class="form-row"><label>日期</label><input type="date" id="vm-date" value="${v.date||''}"></div>
-          <div class="form-row"><label>平台</label><select id="vm-platform">
-            <option value="YouTube"${v.platform==='YouTube'?' selected':''}>YouTube</option>
-            <option value="Instagram"${v.platform==='Instagram'?' selected':''}>Instagram</option>
-          </select></div>
-          <div class="form-row"><label>影片標題</label><input type="text" id="vm-title" value="${(v.title||'').replace(/"/g,'&quot;')}" placeholder="例：LDCT 低劑量電腦斷層衛教"></div>
-          <div class="form-row"><label>觀看數</label><input type="number" id="vm-views" value="${v.views||0}" min="0"></div>
-          <div class="form-row"><label>互動數</label><input type="number" id="vm-engage" value="${v.engage||0}" min="0"></div>
-          <div class="form-row"><label>外部連結</label><input type="url" id="vm-url" value="${v.external_url||''}" placeholder="https://www.youtube.com/watch?v=..."></div>
-          <div class="form-row"><label>跨傳達管道標籤（逗號分隔）</label><input type="text" id="vm-tags" list="crossTagDatalist" value="${tagsStr}" placeholder="例：LDCT, 達文西, 健檢"></div>
+    <div class="modal-overlay open" id="videoModal">
+      <div class="modal-box" style="max-width:560px;">
+        <h3>${isNew?'新增':'編輯'}影片</h3>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="form-group">
+            <label>日期 *</label>
+            <input type="date" id="vm-date" value="${v.date||''}">
+          </div>
+          <div class="form-group">
+            <label>平台 *</label>
+            <select id="vm-platform">
+              <option value="YouTube"${v.platform==='YouTube'?' selected':''}>YouTube</option>
+              <option value="Instagram"${v.platform==='Instagram'?' selected':''}>Instagram</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label>影片標題 *</label>
+            <input type="text" id="vm-title" value="${(v.title||'').replace(/"/g,'&quot;')}" placeholder="例：LDCT 低劑量電腦斷層衛教">
+          </div>
+          <div class="form-group">
+            <label>觀看數</label>
+            <input type="number" id="vm-views" value="${v.views||0}" min="0">
+          </div>
+          <div class="form-group">
+            <label>互動數（讚+留言+分享）</label>
+            <input type="number" id="vm-engage" value="${v.engage||0}" min="0">
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label>外部連結</label>
+            <input type="url" id="vm-url" value="${v.external_url||''}" placeholder="https://www.youtube.com/watch?v=...">
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label>跨傳達管道標籤（可多選，逗號分隔）</label>
+            <input type="text" id="vm-tags" list="crossTagDatalist" value="${tagsStr}" placeholder="例：LDCT, 達文西, 健檢">
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-outline" onclick="document.getElementById('videoModal').remove()">取消</button>
