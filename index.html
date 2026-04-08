@@ -72,6 +72,26 @@
   nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
   nav::-webkit-scrollbar-track { background: transparent; }
   .nav-section { padding: 8px 20px 4px; font-size: 10px; letter-spacing: 1.5px; color: rgba(255,255,255,0.35); text-transform: uppercase; }
+  .nav-group { margin-bottom: 2px; }
+  .nav-group-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 18px 6px 20px; cursor: pointer; user-select: none;
+    font-size: 10.5px; letter-spacing: 1.3px; font-weight: 700;
+    color: rgba(255,255,255,0.42); text-transform: uppercase;
+    transition: color .15s;
+  }
+  .nav-group-header:hover { color: rgba(255,255,255,0.85); }
+  .nav-group-header .chevron {
+    font-size: 9px; opacity:.7; transition: transform .2s;
+    display:inline-block; transform: rotate(0deg);
+  }
+  .nav-group.collapsed .nav-group-header .chevron { transform: rotate(-90deg); }
+  .nav-group-body { overflow: hidden; max-height: 1000px; transition: max-height .22s ease; }
+  .nav-group.collapsed .nav-group-body { max-height: 0; }
+  .nav-group-header .grp-badge {
+    font-size: 9px; background: rgba(16,185,129,.3); color: #A7F3D0;
+    padding: 1px 6px; border-radius: 8px; margin-left: 6px; letter-spacing: 0;
+  }
   .nav-item {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 20px; cursor: pointer;
@@ -743,7 +763,9 @@
     <h2><span class="dot"></span>行銷整合分析中心</h2>
   </div>
   <nav>
-    <div class="nav-section">粉專追蹤</div>
+    <div class="nav-group" data-key="fb">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>粉專追蹤</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
     <a class="nav-item active" onclick="switchSection('fb','overview')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 總覽 Dashboard
     </a>
@@ -768,7 +790,10 @@
     <a class="nav-item" onclick="switchSection('fb','sop')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span> SOP 建議模板
     </a>
-    <div class="nav-section">活動追蹤</div>
+    </div></div>
+    <div class="nav-group" data-key="event">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>活動追蹤</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('event','dashboard')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 成效分析看板
     </a>
@@ -778,21 +803,30 @@
     <a class="nav-item" data-perm="edit" onclick="switchSection('event','add')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> 新增活動回報
     </a>
-    <div class="nav-section">媒體追蹤</div>
+    </div></div>
+    <div class="nav-group" data-key="media">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>媒體追蹤</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('media','list')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></span> 新聞媒體曝光
     </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('media','add')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> 新增媒體記錄
     </a>
-    <div class="nav-section">成效整合</div>
+    </div></div>
+    <div class="nav-group" data-key="campaign">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>成效整合</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('campaign','hub')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Campaign 成果看板
     </a>
     <a class="nav-item" onclick="switchSection('kol','list')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> KOL 成效追蹤
     </a>
-    <div class="nav-section">門診表資料庫</div>
+    </div></div>
+    <div class="nav-group" data-key="clinic">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>門診表資料庫</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('clinic','matrix')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span> 月度傳達矩陣
     </a>
@@ -805,20 +839,53 @@
     <a class="nav-item" onclick="switchSection('clinic','stats')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> 標籤統計分析
     </a>
-    <div class="nav-section">通路總覽</div>
-    <a class="nav-item" onclick="switchSection('channel','overview')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> 官網 + LINE 儀表板
+    </div></div>
+    <div class="nav-group" data-key="web">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>官網 GA4 / SEO</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
+    <a class="nav-item" onclick="switchSection('web','overview')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> 官網儀表板
     </a>
-    <a class="nav-item" data-perm="edit" onclick="switchSection('channel','import')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 GA4 / LINE 數據
+    <a class="nav-item" onclick="switchSection('web','seo')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> SEO 關鍵字列表
     </a>
-    <div class="nav-section">系統</div>
+    <a class="nav-item" data-perm="edit" onclick="switchSection('web','import')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 GA4 / GSC 數據
+    </a>
+    </div></div>
+    <div class="nav-group" data-key="line">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>LINE@ 官方帳號</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
+    <a class="nav-item" onclick="switchSection('line','overview')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> LINE 儀表板
+    </a>
+    <a class="nav-item" onclick="switchSection('line','posts')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> LINE 貼文列表
+    </a>
+    <a class="nav-item" data-perm="edit" onclick="switchSection('line','import')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 LINE 數據
+    </a>
+    </div></div>
+    <div class="nav-group" data-key="crosstag">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>跨通路標籤</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
+    <a class="nav-item" onclick="switchSection('crosstag','stats')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> 標籤跨通路分析
+    </a>
+    <a class="nav-item" onclick="switchSection('crosstag','library')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="12" width="18" height="4" rx="1"/><line x1="3" y1="20" x2="21" y2="20"/></svg></span> 共用標籤字典
+    </a>
+    </div></div>
+    <div class="nav-group" data-key="settings">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>系統</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('settings','backup')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></span> 資料備份還原
     </a>
     <a class="nav-item" onclick="switchSection('settings','main')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> 設定 / Google Sheets
     </a>
+    </div></div>
   </nav>
   <div class="sidebar-footer">
     <div class="version">v2.0 · 2026</div>
@@ -991,6 +1058,7 @@
           <h3>貼文成效列表</h3>
           <div style="display:flex;gap:8px;align-items:center;">
             <input placeholder="搜尋標題..." id="searchInput" oninput="filterPostsBySearch()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:200px;">
+            <select id="postsTagFilter" onchange="renderPostsList()" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;"><option value="">所有標籤</option></select>
             <span id="postCount" style="font-size:12px;color:var(--text-muted)"></span>
             <button class="btn btn-primary" data-perm="edit" onclick="openPostModal(-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增貼文</button>
           </div>
@@ -1280,6 +1348,7 @@
             <option value="大甲院區">大甲院區</option>
           </select>
           <input type="text" id="evSearchInput" oninput="renderEvents()" placeholder="搜尋活動名稱…" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;color:var(--text-main);background:#fff;outline:none;min-width:160px;">
+          <select id="evTagFilter" onchange="renderEvents()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;background:#fff;"><option value="">所有標籤</option></select>
           <span id="evCountLabel" style="font-size:12px;color:var(--text-muted);margin-left:auto;"></span>
           <button class="btn btn-outline" onclick="clearEvFilters()" style="height:32px;font-size:12px;padding:0 10px;">清除篩選</button>
         </div>
@@ -1390,6 +1459,7 @@
       <div class="table-card media-table">
         <div class="table-header">
           <h3>媒體新聞曝光追蹤</h3>
+          <select id="mediaTagFilter" onchange="renderMedia()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;background:#fff;margin-right:auto;margin-left:12px;"><option value="">所有標籤</option></select>
           <button class="btn btn-primary" data-perm="edit" onclick="switchSection('media','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增媒體記錄</button>
         </div>
         <div class="table-wrap">
@@ -1461,6 +1531,10 @@
         <div class="form-group" style="margin-bottom:16px;">
           <label>關聯活動 Campaign（選填）</label>
           <input type="text" id="md-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>跨通路標籤（可多選，逗號分隔）</label>
+          <input type="text" id="md-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
         </div>
         <div style="display:flex;gap:10px;">
           <button class="btn btn-primary" onclick="addMedia()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 儲存媒體記錄</button>
@@ -1743,25 +1817,136 @@
       <div id="clinicStatsContent"></div>
     </div>
 
-    <!-- ══ 通路總覽 — 官網 + LINE 儀表板 ══ -->
-    <div class="section" id="sec-channel-overview">
+    <!-- ══ 官網 — GA4 儀表板 ══ -->
+    <div class="section" id="sec-web-overview">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <label style="font-size:12px;font-weight:600;color:var(--text-sub);">期間：</label>
-        <select id="channelPeriod" onchange="renderChannelOverview()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:140px;">
+        <select id="webPeriod" onchange="renderWebOverview()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:140px;">
           <option value="30">近 30 天</option>
           <option value="90">近 90 天</option>
           <option value="all">全部資料</option>
         </select>
       </div>
-      <div id="channelOverviewContent"></div>
+      <div id="webOverviewContent"></div>
     </div>
 
-    <!-- ══ 通路總覽 — 匯入 GA4/LINE 數據 ══ -->
-    <div class="section" id="sec-channel-import">
+    <!-- ══ 官網 — SEO 關鍵字列表 ══ -->
+    <div class="section" id="sec-web-seo">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <input id="seoSearch" type="text" placeholder="搜尋關鍵字…" oninput="renderSeoList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:200px;">
+        <select id="seoTagFilter" onchange="renderSeoList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+          <option value="">所有標籤</option>
+        </select>
+        <button class="btn btn-primary" data-perm="edit" onclick="addSeoKeyword()">+ 新增關鍵字</button>
+      </div>
+      <div id="seoListContent"></div>
+    </div>
+
+    <!-- ══ LINE — 儀表板 ══ -->
+    <div class="section" id="sec-line-overview">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">期間：</label>
+        <select id="linePeriod" onchange="renderLineOverview()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:140px;">
+          <option value="30">近 30 天</option>
+          <option value="90">近 90 天</option>
+          <option value="all">全部資料</option>
+        </select>
+      </div>
+      <div id="lineOverviewContent"></div>
+    </div>
+
+    <!-- ══ LINE — 貼文列表 ══ -->
+    <div class="section" id="sec-line-posts">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <input id="linePostSearch" type="text" placeholder="搜尋 LINE 貼文標題…" oninput="renderLinePostsList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:220px;">
+        <select id="linePostTagFilter" onchange="renderLinePostsList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+          <option value="">所有標籤</option>
+        </select>
+        <button class="btn btn-primary" data-perm="edit" onclick="openLinePostModal(-1)">+ 新增 LINE 貼文</button>
+      </div>
+      <div id="linePostsListContent"></div>
+    </div>
+
+    <!-- ══ LINE — 匯入數據 ══ -->
+    <div class="section" id="sec-line-import">
       <div style="max-width:900px;">
-        <div style="background:#FFF7E6;border-left:4px solid #F59E0B;padding:14px 18px;border-radius:6px;margin-bottom:20px;font-size:12.5px;line-height:1.75;color:#78350F;">
-          <b>📝 關於 GA4 / LINE 數據匯入</b><br>
-          此處支援 <b>手動表單輸入</b> 與 <b>JSON 批次貼入</b> 兩種方式。等您準備好 GA4 Service Account 與 LINE Channel Access Token 後，可升級為自動化每日拉取。
+        <div style="background:#F0FDF4;border-left:4px solid #00B900;padding:14px 18px;border-radius:6px;margin-bottom:20px;font-size:12.5px;line-height:1.75;color:#14532D;">
+          <b>💬 關於 LINE@ 官方帳號數據匯入</b><br>
+          支援 <b>每日指標表單</b> 與 <b>JSON 批次貼入</b>。後續可串接 LINE Messaging API Insight 自動拉取。
+        </div>
+        <div style="background:var(--surface);border-radius:12px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:#00B900;">💬 LINE@ 每日指標</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">好友總數 / 訊息觸及 / 點擊等</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
+            <div class="form-group"><label>日期 *</label><input type="date" id="line-date"></div>
+            <div class="form-group"><label>好友總數</label><input type="number" id="line-total" placeholder="0"></div>
+            <div class="form-group"><label>當日新增</label><input type="number" id="line-new" placeholder="0"></div>
+            <div class="form-group"><label>當日封鎖</label><input type="number" id="line-block" placeholder="0"></div>
+            <div class="form-group"><label>發送訊息數</label><input type="number" id="line-sent" placeholder="0"></div>
+            <div class="form-group"><label>訊息觸及</label><input type="number" id="line-reach" placeholder="0"></div>
+            <div class="form-group"><label>訊息點擊</label><input type="number" id="line-click" placeholder="0"></div>
+            <div class="form-group"><label>加入好友數</label><input type="number" id="line-add" placeholder="0"></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" data-perm="edit" onclick="saveLineDaily()">💾 儲存本筆</button>
+            <button class="btn btn-outline" data-perm="edit" onclick="openLineBatchImport()">📥 JSON 批次匯入</button>
+          </div>
+        </div>
+        <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📊 目前已匯入 LINE 資料</h3>
+          <div id="lineImportSummary"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 跨通路 — 標籤統計 ══ -->
+    <div class="section" id="sec-crosstag-stats">
+      <div style="background:#EEF7F2;border-left:4px solid #2D6A4F;padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:12.5px;line-height:1.7;color:#1B4332;">
+        <b>💡 使用情境</b>：例如選擇 <b>「LDCT」</b> 標籤，可一次看出此主題在 FB 貼文、活動/講座、新聞曝光、門診表、LINE 貼文、SEO 關鍵字等所有通路做了幾次、累積觸及與成效。
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">選擇標籤：</label>
+        <select id="crossTagSelect" onchange="renderCrossTagStats()" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:220px;">
+          <option value="">-- 請選擇標籤 --</option>
+        </select>
+        <select id="crossTagPeriod" onchange="renderCrossTagStats()" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+          <option value="all">全部期間</option>
+          <option value="year">近 12 個月</option>
+          <option value="quarter">近 3 個月</option>
+          <option value="month">近 30 天</option>
+        </select>
+      </div>
+      <div id="crossTagContent"></div>
+    </div>
+
+    <!-- ══ 跨通路 — 共用標籤字典 ══ -->
+    <div class="section" id="sec-crosstag-library">
+      <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:16px;">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">＋ 新增共用標籤</h3>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">此處建立的標籤，可在貼文 / 活動 / 新聞 / 門診表 / LINE 貼文 / SEO 任一列表中套用，用於跨通路統計。</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input id="crossNewTagName" type="text" placeholder="e.g. LDCT、達文西、健檢" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+          <select id="crossNewTagCategory" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+            <option value="project">專案 / 議題</option>
+            <option value="dept">科別</option>
+            <option value="center">中心 / 專科</option>
+            <option value="device">設備 / 技術</option>
+            <option value="nature">性質</option>
+            <option value="audience">目標族群</option>
+            <option value="other">其他</option>
+          </select>
+          <button class="btn btn-primary" data-perm="edit" onclick="crossAddTag()">+ 新增</button>
+        </div>
+      </div>
+      <div id="crossTagLibraryList"></div>
+    </div>
+
+    <!-- ══ 官網 — 匯入 GA4/GSC 數據 ══ -->
+    <div class="section" id="sec-web-import">
+      <div style="max-width:900px;">
+        <div style="background:#EEF5FF;border-left:4px solid #2563EB;padding:14px 18px;border-radius:6px;margin-bottom:20px;font-size:12.5px;line-height:1.75;color:#1E3A8A;">
+          <b>🌐 關於官網數據匯入</b><br>
+          此處支援 <b>GA4 每日指標</b> 與 <b>Search Console SEO 數據</b>。等您準備好 GA4 Service Account 與 GSC OAuth Token 後，可升級為自動化每日拉取。
         </div>
 
         <!-- GA4 官網 -->
@@ -1788,26 +1973,6 @@
           </div>
         </div>
 
-        <!-- LINE@ -->
-        <div style="background:var(--surface);border-radius:12px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:20px;">
-          <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:#00B900;">💬 LINE@ 官方帳號數據（每日一筆）</h3>
-          <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">對應 LINE OA Insight：好友總數、訊息觸及、點擊等</p>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
-            <div class="form-group"><label>日期 *</label><input type="date" id="line-date"></div>
-            <div class="form-group"><label>好友總數</label><input type="number" id="line-total" placeholder="0"></div>
-            <div class="form-group"><label>當日新增</label><input type="number" id="line-new" placeholder="0"></div>
-            <div class="form-group"><label>當日封鎖</label><input type="number" id="line-block" placeholder="0"></div>
-            <div class="form-group"><label>發送訊息數</label><input type="number" id="line-sent" placeholder="0"></div>
-            <div class="form-group"><label>訊息觸及</label><input type="number" id="line-reach" placeholder="0"></div>
-            <div class="form-group"><label>訊息點擊</label><input type="number" id="line-click" placeholder="0"></div>
-            <div class="form-group"><label>加入好友數</label><input type="number" id="line-add" placeholder="0"></div>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-primary" data-perm="edit" onclick="saveLineDaily()">💾 儲存本筆</button>
-            <button class="btn btn-outline" data-perm="edit" onclick="openLineBatchImport()">📥 JSON 批次匯入</button>
-          </div>
-        </div>
-
         <!-- Search Console -->
         <div style="background:var(--surface);border-radius:12px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:20px;">
           <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:#4285F4;">🔍 Search Console SEO 數據（每日一筆）</h3>
@@ -1830,8 +1995,8 @@
 
         <!-- 目前已有資料 -->
         <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);">
-          <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📊 目前已匯入資料</h3>
-          <div id="channelImportSummary"></div>
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📊 目前已匯入官網資料</h3>
+          <div id="webImportSummary"></div>
         </div>
       </div>
     </div>
@@ -1977,6 +2142,11 @@
       <label>關聯活動 Campaign（選填）</label>
       <input type="text" id="pm-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
     </div>
+    <div class="form-group" style="margin-top:4px;">
+      <label>跨通路標籤（可多選，用逗號分隔；例：LDCT, 達文西）</label>
+      <input type="text" id="pm-tags" list="crossTagDatalist" placeholder="輸入標籤名稱，逗號分隔">
+      <div id="pm-tags-preview" style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;"></div>
+    </div>
     <input type="hidden" id="pm-idx" value="-1">
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('postModal')">取消</button>
@@ -2054,6 +2224,10 @@
       <div class="form-group" style="grid-column:1/-1">
         <label>備註</label>
         <input type="text" id="em-note">
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>跨通路標籤（可多選，逗號分隔）</label>
+        <input type="text" id="em-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
       </div>
     </div>
     <input type="hidden" id="em-idx" value="-1">
@@ -2153,6 +2327,7 @@
 <div class="toast" id="toast"></div>
 
 <datalist id="campaignDatalist"></datalist>
+<datalist id="crossTagDatalist"></datalist>
 
 <script>
 // ═══════════════════════════════════════════
@@ -2267,6 +2442,8 @@ function loadStore() {
       if (!d.webMetrics)   d.webMetrics   = [];
       if (!d.lineMetrics)  d.lineMetrics  = [];
       if (!d.searchMetrics) d.searchMetrics = [];
+      if (!d.linePosts)    d.linePosts    = [];
+      if (!d.seoKeywords)  d.seoKeywords  = [];
       // 自我修復：去除因先前同步 bug 造成的 date+title 完全重複（忽略已軟刪除的）
       const dedup = (arr, keyFn) => { if (!Array.isArray(arr)) return []; const seen = new Set(); return arr.filter(x => { if (x && x.deleted_at) return true; const k = keyFn(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
       d.posts  = dedup(d.posts,  p => (p.date||'')+'|'+(p.title||''));
@@ -2279,7 +2456,8 @@ function loadStore() {
   return sanitizeDates({
     posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: getBuiltinKols(),
     mediaItems: [], mediaTags: getDefaultMediaTags(), mediaDoctors: [],
-    webMetrics: [], lineMetrics: [], searchMetrics: []
+    webMetrics: [], lineMetrics: [], searchMetrics: [],
+    linePosts: [], seoKeywords: []
   });
 }
 
@@ -2289,6 +2467,8 @@ function activeEvents() { return (store.events || []).filter(x => !x.deleted_at)
 function activeMedia()  { return (store.media  || []).filter(x => !x.deleted_at); }
 function activeKols()   { return (store.kols   || []).filter(x => !x.deleted_at); }
 function activeMediaItems() { return (store.mediaItems || []).filter(x => !x.deleted_at); }
+function activeLinePosts()  { return (store.linePosts  || []).filter(x => !x.deleted_at); }
+function activeSeoKeywords(){ return (store.seoKeywords|| []).filter(x => !x.deleted_at); }
 
 function saveStore() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e) {}
@@ -2781,6 +2961,13 @@ function switchSection(module, sub) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const sec = document.getElementById(`sec-${module}-${sub}`);
   if (sec) sec.classList.add('active');
+  // mark matching nav-item active by onclick match
+  try {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      const oc = n.getAttribute('onclick') || '';
+      if (oc.includes(`'${module}','${sub}'`)) n.classList.add('active');
+    });
+  } catch(e){}
   const titles = {
     'fb-overview':    ['總覽 Dashboard',      '粉專貼文成效綜合分析'],
     'fb-upload':      ['匯入貼文數據',         'FB後台Excel匯入'],
@@ -2804,8 +2991,14 @@ function switchSection(module, sub) {
     'clinic-items':     ['題材列表',          '所有門診表題材主檔（可依標籤篩選）'],
     'clinic-tags':      ['標籤管理',          '題材標籤字典維護'],
     'clinic-stats':     ['標籤統計分析',      '依標籤撈出歷年宣傳成果與通路涵蓋率'],
-    'channel-overview': ['官網 + LINE 儀表板', 'GA4 / LINE Insight / Search Console 整合分析'],
-    'channel-import':   ['匯入 GA4 / LINE 數據', '手動匯入或 JSON 貼入每日數據'],
+    'web-overview':     ['官網 GA4 儀表板',    '流量來源、使用者、工作階段、轉換分析'],
+    'web-seo':          ['SEO 關鍵字列表',     'Search Console 關鍵字成效追蹤'],
+    'web-import':       ['匯入 GA4 / GSC 數據','手動輸入或 JSON 批次匯入官網指標'],
+    'line-overview':    ['LINE 儀表板',       'LINE@ 好友、訊息觸及、點擊成效'],
+    'line-posts':       ['LINE 貼文列表',      '所有 LINE 官方帳號推播記錄'],
+    'line-import':      ['匯入 LINE 數據',     '手動輸入或 JSON 批次匯入 LINE 指標'],
+    'crosstag-stats':   ['標籤跨通路分析',      '依單一標籤統計所有通路執行次數與成效'],
+    'crosstag-library': ['共用標籤字典',        '管理跨通路共用的標籤'],
   };
   const key = `${module}-${sub}`;
   if (titles[key]) {
@@ -2830,8 +3023,20 @@ function switchSection(module, sub) {
   if (key === 'clinic-items')  renderClinicItems();
   if (key === 'clinic-tags')   renderClinicTags();
   if (key === 'clinic-stats')  renderClinicStats();
-  if (key === 'channel-overview') renderChannelOverview();
-  if (key === 'channel-import')   renderChannelImport();
+  if (key === 'web-overview')     renderWebOverview();
+  if (key === 'web-seo')          renderSeoList();
+  if (key === 'web-import')       renderWebImport();
+  if (key === 'line-overview')    renderLineOverview();
+  if (key === 'line-posts')       renderLinePostsList();
+  if (key === 'line-import')      renderLineImport();
+  if (key === 'crosstag-stats')   renderCrossTagStats();
+  if (key === 'crosstag-library') renderCrossTagLibrary();
+  // auto-expand sidebar group containing active item
+  try {
+    const activeItem = document.querySelector('.nav-item.active');
+    const grp = activeItem && activeItem.closest('.nav-group');
+    if (grp) grp.classList.remove('collapsed');
+  } catch(e){}
 }
 
 // ═══════════════════════════════════════════
@@ -3150,10 +3355,13 @@ function filterPostsBySearch() {
 }
 
 function renderPostsList() {
+  syncTagFilterDropdown('postsTagFilter');
   const active = activePosts();
   let posts = filterByPeriod(active, postsFilter);
   const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const tagF = (document.getElementById('postsTagFilter')?.value || '').trim();
   if (q) posts = posts.filter(p => p.title.toLowerCase().includes(q));
+  if (tagF) posts = posts.filter(p => (p.tags || []).includes(tagF));
   document.getElementById('postCount').textContent = `共 ${posts.length} 篇`;
   // Build sorted index map so edit/delete know the real store index
   const periodFiltered = filterByPeriod(active, postsFilter);
@@ -3164,7 +3372,8 @@ function renderPostsList() {
       if (p.deleted_at) return false;
       const periodOk = periodSet.has(p);
       const qOk = !q || p.title.toLowerCase().includes(q);
-      return periodOk && qOk;
+      const tagOk = !tagF || (p.tags || []).includes(tagF);
+      return periodOk && qOk && tagOk;
     })
     .sort((a, b) => new Date(b.p.date) - new Date(a.p.date));
 
@@ -3216,11 +3425,13 @@ function clearEvFilters() {
 function renderEvents() {
   const tbody = document.getElementById('eventListTbody');
   if (!tbody) return;
+  syncTagFilterDropdown('evTagFilter');
 
   // ── 讀取篩選條件 ──
   const type   = document.getElementById('evTypeFilter')?.value   || 'all';
   const campus = document.getElementById('evCampusFilter')?.value || 'all';
   const search = (document.getElementById('evSearchInput')?.value || '').trim().toLowerCase();
+  const tagF   = (document.getElementById('evTagFilter')?.value   || '').trim();
 
   // ── 套用篩選 ──
   let filtered = store.events.map((e,i)=>({e,i}))
@@ -3234,6 +3445,7 @@ function renderEvents() {
   if (type   !== 'all') filtered = filtered.filter(({e}) => e.type === type);
   if (campus !== 'all') filtered = filtered.filter(({e}) => e.campus === campus);
   if (search)           filtered = filtered.filter(({e}) => (e.name||'').toLowerCase().includes(search));
+  if (tagF)             filtered = filtered.filter(({e}) => (e.tags||[]).includes(tagF));
 
   // ── 計數標籤 ──
   const countEl = document.getElementById('evCountLabel');
@@ -3310,7 +3522,10 @@ function addEvent() {
 // ═══════════════════════════════════════════
 function renderMedia() {
   const tbody = document.getElementById('mediaListTbody');
-  const list = activeMedia();
+  syncTagFilterDropdown('mediaTagFilter');
+  const tagF = (document.getElementById('mediaTagFilter')?.value || '').trim();
+  let list = activeMedia();
+  if (tagF) list = list.filter(m => (m.tags||[]).includes(tagF));
   if (!list.length) {
     tbody.innerHTML = '<tr><td colspan="9"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></div><p>尚未新增媒體記錄</p></div></td></tr>';
     return;
@@ -3336,6 +3551,8 @@ function addMedia() {
   const name = document.getElementById('md-name').value.trim();
   const date = document.getElementById('md-date').value;
   if (!name || !date) { showToast('請填寫媒體名稱和日期'); return; }
+  const mediaTags = parseTagInput('md-tags');
+  ensureTagsExist(mediaTags);
   store.media.push({
     date, name,
     type: document.getElementById('md-type').value,
@@ -3346,6 +3563,7 @@ function addMedia() {
     url: document.getElementById('md-url').value,
     note: document.getElementById('md-note').value,
     campaign: document.getElementById('md-campaign').value.trim(),
+    tags: mediaTags,
   });
   saveStore();
   _gasWrite('addMedia', store.media[store.media.length - 1]);
@@ -3562,7 +3780,9 @@ function openPostModal(idx) {
   document.getElementById('pm-imgtype').value  = defaultImgType;
   document.getElementById('pm-phase').value    = p.phase    || '一般貼文';
   document.getElementById('pm-campaign').value = p.campaign || '';
+  document.getElementById('pm-tags').value     = (p.tags || []).join(', ');
   updateCampaignDatalist();
+  updateCrossTagDatalist();
   openModal('postModal');
 }
 
@@ -3586,7 +3806,9 @@ function savePost() {
     engage: +document.getElementById('pm-engage').value || 0,
     month:  date.slice(0, 7),
     url:    document.getElementById('pm-url').value.trim(),
+    tags:   parseTagInput('pm-tags'),
   };
+  ensureTagsExist(post.tags);
   if (idx === -1) {
     store.posts.push(post);
     _gasWrite('importPosts', [post]);
@@ -3637,6 +3859,8 @@ function openEventModal(idx) {
   document.getElementById('em-yt-views').value  = e.yt_views || '';
   document.getElementById('em-yt-url').value    = e.yt_url   || '';
   document.getElementById('em-note').value      = e.note     || '';
+  document.getElementById('em-tags').value      = (e.tags || []).join(', ');
+  updateCrossTagDatalist();
   openModal('eventModal');
 }
 
@@ -3662,7 +3886,9 @@ function saveEventEdit() {
     expense:  +document.getElementById('em-expense').value  || 0,
     yt_url:   document.getElementById('em-yt-url').value,
     yt_views: +document.getElementById('em-yt-views').value || 0,
+    tags:     parseTagInput('em-tags'),
   };
+  ensureTagsExist(store.events[idx].tags);
   saveStore();
   closeModal('eventModal');
   renderEvents();
@@ -4939,7 +5165,46 @@ function openLineBatchImport() {
   } catch(e) { showToast('JSON 格式錯誤：' + e.message); }
 }
 
-function renderChannelImport() {
+// legacy alias — retained so other code (saveGaDaily/saveLineDaily) still works
+function renderChannelImport() { renderWebImport(); renderLineImport(); }
+function renderChannelOverview() { renderWebOverview(); renderLineOverview(); }
+
+function renderWebImport() {
+  const wrap = document.getElementById('webImportSummary');
+  if (!wrap) return;
+  const ga = store.webMetrics || [], sc = store.searchMetrics || [];
+  wrap.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+      <div style="padding:14px;background:#F0F7F4;border-radius:8px;border:1px solid #B7D7C8;">
+        <div style="font-size:11px;color:#2D6A4F;font-weight:700;margin-bottom:4px;">🟢 GA4 官網</div>
+        <div style="font-size:20px;font-weight:900;color:#2D6A4F;">${ga.length} 筆</div>
+        <div style="font-size:10px;color:#888;">${ga.length?ga.sort((a,b)=>b.date.localeCompare(a.date))[0].date+' ~ '+ga.sort((a,b)=>a.date.localeCompare(b.date))[0].date:'尚無資料'}</div>
+      </div>
+      <div style="padding:14px;background:#EBF2FE;border-radius:8px;border:1px solid #B3D1FA;">
+        <div style="font-size:11px;color:#1E40AF;font-weight:700;margin-bottom:4px;">🔍 Search Console</div>
+        <div style="font-size:20px;font-weight:900;color:#1E40AF;">${sc.length} 筆</div>
+        <div style="font-size:10px;color:#888;">${sc.length?sc.sort((a,b)=>b.date.localeCompare(a.date))[0].date+' ~ '+sc.sort((a,b)=>a.date.localeCompare(b.date))[0].date:'尚無資料'}</div>
+      </div>
+    </div>`;
+  const today = new Date().toISOString().slice(0,10);
+  ['ga-date','sc-date'].forEach(id => { const el = document.getElementById(id); if (el && !el.value) el.value = today; });
+}
+
+function renderLineImport() {
+  const wrap = document.getElementById('lineImportSummary');
+  if (!wrap) return;
+  const line = store.lineMetrics || [];
+  wrap.innerHTML = `
+    <div style="padding:14px;background:#E6F7E6;border-radius:8px;border:1px solid #99E699;">
+      <div style="font-size:11px;color:#006600;font-weight:700;margin-bottom:4px;">💬 LINE@ 每日指標</div>
+      <div style="font-size:20px;font-weight:900;color:#006600;">${line.length} 筆</div>
+      <div style="font-size:10px;color:#888;">${line.length?line.sort((a,b)=>b.date.localeCompare(a.date))[0].date+' ~ '+line.sort((a,b)=>a.date.localeCompare(b.date))[0].date:'尚無資料'}</div>
+    </div>`;
+  const today = new Date().toISOString().slice(0,10);
+  const el = document.getElementById('line-date'); if (el && !el.value) el.value = today;
+}
+
+function _renderChannelImport_LEGACY() {
   const wrap = document.getElementById('channelImportSummary');
   if (!wrap) return;
   const ga = store.webMetrics || [], line = store.lineMetrics || [], sc = store.searchMetrics || [];
@@ -4966,7 +5231,7 @@ function renderChannelImport() {
   ['ga-date','line-date','sc-date'].forEach(id => { const el = document.getElementById(id); if (el && !el.value) el.value = today; });
 }
 
-function renderChannelOverview() {
+function _renderChannelOverview_LEGACY() {
   const wrap = document.getElementById('channelOverviewContent');
   if (!wrap) return;
   const period = (document.getElementById('channelPeriod')||{}).value || '30';
@@ -5030,6 +5295,482 @@ function renderChannelOverview() {
         <div style="padding:14px;background:#EBF2FE;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均排名</div><div style="font-size:22px;font-weight:900;color:#1E40AF;">${scAvgPos}</div></div>
       </div>`:'<div style="padding:20px;color:#aaa;font-style:italic;">尚無 Search Console 資料</div>'}
     </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  COLLAPSIBLE SIDEBAR
+// ═══════════════════════════════════════════
+function toggleNavGroup(headerEl) {
+  const grp = headerEl && headerEl.parentElement;
+  if (!grp) return;
+  grp.classList.toggle('collapsed');
+  try {
+    const keys = [...document.querySelectorAll('.nav-group.collapsed')].map(g => g.dataset.key);
+    localStorage.setItem('ktgh_nav_collapsed', JSON.stringify(keys));
+  } catch(e){}
+}
+function restoreNavState() {
+  try {
+    const raw = localStorage.getItem('ktgh_nav_collapsed');
+    if (!raw) {
+      // default: collapse everything except fb (active)
+      document.querySelectorAll('.nav-group').forEach(g => {
+        if (g.dataset.key !== 'fb') g.classList.add('collapsed');
+      });
+      return;
+    }
+    const keys = JSON.parse(raw);
+    keys.forEach(k => {
+      const g = document.querySelector(`.nav-group[data-key="${k}"]`);
+      if (g) g.classList.add('collapsed');
+    });
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════
+//  CROSS-CHANNEL TAG HELPERS
+// ═══════════════════════════════════════════
+function parseTagInput(inputId) {
+  const v = (document.getElementById(inputId)?.value || '').trim();
+  if (!v) return [];
+  return [...new Set(v.split(/[,，;；]/).map(s => s.trim()).filter(Boolean))];
+}
+function ensureTagsExist(names) {
+  if (!Array.isArray(names) || !names.length) return;
+  if (!Array.isArray(store.mediaTags)) store.mediaTags = [];
+  const existing = new Set(store.mediaTags.filter(t => !t.deleted_at).map(t => t.name));
+  const palette = ['#2D6A4F','#1E40AF','#F59E0B','#DC2626','#7C3AED','#0891B2','#B45309','#059669'];
+  names.forEach(n => {
+    if (!existing.has(n)) {
+      store.mediaTags.push({
+        id: 'tag_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+        name: n,
+        category: 'project',
+        color: palette[Math.floor(Math.random()*palette.length)],
+        created_at: new Date().toISOString()
+      });
+      existing.add(n);
+    }
+  });
+}
+function updateCrossTagDatalist() {
+  const dl = document.getElementById('crossTagDatalist');
+  if (!dl) return;
+  const tags = (store.mediaTags || []).filter(t => !t.deleted_at);
+  dl.innerHTML = tags.map(t => `<option value="${t.name}">`).join('');
+}
+function syncTagFilterDropdown(id) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  const current = sel.value;
+  const tags = (store.mediaTags || []).filter(t => !t.deleted_at).map(t => t.name);
+  // collect tags actually used too
+  const used = new Set();
+  [...(store.posts||[]), ...(store.events||[]), ...(store.media||[]), ...(store.mediaItems||[]), ...(store.linePosts||[]), ...(store.seoKeywords||[])]
+    .forEach(x => (x && !x.deleted_at && Array.isArray(x.tags) ? x.tags : []).forEach(t => used.add(t)));
+  const combined = [...new Set([...tags, ...used])].sort();
+  sel.innerHTML = '<option value="">所有標籤</option>' + combined.map(t => `<option value="${t}"${t===current?' selected':''}>${t}</option>`).join('');
+}
+
+// ═══════════════════════════════════════════
+//  WEB (GA4) OVERVIEW & SEO
+// ═══════════════════════════════════════════
+function renderWebOverview() {
+  const wrap = document.getElementById('webOverviewContent');
+  if (!wrap) return;
+  const period = (document.getElementById('webPeriod')||{}).value || '30';
+  const ga = store.webMetrics || [], sc = store.searchMetrics || [];
+  const cutoff = period === 'all' ? null : (() => { const d = new Date(); d.setDate(d.getDate() - parseInt(period)); return d.toISOString().slice(0,10); })();
+  const filt = arr => cutoff ? arr.filter(r => r.date >= cutoff) : arr;
+  const gaF = filt(ga), scF = filt(sc);
+  if (!gaF.length && !scF.length) {
+    wrap.innerHTML = `<div style="padding:60px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);">
+      <div style="font-size:48px;margin-bottom:12px;">🌐</div>
+      <h3 style="font-size:16px;color:var(--text);margin-bottom:8px;">尚無官網數據</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">請先到「匯入 GA4 / GSC 數據」新增資料</p>
+      <button class="btn btn-primary" onclick="switchSection('web','import')">前往匯入</button>
+    </div>`;
+    return;
+  }
+  const pvSum = gaF.reduce((s,r) => s + (+r.pv||0), 0);
+  const uvSum = gaF.reduce((s,r) => s + (+r.uv||0), 0);
+  const sessSum = gaF.reduce((s,r) => s + (+r.sessions||0), 0);
+  const avgDur = gaF.length ? Math.round(gaF.reduce((s,r)=>s+(+r.avg_duration||0),0) / gaF.length) : 0;
+  const avgBounce = gaF.length ? (gaF.reduce((s,r)=>s+(+r.bounce_rate||0),0)/gaF.length).toFixed(1) : 0;
+  const lastGaWithSrc = [...gaF].reverse().find(r => r.sources);
+  const sources = lastGaWithSrc ? lastGaWithSrc.sources : null;
+  const scImprSum = scF.reduce((s,r) => s + (+r.impressions||0), 0);
+  const scClickSum = scF.reduce((s,r) => s + (+r.clicks||0), 0);
+  const scAvgPos = scF.length ? (scF.reduce((s,r)=>s+(+r.avg_position||0),0)/scF.length).toFixed(1) : 0;
+  wrap.innerHTML = `
+    <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#2D6A4F;">🟢 GA4 官網 — ${gaF.length} 天</h3>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 PV</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${pvSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 UV</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${uvSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">工作階段</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${sessSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均停留</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${avgDur}s</div></div>
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">跳出率</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${avgBounce}%</div></div>
+      </div>
+      ${sources?`<h4 style="font-size:12px;font-weight:700;margin:16px 0 8px;color:#666;">流量來源分布（最新一筆 ${lastGaWithSrc.date}）</h4>${Object.entries(sources).map(([k,v]) => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px;"><div style="width:100px;">${k}</div><div style="flex:1;height:16px;background:#F0F7F4;border-radius:3px;"><div style="height:100%;background:linear-gradient(90deg,#2D6A4F,#52B788);width:${v}%;border-radius:3px;"></div></div><div style="width:50px;text-align:right;font-weight:700;">${v}%</div></div>`).join('')}`:'<div style="margin-top:10px;font-size:11px;color:#aaa;font-style:italic;">（尚無流量來源資料）</div>'}
+    </div>
+    <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#1E40AF;">🔍 Search Console SEO — ${scF.length} 天</h3>
+      ${scF.length?`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="padding:14px;background:#EBF2FE;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計曝光</div><div style="font-size:22px;font-weight:900;color:#1E40AF;">${scImprSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#EBF2FE;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計點擊</div><div style="font-size:22px;font-weight:900;color:#1E40AF;">${scClickSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#EBF2FE;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均 CTR</div><div style="font-size:22px;font-weight:900;color:#1E40AF;">${scImprSum?(scClickSum/scImprSum*100).toFixed(2)+'%':'—'}</div></div>
+        <div style="padding:14px;background:#EBF2FE;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均排名</div><div style="font-size:22px;font-weight:900;color:#1E40AF;">${scAvgPos}</div></div>
+      </div>`:'<div style="padding:20px;color:#aaa;font-style:italic;">尚無 Search Console 資料</div>'}
+    </div>`;
+}
+
+function renderSeoList() {
+  syncTagFilterDropdown('seoTagFilter');
+  const wrap = document.getElementById('seoListContent');
+  if (!wrap) return;
+  const q = (document.getElementById('seoSearch')?.value || '').toLowerCase().trim();
+  const tagF = (document.getElementById('seoTagFilter')?.value || '').trim();
+  let list = activeSeoKeywords();
+  if (q) list = list.filter(k => (k.keyword||'').toLowerCase().includes(q));
+  if (tagF) list = list.filter(k => (k.tags||[]).includes(tagF));
+  if (!list.length) {
+    wrap.innerHTML = `<div style="padding:40px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);color:var(--text-muted);">
+      <div style="font-size:36px;margin-bottom:8px;">🔍</div>
+      <p style="font-size:13px;">尚無 SEO 關鍵字記錄</p>
+      <p style="font-size:11px;">點上方「＋ 新增關鍵字」開始建立</p></div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="table-card"><div class="table-wrap"><table>
+    <thead><tr><th>關鍵字</th><th>曝光</th><th>點擊</th><th>CTR</th><th>平均排名</th><th>標籤</th><th>備註</th><th>操作</th></tr></thead>
+    <tbody>${list.sort((a,b)=>(b.impressions||0)-(a.impressions||0)).map((k,i) => {
+      const globalIdx = store.seoKeywords.indexOf(k);
+      const ctr = k.impressions ? ((k.clicks||0)/k.impressions*100).toFixed(2)+'%' : '—';
+      const tags = (k.tags||[]).map(t => `<span style="display:inline-block;padding:1px 6px;background:#EEF7F2;color:#2D6A4F;border-radius:8px;font-size:10px;margin:1px 2px;">${t}</span>`).join('');
+      return `<tr>
+        <td style="font-weight:600">${k.keyword||''}</td>
+        <td class="text-mono">${(k.impressions||0).toLocaleString()}</td>
+        <td class="text-mono">${(k.clicks||0).toLocaleString()}</td>
+        <td class="text-mono">${ctr}</td>
+        <td class="text-mono">${k.position||'—'}</td>
+        <td>${tags||'<span style="color:#bbb">—</span>'}</td>
+        <td style="font-size:11px;color:var(--text-muted);">${k.note||''}</td>
+        <td><button class="action-btn edit" onclick="editSeoKeyword(${globalIdx})">編輯</button> <button class="action-btn del" onclick="deleteSeoKeyword(${globalIdx})">刪</button></td>
+      </tr>`;
+    }).join('')}</tbody></table></div></div>`;
+}
+
+function addSeoKeyword() {
+  if (!requireEdit()) return;
+  const kw = prompt('輸入關鍵字');
+  if (!kw) return;
+  if (!store.seoKeywords) store.seoKeywords = [];
+  store.seoKeywords.push({ keyword: kw.trim(), impressions:0, clicks:0, position:0, tags:[], note:'', created_at: new Date().toISOString() });
+  saveStore();
+  renderSeoList();
+}
+function editSeoKeyword(idx) {
+  if (!requireEdit()) return;
+  const k = store.seoKeywords[idx]; if (!k) return;
+  const kw = prompt('關鍵字', k.keyword||''); if (kw===null) return;
+  const impr = prompt('曝光次數', k.impressions||0); if (impr===null) return;
+  const clk = prompt('點擊次數', k.clicks||0); if (clk===null) return;
+  const pos = prompt('平均排名', k.position||0); if (pos===null) return;
+  const tags = prompt('標籤（逗號分隔）', (k.tags||[]).join(', ')); if (tags===null) return;
+  const tagArr = tags.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  ensureTagsExist(tagArr);
+  store.seoKeywords[idx] = { ...k, keyword:kw.trim(), impressions:+impr||0, clicks:+clk||0, position:+pos||0, tags:tagArr };
+  saveStore();
+  renderSeoList();
+}
+function deleteSeoKeyword(idx) {
+  if (!requireEdit()) return;
+  if (!confirm('確定刪除此關鍵字？')) return;
+  store.seoKeywords[idx].deleted_at = new Date().toISOString();
+  saveStore();
+  renderSeoList();
+}
+
+// ═══════════════════════════════════════════
+//  LINE OVERVIEW & POSTS
+// ═══════════════════════════════════════════
+function renderLineOverview() {
+  const wrap = document.getElementById('lineOverviewContent');
+  if (!wrap) return;
+  const period = (document.getElementById('linePeriod')||{}).value || '30';
+  const line = store.lineMetrics || [];
+  const cutoff = period === 'all' ? null : (() => { const d = new Date(); d.setDate(d.getDate() - parseInt(period)); return d.toISOString().slice(0,10); })();
+  const lineF = cutoff ? line.filter(r => r.date >= cutoff) : line;
+  const posts = activeLinePosts();
+  if (!lineF.length && !posts.length) {
+    wrap.innerHTML = `<div style="padding:60px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);">
+      <div style="font-size:48px;margin-bottom:12px;">💬</div>
+      <h3 style="font-size:16px;color:var(--text);margin-bottom:8px;">尚無 LINE 數據</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">請先匯入 LINE 每日指標或新增 LINE 貼文記錄</p>
+      <button class="btn btn-primary" onclick="switchSection('line','import')">前往匯入</button>
+    </div>`;
+    return;
+  }
+  const latestLine = lineF.length ? lineF.sort((a,b) => b.date.localeCompare(a.date))[0] : null;
+  const lineReachSum = lineF.reduce((s,r) => s + (+r.messages_reach||0), 0);
+  const lineClickSum = lineF.reduce((s,r) => s + (+r.messages_click||0), 0);
+  const lineSentSum  = lineF.reduce((s,r) => s + (+r.messages_sent||0), 0);
+  const postCount = posts.length;
+  const postReach = posts.reduce((s,p)=>s+(+p.reach||0),0);
+  const postClick = posts.reduce((s,p)=>s+(+p.click||0),0);
+  wrap.innerHTML = `
+    <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#00B900;">💬 LINE@ 每日指標 — ${lineF.length} 天</h3>
+      ${latestLine?`<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">好友總數</div><div style="font-size:22px;font-weight:900;color:#006600;">${(latestLine.followers_total||0).toLocaleString()}</div><div style="font-size:10px;color:#888;">${latestLine.date}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">發送訊息</div><div style="font-size:22px;font-weight:900;color:#006600;">${lineSentSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">訊息觸及</div><div style="font-size:22px;font-weight:900;color:#006600;">${lineReachSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">訊息點擊</div><div style="font-size:22px;font-weight:900;color:#006600;">${lineClickSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">CTR</div><div style="font-size:22px;font-weight:900;color:#006600;">${lineReachSum?(lineClickSum/lineReachSum*100).toFixed(1)+'%':'—'}</div></div>
+      </div>`:'<div style="padding:20px;color:#aaa;font-style:italic;">尚無 LINE 每日指標</div>'}
+    </div>
+    <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#00B900;">📝 LINE 貼文累計 — ${postCount} 篇</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計貼文</div><div style="font-size:22px;font-weight:900;color:#006600;">${postCount}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計觸及</div><div style="font-size:22px;font-weight:900;color:#006600;">${postReach.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計點擊</div><div style="font-size:22px;font-weight:900;color:#006600;">${postClick.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均 CTR</div><div style="font-size:22px;font-weight:900;color:#006600;">${postReach?(postClick/postReach*100).toFixed(1)+'%':'—'}</div></div>
+      </div>
+    </div>`;
+}
+
+function renderLinePostsList() {
+  syncTagFilterDropdown('linePostTagFilter');
+  const wrap = document.getElementById('linePostsListContent');
+  if (!wrap) return;
+  const q = (document.getElementById('linePostSearch')?.value || '').toLowerCase().trim();
+  const tagF = (document.getElementById('linePostTagFilter')?.value || '').trim();
+  let list = activeLinePosts();
+  if (q) list = list.filter(p => (p.title||'').toLowerCase().includes(q));
+  if (tagF) list = list.filter(p => (p.tags||[]).includes(tagF));
+  if (!list.length) {
+    wrap.innerHTML = `<div style="padding:40px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);color:var(--text-muted);">
+      <div style="font-size:36px;margin-bottom:8px;">💬</div>
+      <p style="font-size:13px;">尚無 LINE 貼文記錄</p></div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="table-card"><div class="table-wrap"><table>
+    <thead><tr><th>日期</th><th>標題</th><th>類型</th><th>觸及</th><th>點擊</th><th>CTR</th><th>標籤</th><th>操作</th></tr></thead>
+    <tbody>${list.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(p => {
+      const idx = store.linePosts.indexOf(p);
+      const ctr = p.reach ? ((p.click||0)/p.reach*100).toFixed(2)+'%' : '—';
+      const tags = (p.tags||[]).map(t => `<span style="display:inline-block;padding:1px 6px;background:#E6F7E6;color:#006600;border-radius:8px;font-size:10px;margin:1px 2px;">${t}</span>`).join('');
+      return `<tr>
+        <td class="text-mono">${p.date||''}</td>
+        <td style="font-weight:600;max-width:260px;">${p.title||''}</td>
+        <td><span class="badge badge-blue">${p.type||'推播'}</span></td>
+        <td class="text-mono">${(p.reach||0).toLocaleString()}</td>
+        <td class="text-mono">${(p.click||0).toLocaleString()}</td>
+        <td class="text-mono">${ctr}</td>
+        <td>${tags||'<span style="color:#bbb">—</span>'}</td>
+        <td><button class="action-btn edit" onclick="openLinePostModal(${idx})">編輯</button> <button class="action-btn del" onclick="deleteLinePost(${idx})">刪</button></td>
+      </tr>`;
+    }).join('')}</tbody></table></div></div>`;
+}
+
+function openLinePostModal(idx) {
+  if (!requireEdit()) return;
+  const isNew = idx === -1;
+  const p = isNew ? {} : store.linePosts[idx];
+  const title = prompt('LINE 貼文標題', p.title || '');
+  if (title===null) return;
+  const date = prompt('日期 (YYYY-MM-DD)', p.date || new Date().toISOString().slice(0,10));
+  if (date===null) return;
+  const type = prompt('類型（推播/圖文選單/Rich Menu/自動回覆）', p.type || '推播');
+  if (type===null) return;
+  const reach = prompt('觸及人數', p.reach || 0); if (reach===null) return;
+  const click = prompt('點擊次數', p.click || 0); if (click===null) return;
+  const tags = prompt('標籤（逗號分隔）', (p.tags||[]).join(', ')); if (tags===null) return;
+  const tagArr = tags.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  ensureTagsExist(tagArr);
+  const obj = { title: title.trim(), date, type, reach:+reach||0, click:+click||0, tags:tagArr, month: date.slice(0,7), updated_at: new Date().toISOString() };
+  if (isNew) { store.linePosts.push(obj); } else { store.linePosts[idx] = { ...p, ...obj }; }
+  saveStore();
+  renderLinePostsList();
+  showToast(isNew ? 'LINE 貼文已新增' : 'LINE 貼文已更新');
+}
+function deleteLinePost(idx) {
+  if (!requireEdit()) return;
+  if (!confirm('確定刪除此 LINE 貼文？')) return;
+  store.linePosts[idx].deleted_at = new Date().toISOString();
+  saveStore();
+  renderLinePostsList();
+}
+
+// ═══════════════════════════════════════════
+//  CROSS-CHANNEL TAG STATS
+// ═══════════════════════════════════════════
+function renderCrossTagLibrary() {
+  const wrap = document.getElementById('crossTagLibraryList');
+  if (!wrap) return;
+  const tags = (store.mediaTags || []).filter(t => !t.deleted_at);
+  if (!tags.length) {
+    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:13px;">尚無標籤，請於上方新增。</div>';
+    return;
+  }
+  // Count usage across all sources
+  const usage = {};
+  tags.forEach(t => { usage[t.name] = { posts:0, events:0, media:0, clinic:0, linePosts:0, seo:0 }; });
+  (store.posts||[]).filter(x=>!x.deleted_at).forEach(p => (p.tags||[]).forEach(t => { if(usage[t]) usage[t].posts++; }));
+  (store.events||[]).filter(x=>!x.deleted_at).forEach(e => (e.tags||[]).forEach(t => { if(usage[t]) usage[t].events++; }));
+  (store.media||[]).filter(x=>!x.deleted_at).forEach(m => (m.tags||[]).forEach(t => { if(usage[t]) usage[t].media++; }));
+  (store.mediaItems||[]).filter(x=>!x.deleted_at).forEach(m => (m.tags||[]).forEach(tId => {
+    const t = tags.find(tt => tt.id===tId || tt.name===tId);
+    if (t && usage[t.name]) usage[t.name].clinic++;
+  }));
+  (store.linePosts||[]).filter(x=>!x.deleted_at).forEach(p => (p.tags||[]).forEach(t => { if(usage[t]) usage[t].linePosts++; }));
+  (store.seoKeywords||[]).filter(x=>!x.deleted_at).forEach(k => (k.tags||[]).forEach(t => { if(usage[t]) usage[t].seo++; }));
+  const catLabel = { project:'專案/議題', dept:'科別', center:'中心', device:'設備', nature:'性質', audience:'族群', other:'其他' };
+  const byCat = {};
+  tags.forEach(t => { const c = t.category || 'other'; if (!byCat[c]) byCat[c] = []; byCat[c].push(t); });
+  wrap.innerHTML = Object.entries(byCat).map(([cat, arr]) => `
+    <div style="background:var(--surface);border-radius:12px;padding:18px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:14px;">
+      <h3 style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text);">${catLabel[cat]||cat} <span style="font-size:11px;color:var(--text-muted);font-weight:400;">（${arr.length}）</span></h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${arr.map(t => {
+          const u = usage[t.name] || {};
+          const total = (u.posts||0)+(u.events||0)+(u.media||0)+(u.clinic||0)+(u.linePosts||0)+(u.seo||0);
+          return `<div style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:${t.color||'#2D6A4F'}18;border:1px solid ${t.color||'#2D6A4F'}55;border-radius:16px;font-size:12px;">
+            <span style="font-weight:700;color:${t.color||'#2D6A4F'};">${t.name}</span>
+            <span style="font-size:10px;color:var(--text-muted);">${total} 次</span>
+            <button onclick="crossDeleteTag('${t.id}')" data-perm="edit" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:13px;padding:0 2px;">×</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function crossAddTag() {
+  if (!requireEdit()) return;
+  const name = document.getElementById('crossNewTagName').value.trim();
+  const cat  = document.getElementById('crossNewTagCategory').value;
+  if (!name) { showToast('請輸入標籤名稱'); return; }
+  const existing = (store.mediaTags||[]).filter(t => !t.deleted_at).find(t => t.name === name);
+  if (existing) { showToast('此標籤已存在'); return; }
+  const palette = ['#2D6A4F','#1E40AF','#F59E0B','#DC2626','#7C3AED','#0891B2'];
+  if (!store.mediaTags) store.mediaTags = [];
+  store.mediaTags.push({
+    id: 'tag_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    name, category: cat,
+    color: palette[Math.floor(Math.random()*palette.length)],
+    created_at: new Date().toISOString()
+  });
+  saveStore();
+  document.getElementById('crossNewTagName').value = '';
+  renderCrossTagLibrary();
+  showToast('標籤已新增');
+}
+
+function crossDeleteTag(tagId) {
+  if (!requireEdit()) return;
+  if (!confirm('確定刪除此標籤？')) return;
+  const t = (store.mediaTags||[]).find(x => x.id === tagId);
+  if (t) { t.deleted_at = new Date().toISOString(); saveStore(); renderCrossTagLibrary(); }
+}
+
+function renderCrossTagStats() {
+  // populate select
+  const sel = document.getElementById('crossTagSelect');
+  if (!sel) return;
+  const tags = (store.mediaTags || []).filter(t => !t.deleted_at);
+  const current = sel.value;
+  sel.innerHTML = '<option value="">-- 請選擇標籤 --</option>' + tags.map(t => `<option value="${t.name}"${t.name===current?' selected':''}>${t.name}</option>`).join('');
+  const wrap = document.getElementById('crossTagContent');
+  if (!wrap) return;
+  const tagName = sel.value;
+  if (!tagName) {
+    wrap.innerHTML = '<div style="padding:60px;text-align:center;color:var(--text-muted);font-size:13px;">請選擇一個標籤開始分析。</div>';
+    return;
+  }
+  const period = (document.getElementById('crossTagPeriod')||{}).value || 'all';
+  const cutoff = (() => {
+    if (period === 'all') return null;
+    const d = new Date();
+    if (period === 'year') d.setFullYear(d.getFullYear()-1);
+    else if (period === 'quarter') d.setMonth(d.getMonth()-3);
+    else if (period === 'month') d.setDate(d.getDate()-30);
+    return d.toISOString().slice(0,10);
+  })();
+  const inPeriod = (dateStr) => !cutoff || (dateStr||'') >= cutoff;
+
+  // Collect matching items per channel
+  const postsHit = (store.posts||[]).filter(p => !p.deleted_at && (p.tags||[]).includes(tagName) && inPeriod(p.date));
+  const eventsHit = (store.events||[]).filter(e => !e.deleted_at && (e.tags||[]).includes(tagName) && inPeriod(e.date));
+  const mediaHit = (store.media||[]).filter(m => !m.deleted_at && (m.tags||[]).includes(tagName) && inPeriod(m.date));
+  // clinic items: tags may be IDs or names — normalize
+  const tagObj = tags.find(t => t.name === tagName);
+  const clinicHit = (store.mediaItems||[]).filter(m => !m.deleted_at && (m.tags||[]).some(t => t === tagName || (tagObj && t === tagObj.id)) && inPeriod(m.month));
+  const linePostsHit = (store.linePosts||[]).filter(p => !p.deleted_at && (p.tags||[]).includes(tagName) && inPeriod(p.date));
+  const seoHit = (store.seoKeywords||[]).filter(k => !k.deleted_at && (k.tags||[]).includes(tagName));
+
+  const totalCount = postsHit.length + eventsHit.length + mediaHit.length + clinicHit.length + linePostsHit.length + seoHit.length;
+  if (!totalCount) {
+    wrap.innerHTML = `<div style="padding:60px;text-align:center;color:var(--text-muted);font-size:13px;">此標籤在選定期間內尚無任何通路記錄。</div>`;
+    return;
+  }
+
+  // Aggregate
+  const postsReach = postsHit.reduce((s,p)=>s+(+p.reach||0),0);
+  const postsEngage = postsHit.reduce((s,p)=>s+(+p.engage||0),0);
+  const eventsReg = eventsHit.reduce((s,e)=>s+(+e.reg||0),0);
+  const eventsAttend = eventsHit.reduce((s,e)=>s+(+e.attend||0),0);
+  const mediaReach = mediaHit.reduce((s,m)=>s+(+m.reach||0),0);
+  const linePostsReach = linePostsHit.reduce((s,p)=>s+(+p.reach||0),0);
+  const linePostsClick = linePostsHit.reduce((s,p)=>s+(+p.click||0),0);
+  const seoImpr = seoHit.reduce((s,k)=>s+(+k.impressions||0),0);
+  const seoClicks = seoHit.reduce((s,k)=>s+(+k.clicks||0),0);
+
+  const channels = [
+    { icon:'📱', name:'FB 粉專貼文', count:postsHit.length, metric:`觸及 ${postsReach.toLocaleString()} / 互動 ${postsEngage.toLocaleString()}`, color:'#1877F2' },
+    { icon:'🎤', name:'活動 / 講座', count:eventsHit.length, metric:`報名 ${eventsReg} / 出席 ${eventsAttend}`, color:'#F59E0B' },
+    { icon:'📰', name:'新聞媒體曝光', count:mediaHit.length, metric:`累計觸及 ${mediaReach.toLocaleString()}`, color:'#DC2626' },
+    { icon:'📋', name:'門診表題材', count:clinicHit.length, metric:`${clinicHit.length} 次刊登`, color:'#2D6A4F' },
+    { icon:'💬', name:'LINE 貼文', count:linePostsHit.length, metric:`觸及 ${linePostsReach.toLocaleString()} / 點擊 ${linePostsClick.toLocaleString()}`, color:'#00B900' },
+    { icon:'🔍', name:'SEO 關鍵字', count:seoHit.length, metric:`曝光 ${seoImpr.toLocaleString()} / 點擊 ${seoClicks.toLocaleString()}`, color:'#1E40AF' },
+  ];
+
+  wrap.innerHTML = `
+    <div style="background:linear-gradient(135deg,#2D6A4F,#52B788);border-radius:14px;padding:24px;color:#fff;margin-bottom:18px;">
+      <div style="font-size:12px;opacity:.85;margin-bottom:4px;">標籤</div>
+      <div style="font-size:28px;font-weight:900;margin-bottom:4px;">#${tagName}</div>
+      <div style="font-size:13px;opacity:.9;">跨通路共執行 <b style="font-size:18px;">${totalCount}</b> 次</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:20px;">
+      ${channels.map(c => `
+        <div style="background:var(--surface);border-radius:12px;padding:16px;border:1px solid var(--border);border-left:4px solid ${c.color};">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="font-size:20px;">${c.icon}</span>
+            <span style="font-size:13px;font-weight:700;color:var(--text);">${c.name}</span>
+          </div>
+          <div style="font-size:28px;font-weight:900;color:${c.color};">${c.count}</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${c.metric}</div>
+        </div>
+      `).join('')}
+    </div>
+    ${renderCrossTagDetailTable('📱 FB 貼文', postsHit, p => [p.date, p.title, `觸及 ${(p.reach||0).toLocaleString()}`, p.cat||''])}
+    ${renderCrossTagDetailTable('🎤 活動', eventsHit, e => [e.date, e.name, `出席 ${e.attend||0}/${e.reg||0}`, e.type||''])}
+    ${renderCrossTagDetailTable('📰 新聞', mediaHit, m => [m.date, m.title||m.name, `觸及 ${(m.reach||0).toLocaleString()}`, m.name||''])}
+    ${renderCrossTagDetailTable('📋 門診表題材', clinicHit, m => [m.month||'', m.title||'', m.owner||'', m.dept||''])}
+    ${renderCrossTagDetailTable('💬 LINE 貼文', linePostsHit, p => [p.date, p.title, `觸及 ${(p.reach||0).toLocaleString()}`, p.type||''])}
+    ${renderCrossTagDetailTable('🔍 SEO 關鍵字', seoHit, k => ['—', k.keyword, `曝光 ${(k.impressions||0).toLocaleString()}`, `排名 ${k.position||'—'}`])}
+  `;
+}
+
+function renderCrossTagDetailTable(title, items, mapper) {
+  if (!items.length) return '';
+  return `<div style="background:var(--surface);border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:14px;">
+    <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;">${title} <span style="color:var(--text-muted);font-weight:400;">（${items.length}）</span></h3>
+    <div class="table-wrap"><table style="width:100%;font-size:12px;">
+      <thead><tr style="background:#F5F9F7;"><th style="text-align:left;padding:6px 8px;">日期</th><th style="text-align:left;padding:6px 8px;">標題 / 內容</th><th style="text-align:left;padding:6px 8px;">數據</th><th style="text-align:left;padding:6px 8px;">備註</th></tr></thead>
+      <tbody>${items.map(it => { const c = mapper(it); return `<tr><td style="padding:5px 8px;color:#666;">${c[0]||''}</td><td style="padding:5px 8px;font-weight:600;">${c[1]||''}</td><td style="padding:5px 8px;color:#2D6A4F;">${c[2]||''}</td><td style="padding:5px 8px;color:#888;">${c[3]||''}</td></tr>`; }).join('')}</tbody>
+    </table></div>
+  </div>`;
 }
 
 // ═══════════════════════════════════════════
@@ -5650,6 +6391,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderOverview();
   renderEvents();
   updateSettingsUI();
+  restoreNavState();
+  updateCrossTagDatalist();
   if (config.gasUrl) {
     setSyncStatus('正在同步…', 'var(--brand)');
     if (!localStorage.getItem(PUSH_FLAG)) {
