@@ -1060,6 +1060,7 @@
             <input placeholder="搜尋標題..." id="searchInput" oninput="filterPostsBySearch()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:200px;">
             <select id="postsTagFilter" onchange="renderPostsList()" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;"><option value="">所有標籤</option></select>
             <span id="postCount" style="font-size:12px;color:var(--text-muted)"></span>
+            <button class="btn" onclick="openChannelReport('fb')" style="background:#1877F2;color:#fff;">📊 產生報表</button>
             <button class="btn btn-primary" data-perm="edit" onclick="openPostModal(-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增貼文</button>
           </div>
         </div>
@@ -1351,6 +1352,7 @@
           <select id="evTagFilter" onchange="renderEvents()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;background:#fff;"><option value="">所有標籤</option></select>
           <span id="evCountLabel" style="font-size:12px;color:var(--text-muted);margin-left:auto;"></span>
           <button class="btn btn-outline" onclick="clearEvFilters()" style="height:32px;font-size:12px;padding:0 10px;">清除篩選</button>
+          <button class="btn" onclick="openChannelReport('event')" style="height:32px;font-size:12px;padding:0 10px;background:#F59E0B;color:#fff;">📊 產生報表</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -1460,6 +1462,7 @@
         <div class="table-header">
           <h3>媒體新聞曝光追蹤</h3>
           <select id="mediaTagFilter" onchange="renderMedia()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;background:#fff;margin-right:auto;margin-left:12px;"><option value="">所有標籤</option></select>
+          <button class="btn" onclick="openChannelReport('media')" style="background:#DC2626;color:#fff;margin-right:6px;">📊 產生報表</button>
           <button class="btn btn-primary" data-perm="edit" onclick="switchSection('media','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增媒體記錄</button>
         </div>
         <div class="table-wrap">
@@ -1548,6 +1551,7 @@
       <div class="table-card">
         <div class="table-header">
           <h3>KOL / 網紅合作成效</h3>
+          <button class="btn" onclick="openChannelReport('kol')" style="background:#7C3AED;color:#fff;margin-right:6px;">📊 產生報表</button>
           <button class="btn btn-primary" data-perm="edit" onclick="switchSection('kol','add')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增 KOL 記錄</button>
         </div>
         <div class="table-wrap">
@@ -1781,6 +1785,7 @@
           <option value="">所有月份</option>
         </select>
         <div id="clinicItemCount" style="font-size:12px;color:var(--text-muted);"></div>
+        <button class="btn" onclick="openChannelReport('clinic')" style="background:#2D6A4F;color:#fff;margin-left:auto;">📊 產生報表</button>
       </div>
       <div id="clinicItemList"></div>
     </div>
@@ -1826,6 +1831,7 @@
           <option value="90">近 90 天</option>
           <option value="all">全部資料</option>
         </select>
+        <button class="btn" onclick="openChannelReport('web')" style="background:#1E40AF;color:#fff;margin-left:auto;">📊 產生報表</button>
       </div>
       <div id="webOverviewContent"></div>
     </div>
@@ -1862,6 +1868,7 @@
         <select id="linePostTagFilter" onchange="renderLinePostsList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
           <option value="">所有標籤</option>
         </select>
+        <button class="btn" onclick="openChannelReport('line')" style="background:#00B900;color:#fff;">📊 產生報表</button>
         <button class="btn btn-primary" data-perm="edit" onclick="openLinePostModal(-1)">+ 新增 LINE 貼文</button>
       </div>
       <div id="linePostsListContent"></div>
@@ -5771,6 +5778,349 @@ function renderCrossTagDetailTable(title, items, mapper) {
       <tbody>${items.map(it => { const c = mapper(it); return `<tr><td style="padding:5px 8px;color:#666;">${c[0]||''}</td><td style="padding:5px 8px;font-weight:600;">${c[1]||''}</td><td style="padding:5px 8px;color:#2D6A4F;">${c[2]||''}</td><td style="padding:5px 8px;color:#888;">${c[3]||''}</td></tr>`; }).join('')}</tbody>
     </table></div>
   </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  UNIFIED CHANNEL REPORT GENERATOR
+//  每個通路一鍵產生 A4 報表（可列印/存 PDF）
+// ═══════════════════════════════════════════
+function openChannelReport(channel) {
+  const CH = {
+    fb:    { title:'粉專貼文成效報表',    color:'#1877F2' },
+    event: { title:'活動 / 講座成效報表', color:'#F59E0B' },
+    media: { title:'新聞媒體曝光報表',    color:'#DC2626' },
+    clinic:{ title:'門診表題材推廣報表',  color:'#2D6A4F' },
+    line:  { title:'LINE@ 官方帳號報表',   color:'#00B900' },
+    web:   { title:'官網 GA4 / SEO 報表',  color:'#1E40AF' },
+    kol:   { title:'KOL 合作成效報表',     color:'#7C3AED' },
+  };
+  const cfg = CH[channel];
+  if (!cfg) { showToast('未知的通路類型'); return; }
+
+  // 讀取期間
+  const periodLabel = (() => {
+    try {
+      const el = document.getElementById('channelReportPeriod_' + channel);
+      if (el && el.value && el.value !== 'all') return el.value;
+    } catch(e){}
+    return '全部期間';
+  })();
+  const now = new Date();
+  const stamp = now.toLocaleDateString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit' });
+
+  // ── 依通路建立 body ──
+  let body = '';
+  try {
+    if (channel === 'fb')    body = _rptFb(periodLabel);
+    if (channel === 'event') body = _rptEvent(periodLabel);
+    if (channel === 'media') body = _rptMedia(periodLabel);
+    if (channel === 'clinic')body = _rptClinic(periodLabel);
+    if (channel === 'line')  body = _rptLine(periodLabel);
+    if (channel === 'web')   body = _rptWeb(periodLabel);
+    if (channel === 'kol')   body = _rptKol(periodLabel);
+  } catch(err) { body = '<p style="color:#dc2626;">產生報表時發生錯誤：' + err.message + '</p>'; }
+
+  const html =
+    '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + cfg.title + '</title><style>' +
+    "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&family=Inter:wght@700;900&display=swap');" +
+    '*{margin:0;padding:0;box-sizing:border-box;}' +
+    "body{font-family:'Noto Sans TC',sans-serif;background:#F5F5F5;color:#1A1A2E;padding:20px;}" +
+    '.page{max-width:960px;margin:0 auto 20px;background:#fff;padding:48px 56px;box-shadow:0 4px 20px rgba(0,0,0,.08);border-radius:4px;}' +
+    '.hdr{display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid ' + cfg.color + ';padding-bottom:18px;margin-bottom:28px;}' +
+    '.hdr-left h1{font-size:26px;font-weight:900;color:' + cfg.color + ';margin-bottom:4px;}' +
+    '.hdr-left .sub{font-size:13px;color:#888;}' +
+    '.hdr-right{text-align:right;font-size:11px;color:#aaa;}' +
+    '.hdr-right .big{font-size:14px;font-weight:700;color:#555;}' +
+    'h2{font-size:17px;font-weight:700;margin:28px 0 12px;padding:8px 14px;background:' + cfg.color + '12;border-left:5px solid ' + cfg.color + ';color:#1A1A2E;}' +
+    'h3{font-size:14px;font-weight:700;margin:18px 0 8px;color:#333;}' +
+    '.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}' +
+    '.kpi{background:' + cfg.color + '0D;border:1px solid ' + cfg.color + '33;border-radius:10px;padding:16px;text-align:center;}' +
+    '.kpi-label{font-size:11px;color:#888;margin-bottom:6px;letter-spacing:.5px;}' +
+    ".kpi-val{font-size:26px;font-weight:900;color:" + cfg.color + ";font-family:Inter,sans-serif;}" +
+    '.kpi-sub{font-size:10px;color:#aaa;margin-top:4px;}' +
+    'table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:18px;}' +
+    'th{background:' + cfg.color + '15;padding:10px 10px;text-align:left;font-weight:700;font-size:11.5px;color:' + cfg.color + ';border-bottom:2px solid ' + cfg.color + '44;}' +
+    'td{padding:8px 10px;border-bottom:1px solid #EEE;font-size:12px;}' +
+    'tr:nth-child(even) td{background:#FAFAFA;}' +
+    '.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px;}' +
+    '.bar-label{width:120px;text-align:right;font-weight:600;color:#555;font-size:11.5px;}' +
+    '.bar-track{flex:1;height:22px;background:#F3F4F6;border-radius:4px;overflow:hidden;}' +
+    '.bar-fill{height:100%;background:linear-gradient(90deg,' + cfg.color + ',' + cfg.color + 'CC);border-radius:4px;color:#fff;font-size:10.5px;display:flex;align-items:center;padding-left:10px;font-weight:700;}' +
+    '.empty{padding:40px;text-align:center;color:#aaa;font-size:13px;background:#FAFAFA;border-radius:8px;}' +
+    '.footer{margin-top:32px;text-align:center;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;}' +
+    '.toolbar{position:fixed;top:12px;right:12px;display:flex;gap:6px;z-index:999;}' +
+    '.toolbar button{padding:8px 16px;background:' + cfg.color + ';color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;font-family:inherit;}' +
+    '.toolbar button.outline{background:#fff;color:' + cfg.color + ';border:1.5px solid ' + cfg.color + ';}' +
+    '@media print{body{background:#fff;padding:0;} .page{box-shadow:none;max-width:100%;padding:24px 36px;} .toolbar{display:none;}}' +
+    '</style></head><body>' +
+    '<div class="toolbar"><button onclick="window.print()">🖨 列印 / 存 PDF</button><button class="outline" onclick="window.close()">✕ 關閉</button></div>' +
+    '<div class="page">' +
+    '<div class="hdr"><div class="hdr-left"><h1>' + cfg.title + '</h1><div class="sub">光田綜合醫院 行銷整合分析中心</div></div>' +
+    '<div class="hdr-right">產製日期<br><span class="big">' + stamp + '</span><br>期間：' + periodLabel + '</div></div>' +
+    body +
+    '<div class="footer">光田綜合醫院 行銷組 ｜ 本報表由行銷整合分析中心自動產出</div>' +
+    '</div></body></html>';
+
+  const w = window.open('', '_blank', 'width=1040,height=820,scrollbars=yes');
+  if (!w) { showToast('請允許彈出視窗'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+}
+
+// ── 各通路報表內容產生器 ──
+function _rptFilterByPeriod(items, period, dateField) {
+  if (!period || period === '全部期間') return items;
+  const f = dateField || 'date';
+  return items.filter(it => {
+    const d = String(it[f] || it.month || '');
+    if (/^\d{4}-Q[1-4]$/.test(period)) {
+      const y = period.slice(0,4), q = parseInt(period.slice(6));
+      const m = parseInt(d.slice(5,7));
+      return d.startsWith(y) && m >= (q-1)*3+1 && m <= q*3;
+    }
+    if (period.length === 7) return d.slice(0,7) === period;
+    if (period.length === 4) return d.startsWith(period);
+    return true;
+  });
+}
+
+function _rptKpiCards(items) {
+  return '<div class="kpi-row">' + items.map(k =>
+    '<div class="kpi"><div class="kpi-label">' + k.label + '</div><div class="kpi-val">' + k.val + '</div>' + (k.sub?'<div class="kpi-sub">' + k.sub + '</div>':'') + '</div>'
+  ).join('') + '</div>';
+}
+function _rptBarChart(rows) {
+  if (!rows.length) return '<div class="empty">無資料</div>';
+  const max = Math.max(...rows.map(r => r.value || 0), 1);
+  return rows.map(r => {
+    const pct = Math.round((r.value||0)/max*100);
+    return '<div class="bar-row"><div class="bar-label">' + r.label + '</div><div class="bar-track"><div class="bar-fill" style="width:' + Math.max(pct,3) + '%">' + (r.display || r.value) + '</div></div></div>';
+  }).join('');
+}
+
+function _rptFb(period) {
+  const list = _rptFilterByPeriod(activePosts(), period);
+  if (!list.length) return '<div class="empty">此期間無貼文資料</div>';
+  const total = list.length;
+  const reachSum = list.reduce((s,p)=>s+(+p.reach||0),0);
+  const clickSum = list.reduce((s,p)=>s+(+p.click||0),0);
+  const engageSum = list.reduce((s,p)=>s+(+p.engage||0),0);
+  const avgReach = Math.round(reachSum/total);
+  const ctr = reachSum?(clickSum/reachSum*100).toFixed(2)+'%':'—';
+  const engRate = reachSum?(engageSum/reachSum*100).toFixed(2)+'%':'—';
+  // 分類分布
+  const byCat = {};
+  list.forEach(p => { const c = p.cat||'未分類'; byCat[c] = (byCat[c]||0)+1; });
+  const catRows = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v]) => ({ label:k, value:v, display:v+' 篇' }));
+  // 月度趨勢
+  const byMonth = {};
+  list.forEach(p => { const m = (p.month||p.date||'').slice(0,7); if (m) { byMonth[m] = byMonth[m]||{c:0,r:0}; byMonth[m].c++; byMonth[m].r += +p.reach||0; } });
+  const monthRows = Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v]) => ({ label:k, value:v.r, display:v.c+'篇 觸及'+v.r.toLocaleString() }));
+  // Top 10 觸及
+  const top = [...list].sort((a,b)=>(b.reach||0)-(a.reach||0)).slice(0,10);
+  return _rptKpiCards([
+    { label:'總貼文數', val: total + ' 篇' },
+    { label:'累計觸及', val: reachSum.toLocaleString() },
+    { label:'平均觸及 / 篇', val: avgReach.toLocaleString() },
+    { label:'累計互動', val: engageSum.toLocaleString(), sub:'互動率 ' + engRate },
+  ]) +
+  '<h2>📂 內容分類分布</h2>' + _rptBarChart(catRows) +
+  '<h2>📅 月度趨勢（依觸及）</h2>' + _rptBarChart(monthRows) +
+  '<h2>🏆 Top 10 高觸及貼文</h2>' +
+  '<table><thead><tr><th>排名</th><th>日期</th><th>標題</th><th>分類</th><th>觸及</th><th>互動</th><th>互動率</th></tr></thead><tbody>' +
+  top.map((p,i) => {
+    const er = p.reach?((p.engage||0)/p.reach*100).toFixed(1)+'%':'—';
+    return '<tr><td style="text-align:center;font-weight:700;">' + (i+1) + '</td><td>' + p.date + '</td><td style="font-weight:600;">' + (p.title||'') + '</td><td>' + (p.cat||'') + '</td><td style="text-align:right;">' + (p.reach||0).toLocaleString() + '</td><td style="text-align:right;">' + (p.engage||0).toLocaleString() + '</td><td style="text-align:right;">' + er + '</td></tr>';
+  }).join('') + '</tbody></table>';
+}
+
+function _rptEvent(period) {
+  const list = _rptFilterByPeriod(activeEvents(), period);
+  if (!list.length) return '<div class="empty">此期間無活動資料</div>';
+  const total = list.length;
+  const regSum = list.reduce((s,e)=>s+(+e.reg||0),0);
+  const attSum = list.reduce((s,e)=>s+(+e.attend||0),0);
+  const reachSum = list.reduce((s,e)=>s+(+e.reach||0),0);
+  const withReg = list.filter(e=>e.reg>0);
+  const avgRate = withReg.length ? Math.round(withReg.reduce((s,e)=>s+(e.attend/e.reg*100),0)/withReg.length) : 0;
+  const withSat = list.filter(e=>e.sat>0);
+  const avgSat = withSat.length ? (withSat.reduce((s,e)=>s+e.sat,0)/withSat.length).toFixed(1) : '—';
+  // 類型分布
+  const byType = {};
+  list.forEach(e => { byType[e.type] = byType[e.type] || { c:0, r:0, a:0 }; byType[e.type].c++; byType[e.type].r += +e.reg||0; byType[e.type].a += +e.attend||0; });
+  const typeRows = Object.entries(byType).sort((a,b)=>b[1].c-a[1].c).map(([k,v]) => ({ label:k, value:v.c, display:v.c+'場 出席'+v.a+'/'+v.r }));
+  // 院區
+  const byCampus = {};
+  list.forEach(e => { const c = e.campus||'未填'; byCampus[c] = (byCampus[c]||0)+1; });
+  const campusRows = Object.entries(byCampus).sort((a,b)=>b[1]-a[1]).map(([k,v]) => ({ label:k, value:v, display:v+' 場' }));
+  return _rptKpiCards([
+    { label:'活動場次', val: total + ' 場' },
+    { label:'總報名 / 出席', val: regSum + ' / ' + attSum, sub:'出席率 ' + avgRate + '%' },
+    { label:'FB 累計觸及', val: reachSum.toLocaleString() },
+    { label:'平均滿意度', val: avgSat + ' ★' },
+  ]) +
+  '<h2>📊 活動類型分布</h2>' + _rptBarChart(typeRows) +
+  '<h2>🏥 院區分布</h2>' + _rptBarChart(campusRows) +
+  '<h2>📋 活動明細（依日期排序）</h2>' +
+  '<table><thead><tr><th>日期</th><th>活動名稱</th><th>類型</th><th>報名/出席</th><th>出席率</th><th>觸及</th><th>滿意度</th></tr></thead><tbody>' +
+  [...list].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e => {
+    const r = e.reg>0 ? Math.round(e.attend/e.reg*100)+'%' : '—';
+    return '<tr><td>' + (e.date||'') + '</td><td style="font-weight:600;">' + (e.name||'') + '</td><td>' + (e.type||'') + '</td><td style="text-align:center;">' + (e.reg||0) + '/' + (e.attend||0) + '</td><td style="text-align:right;">' + r + '</td><td style="text-align:right;">' + (e.reach||0).toLocaleString() + '</td><td style="text-align:center;">' + (e.sat||'—') + '</td></tr>';
+  }).join('') + '</tbody></table>';
+}
+
+function _rptMedia(period) {
+  const list = _rptFilterByPeriod(activeMedia(), period);
+  if (!list.length) return '<div class="empty">此期間無媒體記錄</div>';
+  const total = list.length;
+  const reachSum = list.reduce((s,m)=>s+(+m.reach||0),0);
+  const byType = {};
+  list.forEach(m => { byType[m.type||'未分類'] = (byType[m.type||'未分類']||0)+1; });
+  const typeRows = Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([k,v]) => ({ label:k, value:v, display:v+' 則' }));
+  const byNature = {};
+  list.forEach(m => { byNature[m.nature||'—'] = (byNature[m.nature||'—']||0)+1; });
+  const natureRows = Object.entries(byNature).sort((a,b)=>b[1]-a[1]).map(([k,v]) => ({ label:k, value:v, display:v+' 則' }));
+  return _rptKpiCards([
+    { label:'媒體露出次數', val: total + ' 則' },
+    { label:'累計預估觸及', val: reachSum.toLocaleString() },
+    { label:'平均單則觸及', val: Math.round(reachSum/total).toLocaleString() },
+    { label:'正面報導比例', val: total ? Math.round(((byNature['正面報導']||0)/total)*100)+'%' : '—' },
+  ]) +
+  '<h2>📺 媒體類型分布</h2>' + _rptBarChart(typeRows) +
+  '<h2>💡 曝光性質分布</h2>' + _rptBarChart(natureRows) +
+  '<h2>📋 媒體曝光明細</h2>' +
+  '<table><thead><tr><th>日期</th><th>媒體</th><th>類型</th><th>標題</th><th>性質</th><th>觸及</th></tr></thead><tbody>' +
+  [...list].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(m => '<tr><td>' + (m.date||'') + '</td><td style="font-weight:600;">' + (m.name||'') + '</td><td>' + (m.type||'') + '</td><td>' + (m.title||'') + '</td><td>' + (m.nature||'') + '</td><td style="text-align:right;">' + (m.reach||0).toLocaleString() + '</td></tr>').join('') + '</tbody></table>';
+}
+
+function _rptClinic(period) {
+  const list = _rptFilterByPeriod(activeMediaItems(), period, 'month');
+  if (!list.length) return '<div class="empty">此期間無門診表題材</div>';
+  const total = list.length;
+  // 通路涵蓋率
+  const channels = (typeof MEDIA_CHANNELS !== 'undefined' ? MEDIA_CHANNELS : []);
+  const chCoverage = {};
+  channels.forEach(c => { chCoverage[c.label || c.key] = 0; });
+  list.forEach(it => {
+    channels.forEach(c => {
+      const key = c.key || c.label;
+      if (it.channels && it.channels[key]) chCoverage[c.label || c.key]++;
+    });
+  });
+  const chRows = Object.entries(chCoverage).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([k,v]) => ({ label:k, value:v, display:v+' 次 ('+Math.round(v/total*100)+'%)' }));
+  // 科別
+  const byDept = {};
+  list.forEach(it => { const d = it.dept||'未標'; byDept[d] = (byDept[d]||0)+1; });
+  const deptRows = Object.entries(byDept).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,v]) => ({ label:k, value:v, display:v+' 則' }));
+  // 月度
+  const byMonth = {};
+  list.forEach(it => { const m = it.month||''; if (m) byMonth[m] = (byMonth[m]||0)+1; });
+  const monthRows = Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v]) => ({ label:k, value:v, display:v+' 則' }));
+  const avgChannels = list.length ? (list.reduce((s,it)=>s+Object.values(it.channels||{}).filter(Boolean).length,0)/list.length).toFixed(1) : 0;
+  return _rptKpiCards([
+    { label:'題材總數', val: total + ' 則' },
+    { label:'涵蓋月份', val: Object.keys(byMonth).length + ' 個月' },
+    { label:'平均通路佈署', val: avgChannels + ' 個/則' },
+    { label:'涉及科別', val: Object.keys(byDept).length + ' 科' },
+  ]) +
+  '<h2>📡 通路涵蓋率 Top 15</h2>' + _rptBarChart(chRows) +
+  '<h2>🏥 科別分布 Top 10</h2>' + _rptBarChart(deptRows) +
+  '<h2>📅 月度題材數</h2>' + _rptBarChart(monthRows) +
+  '<h2>📋 題材明細</h2>' +
+  '<table><thead><tr><th>月份</th><th>頁碼</th><th>題材標題</th><th>科別</th><th>負責人</th><th>通路數</th></tr></thead><tbody>' +
+  [...list].sort((a,b)=>(b.month||'').localeCompare(a.month||'')).map(it => {
+    const chCount = Object.values(it.channels||{}).filter(Boolean).length;
+    return '<tr><td>' + (it.month||'') + '</td><td style="text-align:center;">' + (it.page_no||'') + '</td><td style="font-weight:600;">' + (it.title||'') + '</td><td>' + (it.dept||'') + '</td><td>' + (it.owner||'') + '</td><td style="text-align:center;">' + chCount + '</td></tr>';
+  }).join('') + '</tbody></table>';
+}
+
+function _rptLine(period) {
+  const posts = _rptFilterByPeriod(activeLinePosts(), period);
+  const daily = _rptFilterByPeriod((store.lineMetrics||[]), period);
+  if (!posts.length && !daily.length) return '<div class="empty">此期間無 LINE 資料</div>';
+  const latestDaily = daily.length ? [...daily].sort((a,b)=>b.date.localeCompare(a.date))[0] : null;
+  const firstDaily  = daily.length ? [...daily].sort((a,b)=>a.date.localeCompare(b.date))[0] : null;
+  const followerGrowth = (latestDaily && firstDaily) ? ((latestDaily.followers_total||0) - (firstDaily.followers_total||0)) : 0;
+  const sentSum  = daily.reduce((s,r)=>s+(+r.messages_sent||0),0);
+  const reachSum = daily.reduce((s,r)=>s+(+r.messages_reach||0),0);
+  const clickSum = daily.reduce((s,r)=>s+(+r.messages_click||0),0);
+  const postReach = posts.reduce((s,p)=>s+(+p.reach||0),0);
+  const postClick = posts.reduce((s,p)=>s+(+p.click||0),0);
+  // 類型分布
+  const byType = {};
+  posts.forEach(p => { const t = p.type||'推播'; byType[t] = (byType[t]||0)+1; });
+  const typeRows = Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([k,v]) => ({ label:k, value:v, display:v+' 則' }));
+  return _rptKpiCards([
+    { label:'目前好友數', val: latestDaily ? (latestDaily.followers_total||0).toLocaleString() : '—', sub: followerGrowth?('期間 +' + followerGrowth):'—' },
+    { label:'累計訊息觸及', val: reachSum.toLocaleString(), sub: '發送 ' + sentSum.toLocaleString() + ' 則' },
+    { label:'累計訊息點擊', val: clickSum.toLocaleString(), sub: reachSum ? 'CTR ' + (clickSum/reachSum*100).toFixed(1) + '%' : '—' },
+    { label:'LINE 貼文數', val: posts.length + ' 則', sub: '觸及 ' + postReach.toLocaleString() },
+  ]) +
+  '<h2>📝 LINE 貼文類型分布</h2>' + _rptBarChart(typeRows) +
+  '<h2>📋 LINE 貼文明細</h2>' +
+  (posts.length ?
+    '<table><thead><tr><th>日期</th><th>標題</th><th>類型</th><th>觸及</th><th>點擊</th><th>CTR</th></tr></thead><tbody>' +
+    [...posts].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(p => {
+      const ctr = p.reach?((p.click||0)/p.reach*100).toFixed(2)+'%':'—';
+      return '<tr><td>' + (p.date||'') + '</td><td style="font-weight:600;">' + (p.title||'') + '</td><td>' + (p.type||'') + '</td><td style="text-align:right;">' + (p.reach||0).toLocaleString() + '</td><td style="text-align:right;">' + (p.click||0).toLocaleString() + '</td><td style="text-align:right;">' + ctr + '</td></tr>';
+    }).join('') + '</tbody></table>'
+    : '<div class="empty">此期間無 LINE 貼文記錄</div>');
+}
+
+function _rptWeb(period) {
+  const ga = _rptFilterByPeriod((store.webMetrics||[]), period);
+  const sc = _rptFilterByPeriod((store.searchMetrics||[]), period);
+  const kws = activeSeoKeywords();
+  if (!ga.length && !sc.length && !kws.length) return '<div class="empty">此期間無官網資料</div>';
+  const pvSum = ga.reduce((s,r)=>s+(+r.pv||0),0);
+  const uvSum = ga.reduce((s,r)=>s+(+r.uv||0),0);
+  const sessSum = ga.reduce((s,r)=>s+(+r.sessions||0),0);
+  const avgDur = ga.length ? Math.round(ga.reduce((s,r)=>s+(+r.avg_duration||0),0)/ga.length) : 0;
+  const avgBounce = ga.length ? (ga.reduce((s,r)=>s+(+r.bounce_rate||0),0)/ga.length).toFixed(1) : '—';
+  const scImpr = sc.reduce((s,r)=>s+(+r.impressions||0),0);
+  const scClick = sc.reduce((s,r)=>s+(+r.clicks||0),0);
+  const scAvgPos = sc.length ? (sc.reduce((s,r)=>s+(+r.avg_position||0),0)/sc.length).toFixed(1) : '—';
+  // 流量來源
+  const lastWithSrc = [...ga].reverse().find(r => r.sources);
+  const sources = lastWithSrc ? lastWithSrc.sources : null;
+  const srcRows = sources ? Object.entries(sources).sort((a,b)=>b[1]-a[1]).map(([k,v]) => ({ label:k, value:v, display:v+'%' })) : [];
+  const topKws = [...kws].sort((a,b)=>(b.impressions||0)-(a.impressions||0)).slice(0,15);
+  return _rptKpiCards([
+    { label:'累計 PV / UV', val: pvSum.toLocaleString() + ' / ' + uvSum.toLocaleString() },
+    { label:'工作階段', val: sessSum.toLocaleString(), sub:'平均停留 ' + avgDur + 's' },
+    { label:'跳出率', val: avgBounce + '%' },
+    { label:'SEO 曝光 / 點擊', val: scImpr.toLocaleString() + ' / ' + scClick.toLocaleString(), sub:'平均排名 ' + scAvgPos },
+  ]) +
+  (srcRows.length ? '<h2>🌐 流量來源分布（最新 ' + lastWithSrc.date + '）</h2>' + _rptBarChart(srcRows) : '') +
+  '<h2>🔍 Top 15 SEO 關鍵字（依曝光）</h2>' +
+  (topKws.length ?
+    '<table><thead><tr><th>排名</th><th>關鍵字</th><th>曝光</th><th>點擊</th><th>CTR</th><th>平均排名</th></tr></thead><tbody>' +
+    topKws.map((k,i) => {
+      const ctr = k.impressions?((k.clicks||0)/k.impressions*100).toFixed(2)+'%':'—';
+      return '<tr><td style="text-align:center;">' + (i+1) + '</td><td style="font-weight:600;">' + (k.keyword||'') + '</td><td style="text-align:right;">' + (k.impressions||0).toLocaleString() + '</td><td style="text-align:right;">' + (k.clicks||0).toLocaleString() + '</td><td style="text-align:right;">' + ctr + '</td><td style="text-align:center;">' + (k.position||'—') + '</td></tr>';
+    }).join('') + '</tbody></table>'
+    : '<div class="empty">尚未建立關鍵字</div>');
+}
+
+function _rptKol(period) {
+  const list = _rptFilterByPeriod(activeKols(), period);
+  if (!list.length) return '<div class="empty">此期間無 KOL 記錄</div>';
+  const total = list.length;
+  const followerSum = list.reduce((s,k)=>s+(+k.followers||0),0);
+  const reachSum = list.reduce((s,k)=>s+(+k.reach||0),0);
+  const engageSum = list.reduce((s,k)=>s+(+k.engage||0),0);
+  const byPlat = {};
+  list.forEach(k => { const p = k.platform||'—'; byPlat[p] = byPlat[p]||{c:0,r:0}; byPlat[p].c++; byPlat[p].r += +k.reach||0; });
+  const platRows = Object.entries(byPlat).sort((a,b)=>b[1].c-a[1].c).map(([k,v]) => ({ label:k, value:v.c, display:v.c+' 位 觸及'+v.r.toLocaleString() }));
+  return _rptKpiCards([
+    { label:'合作 KOL 數', val: total + ' 位' },
+    { label:'累計粉絲基數', val: followerSum.toLocaleString() },
+    { label:'累計觸及', val: reachSum.toLocaleString() },
+    { label:'累計互動', val: engageSum.toLocaleString(), sub: reachSum?'互動率 ' + (engageSum/reachSum*100).toFixed(2) + '%':'—' },
+  ]) +
+  '<h2>📱 平台分布</h2>' + _rptBarChart(platRows) +
+  '<h2>📋 KOL 合作明細</h2>' +
+  '<table><thead><tr><th>日期</th><th>KOL</th><th>平台</th><th>粉絲</th><th>觸及</th><th>互動</th><th>活動</th></tr></thead><tbody>' +
+  [...list].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(k => '<tr><td>' + (k.date||'') + '</td><td style="font-weight:600;">' + (k.name||'') + '</td><td>' + (k.platform||'') + '</td><td style="text-align:right;">' + (k.followers||0).toLocaleString() + '</td><td style="text-align:right;">' + (k.reach||0).toLocaleString() + '</td><td style="text-align:right;">' + (k.engage||0).toLocaleString() + '</td><td>' + (k.campaign||'') + '</td></tr>').join('') + '</tbody></table>';
 }
 
 // ═══════════════════════════════════════════
