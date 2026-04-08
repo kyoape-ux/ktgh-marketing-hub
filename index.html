@@ -792,6 +792,26 @@
     <a class="nav-item" onclick="switchSection('kol','list')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> KOL 成效追蹤
     </a>
+    <div class="nav-section">門診表資料庫</div>
+    <a class="nav-item" onclick="switchSection('clinic','matrix')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span> 月度傳達矩陣
+    </a>
+    <a class="nav-item" onclick="switchSection('clinic','items')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> 題材列表
+    </a>
+    <a class="nav-item" onclick="switchSection('clinic','tags')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> 標籤管理
+    </a>
+    <a class="nav-item" onclick="switchSection('clinic','stats')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> 標籤統計分析
+    </a>
+    <div class="nav-section">通路總覽</div>
+    <a class="nav-item" onclick="switchSection('channel','overview')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> 官網 + LINE 儀表板
+    </a>
+    <a class="nav-item" data-perm="edit" onclick="switchSection('channel','import')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 GA4 / LINE 數據
+    </a>
     <div class="nav-section">系統</div>
     <a class="nav-item" onclick="switchSection('settings','backup')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></span> 資料備份還原
@@ -1657,6 +1677,165 @@
       </div>
     </div>
 
+    <!-- ══ 門診表 — 月度傳達矩陣 ══ -->
+    <div class="section" id="sec-clinic-matrix">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">月份：</label>
+        <select id="clinicMatrixMonth" onchange="renderClinicMatrix()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:140px;"></select>
+        <button class="btn btn-outline" data-perm="edit" onclick="clinicAddMonth()" style="font-size:12.5px;">+ 新增月份</button>
+        <button class="btn btn-outline" data-perm="edit" onclick="clinicCopyPrevMonth()" style="font-size:12.5px;">📋 複製上月</button>
+        <div style="flex:1;"></div>
+        <button class="btn btn-primary" data-perm="edit" onclick="clinicAddItem()" style="font-size:12.5px;">+ 新增題材</button>
+        <button class="btn btn-outline" onclick="clinicPrintMatrix()" style="font-size:12.5px;">🖨 列印本月矩陣</button>
+      </div>
+      <div style="background:var(--surface);border-radius:12px;padding:16px;border:1px solid var(--border);box-shadow:var(--shadow);overflow-x:auto;">
+        <div id="clinicMatrixWrap"></div>
+      </div>
+      <div style="margin-top:12px;background:#F0F7F4;border-left:4px solid var(--brand);padding:12px 16px;border-radius:6px;font-size:12px;color:var(--text-sub);line-height:1.7;">
+        💡 <b>使用說明</b>：這張矩陣對應紙本「門診表傳達管道」表。每列是題材、每欄是通路，點擊儲存格切換 ✓/✗。點擊題材名稱可編輯詳細資料與標籤。
+      </div>
+    </div>
+
+    <!-- ══ 門診表 — 題材列表 ══ -->
+    <div class="section" id="sec-clinic-items">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <input id="clinicItemSearch" type="text" placeholder="搜尋題材名稱…" oninput="renderClinicItems()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:200px;">
+        <select id="clinicItemTagFilter" onchange="renderClinicItems()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+          <option value="">所有標籤</option>
+        </select>
+        <select id="clinicItemMonthFilter" onchange="renderClinicItems()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+          <option value="">所有月份</option>
+        </select>
+        <div id="clinicItemCount" style="font-size:12px;color:var(--text-muted);"></div>
+      </div>
+      <div id="clinicItemList"></div>
+    </div>
+
+    <!-- ══ 門診表 — 標籤管理 ══ -->
+    <div class="section" id="sec-clinic-tags">
+      <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:16px;">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">新增標籤</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input id="newTagName" type="text" placeholder="標籤名稱" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+          <select id="newTagCategory" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+            <option value="dept">科別</option>
+            <option value="center">中心 / 專科</option>
+            <option value="device">設備 / 技術</option>
+            <option value="nature">性質</option>
+            <option value="audience">目標族群</option>
+            <option value="project">專案</option>
+            <option value="other">其他</option>
+          </select>
+          <button class="btn btn-primary" data-perm="edit" onclick="clinicAddTag()">+ 新增</button>
+        </div>
+      </div>
+      <div id="clinicTagList"></div>
+    </div>
+
+    <!-- ══ 門診表 — 標籤統計分析 ══ -->
+    <div class="section" id="sec-clinic-stats">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">選擇標籤：</label>
+        <select id="clinicStatsTag" onchange="renderClinicStats()" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:200px;">
+          <option value="">-- 請選擇 --</option>
+        </select>
+      </div>
+      <div id="clinicStatsContent"></div>
+    </div>
+
+    <!-- ══ 通路總覽 — 官網 + LINE 儀表板 ══ -->
+    <div class="section" id="sec-channel-overview">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">期間：</label>
+        <select id="channelPeriod" onchange="renderChannelOverview()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:140px;">
+          <option value="30">近 30 天</option>
+          <option value="90">近 90 天</option>
+          <option value="all">全部資料</option>
+        </select>
+      </div>
+      <div id="channelOverviewContent"></div>
+    </div>
+
+    <!-- ══ 通路總覽 — 匯入 GA4/LINE 數據 ══ -->
+    <div class="section" id="sec-channel-import">
+      <div style="max-width:900px;">
+        <div style="background:#FFF7E6;border-left:4px solid #F59E0B;padding:14px 18px;border-radius:6px;margin-bottom:20px;font-size:12.5px;line-height:1.75;color:#78350F;">
+          <b>📝 關於 GA4 / LINE 數據匯入</b><br>
+          此處支援 <b>手動表單輸入</b> 與 <b>JSON 批次貼入</b> 兩種方式。等您準備好 GA4 Service Account 與 LINE Channel Access Token 後，可升級為自動化每日拉取。
+        </div>
+
+        <!-- GA4 官網 -->
+        <div style="background:var(--surface);border-radius:12px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:#2D6A4F;">🟢 GA4 官網數據（每日一筆）</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">對應 GA4 指標：使用者數、工作階段、事件數、平均互動時間等</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
+            <div class="form-group"><label>日期 *</label><input type="date" id="ga-date"></div>
+            <div class="form-group"><label>PV 頁面瀏覽</label><input type="number" id="ga-pv" placeholder="0"></div>
+            <div class="form-group"><label>UV 使用者</label><input type="number" id="ga-uv" placeholder="0"></div>
+            <div class="form-group"><label>工作階段</label><input type="number" id="ga-sessions" placeholder="0"></div>
+            <div class="form-group"><label>新訪客</label><input type="number" id="ga-new" placeholder="0"></div>
+            <div class="form-group"><label>平均停留(秒)</label><input type="number" id="ga-duration" placeholder="0"></div>
+            <div class="form-group"><label>跳出率 %</label><input type="number" step="0.1" id="ga-bounce" placeholder="0"></div>
+            <div class="form-group"><label>轉換次數</label><input type="number" id="ga-conv" placeholder="0"></div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;color:var(--text-sub);">流量來源分布（JSON 格式，可選）</label>
+            <textarea id="ga-sources" rows="3" placeholder='{"organic":42,"facebook":28,"direct":15,"line":8,"referral":5,"other":2}' style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:monospace;font-size:12px;margin-top:4px;"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" data-perm="edit" onclick="saveGaDaily()">💾 儲存本筆</button>
+            <button class="btn btn-outline" data-perm="edit" onclick="openGaBatchImport()">📥 JSON 批次匯入</button>
+          </div>
+        </div>
+
+        <!-- LINE@ -->
+        <div style="background:var(--surface);border-radius:12px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:#00B900;">💬 LINE@ 官方帳號數據（每日一筆）</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">對應 LINE OA Insight：好友總數、訊息觸及、點擊等</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
+            <div class="form-group"><label>日期 *</label><input type="date" id="line-date"></div>
+            <div class="form-group"><label>好友總數</label><input type="number" id="line-total" placeholder="0"></div>
+            <div class="form-group"><label>當日新增</label><input type="number" id="line-new" placeholder="0"></div>
+            <div class="form-group"><label>當日封鎖</label><input type="number" id="line-block" placeholder="0"></div>
+            <div class="form-group"><label>發送訊息數</label><input type="number" id="line-sent" placeholder="0"></div>
+            <div class="form-group"><label>訊息觸及</label><input type="number" id="line-reach" placeholder="0"></div>
+            <div class="form-group"><label>訊息點擊</label><input type="number" id="line-click" placeholder="0"></div>
+            <div class="form-group"><label>加入好友數</label><input type="number" id="line-add" placeholder="0"></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" data-perm="edit" onclick="saveLineDaily()">💾 儲存本筆</button>
+            <button class="btn btn-outline" data-perm="edit" onclick="openLineBatchImport()">📥 JSON 批次匯入</button>
+          </div>
+        </div>
+
+        <!-- Search Console -->
+        <div style="background:var(--surface);border-radius:12px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:#4285F4;">🔍 Search Console SEO 數據（每日一筆）</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">對應 GSC API：曝光、點擊、CTR、平均排名</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
+            <div class="form-group"><label>日期 *</label><input type="date" id="sc-date"></div>
+            <div class="form-group"><label>曝光次數</label><input type="number" id="sc-impr" placeholder="0"></div>
+            <div class="form-group"><label>點擊次數</label><input type="number" id="sc-clicks" placeholder="0"></div>
+            <div class="form-group"><label>平均 CTR %</label><input type="number" step="0.01" id="sc-ctr" placeholder="0"></div>
+            <div class="form-group"><label>平均排名</label><input type="number" step="0.1" id="sc-pos" placeholder="0"></div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;color:var(--text-sub);">Top 關鍵字（JSON 格式，可選）</label>
+            <textarea id="sc-queries" rows="3" placeholder='[{"query":"光田 健檢","clicks":120,"impr":2400,"pos":2.1},{"query":"沙鹿小兒科","clicks":85,"impr":1800,"pos":5.3}]' style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:monospace;font-size:12px;margin-top:4px;"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" data-perm="edit" onclick="saveScDaily()">💾 儲存本筆</button>
+          </div>
+        </div>
+
+        <!-- 目前已有資料 -->
+        <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow);">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📊 目前已匯入資料</h3>
+          <div id="channelImportSummary"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ SETTINGS ══ -->
     <div class="section" id="sec-settings-main">
       <div style="max-width:640px;">
@@ -1980,6 +2159,70 @@
 //  CONFIG + DATA STORE
 // ═══════════════════════════════════════════
 const STORE_KEY  = 'ktgh_marketing_v5';
+
+// ═══════════════════════════════════════════
+//  門診表資料庫 — 常數定義
+// ═══════════════════════════════════════════
+// 內容編輯組（負責主題企劃與撰稿）
+const CONTENT_OWNERS = ['宜靜','俊佑','嘉珊','藝漩','詠瑜'];
+
+// 通路執行組（負責各通路素材製作與上架）
+const CHANNEL_OWNERS = { '菁':'海報設計', '翊':'數位內容', '喬':'上傳執行', '琪':'FB社群' };
+
+// 通路清單（16 項，依手寫表整理）
+const MEDIA_CHANNELS = [
+  { key:'poster_xs_a2', group:'向上院區', label:'海報 A2', owner:'菁', spec:'200-300字 / A2' },
+  { key:'poster_xs_a3', group:'向上院區', label:'海報 A3', owner:'菁', spec:'200-300字 / A3' },
+  { key:'poster_xs_a4', group:'向上院區', label:'海報 A4', owner:'菁', spec:'200-300字 / A4' },
+  { key:'poster_sl_a2', group:'沙鹿院區', label:'海報 A2', owner:'菁', spec:'200-300字 / A2' },
+  { key:'poster_sl_a3', group:'沙鹿院區', label:'海報 A3', owner:'菁', spec:'200-300字 / A3' },
+  { key:'poster_sl_a4', group:'沙鹿院區', label:'海報 A4', owner:'菁', spec:'200-300字 / A4' },
+  { key:'poster_dj_a2', group:'大甲院區', label:'海報 A2', owner:'菁', spec:'200-300字 / A2' },
+  { key:'poster_dj_a3', group:'大甲院區', label:'海報 A3', owner:'菁', spec:'200-300字 / A3' },
+  { key:'poster_dj_a4', group:'大甲院區', label:'海報 A4', owner:'菁', spec:'200-300字 / A4' },
+  { key:'tv_card',      group:'3院區通用', label:'電視圖卡', owner:'翊', spec:'30字 / 800×1080' },
+  { key:'epaper',       group:'3院區通用', label:'電子海報機', owner:'翊 / 喬上傳', spec:'300字' },
+  { key:'eip_banner',   group:'數位通路', label:'EIP Banner', owner:'翊', spec:'—' },
+  { key:'web_page',     group:'數位通路', label:'官網', owner:'翊', spec:'SEO 架構長文' },
+  { key:'web_banner',   group:'數位通路', label:'官網 Banner', owner:'翊', spec:'30字 / 896px寬' },
+  { key:'fb_post',      group:'數位通路', label:'FB 粉專貼文', owner:'琪', spec:'—' },
+  { key:'ticker',       group:'數位通路', label:'跑馬燈', owner:'喬', spec:'—' },
+  { key:'th_poster_a2', group:'通霄光田', label:'海報 A2', owner:'菁', spec:'300字' },
+  { key:'th_poster_a3', group:'通霄光田', label:'海報 A3', owner:'菁', spec:'300字' },
+  { key:'th_poster_a4', group:'通霄光田', label:'海報 A4', owner:'菁', spec:'300字' },
+  { key:'th_elevator',  group:'通霄光田', label:'電梯海報', owner:'菁', spec:'300字' },
+  { key:'th_web',       group:'通霄光田', label:'網站', owner:'翊', spec:'—' },
+  { key:'th_web_banner',group:'通霄光田', label:'網站 Banner', owner:'翊', spec:'—' },
+  { key:'th_other',     group:'通霄光田', label:'其他 (FB/病房交誼廳/牆面)', owner:'琪', spec:'—' },
+];
+
+// 題材性質
+const ITEM_NATURES = ['衛教文章','新醫師','新儀器','新技術','專案活動','健檢方案','媒體露出','行政公告','院慶活動'];
+
+// 季度族群對應（承接 Q1-Q4）
+const SEASON_AUDIENCE = { 1:'女性', 2:'親子', 3:'男性', 4:'中高齡' };
+
+// 預設標籤字典
+function getDefaultMediaTags() {
+  const make = (name, category, color) => ({ id: 't_'+name, name, category, color: color||'#2D6A4F' });
+  return [
+    // 科別
+    ...['心臟內科','神經內科','神經外科','骨科','婦產科','兒科','耳鼻喉科','眼科','皮膚科','泌尿科','腸胃肝膽','身心科','中醫部','放射腫瘤','核子醫學','家醫科','急診','麻醉科','復健科']
+      .map(n => make(n,'dept','#2D6A4F')),
+    // 中心 / 專科
+    ...['健康管理中心','醫美中心','運動醫學中心','癌症中心','失智症中心','睡眠中心','人工生殖','新生兒中心']
+      .map(n => make(n,'center','#1D4ED8')),
+    // 設備 / 技術
+    ...['達文西','Elekta Versa HD','PET-CT','細胞治療','標靶治療','微創手術','內視鏡','心導管','精準微創']
+      .map(n => make(n,'device','#7C3AED')),
+    // 性質
+    ...['新醫師','新儀器','新技術','專案活動','健檢方案','媒體露出','行政公告','衛教文章','院慶活動']
+      .map(n => make(n,'nature','#F59E0B')),
+    // 族群
+    ...['女性','親子','男性','中高齡','兒童','青少年']
+      .map(n => make(n,'audience','#DB2777')),
+  ];
+}
 const CONFIG_KEY = 'ktgh_config_v1';
 const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbwFXUogmT8PgJFr00TbhDqzR8h370o_dBxH_QaGkUMFxeeuFplk0SddsIg9tFoHSx5N/exec';
 
@@ -2017,6 +2260,13 @@ function loadStore() {
     if (s) {
       const d = JSON.parse(s);
       if (!d.kols) d.kols = [];
+      // 門診表資料庫 + GA4 / LINE 指標
+      if (!d.mediaItems)   d.mediaItems   = [];
+      if (!d.mediaTags)    d.mediaTags    = getDefaultMediaTags();
+      if (!d.mediaDoctors) d.mediaDoctors = [];
+      if (!d.webMetrics)   d.webMetrics   = [];
+      if (!d.lineMetrics)  d.lineMetrics  = [];
+      if (!d.searchMetrics) d.searchMetrics = [];
       // 自我修復：去除因先前同步 bug 造成的 date+title 完全重複（忽略已軟刪除的）
       const dedup = (arr, keyFn) => { if (!Array.isArray(arr)) return []; const seen = new Set(); return arr.filter(x => { if (x && x.deleted_at) return true; const k = keyFn(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
       d.posts  = dedup(d.posts,  p => (p.date||'')+'|'+(p.title||''));
@@ -2026,7 +2276,11 @@ function loadStore() {
       return sanitizeDates(d);
     }
   } catch(e) {}
-  return sanitizeDates({ posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: getBuiltinKols() });
+  return sanitizeDates({
+    posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: getBuiltinKols(),
+    mediaItems: [], mediaTags: getDefaultMediaTags(), mediaDoctors: [],
+    webMetrics: [], lineMetrics: [], searchMetrics: []
+  });
 }
 
 // 取得有效（未被軟刪除）的資料 — 所有渲染/統計都應使用這些 getter
@@ -2034,6 +2288,7 @@ function activePosts()  { return (store.posts  || []).filter(x => !x.deleted_at)
 function activeEvents() { return (store.events || []).filter(x => !x.deleted_at); }
 function activeMedia()  { return (store.media  || []).filter(x => !x.deleted_at); }
 function activeKols()   { return (store.kols   || []).filter(x => !x.deleted_at); }
+function activeMediaItems() { return (store.mediaItems || []).filter(x => !x.deleted_at); }
 
 function saveStore() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e) {}
@@ -2545,6 +2800,12 @@ function switchSection(module, sub) {
     'campaign-hub':     ['Campaign 成果看板', '跨平台活動整合成效追蹤'],
     'kol-list':         ['KOL 成效追蹤',      'KOL / 網紅合作觸及與互動'],
     'kol-add':          ['新增 KOL 記錄',     '填寫 KOL 合作成效資料'],
+    'clinic-matrix':    ['月度傳達矩陣',      '門診表每月題材 × 通路布署追蹤'],
+    'clinic-items':     ['題材列表',          '所有門診表題材主檔（可依標籤篩選）'],
+    'clinic-tags':      ['標籤管理',          '題材標籤字典維護'],
+    'clinic-stats':     ['標籤統計分析',      '依標籤撈出歷年宣傳成果與通路涵蓋率'],
+    'channel-overview': ['官網 + LINE 儀表板', 'GA4 / LINE Insight / Search Console 整合分析'],
+    'channel-import':   ['匯入 GA4 / LINE 數據', '手動匯入或 JSON 貼入每日數據'],
   };
   const key = `${module}-${sub}`;
   if (titles[key]) {
@@ -2565,6 +2826,12 @@ function switchSection(module, sub) {
   if (key === 'settings-backup') renderBackupSection();
   if (key === 'fb-predict')    runPrediction();
   if (key === 'settings-main') loadTargetInputs();
+  if (key === 'clinic-matrix') renderClinicMatrix();
+  if (key === 'clinic-items')  renderClinicItems();
+  if (key === 'clinic-tags')   renderClinicTags();
+  if (key === 'clinic-stats')  renderClinicStats();
+  if (key === 'channel-overview') renderChannelOverview();
+  if (key === 'channel-import')   renderChannelImport();
 }
 
 // ═══════════════════════════════════════════
@@ -4193,6 +4460,576 @@ function loadTargetInputs() {
   const el1 = document.getElementById('target-reach'); if(el1 && t.reach) el1.value = t.reach;
   const el2 = document.getElementById('target-engage'); if(el2 && t.engage) el2.value = t.engage;
   const el3 = document.getElementById('target-posts'); if(el3 && t.posts) el3.value = t.posts;
+}
+
+// ═══════════════════════════════════════════
+//  門診表資料庫 — CRUD + 渲染
+// ═══════════════════════════════════════════
+function clinicMonths() {
+  return [...new Set(activeMediaItems().map(x => x.month).filter(Boolean))].sort().reverse();
+}
+function clinicCurrentMonth() {
+  const sel = document.getElementById('clinicMatrixMonth');
+  return (sel && sel.value) || clinicMonths()[0] || new Date().toISOString().slice(0,7);
+}
+
+function renderClinicMatrix() {
+  const sel = document.getElementById('clinicMatrixMonth');
+  if (!sel) return;
+  const months = clinicMonths();
+  if (!months.length) months.push(new Date().toISOString().slice(0,7));
+  const prev = sel.value;
+  sel.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
+  if (prev && months.includes(prev)) sel.value = prev;
+  const month = sel.value;
+  const items = activeMediaItems().filter(x => x.month === month).sort((a,b) => (a.page_no||'').localeCompare(b.page_no||''));
+  const wrap = document.getElementById('clinicMatrixWrap');
+  if (!items.length) {
+    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:13px;">本月尚無題材，請點「+ 新增題材」或「📋 複製上月」</div>';
+    return;
+  }
+  // Group channels by group
+  const groups = {};
+  MEDIA_CHANNELS.forEach(c => { if (!groups[c.group]) groups[c.group] = []; groups[c.group].push(c); });
+  let html = '<table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:1400px;">';
+  // Header group row
+  html += '<thead><tr><th rowspan="2" style="background:#2D6A4F;color:#fff;padding:8px;border:1px solid #2D6A4F;min-width:60px;">頁碼</th><th rowspan="2" style="background:#2D6A4F;color:#fff;padding:8px;border:1px solid #2D6A4F;min-width:160px;">主題</th><th rowspan="2" style="background:#2D6A4F;color:#fff;padding:8px;border:1px solid #2D6A4F;min-width:60px;">負責人</th>';
+  Object.keys(groups).forEach(g => {
+    html += `<th colspan="${groups[g].length}" style="background:#1B4332;color:#fff;padding:6px;border:1px solid #2D6A4F;font-size:11px;">${g}</th>`;
+  });
+  html += '<th rowspan="2" style="background:#2D6A4F;color:#fff;padding:8px;border:1px solid #2D6A4F;min-width:60px;">操作</th></tr><tr>';
+  Object.keys(groups).forEach(g => {
+    groups[g].forEach(c => {
+      html += `<th style="background:#40916C;color:#fff;padding:6px 4px;border:1px solid #2D6A4F;font-size:10px;font-weight:600;min-width:38px;" title="${c.label}｜${c.owner}｜${c.spec}">${c.label.replace('海報 ','')}<br><span style="font-weight:400;opacity:0.8;font-size:9px;">(${c.owner})</span></th>`;
+    });
+  });
+  html += '</tr></thead><tbody>';
+  items.forEach((it, i) => {
+    const idx = store.mediaItems.indexOf(it);
+    html += `<tr><td style="padding:6px;border:1px solid #D4E5DB;text-align:center;font-weight:700;color:#2D6A4F;">${it.page_no||''}</td>`;
+    html += `<td style="padding:6px;border:1px solid #D4E5DB;"><a href="javascript:clinicEditItem(${idx})" style="color:#2D6A4F;text-decoration:none;font-weight:600;">${it.title||'(未命名)'}</a>`;
+    if (it.tags && it.tags.length) {
+      html += '<div style="margin-top:3px;">' + it.tags.slice(0,4).map(t => `<span style="display:inline-block;padding:1px 6px;background:#E8F0EC;color:#2D6A4F;border-radius:8px;font-size:9px;margin-right:3px;">${t}</span>`).join('') + '</div>';
+    }
+    html += '</td>';
+    html += `<td style="padding:6px;border:1px solid #D4E5DB;text-align:center;">${it.content_owner||''}</td>`;
+    Object.keys(groups).forEach(g => {
+      groups[g].forEach(c => {
+        const checked = it.channels && it.channels[c.key];
+        html += `<td onclick="clinicToggleChannel(${idx},'${c.key}')" style="padding:0;border:1px solid #D4E5DB;text-align:center;cursor:pointer;background:${checked?'#D4E5DB':'#fff'};font-size:14px;color:${checked?'#2D6A4F':'#ddd'};font-weight:900;" title="點擊切換">${checked?'✓':'·'}</td>`;
+      });
+    });
+    html += `<td style="padding:4px;border:1px solid #D4E5DB;text-align:center;white-space:nowrap;"><button class="action-btn edit" onclick="clinicEditItem(${idx})" style="font-size:10px;padding:3px 6px;">編輯</button><button class="action-btn del" onclick="clinicDeleteItem(${idx})" data-perm="edit" style="font-size:10px;padding:3px 6px;margin-left:2px;">刪</button></td>`;
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  applyPermissions();
+}
+
+function clinicToggleChannel(idx, key) {
+  if (!requireEdit()) return;
+  const it = store.mediaItems[idx];
+  if (!it) return;
+  if (!it.channels) it.channels = {};
+  it.channels[key] = !it.channels[key];
+  it.updated_at = new Date().toISOString();
+  saveStore();
+  renderClinicMatrix();
+}
+
+function clinicAddMonth() {
+  if (!requireEdit()) return;
+  const m = prompt('請輸入新月份 (格式 YYYY-MM)', new Date().toISOString().slice(0,7));
+  if (!m || !/^\d{4}-\d{2}$/.test(m)) { showToast('格式錯誤'); return; }
+  const sel = document.getElementById('clinicMatrixMonth');
+  if (![...sel.options].some(o => o.value === m)) {
+    const opt = document.createElement('option');
+    opt.value = m; opt.textContent = m;
+    sel.appendChild(opt);
+  }
+  sel.value = m;
+  renderClinicMatrix();
+}
+
+function clinicCopyPrevMonth() {
+  if (!requireEdit()) return;
+  const current = clinicCurrentMonth();
+  const months = clinicMonths();
+  const prev = months.find(m => m < current);
+  if (!prev) { showToast('無上月資料可複製'); return; }
+  if (!confirm(`確定將 ${prev} 的 ${activeMediaItems().filter(x=>x.month===prev).length} 筆題材複製到 ${current}？`)) return;
+  activeMediaItems().filter(x => x.month === prev).forEach(src => {
+    store.mediaItems.push({
+      ...src, id: 'mi_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      month: current, channels: {}, // 重置通路勾選
+      created_at: new Date().toISOString(),
+      deleted_at: null, deleted_by: null
+    });
+  });
+  saveStore();
+  showToast('已複製 ' + prev + ' → ' + current);
+  renderClinicMatrix();
+}
+
+function clinicAddItem() {
+  if (!requireEdit()) return;
+  const month = clinicCurrentMonth();
+  const item = {
+    id: 'mi_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    month, page_no: '', title: '', content_owner: '',
+    department: '', tags: [], nature: [], target_audience: '',
+    doctors: [], media_source: '', media_url: '',
+    note: '', channels: {},
+    created_at: new Date().toISOString()
+  };
+  store.mediaItems.push(item);
+  saveStore();
+  clinicEditItem(store.mediaItems.length - 1);
+}
+
+function clinicDeleteItem(idx) {
+  if (!requireEdit()) return;
+  const it = store.mediaItems[idx];
+  if (!it) return;
+  if (!confirm(`確定刪除題材「${it.title||'(未命名)'}」？（可在資料備份還原復原）`)) return;
+  it.deleted_at = new Date().toISOString();
+  it.deleted_by = getRole();
+  saveStore();
+  renderClinicMatrix();
+  showToast('已刪除');
+}
+
+// —— 題材編輯 Modal ——
+function clinicEditItem(idx) {
+  if (!requireEdit()) return;
+  const it = store.mediaItems[idx];
+  if (!it) return;
+  const tagOpts = (store.mediaTags||[]).map(t => `<option value="${t.name}" ${it.tags && it.tags.includes(t.name)?'selected':''}>${t.name}</option>`).join('');
+  const natureOpts = ITEM_NATURES.map(n => `<label style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;font-size:12px;"><input type="checkbox" ${it.nature && it.nature.includes(n)?'checked':''} value="${n}"> ${n}</label>`).join('');
+  const ownerOpts = CONTENT_OWNERS.map(o => `<option value="${o}" ${it.content_owner===o?'selected':''}>${o}</option>`).join('');
+  const channelGroups = {};
+  MEDIA_CHANNELS.forEach(c => { if (!channelGroups[c.group]) channelGroups[c.group] = []; channelGroups[c.group].push(c); });
+  let chHtml = '';
+  Object.keys(channelGroups).forEach(g => {
+    chHtml += `<div style="margin-bottom:8px;"><div style="font-size:11px;font-weight:700;color:#2D6A4F;margin-bottom:4px;">${g}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">`;
+    channelGroups[g].forEach(c => {
+      const checked = it.channels && it.channels[c.key];
+      chHtml += `<label style="display:inline-flex;align-items:center;gap:3px;padding:4px 8px;background:${checked?'#D4E5DB':'#F5F5F5'};border-radius:6px;font-size:11px;cursor:pointer;"><input type="checkbox" class="cedit-ch" data-key="${c.key}" ${checked?'checked':''}> ${c.label} <span style="color:#888;font-size:9px;">(${c.owner})</span></label>`;
+    });
+    chHtml += '</div></div>';
+  });
+  const html = `
+    <div id="clinicEditOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:#fff;border-radius:14px;padding:28px;max-width:780px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;"><h3 style="font-size:17px;font-weight:900;color:#1B4332;">編輯題材 — ${it.title||'(未命名)'}</h3><button onclick="closeClinicEdit()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">×</button></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group"><label>月份 *</label><input id="ce-month" type="month" value="${it.month||''}"></div>
+          <div class="form-group"><label>頁碼</label><input id="ce-page" type="text" value="${it.page_no||''}" placeholder="P1 / P3上 / p32(1) / 通光"></div>
+          <div class="form-group"><label>內容負責人</label><select id="ce-owner"><option value="">--</option>${ownerOpts}</select></div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label>主題 *</label><input id="ce-title" type="text" value="${(it.title||'').replace(/"/g,'&quot;')}" placeholder="例：春日換膚計畫 / 肺部健檢專案"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group"><label>主責科別</label><input id="ce-dept" type="text" value="${(it.department||'').replace(/"/g,'&quot;')}"></div>
+          <div class="form-group"><label>目標族群</label><select id="ce-target"><option value="">--</option>${['女性','親子','男性','中高齡'].map(x=>`<option value="${x}" ${it.target_audience===x?'selected':''}>${x}</option>`).join('')}</select></div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label>標籤 <small style="color:#888;">（可複選，按 Ctrl / ⌘）</small></label><select id="ce-tags" multiple size="6" style="height:auto;min-height:110px;">${tagOpts}</select></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>題材性質</label><div id="ce-nature">${natureOpts}</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group"><label>關聯醫師（逗號分隔）</label><input id="ce-docs" type="text" value="${(it.doctors||[]).join(', ')}" placeholder="例：江國樑, 鄔翔帆"></div>
+          <div class="form-group"><label>媒體來源（若為媒體露出）</label><input id="ce-media" type="text" value="${(it.media_source||'').replace(/"/g,'&quot;')}" placeholder="例：自由健康網"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;"><label>媒體連結 / 檔案 URL</label><input id="ce-url" type="url" value="${(it.media_url||'').replace(/"/g,'&quot;')}" placeholder="https://..."></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>備註</label><textarea id="ce-note" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;">${it.note||''}</textarea></div>
+        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-sub);display:block;margin-bottom:6px;">通路布署</label><div style="background:#FAFBFA;border:1px solid var(--border);border-radius:8px;padding:12px;">${chHtml}</div></div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;"><button class="btn btn-outline" onclick="closeClinicEdit()">取消</button><button class="btn btn-primary" onclick="clinicSaveItem(${idx})">儲存</button></div>
+      </div>
+    </div>`;
+  const old = document.getElementById('clinicEditOverlay');
+  if (old) old.remove();
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function closeClinicEdit() {
+  const o = document.getElementById('clinicEditOverlay');
+  if (o) o.remove();
+}
+
+function clinicSaveItem(idx) {
+  if (!requireEdit()) return;
+  const it = store.mediaItems[idx];
+  if (!it) return;
+  it.month   = document.getElementById('ce-month').value;
+  it.page_no = document.getElementById('ce-page').value.trim();
+  it.title   = document.getElementById('ce-title').value.trim();
+  it.content_owner = document.getElementById('ce-owner').value;
+  it.department = document.getElementById('ce-dept').value.trim();
+  it.target_audience = document.getElementById('ce-target').value;
+  it.tags = Array.from(document.getElementById('ce-tags').selectedOptions).map(o => o.value);
+  it.nature = Array.from(document.querySelectorAll('#ce-nature input:checked')).map(i => i.value);
+  it.doctors = document.getElementById('ce-docs').value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+  it.media_source = document.getElementById('ce-media').value.trim();
+  it.media_url = document.getElementById('ce-url').value.trim();
+  it.note = document.getElementById('ce-note').value;
+  it.channels = {};
+  document.querySelectorAll('.cedit-ch:checked').forEach(cb => { it.channels[cb.dataset.key] = true; });
+  it.updated_at = new Date().toISOString();
+  saveStore();
+  closeClinicEdit();
+  renderClinicMatrix();
+  renderClinicItems();
+  showToast('已儲存');
+}
+
+// —— 題材列表 ——
+function renderClinicItems() {
+  const wrap = document.getElementById('clinicItemList');
+  if (!wrap) return;
+  // populate filters
+  const tagSel = document.getElementById('clinicItemTagFilter');
+  const monthSel = document.getElementById('clinicItemMonthFilter');
+  const prevTag = tagSel.value, prevMonth = monthSel.value;
+  tagSel.innerHTML = '<option value="">所有標籤</option>' + (store.mediaTags||[]).map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+  monthSel.innerHTML = '<option value="">所有月份</option>' + clinicMonths().map(m => `<option value="${m}">${m}</option>`).join('');
+  tagSel.value = prevTag; monthSel.value = prevMonth;
+  const q = (document.getElementById('clinicItemSearch').value||'').toLowerCase();
+  const ftag = tagSel.value, fmonth = monthSel.value;
+  let items = activeMediaItems();
+  if (q) items = items.filter(x => (x.title||'').toLowerCase().includes(q) || (x.department||'').toLowerCase().includes(q));
+  if (ftag) items = items.filter(x => x.tags && x.tags.includes(ftag));
+  if (fmonth) items = items.filter(x => x.month === fmonth);
+  items.sort((a,b) => (b.month||'').localeCompare(a.month||'') || (a.page_no||'').localeCompare(b.page_no||''));
+  document.getElementById('clinicItemCount').textContent = `共 ${items.length} / ${activeMediaItems().length} 筆`;
+  if (!items.length) { wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">尚無符合條件的題材</div>'; return; }
+  wrap.innerHTML = items.map(it => {
+    const idx = store.mediaItems.indexOf(it);
+    const channelCount = Object.values(it.channels||{}).filter(v => v).length;
+    const tags = (it.tags||[]).map(t => `<span style="display:inline-block;padding:2px 8px;background:#E8F0EC;color:#2D6A4F;border-radius:10px;font-size:10px;margin-right:4px;">${t}</span>`).join('');
+    const nature = (it.nature||[]).map(n => `<span style="display:inline-block;padding:2px 8px;background:#FEF3C7;color:#92400E;border-radius:10px;font-size:10px;margin-right:4px;">${n}</span>`).join('');
+    return `<div style="background:var(--surface);border-radius:10px;padding:16px;border:1px solid var(--border);margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow);">
+      <div style="text-align:center;min-width:60px;"><div style="font-size:18px;font-weight:900;color:#2D6A4F;">${it.page_no||'—'}</div><div style="font-size:10px;color:#888;">${it.month||''}</div></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">${it.title||'(未命名)'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">${it.department||''} ${it.content_owner?' · '+it.content_owner:''} ${it.target_audience?' · 目標：'+it.target_audience:''}</div>
+        <div style="margin-bottom:4px;">${tags}</div>
+        <div>${nature}</div>
+        ${it.media_source?`<div style="font-size:11px;color:#888;margin-top:4px;">📰 ${it.media_source}${it.media_url?' · <a href="'+it.media_url+'" target="_blank" style="color:#2D6A4F;">連結</a>':''}</div>`:''}
+      </div>
+      <div style="text-align:right;"><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">已布署 ${channelCount} 通路</div><button class="action-btn edit" onclick="clinicEditItem(${idx})">編輯</button><button class="action-btn del" onclick="clinicDeleteItem(${idx})" data-perm="edit" style="margin-left:4px;">刪除</button></div>
+    </div>`;
+  }).join('');
+  applyPermissions();
+}
+
+// —— 標籤管理 ——
+function renderClinicTags() {
+  const wrap = document.getElementById('clinicTagList');
+  if (!wrap) return;
+  const cats = { dept:'科別', center:'中心 / 專科', device:'設備 / 技術', nature:'性質', audience:'目標族群', project:'專案', other:'其他' };
+  const grouped = {};
+  (store.mediaTags||[]).forEach(t => { if (!grouped[t.category]) grouped[t.category] = []; grouped[t.category].push(t); });
+  wrap.innerHTML = Object.keys(cats).filter(k => grouped[k]).map(k => {
+    return `<div style="background:var(--surface);border-radius:10px;padding:16px 20px;border:1px solid var(--border);margin-bottom:12px;box-shadow:var(--shadow);">
+      <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:${grouped[k][0]&&grouped[k][0].color||'#2D6A4F'};">${cats[k]} <span style="color:#888;font-weight:400;font-size:11px;">(${grouped[k].length})</span></h3>
+      <div>${grouped[k].map(t => `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:${t.color||'#E8F0EC'}20;color:${t.color||'#2D6A4F'};border:1px solid ${t.color||'#2D6A4F'}40;border-radius:12px;font-size:12px;margin:2px;">${t.name}<button data-perm="edit" onclick="clinicDeleteTag('${t.id}')" style="background:none;border:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;padding:0;margin-left:2px;">×</button></span>`).join('')}</div>
+    </div>`;
+  }).join('');
+  applyPermissions();
+}
+
+function clinicAddTag() {
+  if (!requireEdit()) return;
+  const name = document.getElementById('newTagName').value.trim();
+  const cat = document.getElementById('newTagCategory').value;
+  if (!name) { showToast('請輸入標籤名稱'); return; }
+  if ((store.mediaTags||[]).some(t => t.name === name)) { showToast('標籤已存在'); return; }
+  const colorMap = { dept:'#2D6A4F', center:'#1D4ED8', device:'#7C3AED', nature:'#F59E0B', audience:'#DB2777', project:'#059669', other:'#6B7280' };
+  store.mediaTags = store.mediaTags || [];
+  store.mediaTags.push({ id: 't_'+Date.now(), name, category: cat, color: colorMap[cat]||'#6B7280' });
+  saveStore();
+  document.getElementById('newTagName').value = '';
+  renderClinicTags();
+  showToast('已新增標籤：' + name);
+}
+
+function clinicDeleteTag(id) {
+  if (!requireEdit()) return;
+  const t = (store.mediaTags||[]).find(x => x.id === id);
+  if (!t) return;
+  if (!confirm(`確定刪除標籤「${t.name}」？已使用此標籤的題材不會受影響。`)) return;
+  store.mediaTags = store.mediaTags.filter(x => x.id !== id);
+  saveStore();
+  renderClinicTags();
+}
+
+// —— 標籤統計分析 ——
+function renderClinicStats() {
+  const sel = document.getElementById('clinicStatsTag');
+  const wrap = document.getElementById('clinicStatsContent');
+  if (!sel || !wrap) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">-- 請選擇 --</option>' + (store.mediaTags||[]).map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+  sel.value = prev;
+  const tag = sel.value;
+  if (!tag) { wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);">請先選擇標籤</div>'; return; }
+  const items = activeMediaItems().filter(x => x.tags && x.tags.includes(tag)).sort((a,b) => (a.month||'').localeCompare(b.month||''));
+  if (!items.length) { wrap.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted);">「${tag}」標籤尚無任何題材</div>`; return; }
+  // 月度分布
+  const byMonth = {};
+  items.forEach(x => { byMonth[x.month] = (byMonth[x.month]||0) + 1; });
+  // 通路涵蓋率
+  const chStats = {};
+  MEDIA_CHANNELS.forEach(c => { chStats[c.key] = { ...c, count: 0 }; });
+  items.forEach(x => { Object.keys(x.channels||{}).forEach(k => { if (x.channels[k] && chStats[k]) chStats[k].count++; }); });
+  const total = items.length;
+  wrap.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">宣傳次數</div><div style="font-size:24px;font-weight:900;color:#2D6A4F;">${total}</div></div>
+      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">涵蓋月份</div><div style="font-size:24px;font-weight:900;color:#2D6A4F;">${Object.keys(byMonth).length}</div></div>
+      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">最早月份</div><div style="font-size:16px;font-weight:900;color:#2D6A4F;">${Object.keys(byMonth)[0]||'—'}</div></div>
+      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">最近月份</div><div style="font-size:16px;font-weight:900;color:#2D6A4F;">${Object.keys(byMonth).slice(-1)[0]||'—'}</div></div>
+    </div>
+    <div style="background:var(--surface);border-radius:10px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📅 月度宣傳時間軸</h3>
+      <div>${Object.keys(byMonth).sort().map(m => `<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;"><div style="min-width:80px;font-size:12px;font-weight:700;color:#2D6A4F;">${m}</div><div style="flex:1;height:24px;background:#F0F7F4;border-radius:4px;position:relative;"><div style="position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,#2D6A4F,#52B788);width:${Math.min(byMonth[m]*20,100)}%;border-radius:4px;"></div></div><div style="min-width:40px;font-size:12px;font-weight:700;">${byMonth[m]} 次</div></div>`).join('')}</div>
+    </div>
+    <div style="background:var(--surface);border-radius:10px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📢 通路涵蓋率（${total} 次中使用了幾次）</h3>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">${Object.values(chStats).filter(c=>c.count>0).sort((a,b)=>b.count-a.count).map(c => `<div style="display:flex;align-items:center;gap:8px;font-size:12px;"><div style="min-width:140px;">${c.group} ${c.label}</div><div style="flex:1;height:16px;background:#F0F7F4;border-radius:3px;"><div style="height:100%;background:linear-gradient(90deg,#2D6A4F,#52B788);width:${c.count/total*100}%;border-radius:3px;"></div></div><div style="min-width:60px;text-align:right;font-weight:700;">${c.count}/${total} (${Math.round(c.count/total*100)}%)</div></div>`).join('')}</div>
+    </div>
+    <div style="background:var(--surface);border-radius:10px;padding:20px;border:1px solid var(--border);">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📋 所有題材清單</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr><th style="padding:8px;text-align:left;background:#F0F7F4;">月份</th><th style="padding:8px;text-align:left;background:#F0F7F4;">頁碼</th><th style="padding:8px;text-align:left;background:#F0F7F4;">主題</th><th style="padding:8px;text-align:left;background:#F0F7F4;">負責人</th><th style="padding:8px;text-align:center;background:#F0F7F4;">通路數</th></tr></thead><tbody>
+      ${items.map(x => { const idx = store.mediaItems.indexOf(x); const cc = Object.values(x.channels||{}).filter(v=>v).length; return `<tr><td style="padding:8px;border-bottom:1px solid #eee;">${x.month||''}</td><td style="padding:8px;border-bottom:1px solid #eee;">${x.page_no||'—'}</td><td style="padding:8px;border-bottom:1px solid #eee;"><a href="javascript:clinicEditItem(${idx})" style="color:#2D6A4F;text-decoration:none;font-weight:600;">${x.title||''}</a></td><td style="padding:8px;border-bottom:1px solid #eee;">${x.content_owner||''}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${cc}</td></tr>`; }).join('')}
+      </tbody></table>
+    </div>`;
+}
+
+// —— 列印本月矩陣 ——
+function clinicPrintMatrix() {
+  const month = clinicCurrentMonth();
+  const items = activeMediaItems().filter(x => x.month === month).sort((a,b) => (a.page_no||'').localeCompare(b.page_no||''));
+  if (!items.length) { showToast('本月無題材可列印'); return; }
+  const w = window.open('', '_blank', 'width=1400,height=900');
+  const groups = {};
+  MEDIA_CHANNELS.forEach(c => { if (!groups[c.group]) groups[c.group] = []; groups[c.group].push(c); });
+  let html = `<html><head><meta charset="UTF-8"><title>${month} 門診表傳達管道</title><style>body{font-family:'Noto Sans TC',sans-serif;padding:20px;}h1{font-size:18px;text-align:center;margin-bottom:16px;}table{width:100%;border-collapse:collapse;font-size:10px;}th,td{border:1px solid #666;padding:4px;}th{background:#eee;}td.c{text-align:center;font-size:14px;font-weight:900;}@media print{@page{size:A3 landscape;}}</style></head><body>`;
+  html += `<h1>${month.replace('-','年')}月 門診表傳達管道</h1>`;
+  html += '<table><thead><tr><th rowspan="2">頁碼</th><th rowspan="2">主題</th><th rowspan="2">負責人</th>';
+  Object.keys(groups).forEach(g => { html += `<th colspan="${groups[g].length}">${g}</th>`; });
+  html += '</tr><tr>';
+  Object.keys(groups).forEach(g => groups[g].forEach(c => { html += `<th>${c.label.replace('海報 ','')}<br><small>(${c.owner})</small></th>`; }));
+  html += '</tr></thead><tbody>';
+  items.forEach(it => {
+    html += `<tr><td>${it.page_no||''}</td><td>${it.title||''}</td><td>${it.content_owner||''}</td>`;
+    Object.keys(groups).forEach(g => groups[g].forEach(c => { html += `<td class="c">${it.channels&&it.channels[c.key]?'✓':''}</td>`; }));
+    html += '</tr>';
+  });
+  html += '</tbody></table><div style="margin-top:30px;text-align:center;font-size:11px;color:#888;">光田綜合醫院 行銷組 ｜ 由行銷整合分析中心自動產出</div>';
+  html += '<script>setTimeout(function(){window.print();},300);<\/script></body></html>';
+  w.document.write(html);
+  w.document.close();
+}
+
+// ═══════════════════════════════════════════
+//  通路總覽 — GA4 / LINE / GSC
+// ═══════════════════════════════════════════
+function saveGaDaily() {
+  if (!requireEdit()) return;
+  const date = document.getElementById('ga-date').value;
+  if (!date) { showToast('請填日期'); return; }
+  let sources = null;
+  const sourcesTxt = document.getElementById('ga-sources').value.trim();
+  if (sourcesTxt) { try { sources = JSON.parse(sourcesTxt); } catch(e) { showToast('流量來源 JSON 格式錯誤'); return; } }
+  const rec = {
+    date,
+    pv:       +document.getElementById('ga-pv').value || 0,
+    uv:       +document.getElementById('ga-uv').value || 0,
+    sessions: +document.getElementById('ga-sessions').value || 0,
+    new_users:+document.getElementById('ga-new').value || 0,
+    avg_duration: +document.getElementById('ga-duration').value || 0,
+    bounce_rate:  +document.getElementById('ga-bounce').value || 0,
+    conversions:  +document.getElementById('ga-conv').value || 0,
+    sources,
+    created_at: new Date().toISOString()
+  };
+  store.webMetrics = (store.webMetrics||[]).filter(r => r.date !== date);
+  store.webMetrics.push(rec);
+  saveStore();
+  showToast('已儲存 GA4 ' + date);
+  renderChannelImport();
+}
+
+function saveLineDaily() {
+  if (!requireEdit()) return;
+  const date = document.getElementById('line-date').value;
+  if (!date) { showToast('請填日期'); return; }
+  const rec = {
+    date,
+    followers_total: +document.getElementById('line-total').value || 0,
+    followers_new:   +document.getElementById('line-new').value || 0,
+    followers_blocked:+document.getElementById('line-block').value || 0,
+    messages_sent:   +document.getElementById('line-sent').value || 0,
+    messages_reach:  +document.getElementById('line-reach').value || 0,
+    messages_click:  +document.getElementById('line-click').value || 0,
+    followers_added: +document.getElementById('line-add').value || 0,
+    created_at: new Date().toISOString()
+  };
+  store.lineMetrics = (store.lineMetrics||[]).filter(r => r.date !== date);
+  store.lineMetrics.push(rec);
+  saveStore();
+  showToast('已儲存 LINE ' + date);
+  renderChannelImport();
+}
+
+function saveScDaily() {
+  if (!requireEdit()) return;
+  const date = document.getElementById('sc-date').value;
+  if (!date) { showToast('請填日期'); return; }
+  let queries = null;
+  const q = document.getElementById('sc-queries').value.trim();
+  if (q) { try { queries = JSON.parse(q); } catch(e) { showToast('關鍵字 JSON 格式錯誤'); return; } }
+  const rec = {
+    date,
+    impressions: +document.getElementById('sc-impr').value || 0,
+    clicks:      +document.getElementById('sc-clicks').value || 0,
+    ctr:         +document.getElementById('sc-ctr').value || 0,
+    avg_position:+document.getElementById('sc-pos').value || 0,
+    top_queries: queries,
+    created_at: new Date().toISOString()
+  };
+  store.searchMetrics = (store.searchMetrics||[]).filter(r => r.date !== date);
+  store.searchMetrics.push(rec);
+  saveStore();
+  showToast('已儲存 Search Console ' + date);
+  renderChannelImport();
+}
+
+function openGaBatchImport() {
+  const txt = prompt('請貼入 GA4 日資料 JSON 陣列：\n例：[{"date":"2026-04-01","pv":4200,"uv":1800,"sessions":2100,"avg_duration":150,"bounce_rate":42}]');
+  if (!txt) return;
+  try {
+    const arr = JSON.parse(txt);
+    if (!Array.isArray(arr)) throw new Error('必須是陣列');
+    arr.forEach(r => {
+      if (!r.date) return;
+      store.webMetrics = (store.webMetrics||[]).filter(x => x.date !== r.date);
+      store.webMetrics.push({ ...r, created_at: new Date().toISOString() });
+    });
+    saveStore();
+    showToast('已匯入 ' + arr.length + ' 筆 GA4 資料');
+    renderChannelImport();
+  } catch(e) { showToast('JSON 格式錯誤：' + e.message); }
+}
+
+function openLineBatchImport() {
+  const txt = prompt('請貼入 LINE 日資料 JSON 陣列：\n例：[{"date":"2026-04-01","followers_total":48000,"messages_reach":12000}]');
+  if (!txt) return;
+  try {
+    const arr = JSON.parse(txt);
+    if (!Array.isArray(arr)) throw new Error('必須是陣列');
+    arr.forEach(r => {
+      if (!r.date) return;
+      store.lineMetrics = (store.lineMetrics||[]).filter(x => x.date !== r.date);
+      store.lineMetrics.push({ ...r, created_at: new Date().toISOString() });
+    });
+    saveStore();
+    showToast('已匯入 ' + arr.length + ' 筆 LINE 資料');
+    renderChannelImport();
+  } catch(e) { showToast('JSON 格式錯誤：' + e.message); }
+}
+
+function renderChannelImport() {
+  const wrap = document.getElementById('channelImportSummary');
+  if (!wrap) return;
+  const ga = store.webMetrics || [], line = store.lineMetrics || [], sc = store.searchMetrics || [];
+  wrap.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      <div style="padding:14px;background:#F0F7F4;border-radius:8px;border:1px solid #B7D7C8;">
+        <div style="font-size:11px;color:#2D6A4F;font-weight:700;margin-bottom:4px;">🟢 GA4 官網</div>
+        <div style="font-size:20px;font-weight:900;color:#2D6A4F;">${ga.length} 筆</div>
+        <div style="font-size:10px;color:#888;">${ga.length?ga.sort((a,b)=>b.date.localeCompare(a.date))[0].date+' ~ '+ga.sort((a,b)=>a.date.localeCompare(b.date))[0].date:'尚無資料'}</div>
+      </div>
+      <div style="padding:14px;background:#E6F7E6;border-radius:8px;border:1px solid #99E699;">
+        <div style="font-size:11px;color:#006600;font-weight:700;margin-bottom:4px;">💬 LINE@</div>
+        <div style="font-size:20px;font-weight:900;color:#006600;">${line.length} 筆</div>
+        <div style="font-size:10px;color:#888;">${line.length?line.sort((a,b)=>b.date.localeCompare(a.date))[0].date+' ~ '+line.sort((a,b)=>a.date.localeCompare(b.date))[0].date:'尚無資料'}</div>
+      </div>
+      <div style="padding:14px;background:#EBF2FE;border-radius:8px;border:1px solid #B3D1FA;">
+        <div style="font-size:11px;color:#1E40AF;font-weight:700;margin-bottom:4px;">🔍 Search Console</div>
+        <div style="font-size:20px;font-weight:900;color:#1E40AF;">${sc.length} 筆</div>
+        <div style="font-size:10px;color:#888;">${sc.length?sc.sort((a,b)=>b.date.localeCompare(a.date))[0].date+' ~ '+sc.sort((a,b)=>a.date.localeCompare(b.date))[0].date:'尚無資料'}</div>
+      </div>
+    </div>`;
+  // 預填今天日期
+  const today = new Date().toISOString().slice(0,10);
+  ['ga-date','line-date','sc-date'].forEach(id => { const el = document.getElementById(id); if (el && !el.value) el.value = today; });
+}
+
+function renderChannelOverview() {
+  const wrap = document.getElementById('channelOverviewContent');
+  if (!wrap) return;
+  const period = (document.getElementById('channelPeriod')||{}).value || '30';
+  const ga = store.webMetrics || [], line = store.lineMetrics || [], sc = store.searchMetrics || [];
+  const cutoff = period === 'all' ? null : (() => { const d = new Date(); d.setDate(d.getDate() - parseInt(period)); return d.toISOString().slice(0,10); })();
+  const filt = arr => cutoff ? arr.filter(r => r.date >= cutoff) : arr;
+  const gaF = filt(ga), lineF = filt(line), scF = filt(sc);
+  if (!gaF.length && !lineF.length && !scF.length) {
+    wrap.innerHTML = `<div style="padding:60px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);">
+      <div style="font-size:48px;margin-bottom:12px;">📊</div>
+      <h3 style="font-size:16px;color:var(--text);margin-bottom:8px;">尚無任何通路數據</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">請先到「匯入 GA4 / LINE 數據」頁面新增資料</p>
+      <button class="btn btn-primary" onclick="switchSection('channel','import')">前往匯入</button>
+    </div>`;
+    return;
+  }
+  // GA4 aggregates
+  const pvSum  = gaF.reduce((s,r) => s + (+r.pv||0), 0);
+  const uvSum  = gaF.reduce((s,r) => s + (+r.uv||0), 0);
+  const sessSum= gaF.reduce((s,r) => s + (+r.sessions||0), 0);
+  const avgDur = gaF.length ? Math.round(gaF.reduce((s,r)=>s+(+r.avg_duration||0),0) / gaF.length) : 0;
+  const avgBounce = gaF.length ? (gaF.reduce((s,r)=>s+(+r.bounce_rate||0),0)/gaF.length).toFixed(1) : 0;
+  // LINE aggregates
+  const latestLine = lineF.length ? lineF.sort((a,b) => b.date.localeCompare(a.date))[0] : null;
+  const lineReachSum = lineF.reduce((s,r) => s + (+r.messages_reach||0), 0);
+  const lineClickSum = lineF.reduce((s,r) => s + (+r.messages_click||0), 0);
+  // SC aggregates
+  const scImprSum = scF.reduce((s,r) => s + (+r.impressions||0), 0);
+  const scClickSum = scF.reduce((s,r) => s + (+r.clicks||0), 0);
+  const scAvgPos = scF.length ? (scF.reduce((s,r)=>s+(+r.avg_position||0),0)/scF.length).toFixed(1) : 0;
+  // Source breakdown — from last record with sources
+  const lastGaWithSrc = [...gaF].reverse().find(r => r.sources);
+  const sources = lastGaWithSrc ? lastGaWithSrc.sources : null;
+  wrap.innerHTML = `
+    <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#2D6A4F;">🟢 GA4 官網 — ${gaF.length} 天</h3>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 PV</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${pvSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 UV</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${uvSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">工作階段</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${sessSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均停留</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${avgDur}s</div></div>
+        <div style="padding:14px;background:#F0F7F4;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">跳出率</div><div style="font-size:22px;font-weight:900;color:#2D6A4F;">${avgBounce}%</div></div>
+      </div>
+      ${sources?`<h4 style="font-size:12px;font-weight:700;margin:16px 0 8px;color:#666;">流量來源分布（最新一筆 ${lastGaWithSrc.date}）</h4>${Object.entries(sources).map(([k,v]) => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px;"><div style="width:100px;">${k}</div><div style="flex:1;height:16px;background:#F0F7F4;border-radius:3px;"><div style="height:100%;background:linear-gradient(90deg,#2D6A4F,#52B788);width:${v}%;border-radius:3px;"></div></div><div style="width:50px;text-align:right;font-weight:700;">${v}%</div></div>`).join('')}`:'<div style="margin-top:10px;font-size:11px;color:#aaa;font-style:italic;">（尚無流量來源資料 — 在匯入時可填 sources JSON）</div>'}
+    </div>
+    <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#00B900;">💬 LINE@ — ${lineF.length} 天</h3>
+      ${latestLine?`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">好友總數</div><div style="font-size:22px;font-weight:900;color:#006600;">${(latestLine.followers_total||0).toLocaleString()}</div><div style="font-size:10px;color:#888;">${latestLine.date}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">訊息觸及（累計）</div><div style="font-size:22px;font-weight:900;color:#006600;">${lineReachSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">訊息點擊（累計）</div><div style="font-size:22px;font-weight:900;color:#006600;">${lineClickSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F7E6;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">CTR</div><div style="font-size:22px;font-weight:900;color:#006600;">${lineReachSum?(lineClickSum/lineReachSum*100).toFixed(1)+'%':'—'}</div></div>
+      </div>`:'<div style="padding:20px;color:#aaa;font-style:italic;">尚無 LINE 資料</div>'}
+    </div>
+    <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#1E40AF;">🔍 Search Console SEO — ${scF.length} 天</h3>
+      ${scF.length?`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px;">
+        <div style="padding:14px;background:#EBF2FE;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計曝光</div><div style="font-size:22px;font-weight:900;color:#1E40AF;">${scImprSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#EBF2FE;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計點擊</div><div style="font-size:22px;font-weight:900;color:#1E40AF;">${scClickSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#EBF2FE;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均 CTR</div><div style="font-size:22px;font-weight:900;color:#1E40AF;">${scImprSum?(scClickSum/scImprSum*100).toFixed(2)+'%':'—'}</div></div>
+        <div style="padding:14px;background:#EBF2FE;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均排名</div><div style="font-size:22px;font-weight:900;color:#1E40AF;">${scAvgPos}</div></div>
+      </div>`:'<div style="padding:20px;color:#aaa;font-style:italic;">尚無 Search Console 資料</div>'}
+    </div>`;
 }
 
 // ═══════════════════════════════════════════
