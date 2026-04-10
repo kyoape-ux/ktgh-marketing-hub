@@ -2068,12 +2068,16 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input id="crossNewTagName" type="text" placeholder="e.g. LDCT、達文西、健檢" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
           <select id="crossNewTagCategory" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
-            <option value="project">專案 / 議題</option>
             <option value="dept">科別</option>
-            <option value="center">中心 / 專科</option>
-            <option value="device">設備 / 技術</option>
+            <option value="center">中心</option>
+            <option value="disease">疾病</option>
+            <option value="device">儀器</option>
+            <option value="tech">技術</option>
+            <option value="checkup">高級健檢</option>
             <option value="nature">性質</option>
-            <option value="audience">目標族群</option>
+            <option value="culture">健康人文藝術活動</option>
+            <option value="audience">族群</option>
+            <option value="project">專案 / 議題</option>
             <option value="other">其他</option>
           </select>
           <button class="btn btn-primary" data-perm="edit" onclick="crossAddTag()">+ 新增</button>
@@ -2522,19 +2526,52 @@ const SEASON_AUDIENCE = { 1:'女性', 2:'親子', 3:'男性', 4:'中高齡' };
 function getDefaultMediaTags() {
   const make = (name, category, color) => ({ id: 't_'+name, name, category, color: color||'#2D6A4F' });
   return [
-    // 科別
-    ...['心臟內科','神經內科','神經外科','骨科','婦產科','兒科','耳鼻喉科','眼科','皮膚科','泌尿科','腸胃肝膽','身心科','中醫部','放射腫瘤','核子醫學','家醫科','急診','麻醉科','復健科']
+    // 科別 (35)
+    ...['心臟內科','神經內科','神經外科','骨科','婦產科','兒科','耳鼻喉科','眼科',
+        '皮膚科','泌尿科','腸胃肝膽','身心科','中醫部','放射腫瘤','核子醫學','家醫科',
+        '急診','麻醉科','復健科','胸腔內科','腎臟內科','一般外科','大腸直腸外科','整形外科',
+        '心臟血管外科','胸腔外科','乳房外科','內分泌科','風濕免疫科','腫瘤內科','感染科',
+        '血液腫瘤科','老年醫學科','牙科','病理科']
       .map(n => make(n,'dept','#2D6A4F')),
-    // 中心 / 專科
-    ...['健康管理中心','醫美中心','運動醫學中心','癌症中心','失智症中心','睡眠中心','人工生殖','新生兒中心']
+    // 中心 (16)
+    ...['健康管理中心','醫美中心','運動醫學中心','癌症中心','失智症中心','睡眠中心',
+        '腦中風中心','肺癌篩檢中心','長照中心','營養點滴中心','骨鬆照護中心',
+        '細胞治療專區','兒童發展中心','社區健康中心','國際醫療中心','傷造口照護中心']
       .map(n => make(n,'center','#1D4ED8')),
-    // 設備 / 技術
-    ...['達文西','Elekta Versa HD','PET-CT','細胞治療','標靶治療','微創手術','內視鏡','心導管','精準微創']
+    // 疾病 (61)
+    ...['肺癌','大腸癌','乳癌','肝癌','胃癌','口腔癌','攝護腺癌','甲狀腺癌','子宮頸癌',
+        '腦中風','心肌梗塞','心房顫動','高血壓','糖尿病','高血脂','失智症','帕金森氏症',
+        '癲癇','氣喘','COPD','睡眠呼吸中止症','胃食道逆流','肝炎','膽結石','大腸息肉',
+        '慢性腎病','腎結石','攝護腺肥大','甲狀腺疾病','骨質疏鬆','痛風','退化性關節炎',
+        '椎間盤突出','五十肩','足底筋膜炎','脊椎側彎','白內障','青光眼','黃斑部病變',
+        '鼻竇炎','打鼾','聽力障礙','異位性皮膚炎','帶狀疱疹','乾癬','子宮肌瘤',
+        '子宮內膜異位','不孕症','兒童過敏','腸病毒','發展遲緩','類風濕性關節炎',
+        '僵直性脊椎炎','憂鬱症','焦慮症','失眠','疝氣','痔瘡','靜脈曲張','COVID-19','流感']
+      .map(n => make(n,'disease','#DC2626')),
+    // 儀器 (14)
+    ...['達文西','MAKO機器手臂','Elekta Versa HD','PET-CT','3T MRI','256切CT',
+        '骨密度儀(DXA)','超音波','心導管','內視鏡','高壓氧艙','體外震波',
+        '瑪佐脊椎機械手臂','睡眠檢測儀']
       .map(n => make(n,'device','#7C3AED')),
-    // 性質
-    ...['新醫師','新儀器','新技術','專案活動','健檢方案','媒體露出','行政公告','衛教文章','院慶活動']
+    // 技術 (20)
+    ...['微創手術','達文西手術','機器手臂手術','標靶治療','免疫治療','細胞治療',
+        '放射治療','質子治療','精準醫療','腹腔鏡手術','關節鏡手術','脊椎微創手術',
+        '心導管手術','TAVI','LDCT篩檢','3D列印','AI輔助診斷','基因檢測',
+        '幹細胞治療','冷凍治療']
+      .map(n => make(n,'tech','#6D28D9')),
+    // 高級健檢 (11)
+    ...['全身健檢','癌症篩檢','心血管健檢','腦血管健檢','婦女健檢','企業健檢',
+        '高階影像健檢','基因檢測健檢','樂齡健檢','VIP尊榮健檢','消化道內視鏡健檢']
+      .map(n => make(n,'checkup','#0891B2')),
+    // 性質 (11)
+    ...['新醫師','新儀器','新技術','專案活動','健檢方案','媒體露出','行政公告',
+        '衛教文章','院慶活動','KOL合作','醫師介紹']
       .map(n => make(n,'nature','#F59E0B')),
-    // 族群
+    // 健康人文藝術活動 (12)
+    ...['音樂會','畫展','志工活動','社區講座','健走活動','公益義診',
+        '節慶活動','親子活動','員工運動會','園藝治療','病友會','ESG永續']
+      .map(n => make(n,'culture','#D97706')),
+    // 族群 (6)
     ...['女性','親子','男性','中高齡','兒童','青少年']
       .map(n => make(n,'audience','#DB2777')),
   ];
@@ -5098,7 +5135,7 @@ function renderClinicItems() {
 function renderClinicTags() {
   const wrap = document.getElementById('clinicTagList');
   if (!wrap) return;
-  const cats = { dept:'科別', center:'中心 / 專科', device:'設備 / 技術', nature:'性質', audience:'目標族群', project:'專案', other:'其他' };
+  const cats = { dept:'科別', center:'中心', disease:'疾病', device:'儀器', tech:'技術', checkup:'高級健檢', nature:'性質', culture:'健康人文藝術活動', audience:'族群', project:'專案', other:'其他' };
   const grouped = {};
   (store.mediaTags||[]).forEach(t => { if (!grouped[t.category]) grouped[t.category] = []; grouped[t.category].push(t); });
   wrap.innerHTML = Object.keys(cats).filter(k => grouped[k]).map(k => {
@@ -5116,7 +5153,7 @@ function clinicAddTag() {
   const cat = document.getElementById('newTagCategory').value;
   if (!name) { showToast('請輸入標籤名稱'); return; }
   if ((store.mediaTags||[]).some(t => t.name === name)) { showToast('標籤已存在'); return; }
-  const colorMap = { dept:'#2D6A4F', center:'#1D4ED8', device:'#7C3AED', nature:'#F59E0B', audience:'#DB2777', project:'#059669', other:'#6B7280' };
+  const colorMap = { dept:'#2D6A4F', center:'#1D4ED8', disease:'#DC2626', device:'#7C3AED', tech:'#6D28D9', checkup:'#0891B2', nature:'#F59E0B', culture:'#D97706', audience:'#DB2777', project:'#059669', other:'#6B7280' };
   store.mediaTags = store.mediaTags || [];
   store.mediaTags.push({ id: 't_'+Date.now(), name, category: cat, color: colorMap[cat]||'#6B7280' });
   saveStore();
@@ -5774,10 +5811,14 @@ function renderCrossTagLibrary() {
   (store.linePosts||[]).filter(x=>!x.deleted_at).forEach(p => (p.tags||[]).forEach(t => { if(usage[t]) usage[t].linePosts++; }));
   (store.seoKeywords||[]).filter(x=>!x.deleted_at).forEach(k => (k.tags||[]).forEach(t => { if(usage[t]) usage[t].seo++; }));
   (store.videoItems||[]).filter(x=>!x.deleted_at).forEach(v => (v.tags||[]).forEach(t => { if(usage[t]) usage[t].video++; }));
-  const catLabel = { project:'專案/議題', dept:'科別', center:'中心', device:'設備', nature:'性質', audience:'族群', other:'其他' };
+  const catLabel = { dept:'科別', center:'中心', disease:'疾病', device:'儀器', tech:'技術', checkup:'高級健檢', nature:'性質', culture:'健康人文藝術活動', audience:'族群', project:'專案/議題', other:'其他' };
   const byCat = {};
   tags.forEach(t => { const c = t.category || 'other'; if (!byCat[c]) byCat[c] = []; byCat[c].push(t); });
-  wrap.innerHTML = Object.entries(byCat).map(([cat, arr]) => `
+  const catOrder = Object.keys(catLabel);
+  const sortedEntries = catOrder.filter(k => byCat[k]).map(k => [k, byCat[k]]);
+  // append any categories not in catLabel
+  Object.keys(byCat).forEach(k => { if (!catLabel[k]) sortedEntries.push([k, byCat[k]]); });
+  wrap.innerHTML = sortedEntries.map(([cat, arr]) => `
     <div style="background:var(--surface);border-radius:12px;padding:18px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:14px;">
       <h3 style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text);">${catLabel[cat]||cat} <span style="font-size:11px;color:var(--text-muted);font-weight:400;">（${arr.length}）</span></h3>
       <div style="display:flex;flex-wrap:wrap;gap:8px;">
