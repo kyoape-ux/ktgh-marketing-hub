@@ -1917,16 +1917,24 @@
 
     <!-- ══ 官網 — GA4 儀表板 ══ -->
     <div class="section" id="sec-web-overview">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">期間：</label>
-        <select id="webPeriod" onchange="renderWebOverview()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:140px;">
-          <option value="30">近 30 天</option>
-          <option value="90">近 90 天</option>
-          <option value="all">全部資料</option>
-        </select>
-        <button class="btn" onclick="openChannelReport('web')" style="background:#1E40AF;color:#fff;margin-left:auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 產生報表</button>
+      <div style="background:#EFF6FF;border:1px solid #BFDBFE;padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <b>GA4 月度儀表板</b>：選擇月份後自動顯示 MoM（上月比較）與 YoY（去年同月比較）成長率，並針對各工作表呈現圖表與異常偵測。請先至「匯入 GA4 / GSC 數據」上傳 .xlsx。
       </div>
-      <div id="webOverviewContent"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">分析月份：</label>
+        <select id="gaPeriodMonth" onchange="renderGaDashboard()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:140px;">
+          <option value="">— 選擇月份 —</option>
+        </select>
+        <label style="font-size:12px;font-weight:600;color:var(--text-sub);display:flex;align-items:center;gap:4px;">
+          <input type="checkbox" id="gaCompareYoY" checked onchange="renderGaDashboard()"> 與去年同月比較
+        </label>
+        <span id="gaDataStatus" style="font-size:11px;color:var(--text-muted);"></span>
+        <button class="btn" onclick="openChannelReport('web')" style="background:#1E40AF;color:#fff;margin-left:auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 產生 A4 報表</button>
+      </div>
+      <div id="gaDashboardContent"></div>
+      <!-- 舊版顯示區（保留用於相容） -->
+      <div id="webOverviewContent" style="display:none;"></div>
     </div>
 
     <!-- ══ 官網 — SEO 文章列表 ══ -->
@@ -2104,6 +2112,20 @@
         <div style="background:#EEF5FF;border-left:4px solid #2563EB;padding:14px 18px;border-radius:6px;margin-bottom:20px;font-size:12.5px;line-height:1.75;color:#1E3A8A;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> <b>關於官網數據匯入</b><br>
           此處支援 <b>GA4 每日指標</b> 與 <b>Search Console SEO 數據</b>。等您準備好 GA4 Service Account 與 GSC OAuth Token 後，可升級為自動化每日拉取。
+        </div>
+
+        <!-- Excel 批次匯入（新版：對應 GA4報表YYYY.xlsx 結構） -->
+        <div style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);border-radius:12px;padding:24px;border:1px solid #93C5FD;margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:6px;color:#1E3A8A;">📊 GA4 .xlsx 月度批次匯入（推薦）</h3>
+          <p style="font-size:12px;color:#1E40AF;margin-bottom:14px;line-height:1.7;">
+            直接上傳「<b>GA4報表YYYY.xlsx</b>」，系統會自動解析所有工作表（使用者、年齡性別、裝置類別、使用者來源、捲動狀態、科別掛號、醫師掛號、快速選單、評鑑用報表…），按月份存入資料庫，可在儀表板切換月份進行 MoM / YoY 分析。
+          </p>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="file" id="gaExcelInput" accept=".xlsx" style="padding:6px;font-size:12px;">
+            <button class="btn" data-perm="edit" onclick="importGaExcel()" style="background:#1E40AF;color:#fff;">解析並匯入</button>
+            <button class="btn btn-outline" data-perm="edit" onclick="clearGaMonthly()" style="border-color:#DC2626;color:#DC2626;">清除所有 GA4 月度資料</button>
+          </div>
+          <div id="gaExcelStatus" style="margin-top:10px;font-size:12px;color:#1E40AF;"></div>
         </div>
 
         <!-- GA4 官網 -->
@@ -3219,7 +3241,7 @@ function switchSection(module, sub) {
   if (key === 'clinic-items')  renderClinicItems();
   if (key === 'clinic-tags')   renderClinicTags();
   if (key === 'clinic-stats')  renderClinicStats();
-  if (key === 'web-overview')     renderWebOverview();
+  if (key === 'web-overview')     renderGaDashboard();
   if (key === 'web-seoArticles') renderSeoArticleList();
   if (key === 'web-import')       renderWebImport();
   if (key === 'line-overview')    renderLineOverview();
@@ -5571,6 +5593,602 @@ function syncTagFilterDropdown(id) {
 }
 
 // ═══════════════════════════════════════════
+//  GA4 MONTHLY DASHBOARD  ─ 月度儀表板 + Excel 匯入
+// ═══════════════════════════════════════════
+
+// 取得所有可用的 YYYY-MM 鍵，排序由新到舊
+function gaAvailableMonths() {
+  const m = store.gaMonthly || {};
+  return Object.keys(m).filter(k => /^\d{4}-\d{2}$/.test(k)).sort().reverse();
+}
+
+// 將 "7月份" → 推算 YYYY-MM（需搭配檔案年份）
+function _gaParseMonthHeader(header, fallbackYear) {
+  if (!header) return null;
+  const s = String(header).trim();
+  const m = s.match(/^(\d{1,2})月/);
+  if (!m) return null;
+  const month = String(+m[1]).padStart(2,'0');
+  return (fallbackYear || new Date().getFullYear()) + '-' + month;
+}
+
+// 產生期間選單：從 gaMonthly 中取所有月份
+function _refreshGaMonthSelector() {
+  const sel = document.getElementById('gaPeriodMonth');
+  if (!sel) return;
+  const months = gaAvailableMonths();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— 選擇月份 —</option>'
+    + months.map(m => '<option value="'+m+'"'+(m===cur?' selected':'')+'>'+m+'</option>').join('');
+  if (!cur && months.length) sel.value = months[0];
+  const status = document.getElementById('gaDataStatus');
+  if (status) {
+    status.textContent = months.length ? '（已匯入 '+months.length+' 個月資料：'+months[months.length-1]+' ~ '+months[0]+'）' : '（尚無資料，請先匯入）';
+  }
+}
+
+// MoM / YoY delta 格式化
+function _gaDelta(cur, prev, isPct) {
+  const c = +cur, p = +prev;
+  if (!isFinite(c) || !isFinite(p) || p === 0) return '';
+  const d = isPct ? (c - p) : ((c - p) / p * 100);
+  if (Math.abs(d) < 0.1) return '<span style="font-size:10px;color:#888;">持平</span>';
+  const color = d > 0 ? '#059669' : '#DC2626';
+  const arrow = d > 0 ? '↑' : '↓';
+  return '<span style="font-size:10px;color:'+color+';font-weight:700;">'+arrow+' '+Math.abs(d).toFixed(1)+(isPct?' pp':'%')+'</span>';
+}
+
+// 小型 bar chart (row-based)
+function _gaBarRow(label, value, pct, color, display) {
+  return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;font-size:12px;">'
+    + '<div style="width:140px;font-size:11.5px;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+label+'</div>'
+    + '<div style="flex:1;height:22px;background:#F3F4F6;border-radius:4px;overflow:hidden;">'
+    +   '<div style="height:100%;width:'+Math.max(pct,2)+'%;background:linear-gradient(90deg,'+color+','+color+'CC);padding-left:8px;color:#fff;font-size:10.5px;display:flex;align-items:center;font-weight:700;">'+(display||value.toLocaleString())+'</div>'
+    + '</div></div>';
+}
+
+// 計算 YoY 月份
+function _gaYoYMonth(ym) {
+  if (!ym || !/^\d{4}-\d{2}$/.test(ym)) return null;
+  const y = +ym.slice(0,4), m = ym.slice(5,7);
+  return (y-1) + '-' + m;
+}
+
+// 計算 MoM 月份（上個月）
+function _gaMoMMonth(ym) {
+  if (!ym || !/^\d{4}-\d{2}$/.test(ym)) return null;
+  const y = +ym.slice(0,4), m = +ym.slice(5,7);
+  if (m === 1) return (y-1) + '-12';
+  return y + '-' + String(m-1).padStart(2,'0');
+}
+
+// 主要渲染函式
+function renderGaDashboard() {
+  _refreshGaMonthSelector();
+  const wrap = document.getElementById('gaDashboardContent');
+  if (!wrap) return;
+  const ym = (document.getElementById('gaPeriodMonth')||{}).value || '';
+  const store_ga = store.gaMonthly || {};
+  if (!ym || !store_ga[ym]) {
+    wrap.innerHTML = '<div style="padding:60px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);">'
+      + '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:14px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'
+      + '<div style="font-size:14px;color:var(--text-muted);">尚無 GA4 月度資料</div>'
+      + '<div style="font-size:12px;color:var(--text-muted);margin-top:6px;">請先至「匯入 GA4 / GSC 數據」上傳 .xlsx 檔案</div>'
+      + '<button class="btn btn-primary" style="margin-top:16px;" onclick="switchSection(\'web\',\'import\')">前往匯入</button>'
+      + '</div>';
+    return;
+  }
+  const cur = store_ga[ym] || {};
+  const momKey = _gaMoMMonth(ym);
+  const yoyKey = _gaYoYMonth(ym);
+  const useYoY = (document.getElementById('gaCompareYoY')||{}).checked !== false;
+  const prev = store_ga[momKey] || {};
+  const yoy  = store_ga[yoyKey] || {};
+
+  // —— KPI 卡 ——
+  const userCur = (cur.users && cur.users['活躍使用者']) || 0;
+  const newUserCur = (cur.users && cur.users['新使用者']) || 0;
+  const userPrev = (prev.users && prev.users['活躍使用者']) || 0;
+  const userYoY = (yoy.users && yoy.users['活躍使用者']) || 0;
+
+  const siteSessions = (cur.siteTraffic && cur.siteTraffic['全站統計'] && cur.siteTraffic['全站統計']['工作階段']) || 0;
+  const sitePrevSessions = (prev.siteTraffic && prev.siteTraffic['全站統計'] && prev.siteTraffic['全站統計']['工作階段']) || 0;
+  const siteYoySessions = (yoy.siteTraffic && yoy.siteTraffic['全站統計'] && yoy.siteTraffic['全站統計']['工作階段']) || 0;
+  const engRate = (cur.siteTraffic && cur.siteTraffic['全站統計'] && cur.siteTraffic['全站統計']['參與度']) || 0;
+  const convRate = (cur.siteTraffic && cur.siteTraffic['全站統計'] && cur.siteTraffic['全站統計']['轉換率']) || 0;
+  const prevConvRate = (prev.siteTraffic && prev.siteTraffic['全站統計'] && prev.siteTraffic['全站統計']['轉換率']) || 0;
+  const deptReg = (cur.siteTraffic && cur.siteTraffic['全站統計'] && cur.siteTraffic['全站統計']['科別預約']) || 0;
+  const prevDeptReg = (prev.siteTraffic && prev.siteTraffic['全站統計'] && prev.siteTraffic['全站統計']['科別預約']) || 0;
+  const yoyDeptReg = (yoy.siteTraffic && yoy.siteTraffic['全站統計'] && yoy.siteTraffic['全站統計']['科別預約']) || 0;
+
+  const kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">'
+    + _gaKpiCard('活躍使用者', userCur.toLocaleString(), _gaDelta(userCur, userPrev), useYoY?_gaDelta(userCur, userYoY):'', '#1E40AF')
+    + _gaKpiCard('新使用者', newUserCur.toLocaleString(), '', '', '#059669')
+    + _gaKpiCard('工作階段', siteSessions.toLocaleString(), _gaDelta(siteSessions, sitePrevSessions), useYoY?_gaDelta(siteSessions, siteYoySessions):'', '#7C3AED')
+    + _gaKpiCard('參與度', (engRate*100).toFixed(1)+'%', '', '', '#0891B2')
+    + _gaKpiCard('科別預約', deptReg.toLocaleString(), _gaDelta(deptReg, prevDeptReg), useYoY?_gaDelta(deptReg, yoyDeptReg):'', '#DB2777')
+    + _gaKpiCard('轉換率', (convRate*100).toFixed(2)+'%', _gaDelta(convRate*100, prevConvRate*100, true), '', '#F59E0B')
+    + '</div>';
+
+  // —— 異常偵測 ——
+  const anomalies = [];
+  if (userPrev && Math.abs((userCur-userPrev)/userPrev) > 0.3) {
+    const direction = userCur > userPrev ? '暴增' : '流失';
+    const pct = ((userCur-userPrev)/userPrev*100).toFixed(1);
+    anomalies.push({ type:direction, message:'活躍使用者'+direction+' '+Math.abs(pct)+'% （'+userPrev.toLocaleString()+' → '+userCur.toLocaleString()+'）' });
+  }
+  if (sitePrevSessions && Math.abs((siteSessions-sitePrevSessions)/sitePrevSessions) > 0.3) {
+    const direction = siteSessions > sitePrevSessions ? '暴增' : '流失';
+    const pct = ((siteSessions-sitePrevSessions)/sitePrevSessions*100).toFixed(1);
+    anomalies.push({ type:direction, message:'工作階段'+direction+' '+Math.abs(pct)+'% （'+sitePrevSessions.toLocaleString()+' → '+siteSessions.toLocaleString()+'）' });
+  }
+  let anomalyHtml = '';
+  if (anomalies.length) {
+    // 推測原因：比對該月的 posts / events / videos / seoArticles
+    const inMonth = (d) => (d||'').slice(0,7) === ym;
+    const mPosts = (store.posts||[]).filter(p=>!p.deleted_at && inMonth(p.date));
+    const mEvents = (store.events||[]).filter(e=>!e.deleted_at && inMonth(e.date));
+    const mVideos = (store.videoItems||[]).filter(v=>!v.deleted_at && inMonth(v.date));
+    const mSeo = (store.seoArticles||[]).filter(a=>!a.deleted_at && (a.date||'')===ym);
+    const hints = [];
+    if (mPosts.length) hints.push(mPosts.length+' 篇 FB 貼文');
+    if (mEvents.length) hints.push(mEvents.length+' 場活動');
+    if (mVideos.length) hints.push(mVideos.length+' 支影片');
+    if (mSeo.length) hints.push(mSeo.length+' 篇 SEO 文章');
+    anomalyHtml = '<div style="background:'+(anomalies[0].type==='暴增'?'#F0FDF4':'#FEF2F2')+';border:1px solid '+(anomalies[0].type==='暴增'?'#86EFAC':'#FCA5A5')+';border-radius:10px;padding:14px 18px;margin-bottom:18px;">'
+      + '<div style="font-size:13px;font-weight:700;color:'+(anomalies[0].type==='暴增'?'#15803D':'#B91C1C')+';margin-bottom:6px;">⚠ 異常波動偵測</div>'
+      + anomalies.map(a => '<div style="font-size:12px;margin-top:2px;">• '+a.message+'</div>').join('')
+      + (hints.length ? '<div style="font-size:11.5px;color:#555;margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.08);"><b>本月活動可能原因：</b>'+hints.join('、')+'</div>' : '')
+      + '</div>';
+  }
+
+  // —— 分頁 Tabs ——
+  const tabsHtml = '<div class="ga-tabs" style="display:flex;gap:2px;border-bottom:2px solid var(--border);margin-bottom:16px;flex-wrap:wrap;">'
+    + ['source','device','scroll','deptReg','doctor','quickMenu','pages','age'].map((tid,i) => {
+        const labels = { source:'流量來源', device:'裝置分布', scroll:'捲動熱度', deptReg:'科別預約', doctor:'醫師 Top 15', quickMenu:'快速選單', pages:'熱門頁面', age:'年齡性別' };
+        return '<button class="ga-tab-btn" data-tab="'+tid+'" onclick="switchGaTab(\''+tid+'\')" style="padding:8px 14px;background:'+(i===0?'#1E40AF':'transparent')+';color:'+(i===0?'#fff':'#555')+';border:none;border-radius:6px 6px 0 0;cursor:pointer;font-weight:600;font-size:12px;font-family:inherit;">'+labels[tid]+'</button>';
+      }).join('')
+    + '</div>';
+
+  // —— 各分頁內容 ——
+  const tabContents = {
+    source: _gaTabSource(cur, prev, yoy, useYoY),
+    device: _gaTabDevice(cur, prev),
+    scroll: _gaTabScroll(cur),
+    deptReg: _gaTabDeptReg(cur, prev),
+    doctor: _gaTabDoctor(cur),
+    quickMenu: _gaTabQuickMenu(cur, prev),
+    pages: _gaTabPages(cur, prev),
+    age: _gaTabAge(cur, prev),
+  };
+  const tabContentHtml = Object.entries(tabContents).map(([k,v],i) =>
+    '<div class="ga-tab-content" data-tab="'+k+'" style="display:'+(i===0?'block':'none')+';">'+v+'</div>'
+  ).join('');
+
+  wrap.innerHTML = kpiHtml + anomalyHtml + tabsHtml + tabContentHtml;
+}
+
+function _gaKpiCard(label, value, mom, yoy, color) {
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid '+color+';border-radius:10px;padding:14px 16px;">'
+    + '<div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:4px;">'+label+'</div>'
+    + '<div style="font-size:24px;font-weight:900;color:'+color+';line-height:1.1;">'+value+'</div>'
+    + '<div style="font-size:10px;margin-top:4px;">'
+    +   (mom ? 'MoM '+mom : '')
+    +   (mom && yoy ? ' ｜ ' : '')
+    +   (yoy ? 'YoY '+yoy : '')
+    + '</div></div>';
+}
+
+function switchGaTab(tid) {
+  document.querySelectorAll('.ga-tab-btn').forEach(b => {
+    const active = b.getAttribute('data-tab') === tid;
+    b.style.background = active ? '#1E40AF' : 'transparent';
+    b.style.color = active ? '#fff' : '#555';
+  });
+  document.querySelectorAll('.ga-tab-content').forEach(c => {
+    c.style.display = c.getAttribute('data-tab') === tid ? 'block' : 'none';
+  });
+}
+
+function _gaTabSource(cur, prev, yoy, useYoY) {
+  const sources = cur.sourceUsers || {};
+  const keys = Object.keys(sources).filter(k => k !== '合計');
+  if (!keys.length) return '<div style="padding:30px;text-align:center;color:#999;">無來源資料</div>';
+  const max = Math.max(...keys.map(k => sources[k]||0));
+  let html = '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">流量來源（依使用者數）</h3>';
+  html += keys.sort((a,b)=>(sources[b]||0)-(sources[a]||0)).map(k => {
+    const v = sources[k]||0;
+    const pv = (prev.sourceUsers&&prev.sourceUsers[k])||0;
+    const yv = (yoy.sourceUsers&&yoy.sourceUsers[k])||0;
+    const label = k + ' <span style="font-size:10px;color:#888;">('+_gaDelta(v,pv)+(useYoY&&yv?' ｜YoY '+_gaDelta(v,yv):'')+')</span>';
+    return _gaBarRow(label, v, v/max*100, '#1E40AF', v.toLocaleString());
+  }).join('');
+  return html;
+}
+
+function _gaTabDevice(cur, prev) {
+  const d = cur.deviceUsers || {};
+  const keys = Object.keys(d).filter(k => k !== '合計');
+  if (!keys.length) return '<div style="padding:30px;text-align:center;color:#999;">無裝置資料</div>';
+  const max = Math.max(...keys.map(k => d[k]||0));
+  const total = keys.reduce((s,k)=>s+(d[k]||0),0);
+  return '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">裝置類別分布</h3>'
+    + keys.map(k => {
+      const v = d[k]||0;
+      const pv = (prev.deviceUsers&&prev.deviceUsers[k])||0;
+      const pct = total? (v/total*100).toFixed(1)+'%' : '';
+      return _gaBarRow(k + ' <span style="font-size:10px;color:#888;">('+pct+' '+_gaDelta(v,pv)+')</span>', v, v/max*100, '#7C3AED', v.toLocaleString());
+    }).join('');
+}
+
+function _gaTabScroll(cur) {
+  const s = cur.scroll || {};
+  const keys = Object.keys(s);
+  if (!keys.length) return '<div style="padding:30px;text-align:center;color:#999;">無捲動資料</div>';
+  // 僅顯示 100% 完讀率
+  const reads = keys.filter(k => k.endsWith('/100%')).sort((a,b)=>(s[b]||0)-(s[a]||0)).slice(0,20);
+  if (!reads.length) return '<div style="padding:30px;text-align:center;color:#999;">無完整捲動資料</div>';
+  const max = Math.max(...reads.map(k => s[k]||0));
+  return '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">頁面完讀率 Top 20（100%）</h3>'
+    + reads.map(k => _gaBarRow(k.replace('/100%',''), s[k]||0, (s[k]||0)/max*100, '#059669')).join('');
+}
+
+function _gaTabDeptReg(cur, prev) {
+  const list = cur.deptReg || [];
+  if (!list.length) return '<div style="padding:30px;text-align:center;color:#999;">無科別預約資料</div>';
+  const prevMap = {};
+  (prev.deptReg||[]).forEach(x => prevMap[x.dept] = x.count);
+  const max = Math.max(...list.map(x => x.count));
+  return '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">科別預約完成數（Top 15）</h3>'
+    + list.slice(0,15).map(x => {
+      const pv = prevMap[x.dept]||0;
+      return _gaBarRow(x.dept + ' <span style="font-size:10px;color:#888;">('+_gaDelta(x.count,pv)+')</span>', x.count, x.count/max*100, '#DB2777');
+    }).join('');
+}
+
+function _gaTabDoctor(cur) {
+  const list = cur.doctorReg || [];
+  if (!list.length) return '<div style="padding:30px;text-align:center;color:#999;">無醫師資料</div>';
+  return '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">醫師預約完成數 Top 15</h3>'
+    + '<table style="width:100%;font-size:12px;border-collapse:collapse;">'
+    + '<thead><tr style="background:#EFF6FF;"><th style="padding:8px;text-align:center;">#</th><th style="padding:8px;text-align:left;">醫師</th><th style="padding:8px;text-align:left;">科別</th><th style="padding:8px;text-align:right;">預約完成數</th></tr></thead>'
+    + '<tbody>' + list.slice(0,15).map((d,i)=>'<tr><td style="padding:6px 8px;text-align:center;color:#888;">'+(i+1)+'</td><td style="padding:6px 8px;font-weight:600;">'+(d.name||'')+'</td><td style="padding:6px 8px;">'+(d.dept||'')+'</td><td style="padding:6px 8px;text-align:right;font-weight:700;color:#1E40AF;">'+(d.count||0).toLocaleString()+'</td></tr>').join('')+'</tbody></table>';
+}
+
+function _gaTabQuickMenu(cur, prev) {
+  const q = cur.quickMenu || {};
+  const keys = Object.keys(q);
+  if (!keys.length) return '<div style="padding:30px;text-align:center;color:#999;">無快速選單資料</div>';
+  const max = Math.max(...keys.map(k => q[k]||0));
+  return '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">快速選單點擊分布</h3>'
+    + keys.sort((a,b)=>(q[b]||0)-(q[a]||0)).map(k => {
+      const pv = (prev.quickMenu&&prev.quickMenu[k])||0;
+      return _gaBarRow(k + ' <span style="font-size:10px;color:#888;">('+_gaDelta(q[k]||0, pv)+')</span>', q[k]||0, (q[k]||0)/max*100, '#F59E0B');
+    }).join('');
+}
+
+function _gaTabPages(cur, prev) {
+  const list = cur.pageViews || [];
+  if (!list.length) return '<div style="padding:30px;text-align:center;color:#999;">無熱門頁面資料</div>';
+  const prevMap = {};
+  (prev.pageViews||[]).forEach(x => { prevMap[x.url||x.name] = x.views; });
+  return '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">熱門頁面 Top 20</h3>'
+    + '<table style="width:100%;font-size:12px;border-collapse:collapse;">'
+    + '<thead><tr style="background:#EFF6FF;"><th style="padding:8px;text-align:center;">#</th><th style="padding:8px;text-align:left;">類別</th><th style="padding:8px;text-align:left;">頁面</th><th style="padding:8px;text-align:right;">瀏覽</th><th style="padding:8px;text-align:right;">MoM</th></tr></thead>'
+    + '<tbody>' + list.slice(0,20).map((p,i)=>{
+      const pv = prevMap[p.url||p.name]||0;
+      return '<tr><td style="padding:6px 8px;text-align:center;color:#888;">'+(i+1)+'</td><td style="padding:6px 8px;color:#666;">'+(p.category||'')+'</td><td style="padding:6px 8px;font-weight:600;max-width:280px;">'+(p.name||'')+'</td><td style="padding:6px 8px;text-align:right;font-weight:700;">'+(p.views||0).toLocaleString()+'</td><td style="padding:6px 8px;text-align:right;">'+_gaDelta(p.views||0, pv)+'</td></tr>';
+    }).join('')+'</tbody></table>';
+}
+
+function _gaTabAge(cur, prev) {
+  const a = cur.ageGender || {};
+  const keys = Object.keys(a).filter(k => k !== '合計');
+  if (!keys.length) return '<div style="padding:30px;text-align:center;color:#999;">無年齡性別資料</div>';
+  const max = Math.max(...keys.map(k => a[k]||0));
+  return '<h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">年齡性別分布</h3>'
+    + keys.map(k => {
+      const pv = (prev.ageGender&&prev.ageGender[k])||0;
+      return _gaBarRow(k + ' <span style="font-size:10px;color:#888;">('+_gaDelta(a[k]||0, pv)+')</span>', a[k]||0, (a[k]||0)/max*100, '#0891B2');
+    }).join('');
+}
+
+// ─────────────────────────────────────────────
+//  Excel 批次匯入：解析 GA4報表YYYY.xlsx
+// ─────────────────────────────────────────────
+function importGaExcel() {
+  if (!requireEdit()) return;
+  const input = document.getElementById('gaExcelInput');
+  const f = input && input.files && input.files[0];
+  const status = document.getElementById('gaExcelStatus');
+  if (!f) { status.textContent = '請先選擇 .xlsx 檔案'; return; }
+  if (typeof XLSX === 'undefined') { status.textContent = 'XLSX 套件未載入，請檢查網路後重試'; return; }
+  // 從檔名偵測年份
+  let fallbackYear = (new Date()).getFullYear();
+  const ymatch = f.name.match(/(\d{4})/);
+  if (ymatch) fallbackYear = +ymatch[1];
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
+      const result = _parseGaWorkbook(wb, fallbackYear);
+      if (!store.gaMonthly) store.gaMonthly = {};
+      Object.keys(result).forEach(ym => {
+        store.gaMonthly[ym] = Object.assign(store.gaMonthly[ym]||{}, result[ym]);
+      });
+      saveStore();
+      const months = Object.keys(result).sort();
+      status.innerHTML = '<span style="color:#059669;">✓ 匯入完成：解析到 '+months.length+' 個月資料（'+months.join('、')+'）</span>';
+      input.value = '';
+      renderGaDashboard();
+    } catch(err) {
+      status.innerHTML = '<span style="color:#DC2626;">✗ 匯入失敗：'+(err.message||err)+'</span>';
+    }
+  };
+  reader.readAsArrayBuffer(f);
+}
+
+function clearGaMonthly() {
+  if (!requireEdit()) return;
+  if (!confirm('確定清除所有已匯入的 GA4 月度資料？此操作無法復原。')) return;
+  store.gaMonthly = {};
+  saveStore();
+  document.getElementById('gaExcelStatus').innerHTML = '<span style="color:#888;">已清除。</span>';
+  renderGaDashboard();
+}
+
+function _parseGaWorkbook(wb, fallbackYear) {
+  const out = {}; // { "YYYY-MM": {...} }
+  const ensure = ym => { if (!out[ym]) out[ym] = {}; return out[ym]; };
+  const sheetNames = wb.SheetNames;
+
+  // 通用：把 workbook sheet 讀成 2D array
+  const sheetToRows = (name) => {
+    if (!wb.Sheets[name]) return null;
+    return XLSX.utils.sheet_to_json(wb.Sheets[name], { header:1, defval:null, raw:true });
+  };
+
+  // 1) 年齡性別：row0='總覽', row1=[,月份...], row2..rowN=[分類, 值...]
+  const ageSheet = sheetToRows('年齡性別');
+  if (ageSheet) {
+    const headerRow = ageSheet[1] || [];
+    const monthCols = [];
+    for (let i=1;i<headerRow.length;i++) {
+      const ym = _gaParseMonthHeader(headerRow[i], fallbackYear);
+      if (ym) monthCols.push({ idx:i, ym });
+    }
+    for (let r=2; r<ageSheet.length; r++) {
+      const cat = (ageSheet[r]||[])[0]; if (!cat) continue;
+      monthCols.forEach(mc => {
+        const v = ageSheet[r][mc.idx];
+        if (v != null && v !== '') {
+          const obj = ensure(mc.ym); if (!obj.ageGender) obj.ageGender = {};
+          obj.ageGender[String(cat).trim()] = +v || 0;
+        }
+      });
+    }
+  }
+
+  // 2) 使用者：row1=[,月份...], row2..=[指標, 值...]
+  const userSheet = sheetToRows('使用者');
+  if (userSheet) {
+    const headerRow = userSheet[1] || [];
+    const monthCols = [];
+    for (let i=1;i<headerRow.length;i++) {
+      const ym = _gaParseMonthHeader(headerRow[i], fallbackYear);
+      if (ym) monthCols.push({ idx:i, ym });
+    }
+    for (let r=2; r<userSheet.length; r++) {
+      const metric = (userSheet[r]||[])[0]; if (!metric) continue;
+      monthCols.forEach(mc => {
+        const v = userSheet[r][mc.idx];
+        if (v != null && v !== '') {
+          const obj = ensure(mc.ym); if (!obj.users) obj.users = {};
+          obj.users[String(metric).trim()] = +v || v;
+        }
+      });
+    }
+  }
+
+  // 3) 裝置類別
+  const devSheet = sheetToRows('裝置類別');
+  if (devSheet) {
+    const headerRow = devSheet[1] || [];
+    const monthCols = [];
+    for (let i=1;i<headerRow.length;i++) {
+      const ym = _gaParseMonthHeader(headerRow[i], fallbackYear);
+      if (ym) monthCols.push({ idx:i, ym });
+    }
+    for (let r=3; r<devSheet.length; r++) { // row2 is '設備'/'使用者人數' — skip
+      const cat = (devSheet[r]||[])[0]; if (!cat) continue;
+      monthCols.forEach(mc => {
+        const v = devSheet[r][mc.idx];
+        if (v != null && v !== '') {
+          const obj = ensure(mc.ym); if (!obj.deviceUsers) obj.deviceUsers = {};
+          obj.deviceUsers[String(cat).trim()] = +v || 0;
+        }
+      });
+    }
+  }
+
+  // 4) 使用者來源媒介（2025）/ 使用者來源（2026）
+  ['使用者來源媒介','使用者來源'].forEach(sn => {
+    const srcSheet = sheetToRows(sn);
+    if (!srcSheet) return;
+    // 2025: row1 = [,月份...] with row0 blank; 2026: row1 = ['來源','時間','1月份'...]
+    // 以 row1 或 row2 作 header：尋找第一個含「月份」字串或 /^\d+月/ 的列
+    let headerIdx = -1;
+    for (let i=0;i<Math.min(3, srcSheet.length); i++) {
+      const row = srcSheet[i]||[];
+      if (row.some(c => c && /月份/.test(String(c)))) { headerIdx = i; break; }
+    }
+    if (headerIdx < 0) return;
+    const headerRow = srcSheet[headerIdx];
+    const monthCols = [];
+    for (let i=0;i<headerRow.length;i++) {
+      const ym = _gaParseMonthHeader(headerRow[i], fallbackYear);
+      if (ym) monthCols.push({ idx:i, ym });
+    }
+    if (!monthCols.length) return;
+    // 判斷 2025 格式（單一科別/使用者數）vs 2026 格式（多指標）
+    const row2 = srcSheet[headerIdx+1]||[];
+    const hasMetricCol = row2[1] && /工作階段|參與度|轉換率|科別預約/.test(String(row2[1]));
+    if (hasMetricCol) {
+      // 2026 格式：[來源, 指標, 月份值...]
+      let curSource = null;
+      for (let r=headerIdx+1; r<srcSheet.length; r++) {
+        const row = srcSheet[r]||[];
+        if (row[0]) curSource = String(row[0]).trim();
+        const metric = row[1] ? String(row[1]).trim() : null;
+        if (!curSource || !metric) continue;
+        monthCols.forEach(mc => {
+          const v = row[mc.idx];
+          if (v != null && v !== '') {
+            const obj = ensure(mc.ym); if (!obj.siteTraffic) obj.siteTraffic = {};
+            if (!obj.siteTraffic[curSource]) obj.siteTraffic[curSource] = {};
+            obj.siteTraffic[curSource][metric] = +v || 0;
+            // 兼容：sourceUsers 使用「工作階段」作為來源值
+            if (metric === '工作階段') {
+              if (!obj.sourceUsers) obj.sourceUsers = {};
+              obj.sourceUsers[curSource] = +v || 0;
+            }
+          }
+        });
+      }
+    } else {
+      // 2025 格式：[來源, 月份使用者數...]
+      for (let r=headerIdx+1; r<srcSheet.length; r++) {
+        const row = srcSheet[r]||[];
+        const src = row[0]; if (!src) continue;
+        monthCols.forEach(mc => {
+          const v = row[mc.idx];
+          if (v != null && v !== '') {
+            const obj = ensure(mc.ym); if (!obj.sourceUsers) obj.sourceUsers = {};
+            obj.sourceUsers[String(src).trim()] = +v || 0;
+          }
+        });
+      }
+    }
+  });
+
+  // 5) 捲動狀態
+  const scrollSheet = sheetToRows('捲動狀態');
+  if (scrollSheet) {
+    const headerRow = scrollSheet[1] || [];
+    const monthCols = [];
+    for (let i=1;i<headerRow.length;i++) {
+      const ym = _gaParseMonthHeader(headerRow[i], fallbackYear);
+      if (ym) monthCols.push({ idx:i, ym });
+    }
+    for (let r=2; r<scrollSheet.length; r++) {
+      const cat = (scrollSheet[r]||[])[0]; if (!cat) continue;
+      monthCols.forEach(mc => {
+        const v = scrollSheet[r][mc.idx];
+        if (v != null && v !== '' && !isNaN(+v)) {
+          const obj = ensure(mc.ym); if (!obj.scroll) obj.scroll = {};
+          obj.scroll[String(cat).trim()] = +v || 0;
+        }
+      });
+    }
+  }
+
+  // 6) 科別掛號：多月份並列，每月有 ['科別', '預約完成數']
+  const deptSheet = sheetToRows('科別掛號');
+  if (deptSheet) {
+    const headerRow = deptSheet[0] || [];
+    // 找出每個月的起始欄位
+    const monthStarts = [];
+    for (let i=0;i<headerRow.length;i++) {
+      const ym = _gaParseMonthHeader(headerRow[i], fallbackYear);
+      if (ym) monthStarts.push({ idx:i, ym });
+    }
+    monthStarts.forEach(ms => {
+      const obj = ensure(ms.ym); obj.deptReg = [];
+      for (let r=2; r<deptSheet.length; r++) {
+        const dept = (deptSheet[r]||[])[ms.idx];
+        const cnt = (deptSheet[r]||[])[ms.idx+1];
+        if (dept && cnt != null && +cnt) {
+          obj.deptReg.push({ dept: String(dept).trim(), count: +cnt });
+        }
+      }
+    });
+  }
+
+  // 7) 醫師掛號
+  const docSheet = sheetToRows('醫師掛號');
+  if (docSheet) {
+    const headerRow = docSheet[0] || [];
+    const monthStarts = [];
+    for (let i=0;i<headerRow.length;i++) {
+      const ym = _gaParseMonthHeader(headerRow[i], fallbackYear);
+      if (ym) monthStarts.push({ idx:i, ym });
+    }
+    monthStarts.forEach(ms => {
+      const obj = ensure(ms.ym); obj.doctorReg = [];
+      for (let r=2; r<docSheet.length; r++) {
+        const name = (docSheet[r]||[])[ms.idx];
+        const dept = (docSheet[r]||[])[ms.idx+1];
+        const cnt  = (docSheet[r]||[])[ms.idx+2];
+        if (name && cnt != null && +cnt) {
+          obj.doctorReg.push({ name: String(name).trim(), dept: dept?String(dept).trim():'', count: +cnt });
+        }
+      }
+    });
+  }
+
+  // 8) 快速選單
+  const qmSheet = sheetToRows('快速選單');
+  if (qmSheet) {
+    const headerRow = qmSheet[0] || [];
+    const monthCols = [];
+    for (let i=1;i<headerRow.length;i++) {
+      const ym = _gaParseMonthHeader(headerRow[i], fallbackYear);
+      if (ym) monthCols.push({ idx:i, ym });
+    }
+    for (let r=1; r<qmSheet.length; r++) {
+      const item = (qmSheet[r]||[])[0]; if (!item) continue;
+      monthCols.forEach(mc => {
+        const v = qmSheet[r][mc.idx];
+        if (v != null && v !== '') {
+          const obj = ensure(mc.ym); if (!obj.quickMenu) obj.quickMenu = {};
+          obj.quickMenu[String(item).trim()] = +v || 0;
+        }
+      });
+    }
+  }
+
+  // 9) 評鑑用報表：類別 / 項目 / 網址 / 月份...
+  const pageSheet = sheetToRows('評鑑用報表');
+  if (pageSheet) {
+    const headerRow = pageSheet[0] || [];
+    const monthCols = [];
+    for (let i=3;i<headerRow.length;i++) {
+      const ym = _gaParseMonthHeader(headerRow[i], fallbackYear);
+      if (ym) monthCols.push({ idx:i, ym });
+    }
+    let curCat = '';
+    for (let r=1; r<pageSheet.length; r++) {
+      const row = pageSheet[r]||[];
+      if (row[0]) curCat = String(row[0]).trim();
+      const name = row[1]; const url = row[2];
+      if (!name) continue;
+      monthCols.forEach(mc => {
+        const v = row[mc.idx];
+        if (v != null && v !== '' && +v) {
+          const obj = ensure(mc.ym); if (!obj.pageViews) obj.pageViews = [];
+          obj.pageViews.push({ category:curCat, name:String(name).trim(), url: url?String(url).trim():'', views: +v });
+        }
+      });
+    }
+    // 每月 pageViews 排序
+    Object.keys(out).forEach(ym => { if (out[ym].pageViews) out[ym].pageViews.sort((a,b)=>(b.views||0)-(a.views||0)); });
+  }
+
+  return out;
+}
+
+// ═══════════════════════════════════════════
 //  WEB (GA4) OVERVIEW & SEO
 // ═══════════════════════════════════════════
 function renderWebOverview() {
@@ -6942,7 +7560,10 @@ function _rptWeb(period) {
   const ga = _rptFilterByPeriod((store.webMetrics||[]), period);
   const articles = (store.seoArticles||[]).filter(x=>!x.deleted_at);
   const scopedArticles = _rptFilterByPeriod(articles, period);
-  if (!ga.length && !scopedArticles.length) return '<div class="empty">此期間無官網資料</div>';
+  // 若有 gaMonthly，取當前選中月份 (dashboard) 的摘要
+  const curMonth = (document.getElementById('gaPeriodMonth')||{}).value || '';
+  const gaM = (store.gaMonthly||{})[curMonth] || null;
+  if (!ga.length && !scopedArticles.length && !gaM) return '<div class="empty">此期間無官網資料</div>';
   const pvSum = ga.reduce((s,r)=>s+(+r.pv||0),0);
   const uvSum = ga.reduce((s,r)=>s+(+r.uv||0),0);
   const sessSum = ga.reduce((s,r)=>s+(+r.sessions||0),0);
@@ -6955,9 +7576,32 @@ function _rptWeb(period) {
   const seoRanked = scopedArticles.filter(a => +a.rank);
   const seoAvgRank = seoRanked.length ? (seoRanked.reduce((s,a)=>s+(+a.rank||0),0)/seoRanked.length).toFixed(1) : '—';
   const topArticles = [...scopedArticles].sort((a,b)=>(+b.searchVolume||0)-(+a.searchVolume||0)).slice(0,15);
-  return _rptKpiCards([
+  // 優先用 gaMonthly（月度報表）
+  let gaMonthlyCards = '', gaMonthlySections = '';
+  if (gaM) {
+    const userCur = (gaM.users && gaM.users['活躍使用者']) || 0;
+    const sessCur = (gaM.siteTraffic && gaM.siteTraffic['全站統計'] && gaM.siteTraffic['全站統計']['工作階段']) || 0;
+    const convCur = (gaM.siteTraffic && gaM.siteTraffic['全站統計'] && gaM.siteTraffic['全站統計']['轉換率']) || 0;
+    const regCur  = (gaM.siteTraffic && gaM.siteTraffic['全站統計'] && gaM.siteTraffic['全站統計']['科別預約']) || 0;
+    gaMonthlyCards = _rptKpiCards([
+      { label:'分析月份', val: curMonth },
+      { label:'活躍使用者', val: userCur.toLocaleString() },
+      { label:'工作階段', val: sessCur.toLocaleString() },
+      { label:'科別預約 / 轉換率', val: regCur.toLocaleString() + ' / ' + (convCur*100).toFixed(2) + '%' },
+    ]);
+    // 流量來源 Top 10
+    if (gaM.sourceUsers) {
+      const srcs = Object.entries(gaM.sourceUsers).filter(([k])=>k!=='合計').sort((a,b)=>b[1]-a[1]).slice(0,10);
+      const max = Math.max(1, ...srcs.map(s=>s[1]));
+      gaMonthlySections += '<h2>流量來源 Top 10</h2>' + _rptBarChart(srcs.map(s => ({ label:s[0], value:s[1], display:s[1].toLocaleString() })));
+    }
+    if (gaM.deptReg && gaM.deptReg.length) {
+      gaMonthlySections += '<h2>科別預約 Top 10</h2>' + _rptBarChart(gaM.deptReg.slice(0,10).map(x => ({ label:x.dept, value:x.count, display:x.count.toLocaleString() })));
+    }
+  }
+  return gaMonthlyCards + gaMonthlySections + _rptKpiCards([
     { label:'累計 PV / UV', val: pvSum.toLocaleString() + ' / ' + uvSum.toLocaleString() },
-    { label:'工作階段', val: sessSum.toLocaleString(), sub:'平均停留 ' + avgDur + 's' },
+    { label:'工作階段（舊日資料）', val: sessSum.toLocaleString(), sub:'平均停留 ' + avgDur + 's' },
     { label:'跳出率', val: avgBounce + '%' },
     { label:'SEO 文章 / 平均排名', val: scopedArticles.length + ' 篇 / ' + seoAvgRank, sub:'總月搜尋量 ' + seoVolume.toLocaleString() },
   ]) +
