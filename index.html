@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>光田醫院｜行銷整合分析中心</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@600;700;800&display=swap');
 
@@ -928,8 +929,8 @@
     <a class="nav-item" onclick="switchSection('web','overview')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> 官網儀表板
     </a>
-    <a class="nav-item" onclick="switchSection('web','seo')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> SEO 關鍵字列表
+    <a class="nav-item" onclick="switchSection('web','seoArticles')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> SEO 文章列表
     </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('web','import')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 GA4 / GSC 數據
@@ -1928,16 +1929,27 @@
       <div id="webOverviewContent"></div>
     </div>
 
-    <!-- ══ 官網 — SEO 關鍵字列表 ══ -->
-    <div class="section" id="sec-web-seo">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-        <input id="seoSearch" type="text" placeholder="搜尋關鍵字…" oninput="renderSeoList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:200px;">
-        <select id="seoTagFilter" onchange="renderSeoList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+    <!-- ══ 官網 — SEO 文章列表 ══ -->
+    <div class="section" id="sec-web-seoArticles">
+      <div style="background:#EFF6FF;border:1px solid #BFDBFE;padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.9.8 1 1.5 1 2.3v1h6v-1c0-.8.1-1.5 1-2.3A7 7 0 0 0 12 2z"/></svg>
+        <b>SEO 文章庫</b>：記錄每篇上線的 SEO 文章，可加入跨傳達管道標籤，搭配「各傳達管道分析」一併計入成效。支援 Excel (.xlsx) / JSON 批次匯入。
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <input id="seoArticleSearch" type="text" placeholder="搜尋文章標題 / 關鍵字…" oninput="renderSeoArticleList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:220px;">
+        <select id="seoArticleDeptFilter" onchange="renderSeoArticleList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+          <option value="">所有科別</option>
+        </select>
+        <select id="seoArticleTagFilter" onchange="renderSeoArticleList()" style="padding:7px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
           <option value="">所有標籤</option>
         </select>
-        <button class="btn btn-primary" data-perm="edit" onclick="addSeoKeyword()">+ 新增關鍵字</button>
+        <span id="seoArticleCount" style="font-size:12px;color:var(--text-muted);"></span>
+        <button class="btn" onclick="openChannelReport('seoArticles')" style="background:#1E40AF;color:#fff;margin-left:auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 產生報表</button>
+        <button class="btn btn-primary" data-perm="edit" onclick="openSeoArticleModal(-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增文章</button>
+        <button class="btn btn-outline" data-perm="edit" onclick="document.getElementById('seoArticleXlsxInput').click()">匯入 .xlsx</button>
+        <input type="file" id="seoArticleXlsxInput" accept=".xlsx" style="display:none;" onchange="importSeoArticlesExcel(event)">
       </div>
-      <div id="seoListContent"></div>
+      <div id="seoArticleListContent"></div>
     </div>
 
     <!-- ══ LINE — 儀表板 ══ -->
@@ -2623,6 +2635,8 @@ function loadStore() {
       if (!d.linePosts)    d.linePosts    = [];
       if (!d.seoKeywords)  d.seoKeywords  = [];
       if (!d.videoItems)   d.videoItems   = [];
+      if (!d.seoArticles)  d.seoArticles  = [];
+      if (!d.gaMonthly)    d.gaMonthly    = {};
       // 自我修復：去除因先前同步 bug 造成的 date+title 完全重複（忽略已軟刪除的）
       const dedup = (arr, keyFn) => { if (!Array.isArray(arr)) return []; const seen = new Set(); return arr.filter(x => { if (x && x.deleted_at) return true; const k = keyFn(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
       d.posts  = dedup(d.posts,  p => (p.date||'')+'|'+(p.title||''));
@@ -2636,7 +2650,7 @@ function loadStore() {
     posts: getBuiltinPosts(), events: getBuiltinEvents(), media: getBuiltinMedia(), kols: getBuiltinKols(),
     mediaItems: [], mediaTags: getDefaultMediaTags(), mediaDoctors: [],
     webMetrics: [], lineMetrics: [], searchMetrics: [],
-    linePosts: [], seoKeywords: [], videoItems: []
+    linePosts: [], seoKeywords: [], videoItems: [], seoArticles: [], gaMonthly: {}
   });
 }
 
@@ -3172,7 +3186,7 @@ function switchSection(module, sub) {
     'clinic-tags':      ['標籤管理',          '題材標籤字典維護'],
     'clinic-stats':     ['標籤統計分析',      '依標籤撈出歷年宣傳成果與傳達管道涵蓋率'],
     'web-overview':     ['官網 GA4 儀表板',    '流量來源、使用者、工作階段、轉換分析'],
-    'web-seo':          ['SEO 關鍵字列表',     'Search Console 關鍵字成效追蹤'],
+    'web-seoArticles':  ['SEO 文章列表',       '每篇 SEO 文章的排名、月搜尋量追蹤，可加標籤納入跨管道分析'],
     'web-import':       ['匯入 GA4 / GSC 數據','手動輸入或 JSON 批次匯入官網指標'],
     'line-overview':    ['LINE 儀表板',       'LINE@ 好友、訊息觸及、點擊成效'],
     'line-posts':       ['LINE 貼文列表',      '所有 LINE 官方帳號推播記錄'],
@@ -3206,7 +3220,7 @@ function switchSection(module, sub) {
   if (key === 'clinic-tags')   renderClinicTags();
   if (key === 'clinic-stats')  renderClinicStats();
   if (key === 'web-overview')     renderWebOverview();
-  if (key === 'web-seo')          renderSeoList();
+  if (key === 'web-seoArticles') renderSeoArticleList();
   if (key === 'web-import')       renderWebImport();
   if (key === 'line-overview')    renderLineOverview();
   if (key === 'line-posts')       renderLinePostsList();
@@ -5550,7 +5564,7 @@ function syncTagFilterDropdown(id) {
   const tags = (store.mediaTags || []).filter(t => !t.deleted_at).map(t => t.name);
   // collect tags actually used too
   const used = new Set();
-  [...(store.posts||[]), ...(store.events||[]), ...(store.media||[]), ...(store.mediaItems||[]), ...(store.linePosts||[]), ...(store.seoKeywords||[])]
+  [...(store.posts||[]), ...(store.events||[]), ...(store.media||[]), ...(store.mediaItems||[]), ...(store.linePosts||[]), ...(store.seoArticles||[]), ...(store.videoItems||[])]
     .forEach(x => (x && !x.deleted_at && Array.isArray(x.tags) ? x.tags : []).forEach(t => used.add(t)));
   const combined = [...new Set([...tags, ...used])].sort();
   sel.innerHTML = '<option value="">所有標籤</option>' + combined.map(t => `<option value="${t}"${t===current?' selected':''}>${t}</option>`).join('');
@@ -5609,70 +5623,211 @@ function renderWebOverview() {
     </div>`;
 }
 
-function renderSeoList() {
-  syncTagFilterDropdown('seoTagFilter');
-  const wrap = document.getElementById('seoListContent');
+// ═══════════════════════════════════════════
+//  SEO 文章列表（取代舊 SEO 關鍵字列表）
+// ═══════════════════════════════════════════
+function activeSeoArticles(){ return (store.seoArticles||[]).filter(x => !x.deleted_at); }
+
+function renderSeoArticleList() {
+  const wrap = document.getElementById('seoArticleListContent');
   if (!wrap) return;
-  const q = (document.getElementById('seoSearch')?.value || '').toLowerCase().trim();
-  const tagF = (document.getElementById('seoTagFilter')?.value || '').trim();
-  let list = activeSeoKeywords();
-  if (q) list = list.filter(k => (k.keyword||'').toLowerCase().includes(q));
-  if (tagF) list = list.filter(k => (k.tags||[]).includes(tagF));
+  const items = activeSeoArticles();
+  // populate filters
+  const deptSet = new Set(items.map(a => (a.dept||'').trim()).filter(Boolean));
+  const deptSel = document.getElementById('seoArticleDeptFilter');
+  if (deptSel) {
+    const cur = deptSel.value;
+    deptSel.innerHTML = '<option value="">所有科別</option>' + [...deptSet].sort().map(d => `<option value="${d}"${d===cur?' selected':''}>${d}</option>`).join('');
+  }
+  syncTagFilterDropdown('seoArticleTagFilter');
+
+  const q = (document.getElementById('seoArticleSearch')?.value || '').toLowerCase().trim();
+  const deptF = (deptSel && deptSel.value) || '';
+  const tagF  = (document.getElementById('seoArticleTagFilter')?.value || '').trim();
+  let list = items;
+  if (q) list = list.filter(a => (a.title||'').toLowerCase().includes(q) || (a.keyword||'').toLowerCase().includes(q));
+  if (deptF) list = list.filter(a => (a.dept||'') === deptF);
+  if (tagF) list = list.filter(a => (a.tags||[]).includes(tagF));
+  list = list.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const cnt = document.getElementById('seoArticleCount');
+  if (cnt) cnt.textContent = '共 ' + list.length + ' / ' + items.length + ' 篇';
   if (!list.length) {
-    wrap.innerHTML = `<div style="padding:40px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);color:var(--text-muted);">
-      <div style="font-size:36px;margin-bottom:8px;">🔍</div>
-      <p style="font-size:13px;">尚無 SEO 關鍵字記錄</p>
-      <p style="font-size:11px;">點上方「＋ 新增關鍵字」開始建立</p></div>`;
+    wrap.innerHTML = '<div style="padding:50px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);color:var(--text-muted);">尚無 SEO 文章資料。請點「+ 新增文章」或「匯入 .xlsx」。</div>';
     return;
   }
-  wrap.innerHTML = `<div class="table-card"><div class="table-wrap"><table>
-    <thead><tr><th>關鍵字</th><th>曝光</th><th>點擊</th><th>CTR</th><th>平均排名</th><th>標籤</th><th>備註</th><th>操作</th></tr></thead>
-    <tbody>${list.sort((a,b)=>(b.impressions||0)-(a.impressions||0)).map((k,i) => {
-      const globalIdx = store.seoKeywords.indexOf(k);
-      const ctr = k.impressions ? ((k.clicks||0)/k.impressions*100).toFixed(2)+'%' : '—';
-      const tags = (k.tags||[]).map(t => `<span style="display:inline-block;padding:1px 6px;background:#EEF7F2;color:#2D6A4F;border-radius:8px;font-size:10px;margin:1px 2px;">${t}</span>`).join('');
-      return `<tr>
-        <td style="font-weight:600">${k.keyword||''}</td>
-        <td class="text-mono">${(k.impressions||0).toLocaleString()}</td>
-        <td class="text-mono">${(k.clicks||0).toLocaleString()}</td>
-        <td class="text-mono">${ctr}</td>
-        <td class="text-mono">${k.position||'—'}</td>
-        <td>${tags||'<span style="color:#bbb">—</span>'}</td>
-        <td style="font-size:11px;color:var(--text-muted);">${k.note||''}</td>
-        <td><button class="action-btn edit" onclick="editSeoKeyword(${globalIdx})">編輯</button> <button class="action-btn del" onclick="deleteSeoKeyword(${globalIdx})">刪</button></td>
-      </tr>`;
-    }).join('')}</tbody></table></div></div>`;
+  const rankDelta = (cur, prev) => {
+    const c = +cur, p = +prev;
+    if (!isFinite(c) || !isFinite(p)) return '';
+    const d = p - c; // rank 數字越小越好 → 下降代表進步
+    if (Math.abs(d) < 0.05) return '<span style="color:#888;font-size:10px;">持平</span>';
+    if (d > 0) return '<span style="color:#059669;font-size:10px;">↑ 進步 '+d.toFixed(1)+'</span>';
+    return '<span style="color:#DC2626;font-size:10px;">↓ 退步 '+(-d).toFixed(1)+'</span>';
+  };
+  const volDelta = (cur, prev) => {
+    const c = +cur, p = +prev;
+    if (!isFinite(c) || !isFinite(p) || p === 0) return '';
+    const d = (c - p) / p * 100;
+    if (Math.abs(d) < 1) return '<span style="color:#888;font-size:10px;">持平</span>';
+    if (d > 0) return '<span style="color:#059669;font-size:10px;">↑ '+d.toFixed(0)+'%</span>';
+    return '<span style="color:#DC2626;font-size:10px;">↓ '+Math.abs(d).toFixed(0)+'%</span>';
+  };
+  wrap.innerHTML = '<div class="table-wrap" style="background:var(--surface);border-radius:12px;border:1px solid var(--border);"><table style="width:100%;font-size:12.5px;">'
+    + '<thead><tr style="background:#EFF6FF;">'
+    +   '<th style="padding:10px;text-align:left;">日期</th>'
+    +   '<th style="padding:10px;text-align:left;">科別</th>'
+    +   '<th style="padding:10px;text-align:left;">文章標題</th>'
+    +   '<th style="padding:10px;text-align:left;">關鍵字</th>'
+    +   '<th style="padding:10px;text-align:right;">排名</th>'
+    +   '<th style="padding:10px;text-align:right;">月搜尋量</th>'
+    +   '<th style="padding:10px;text-align:left;">標籤</th>'
+    +   '<th style="padding:10px;">操作</th>'
+    + '</tr></thead><tbody>'
+    + list.map(a => {
+        const idx = (store.seoArticles||[]).indexOf(a);
+        const tagsHtml = (a.tags||[]).map(t => '<span style="display:inline-block;padding:1px 6px;background:#EFF6FF;color:#1E40AF;border-radius:3px;font-size:10px;margin-right:3px;">'+t+'</span>').join('');
+        const linkHtml = a.url ? '<a href="'+a.url+'" target="_blank" style="color:#1E40AF;text-decoration:none;margin-left:4px;">↗</a>' : '';
+        return '<tr>'
+          + '<td style="padding:8px 10px;color:#666;">'+(a.date||'')+'</td>'
+          + '<td style="padding:8px 10px;"><span style="display:inline-block;padding:2px 7px;background:#DBEAFE;color:#1E40AF;border-radius:3px;font-size:11px;">'+(a.dept||'—')+'</span></td>'
+          + '<td style="padding:8px 10px;font-weight:600;max-width:360px;">'+(a.title||'—')+linkHtml+'</td>'
+          + '<td style="padding:8px 10px;">'+(a.keyword||'—')+'</td>'
+          + '<td style="padding:8px 10px;text-align:right;"><div style="font-weight:700;color:#1E40AF;">'+(a.rank||'—')+'</div>'+rankDelta(a.rank, a.prevRank)+'</td>'
+          + '<td style="padding:8px 10px;text-align:right;"><div style="font-weight:700;">'+(a.searchVolume? (+a.searchVolume).toLocaleString():'—')+'</div>'+volDelta(a.searchVolume, a.prevSearchVolume)+'</td>'
+          + '<td style="padding:8px 10px;">'+(tagsHtml||'<span style="color:#bbb;">—</span>')+'</td>'
+          + '<td style="padding:8px 10px;text-align:center;"><button class="action-btn edit" onclick="openSeoArticleModal('+idx+')">編輯</button> <button class="action-btn del" data-perm="edit" onclick="deleteSeoArticle('+idx+')">刪除</button></td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table></div>';
+  applyPermissions();
 }
 
-function addSeoKeyword() {
+function openSeoArticleModal(idx) {
   if (!requireEdit()) return;
-  const kw = prompt('輸入關鍵字');
-  if (!kw) return;
-  if (!store.seoKeywords) store.seoKeywords = [];
-  store.seoKeywords.push({ keyword: kw.trim(), impressions:0, clicks:0, position:0, tags:[], note:'', created_at: new Date().toISOString() });
-  saveStore();
-  renderSeoList();
+  const isNew = idx === -1;
+  const a = isNew ? {} : store.seoArticles[idx];
+  const tagsStr = (a.tags||[]).join(', ');
+  const html =
+    '<div class="modal-overlay open" id="seoArticleModal">'
+    + '<div class="modal-box" style="max-width:600px;">'
+    + '<h3>' + (isNew?'新增':'編輯') + ' SEO 文章</h3>'
+    + '<div class="form-grid" style="grid-template-columns:1fr 1fr;">'
+    +   '<div class="form-group"><label>日期 * (YYYY-MM)</label><input type="text" id="sa-date" value="' + (a.date||'') + '" placeholder="2026-03"></div>'
+    +   '<div class="form-group"><label>科別 *</label><input type="text" id="sa-dept" value="' + (a.dept||'') + '" placeholder="骨科 / 神經內科 ..."></div>'
+    +   '<div class="form-group" style="grid-column:1/-1;"><label>文章標題 *</label><input type="text" id="sa-title" value="' + (a.title||'').replace(/"/g,'&quot;') + '"></div>'
+    +   '<div class="form-group" style="grid-column:1/-1;"><label>關鍵字</label><input type="text" id="sa-keyword" value="' + (a.keyword||'') + '"></div>'
+    +   '<div class="form-group"><label>本月排名</label><input type="number" step="0.1" id="sa-rank" value="' + (a.rank||'') + '"></div>'
+    +   '<div class="form-group"><label>本月搜尋量</label><input type="number" id="sa-vol" value="' + (a.searchVolume||'') + '"></div>'
+    +   '<div class="form-group"><label>上月排名</label><input type="number" step="0.1" id="sa-prevrank" value="' + (a.prevRank||'') + '"></div>'
+    +   '<div class="form-group"><label>上月搜尋量</label><input type="number" id="sa-prevvol" value="' + (a.prevSearchVolume||'') + '"></div>'
+    +   '<div class="form-group" style="grid-column:1/-1;"><label>網址</label><input type="url" id="sa-url" value="' + (a.url||'') + '"></div>'
+    +   '<div class="form-group" style="grid-column:1/-1;"><label>跨傳達管道標籤（逗號分隔）</label><input type="text" id="sa-tags" list="crossTagDatalist" value="' + tagsStr + '" placeholder="例：LDCT, 達文西"></div>'
+    + '</div>'
+    + '<div class="modal-footer">'
+    +   '<button class="btn btn-outline" onclick="document.getElementById(\'seoArticleModal\').remove()">取消</button>'
+    +   '<button class="btn btn-primary" onclick="saveSeoArticle(' + idx + ')">儲存</button>'
+    + '</div></div></div>';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  document.body.appendChild(tmp.firstElementChild);
 }
-function editSeoKeyword(idx) {
+
+function saveSeoArticle(idx) {
   if (!requireEdit()) return;
-  const k = store.seoKeywords[idx]; if (!k) return;
-  const kw = prompt('關鍵字', k.keyword||''); if (kw===null) return;
-  const impr = prompt('曝光次數', k.impressions||0); if (impr===null) return;
-  const clk = prompt('點擊次數', k.clicks||0); if (clk===null) return;
-  const pos = prompt('平均排名', k.position||0); if (pos===null) return;
-  const tags = prompt('標籤（逗號分隔）', (k.tags||[]).join(', ')); if (tags===null) return;
-  const tagArr = tags.split(/[,，]/).map(s=>s.trim()).filter(Boolean);
+  const get = id => (document.getElementById(id)||{}).value || '';
+  const date = get('sa-date').trim();
+  const title = get('sa-title').trim();
+  const dept = get('sa-dept').trim();
+  if (!date || !title || !dept) { showToast('請填寫日期、科別、標題'); return; }
+  const tagArr = get('sa-tags').split(/[,，;；]/).map(s=>s.trim()).filter(Boolean);
   ensureTagsExist(tagArr);
-  store.seoKeywords[idx] = { ...k, keyword:kw.trim(), impressions:+impr||0, clicks:+clk||0, position:+pos||0, tags:tagArr };
+  const obj = {
+    date, dept, title,
+    keyword: get('sa-keyword').trim(),
+    rank: +get('sa-rank') || '',
+    searchVolume: +get('sa-vol') || '',
+    prevRank: +get('sa-prevrank') || '',
+    prevSearchVolume: +get('sa-prevvol') || '',
+    url: get('sa-url').trim(),
+    tags: tagArr,
+    updated_at: new Date().toISOString()
+  };
+  if (!store.seoArticles) store.seoArticles = [];
+  if (idx === -1) { obj.id = 'sa_'+Date.now(); obj.created_at = obj.updated_at; store.seoArticles.push(obj); }
+  else { store.seoArticles[idx] = { ...store.seoArticles[idx], ...obj }; }
   saveStore();
-  renderSeoList();
+  const modal = document.getElementById('seoArticleModal'); if (modal) modal.remove();
+  renderSeoArticleList();
+  showToast(idx===-1?'文章已新增':'文章已更新');
 }
-function deleteSeoKeyword(idx) {
+
+function deleteSeoArticle(idx) {
   if (!requireEdit()) return;
-  if (!confirm('確定刪除此關鍵字？')) return;
-  store.seoKeywords[idx].deleted_at = new Date().toISOString();
+  if (!confirm('確定刪除此文章？')) return;
+  store.seoArticles[idx].deleted_at = new Date().toISOString();
   saveStore();
-  renderSeoList();
+  renderSeoArticleList();
+}
+
+// Excel (.xlsx) 匯入 — 依「總表」sheet 結構解析
+function importSeoArticlesExcel(evt) {
+  if (!requireEdit()) return;
+  const f = evt.target.files && evt.target.files[0];
+  if (!f) return;
+  if (typeof XLSX === 'undefined') { showToast('XLSX 套件尚未載入，請稍後重試'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
+      const sn = wb.SheetNames.includes('總表') ? '總表' : wb.SheetNames[0];
+      const ws = wb.Sheets[sn];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval:'', raw:false });
+      let added = 0, updated = 0;
+      if (!store.seoArticles) store.seoArticles = [];
+      rows.forEach(r => {
+        const title = (r['文章名稱']||'').toString().trim();
+        if (!title) return;
+        let dateRaw = (r['日期']||'').toString().trim();
+        // normalise 2026.03 / 2026-03 / 2025.12 → YYYY-MM
+        dateRaw = dateRaw.replace(/\./g,'-').replace(/\s/g,'');
+        if (/^\d{4}-\d{1,2}$/.test(dateRaw)) {
+          const [y,m] = dateRaw.split('-'); dateRaw = y + '-' + String(m).padStart(2,'0');
+        } else if (/^\d{6}$/.test(dateRaw)) {
+          dateRaw = dateRaw.slice(0,4)+'-'+dateRaw.slice(4,6);
+        }
+        const dept = (r['科別']||'').toString().trim();
+        const keyword = (r['關鍵字']||'').toString().trim();
+        const rank = parseFloat(r['排名']) || '';
+        const searchVolume = parseFloat(r['月搜尋量']) || '';
+        const prevRank = parseFloat(r['排名(上個月)']) || '';
+        const prevVol  = parseFloat(r['月搜尋量(上個月)']) || '';
+        const url = (r['網址']||'').toString().trim();
+        // match by url if available, else title+date
+        const existing = store.seoArticles.find(x =>
+          !x.deleted_at && ((url && x.url === url) || (x.title === title && x.date === dateRaw))
+        );
+        if (existing) {
+          Object.assign(existing, { date:dateRaw, dept, keyword, rank, searchVolume, prevRank, prevSearchVolume:prevVol, url, updated_at:new Date().toISOString() });
+          updated++;
+        } else {
+          store.seoArticles.push({
+            id: 'sa_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+            date: dateRaw, dept, title, keyword,
+            rank, searchVolume, prevRank, prevSearchVolume: prevVol,
+            url, tags: [], created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+          });
+          added++;
+        }
+      });
+      saveStore();
+      renderSeoArticleList();
+      showToast('匯入完成：新增 '+added+' 筆，更新 '+updated+' 筆');
+    } catch(err) {
+      showToast('匯入失敗：'+err.message);
+    } finally {
+      evt.target.value = '';
+    }
+  };
+  reader.readAsArrayBuffer(f);
 }
 
 // ═══════════════════════════════════════════
@@ -5809,7 +5964,7 @@ function renderCrossTagLibrary() {
     if (t && usage[t.name]) usage[t.name].clinic++;
   }));
   (store.linePosts||[]).filter(x=>!x.deleted_at).forEach(p => (p.tags||[]).forEach(t => { if(usage[t]) usage[t].linePosts++; }));
-  (store.seoKeywords||[]).filter(x=>!x.deleted_at).forEach(k => (k.tags||[]).forEach(t => { if(usage[t]) usage[t].seo++; }));
+  (store.seoArticles||[]).filter(x=>!x.deleted_at).forEach(a => (a.tags||[]).forEach(t => { if(usage[t]) usage[t].seo++; }));
   (store.videoItems||[]).filter(x=>!x.deleted_at).forEach(v => (v.tags||[]).forEach(t => { if(usage[t]) usage[t].video++; }));
   const catLabel = { dept:'科別', center:'中心', disease:'疾病', device:'儀器', tech:'技術', checkup:'高級健檢', nature:'性質', culture:'健康人文藝術活動', audience:'族群', project:'專案/議題', other:'其他' };
   const byCat = {};
@@ -5983,7 +6138,7 @@ function renderCrossTagStats() {
   const tagObj = tags.find(t => t.name === tagName);
   const clinicHit = (store.mediaItems||[]).filter(m => !m.deleted_at && (m.tags||[]).some(t => t === tagName || (tagObj && t === tagObj.id)) && inPeriod(m.month));
   const linePostsHit = (store.linePosts||[]).filter(p => !p.deleted_at && (p.tags||[]).includes(tagName) && inPeriod(p.date));
-  const seoHit = (store.seoKeywords||[]).filter(k => !k.deleted_at && (k.tags||[]).includes(tagName));
+  const seoHit = (store.seoArticles||[]).filter(a => !a.deleted_at && (a.tags||[]).includes(tagName) && inPeriod(a.date));
   const videoHit = (store.videoItems||[]).filter(v => !v.deleted_at && (v.tags||[]).includes(tagName) && inPeriod(v.date));
   const ytHit = videoHit.filter(v => v.platform === 'YouTube');
   const igHit = videoHit.filter(v => v.platform === 'Instagram');
@@ -6002,8 +6157,8 @@ function renderCrossTagStats() {
   const mediaReach = mediaHit.reduce((s,m)=>s+(+m.reach||0),0);
   const linePostsReach = linePostsHit.reduce((s,p)=>s+(+p.reach||0),0);
   const linePostsClick = linePostsHit.reduce((s,p)=>s+(+p.click||0),0);
-  const seoImpr = seoHit.reduce((s,k)=>s+(+k.impressions||0),0);
-  const seoClicks = seoHit.reduce((s,k)=>s+(+k.clicks||0),0);
+  const seoVolume = seoHit.reduce((s,a)=>s+(+a.searchVolume||0),0);
+  const seoAvgRank = seoHit.length ? (seoHit.reduce((s,a)=>s+(+a.rank||0),0)/seoHit.filter(a=>+a.rank).length) : 0;
   const ytViews = ytHit.reduce((s,v)=>s+(+v.views||0),0);
   const igViews = igHit.reduce((s,v)=>s+(+v.views||0),0);
   const ytEngage = ytHit.reduce((s,v)=>s+(+v.engage||0),0);
@@ -6015,7 +6170,7 @@ function renderCrossTagStats() {
     { icon:svgIcon('newspaper'), name:'新聞媒體曝光', count:mediaHit.length, metric:`累計觸及 ${mediaReach.toLocaleString()}`, color:'#DC2626' },
     { icon:svgIcon('clipboard'), name:'門診表題材', count:clinicHit.length, metric:`${clinicHit.length} 次刊登`, color:'#2D6A4F' },
     { icon:svgIcon('message'), name:'LINE 貼文', count:linePostsHit.length, metric:`觸及 ${linePostsReach.toLocaleString()} / 點擊 ${linePostsClick.toLocaleString()}`, color:'#00B900' },
-    { icon:svgIcon('search'), name:'SEO 關鍵字', count:seoHit.length, metric:`曝光 ${seoImpr.toLocaleString()} / 點擊 ${seoClicks.toLocaleString()}`, color:'#1E40AF' },
+    { icon:svgIcon('search'), name:'SEO 文章', count:seoHit.length, metric:`總搜尋量 ${seoVolume.toLocaleString()}${seoAvgRank?(' / 平均排名 '+seoAvgRank.toFixed(1)):''}`, color:'#1E40AF' },
     { icon:svgIcon('youtube'), name:'YouTube 影片', count:ytHit.length, metric:`觀看 ${ytViews.toLocaleString()} / 互動 ${ytEngage.toLocaleString()}`, color:'#FF0000' },
     { icon:svgIcon('instagram'), name:'Instagram 影片', count:igHit.length, metric:`觀看 ${igViews.toLocaleString()} / 互動 ${igEngage.toLocaleString()}`, color:'#E1306C' },
   ];
@@ -6053,10 +6208,10 @@ function renderCrossTagStats() {
     ${renderCrossTagDetail('LINE 貼文', '#00B900', linePostsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
       ['日期','類型','標題','觸及','點擊','備註'],
       l => [l.date||'', l.type||'—', l.title||'—', (l.reach||0).toLocaleString(), (l.click||0).toLocaleString(), l.note||''])}
-    ${renderCrossTagDetail('SEO 關鍵字', '#1E40AF', seoHit,
-      ['關鍵字','曝光','點擊','CTR','排名','備註'],
-      k => [k.keyword||'—', (k.impressions||0).toLocaleString(), (k.clicks||0).toLocaleString(),
-            (k.impressions? ((k.clicks||0)/k.impressions*100).toFixed(1)+'%':'—'), k.position||'—', k.note||''])}
+    ${renderCrossTagDetail('SEO 文章', '#1E40AF', seoHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+      ['日期','科別','文章標題','關鍵字','排名','月搜尋量','連結'],
+      a => [a.date||'', a.dept||'—', a.title||'—', a.keyword||'—', a.rank||'—',
+            (a.searchVolume? (+a.searchVolume).toLocaleString():'—'), a.url||''])}
     ${renderCrossTagDetail('YouTube 影片', '#FF0000', ytHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
       ['日期','影片標題','觀看','互動','互動率','連結'],
       v => [v.date||'', v.title||'—', (v.views||0).toLocaleString(), (v.engage||0).toLocaleString(),
@@ -6339,7 +6494,7 @@ function openCrossTagReport() {
   const mediaHit  = (store.media||[]).filter(m => !m.deleted_at && (m.tags||[]).includes(tagName) && inP(m.date));
   const clinicHit = (store.mediaItems||[]).filter(m => !m.deleted_at && (m.tags||[]).some(t => t === tagName || (tagObj && t === tagObj.id)) && inP(m.month));
   const lineHit   = (store.linePosts||[]).filter(p => !p.deleted_at && (p.tags||[]).includes(tagName) && inP(p.date));
-  const seoHit    = (store.seoKeywords||[]).filter(k => !k.deleted_at && (k.tags||[]).includes(tagName));
+  const seoHit    = (store.seoArticles||[]).filter(a => !a.deleted_at && (a.tags||[]).includes(tagName) && inP(a.date));
   const videoAll  = (store.videoItems||[]).filter(v => !v.deleted_at && (v.tags||[]).includes(tagName) && inP(v.date));
   const ytHit     = videoAll.filter(v => v.platform === 'YouTube');
   const igHit     = videoAll.filter(v => v.platform === 'Instagram');
@@ -6353,13 +6508,14 @@ function openCrossTagReport() {
   const mediaReach  = mediaHit.reduce((s,m)=>s+(+m.reach||0),0);
   const lineReach   = lineHit.reduce((s,p)=>s+(+p.reach||0),0);
   const lineClick   = lineHit.reduce((s,p)=>s+(+p.click||0),0);
-  const seoImpr     = seoHit.reduce((s,k)=>s+(+k.impressions||0),0);
-  const seoClicks   = seoHit.reduce((s,k)=>s+(+k.clicks||0),0);
+  const seoVolume   = seoHit.reduce((s,a)=>s+(+a.searchVolume||0),0);
+  const seoRanked   = seoHit.filter(a => +a.rank);
+  const seoAvgRank  = seoRanked.length ? (seoRanked.reduce((s,a)=>s+(+a.rank||0),0)/seoRanked.length) : 0;
   const ytViews     = ytHit.reduce((s,v)=>s+(+v.views||0),0);
   const ytEngage    = ytHit.reduce((s,v)=>s+(+v.engage||0),0);
   const igViews     = igHit.reduce((s,v)=>s+(+v.views||0),0);
   const igEngage    = igHit.reduce((s,v)=>s+(+v.engage||0),0);
-  const totalReach  = postsReach + mediaReach + lineReach + seoImpr + ytViews + igViews;
+  const totalReach  = postsReach + mediaReach + lineReach + seoVolume + ytViews + igViews;
 
   const channels = [
     { icon:svgIcon('smartphone',14), name:'FB 粉專貼文',   count:postsHit.length,  metric:'觸及 '+postsReach.toLocaleString()+' / 互動 '+postsEngage.toLocaleString(), color:'#1877F2' },
@@ -6367,7 +6523,7 @@ function openCrossTagReport() {
     { icon:svgIcon('newspaper',14),  name:'新聞媒體曝光',  count:mediaHit.length,  metric:'累計觸及 '+mediaReach.toLocaleString(), color:'#DC2626' },
     { icon:svgIcon('clipboard',14),  name:'門診表題材',    count:clinicHit.length, metric:clinicHit.length+' 次刊登', color:'#2D6A4F' },
     { icon:svgIcon('message',14),    name:'LINE 貼文',     count:lineHit.length,   metric:'觸及 '+lineReach.toLocaleString()+' / 點擊 '+lineClick.toLocaleString(), color:'#00B900' },
-    { icon:svgIcon('search',14),     name:'SEO 關鍵字',    count:seoHit.length,    metric:'曝光 '+seoImpr.toLocaleString()+' / 點擊 '+seoClicks.toLocaleString(), color:'#1E40AF' },
+    { icon:svgIcon('search',14),     name:'SEO 文章',      count:seoHit.length,    metric:'總搜尋量 '+seoVolume.toLocaleString()+(seoAvgRank?' / 平均排名 '+seoAvgRank.toFixed(1):''), color:'#1E40AF' },
     { icon:svgIcon('youtube',14),    name:'YouTube 影片',  count:ytHit.length,     metric:'觀看 '+ytViews.toLocaleString()+' / 互動 '+ytEngage.toLocaleString(), color:'#FF0000' },
     { icon:svgIcon('instagram',14),  name:'Instagram 影片',count:igHit.length,     metric:'觀看 '+igViews.toLocaleString()+' / 互動 '+igEngage.toLocaleString(), color:'#E1306C' },
   ];
@@ -6432,10 +6588,10 @@ function openCrossTagReport() {
         ['日期','影片標題','觀看','互動','互動率','連結'],
         v => [v.date||'', v.title||'—', (v.views||0).toLocaleString(), (v.engage||0).toLocaleString(),
               (v.views? ((v.engage||0)/v.views*100).toFixed(1)+'%':'—'), v.external_url||'—']) +
-    tbl('SEO 關鍵字佈局', seoHit,
-        ['關鍵字','曝光','點擊','CTR','排名','備註'],
-        k => [k.keyword||'—', (k.impressions||0).toLocaleString(), (k.clicks||0).toLocaleString(),
-              (k.impressions? ((k.clicks||0)/k.impressions*100).toFixed(1)+'%':'—'), k.position||'—', k.note||'']);
+    tbl('SEO 文章明細', seoHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+        ['日期','科別','文章標題','關鍵字','排名','月搜尋量','連結'],
+        a => [a.date||'', a.dept||'—', a.title||'—', a.keyword||'—', a.rank||'—',
+              (a.searchVolume? (+a.searchVolume).toLocaleString():'—'), a.url||'—']);
 
   const w = window.open('', '_blank', 'width=1040,height=820,scrollbars=yes');
   if (!w) { showToast('請允許彈出視窗'); return; }
@@ -6506,6 +6662,7 @@ function openChannelReport(channel) {
     web:   { title:'官網 GA4 / SEO 報表',  color:'#1E40AF' },
     kol:   { title:'KOL 合作成效報表',     color:'#7C3AED' },
     video: { title:'YT / IG 影片成效報表',  color:'#F97316' },
+    seoArticles: { title:'SEO 文章成效報表', color:'#1E40AF' },
   };
   const cfg = CH[channel];
   if (!cfg) { showToast('未知的傳達管道類型'); return; }
@@ -6532,6 +6689,7 @@ function openChannelReport(channel) {
     if (channel === 'web')   body = _rptWeb(periodLabel);
     if (channel === 'kol')   body = _rptKol(periodLabel);
     if (channel === 'video') body = _rptVideo(periodLabel);
+    if (channel === 'seoArticles') body = _rptSeoArticles(periodLabel);
   } catch(err) { body = '<p style="color:#dc2626;">產生報表時發生錯誤：' + err.message + '</p>'; }
 
   const html =
@@ -6782,37 +6940,68 @@ function _rptLine(period) {
 
 function _rptWeb(period) {
   const ga = _rptFilterByPeriod((store.webMetrics||[]), period);
-  const sc = _rptFilterByPeriod((store.searchMetrics||[]), period);
-  const kws = activeSeoKeywords();
-  if (!ga.length && !sc.length && !kws.length) return '<div class="empty">此期間無官網資料</div>';
+  const articles = (store.seoArticles||[]).filter(x=>!x.deleted_at);
+  const scopedArticles = _rptFilterByPeriod(articles, period);
+  if (!ga.length && !scopedArticles.length) return '<div class="empty">此期間無官網資料</div>';
   const pvSum = ga.reduce((s,r)=>s+(+r.pv||0),0);
   const uvSum = ga.reduce((s,r)=>s+(+r.uv||0),0);
   const sessSum = ga.reduce((s,r)=>s+(+r.sessions||0),0);
   const avgDur = ga.length ? Math.round(ga.reduce((s,r)=>s+(+r.avg_duration||0),0)/ga.length) : 0;
   const avgBounce = ga.length ? (ga.reduce((s,r)=>s+(+r.bounce_rate||0),0)/ga.length).toFixed(1) : '—';
-  const scImpr = sc.reduce((s,r)=>s+(+r.impressions||0),0);
-  const scClick = sc.reduce((s,r)=>s+(+r.clicks||0),0);
-  const scAvgPos = sc.length ? (sc.reduce((s,r)=>s+(+r.avg_position||0),0)/sc.length).toFixed(1) : '—';
-  // 流量來源
   const lastWithSrc = [...ga].reverse().find(r => r.sources);
   const sources = lastWithSrc ? lastWithSrc.sources : null;
   const srcRows = sources ? Object.entries(sources).sort((a,b)=>b[1]-a[1]).map(([k,v]) => ({ label:k, value:v, display:v+'%' })) : [];
-  const topKws = [...kws].sort((a,b)=>(b.impressions||0)-(a.impressions||0)).slice(0,15);
+  const seoVolume = scopedArticles.reduce((s,a)=>s+(+a.searchVolume||0),0);
+  const seoRanked = scopedArticles.filter(a => +a.rank);
+  const seoAvgRank = seoRanked.length ? (seoRanked.reduce((s,a)=>s+(+a.rank||0),0)/seoRanked.length).toFixed(1) : '—';
+  const topArticles = [...scopedArticles].sort((a,b)=>(+b.searchVolume||0)-(+a.searchVolume||0)).slice(0,15);
   return _rptKpiCards([
     { label:'累計 PV / UV', val: pvSum.toLocaleString() + ' / ' + uvSum.toLocaleString() },
     { label:'工作階段', val: sessSum.toLocaleString(), sub:'平均停留 ' + avgDur + 's' },
     { label:'跳出率', val: avgBounce + '%' },
-    { label:'SEO 曝光 / 點擊', val: scImpr.toLocaleString() + ' / ' + scClick.toLocaleString(), sub:'平均排名 ' + scAvgPos },
+    { label:'SEO 文章 / 平均排名', val: scopedArticles.length + ' 篇 / ' + seoAvgRank, sub:'總月搜尋量 ' + seoVolume.toLocaleString() },
   ]) +
-  (srcRows.length ? '<h2>🌐 流量來源分布（最新 ' + lastWithSrc.date + '）</h2>' + _rptBarChart(srcRows) : '') +
-  '<h2>🔍 Top 15 SEO 關鍵字（依曝光）</h2>' +
-  (topKws.length ?
-    '<table><thead><tr><th>排名</th><th>關鍵字</th><th>曝光</th><th>點擊</th><th>CTR</th><th>平均排名</th></tr></thead><tbody>' +
-    topKws.map((k,i) => {
-      const ctr = k.impressions?((k.clicks||0)/k.impressions*100).toFixed(2)+'%':'—';
-      return '<tr><td style="text-align:center;">' + (i+1) + '</td><td style="font-weight:600;">' + (k.keyword||'') + '</td><td style="text-align:right;">' + (k.impressions||0).toLocaleString() + '</td><td style="text-align:right;">' + (k.clicks||0).toLocaleString() + '</td><td style="text-align:right;">' + ctr + '</td><td style="text-align:center;">' + (k.position||'—') + '</td></tr>';
-    }).join('') + '</tbody></table>'
-    : '<div class="empty">尚未建立關鍵字</div>');
+  (srcRows.length ? '<h2>流量來源分布（最新 ' + lastWithSrc.date + '）</h2>' + _rptBarChart(srcRows) : '') +
+  '<h2>Top 15 SEO 文章（依月搜尋量）</h2>' +
+  (topArticles.length ?
+    '<table><thead><tr><th>日期</th><th>科別</th><th>文章標題</th><th>關鍵字</th><th style="text-align:right;">排名</th><th style="text-align:right;">月搜尋量</th></tr></thead><tbody>' +
+    topArticles.map(a => '<tr><td>'+(a.date||'')+'</td><td>'+(a.dept||'')+'</td><td style="font-weight:600;">'+(a.title||'')+'</td><td>'+(a.keyword||'')+'</td><td style="text-align:right;">'+(a.rank||'—')+'</td><td style="text-align:right;">'+((+a.searchVolume||0).toLocaleString())+'</td></tr>').join('') +
+    '</tbody></table>'
+    : '<div class="empty">尚未建立 SEO 文章</div>');
+}
+
+// ── SEO 文章專用一鍵報表 ──
+function _rptSeoArticles(period) {
+  const articles = _rptFilterByPeriod((store.seoArticles||[]).filter(x=>!x.deleted_at), period);
+  if (!articles.length) return '<div class="empty">此期間無 SEO 文章</div>';
+  const totalVolume = articles.reduce((s,a)=>s+(+a.searchVolume||0),0);
+  const ranked = articles.filter(a => +a.rank);
+  const avgRank = ranked.length ? (ranked.reduce((s,a)=>s+(+a.rank||0),0)/ranked.length).toFixed(1) : '—';
+  // 依科別分布
+  const byDept = {};
+  articles.forEach(a => { const d = a.dept||'未分類'; if (!byDept[d]) byDept[d] = { count:0, vol:0 }; byDept[d].count++; byDept[d].vol += (+a.searchVolume||0); });
+  const deptRows = Object.entries(byDept).map(([k,v]) => ({ label:k, value:v.count, display:v.count+' 篇｜月搜尋量 '+v.vol.toLocaleString() })).sort((a,b)=>b.value-a.value);
+  // 排名進步 / 退步
+  const improving = articles.filter(a => +a.rank && +a.prevRank && (+a.prevRank - +a.rank) >= 1);
+  const declining = articles.filter(a => +a.rank && +a.prevRank && (+a.rank - +a.prevRank) >= 1);
+  return _rptKpiCards([
+    { label:'SEO 文章總數', val: articles.length + ' 篇' },
+    { label:'已排名文章', val: ranked.length + ' 篇' },
+    { label:'總月搜尋量', val: totalVolume.toLocaleString() },
+    { label:'平均排名', val: avgRank },
+  ]) +
+  '<h2>排名變化摘要</h2>' +
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">'
+    + '<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:14px;"><div style="font-size:12px;color:#059669;font-weight:700;">↑ 排名進步（' + improving.length + ' 篇）</div>'
+    + improving.slice(0,6).map(a => '<div style="font-size:11px;margin-top:4px;">'+(a.title||'').slice(0,40)+' ('+(a.prevRank||'—')+' → '+(a.rank||'—')+')</div>').join('') + '</div>'
+    + '<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:14px;"><div style="font-size:12px;color:#DC2626;font-weight:700;">↓ 排名退步（' + declining.length + ' 篇）</div>'
+    + declining.slice(0,6).map(a => '<div style="font-size:11px;margin-top:4px;">'+(a.title||'').slice(0,40)+' ('+(a.prevRank||'—')+' → '+(a.rank||'—')+')</div>').join('') + '</div>'
+  + '</div>' +
+  '<h2>科別分布</h2>' + _rptBarChart(deptRows) +
+  '<h2>SEO 文章完整列表</h2>' +
+  '<table><thead><tr><th>日期</th><th>科別</th><th>文章標題</th><th>關鍵字</th><th style="text-align:right;">排名</th><th style="text-align:right;">月搜尋量</th><th style="text-align:right;">上月排名</th><th style="text-align:right;">上月搜尋量</th></tr></thead><tbody>' +
+  articles.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(a => '<tr><td>'+(a.date||'')+'</td><td>'+(a.dept||'')+'</td><td style="font-weight:600;">'+(a.title||'')+'</td><td>'+(a.keyword||'')+'</td><td style="text-align:right;">'+(a.rank||'—')+'</td><td style="text-align:right;">'+((+a.searchVolume||0).toLocaleString())+'</td><td style="text-align:right;color:#888;">'+(a.prevRank||'—')+'</td><td style="text-align:right;color:#888;">'+((+a.prevSearchVolume||0).toLocaleString())+'</td></tr>').join('') +
+  '</tbody></table>';
 }
 
 function _rptKol(period) {
@@ -6877,7 +7066,7 @@ function exportReport() {
     media: activeMedia(),
     clinic: (typeof activeMediaItems==='function'? activeMediaItems() : (store.mediaItems||[]).filter(x=>!x.deleted_at)),
     linePosts: (typeof activeLinePosts==='function'? activeLinePosts() : (store.linePosts||[]).filter(x=>!x.deleted_at)),
-    seo: (typeof activeSeoKeywords==='function'? activeSeoKeywords() : (store.seoKeywords||[]).filter(x=>!x.deleted_at)),
+    seoArticles: (typeof activeSeoArticles==='function'? activeSeoArticles() : (store.seoArticles||[]).filter(x=>!x.deleted_at)),
     kol: (store.kols||[]).filter(x=>!x.deleted_at),
     web: (store.webMetrics||[]).filter(x=>!x.deleted_at),
     search: (store.searchMetrics||[]).filter(x=>!x.deleted_at),
@@ -6979,6 +7168,7 @@ function exportReport() {
     '(RAW.line||[]).forEach(function(l){ds.push(l.date||"");});' +
     '(RAW.kol||[]).forEach(function(k){ds.push(k.date||"");});' +
     '(RAW.video||[]).forEach(function(v){ds.push(v.date||"");});' +
+    '(RAW.seoArticles||[]).forEach(function(a){ds.push(a.date||"");});' +
     'return ds.filter(function(d){return d&&d.length>=7;});' +
   '}' +
   'function updatePeriodValues(){' +
@@ -7115,9 +7305,10 @@ function exportReport() {
     'var wbSessions=wbDaily.reduce(function(s,d){return s+(+d.sessions||0);},0);' +
     'var wbBounceArr=wbDaily.filter(function(d){return d.bounce;});' +
     'var wbBounce=wbBounceArr.length?(wbBounceArr.reduce(function(s,d){return s+(+d.bounce||0);},0)/wbBounceArr.length).toFixed(1):"—";' +
-    'var seoAll=(RAW.seo||[]);' +
-    'var seoImpr=seoAll.reduce(function(s,k){return s+(+k.impressions||0);},0);' +
-    'var seoClicks=seoAll.reduce(function(s,k){return s+(+k.clicks||0);},0);' +
+    'var seoAll=filterByPeriod(RAW.seoArticles||[],period,"date");' +
+    'var seoVolume=seoAll.reduce(function(s,a){return s+(+a.searchVolume||0);},0);' +
+    'var seoRanked=seoAll.filter(function(a){return +a.rank;});' +
+    'var seoAvgRank=seoRanked.length?(seoRanked.reduce(function(s,a){return s+(+a.rank||0);},0)/seoRanked.length):0;' +
     'var wbH="<div class=\\"kpi-row\\">"' +
       '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">官網 PV</div><div class=\\"kpi-val\\">"+wbPV.toLocaleString()+"</div></div>"' +
       '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">UV 使用者</div><div class=\\"kpi-val\\">"+wbUV.toLocaleString()+"</div></div>"' +
@@ -7125,13 +7316,13 @@ function exportReport() {
       '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均跳出率</div><div class=\\"kpi-val\\">"+wbBounce+"%</div></div>"' +
       '+"</div>";' +
     'wbH+="<div class=\\"kpi-row\\" style=\\"margin-top:8px\\">"' +
-      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">SEO 關鍵字數</div><div class=\\"kpi-val\\">"+seoAll.length+"</div></div>"' +
-      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">關鍵字曝光</div><div class=\\"kpi-val\\">"+seoImpr.toLocaleString()+"</div></div>"' +
-      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">關鍵字點擊</div><div class=\\"kpi-val\\">"+seoClicks.toLocaleString()+"</div></div>"' +
-      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均 CTR</div><div class=\\"kpi-val\\">"+(seoImpr?(seoClicks/seoImpr*100).toFixed(2)+"%":"—")+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">SEO 文章數</div><div class=\\"kpi-val\\">"+seoAll.length+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">文章月搜尋量</div><div class=\\"kpi-val\\">"+seoVolume.toLocaleString()+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">平均排名</div><div class=\\"kpi-val\\">"+(seoAvgRank?seoAvgRank.toFixed(1):"—")+"</div></div>"' +
+      '+"<div class=\\"kpi\\"><div class=\\"kpi-label\\">已上線文章 (篇)</div><div class=\\"kpi-val\\">"+seoRanked.length+"</div></div>"' +
       '+"</div>";' +
-    'wbH+="<h2>SEO 關鍵字 Top 15</h2><table><thead><tr><th>關鍵字</th><th>曝光</th><th>點擊</th><th>排名</th><th>備註</th></tr></thead><tbody>";' +
-    '[].concat(seoAll).sort(function(a,b){return(b.impressions||0)-(a.impressions||0);}).slice(0,15).forEach(function(k){wbH+="<tr><td>"+(k.keyword||"")+"</td><td>"+(k.impressions||0).toLocaleString()+"</td><td>"+(k.clicks||0).toLocaleString()+"</td><td>"+(k.position||"—")+"</td><td>"+(k.note||"")+"</td></tr>";});' +
+    'wbH+="<h2>SEO 文章成效 (Top 15)</h2><table><thead><tr><th>日期</th><th>科別</th><th>文章標題</th><th>關鍵字</th><th>排名</th><th>月搜尋量</th></tr></thead><tbody>";' +
+    '[].concat(seoAll).sort(function(a,b){return(+b.searchVolume||0)-(+a.searchVolume||0);}).slice(0,15).forEach(function(a){wbH+="<tr><td>"+(a.date||"")+"</td><td>"+(a.dept||"")+"</td><td>"+(a.title||"")+"</td><td>"+(a.keyword||"")+"</td><td>"+(a.rank||"—")+"</td><td>"+((+a.searchVolume||0).toLocaleString())+"</td></tr>";});' +
     'wbH+="</tbody></table>";' +
     'document.getElementById("rpt-wb").innerHTML=wbH;' +
     /* KOL Tab */
