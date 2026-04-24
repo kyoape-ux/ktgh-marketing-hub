@@ -7863,6 +7863,15 @@ function openCrossTagReport() {
   const sel = document.getElementById('crossTagSelect');
   const tagName = sel && sel.value;
   if (!tagName) { showToast('請先選擇一個標籤'); return; }
+  openReportFilterModal('crossTag', tagName, (opts) => _generateCrossTagReport(opts));
+}
+
+function _generateCrossTagReport(opts) {
+  opts = opts || {};
+  const _oSec = (id) => _hasSec(opts, id);
+  const sel = document.getElementById('crossTagSelect');
+  const tagName = sel && sel.value;
+  if (!tagName) { showToast('請先選擇一個標籤'); return; }
   const periodSel = document.getElementById('crossTagPeriod');
   const period = (periodSel && periodSel.value) || 'all';
   const periodLabel = crossTagPeriodLabel(period);
@@ -7943,35 +7952,35 @@ function openCrossTagReport() {
   };
 
   const detailHtml =
-    tbl('FB 粉專貼文明細', postsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+    (_oSec('fb') ? tbl('FB 粉專貼文明細', postsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
         ['日期','類型','標題','觸及','互動','互動率','連結'],
         p => [p.date||'', p.cat||'—', p.title||'—', (p.reach||0).toLocaleString(), (p.engage||0).toLocaleString(),
-              (p.reach? ((p.engage||0)/p.reach*100).toFixed(1)+'%':'—'), p.link||p.url||'—']) +
-    tbl('活動 / 講座明細', eventsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+              (p.reach? ((p.engage||0)/p.reach*100).toFixed(1)+'%':'—'), p.link||p.url||'—']) : '') +
+    (_oSec('event') ? tbl('活動 / 講座明細', eventsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
         ['日期','活動名稱','類型','院區','報名','出席','講者','FB觸及','備註'],
-        e => [e.date||'', e.name||'—', e.type||'—', e.campus||'—', (e.reg||0), (e.attend||0), e.speaker||'—', (e.reach||0).toLocaleString(), e.note||'']) +
-    tbl('新聞媒體曝光明細', mediaHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+        e => [e.date||'', e.name||'—', e.type||'—', e.campus||'—', (e.reg||0), (e.attend||0), e.speaker||'—', (e.reach||0).toLocaleString(), e.note||'']) : '') +
+    (_oSec('media') ? tbl('新聞媒體曝光明細', mediaHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
         ['日期','媒體名稱','類型','報導標題','觸及','連結'],
-        m => [m.date||'', m.name||'—', m.type||'—', m.title||'—', (m.reach||0).toLocaleString(), m.url||m.link||'—']) +
-    tbl('門診表題材刊登', clinicHit.sort((a,b)=>(b.month||'').localeCompare(a.month||'')),
+        m => [m.date||'', m.name||'—', m.type||'—', m.title||'—', (m.reach||0).toLocaleString(), m.url||m.link||'—']) : '') +
+    (_oSec('clinic') ? tbl('門診表題材刊登', clinicHit.sort((a,b)=>(b.month||'').localeCompare(a.month||'')),
         ['月份','頁碼','題材','科別','負責人','備註'],
-        m => [m.month||'', m.page||'—', m.title||'—', m.dept||'—', m.owner||'—', m.note||'']) +
-    tbl('LINE 貼文明細', lineHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+        m => [m.month||'', m.page||'—', m.title||'—', m.dept||'—', m.owner||'—', m.note||'']) : '') +
+    (_oSec('line') ? tbl('LINE 貼文明細', lineHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
         ['日期','類型','標題','觸及','點擊','CTR','備註'],
         p => [p.date||'', p.type||'—', p.title||'—', (p.reach||0).toLocaleString(), (p.click||0).toLocaleString(),
-              (p.reach? ((p.click||0)/p.reach*100).toFixed(1)+'%':'—'), p.note||'']) +
-    tbl('YouTube 影片明細', ytHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+              (p.reach? ((p.click||0)/p.reach*100).toFixed(1)+'%':'—'), p.note||'']) : '') +
+    (_oSec('yt') ? tbl('YouTube 影片明細', ytHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
         ['日期','影片標題','觀看','互動','互動率','連結'],
         v => [v.date||'', v.title||'—', (v.views||0).toLocaleString(), (v.engage||0).toLocaleString(),
-              (v.views? ((v.engage||0)/v.views*100).toFixed(1)+'%':'—'), v.external_url||'—']) +
-    tbl('Instagram 影片明細', igHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+              (v.views? ((v.engage||0)/v.views*100).toFixed(1)+'%':'—'), v.external_url||'—']) : '') +
+    (_oSec('ig') ? tbl('Instagram 影片明細', igHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
         ['日期','影片標題','觀看','互動','互動率','連結'],
         v => [v.date||'', v.title||'—', (v.views||0).toLocaleString(), (v.engage||0).toLocaleString(),
-              (v.views? ((v.engage||0)/v.views*100).toFixed(1)+'%':'—'), v.external_url||'—']) +
-    tbl('SEO 文章明細', seoHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
+              (v.views? ((v.engage||0)/v.views*100).toFixed(1)+'%':'—'), v.external_url||'—']) : '') +
+    (_oSec('seo') ? tbl('SEO 文章明細', seoHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
         ['日期','科別','文章標題','關鍵字','排名','月搜尋量','連結'],
         a => [a.date||'', a.dept||'—', a.title||'—', a.keyword||'—', a.rank||'—',
-              (a.searchVolume? (+a.searchVolume).toLocaleString():'—'), a.url||'—']);
+              (a.searchVolume? (+a.searchVolume).toLocaleString():'—'), a.url||'—']) : '');
 
   const w = window.open('', '_blank', 'width=1040,height=820,scrollbars=yes');
   if (!w) { showToast('請允許彈出視窗'); return; }
@@ -8016,9 +8025,8 @@ function openCrossTagReport() {
     + '<div class="hero"><div class="label">推廣主題標籤</div>'
     + '<div class="tag">#'+esc(tagName)+'</div>'
     + '<div class="stat">跨傳達管道共執行 <b>'+totalCount+'</b> 次｜累計曝光觸及 <b>'+totalReach.toLocaleString()+'</b></div></div>'
-    + '<h2>'+svgIcon('pin',16)+' 各傳達管道執行概覽</h2>'
-    + cardsHtml
-    + coverHtml
+    + (_oSec('kpi') ? ('<h2>'+svgIcon('pin',16)+' 各傳達管道執行概覽</h2>' + cardsHtml) : '')
+    + (_oSec('bar') ? coverHtml : '')
     + (totalCount === 0 ? '<div style="padding:40px;text-align:center;color:#888;">此標籤在選定期間內尚無任何傳達管道記錄。</div>' : detailHtml)
     + '<div class="footer">光田綜合醫院 行銷組 ｜ 各傳達管道分析報告 ｜ 由行銷整合分析中心自動產出</div>'
     + '</div></body></html>';
@@ -8032,7 +8040,213 @@ function openCrossTagReport() {
 //  UNIFIED CHANNEL REPORT GENERATOR
 //  每個傳達管道一鍵產生 A4 報表（可列印/存 PDF）
 // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// 通用報表篩選 Modal — 支援區塊勾選 / 時間比對 / 項目比對 / 圖表切換
+// ═══════════════════════════════════════════
+
+// 各管道可勾選的 sections 定義
+const REPORT_SECTIONS = {
+  fb: [
+    { id:'kpi', label:'KPI 總覽', def:true },
+    { id:'trend', label:'月份趨勢（觸及/互動/數量）', def:true },
+    { id:'catDist', label:'貼文類型分布', def:true },
+    { id:'top5', label:'Top 5 高互動貼文', def:true },
+    { id:'detail', label:'全部貼文明細', def:false },
+  ],
+  event: [
+    { id:'kpi', label:'KPI 總覽', def:true },
+    { id:'typeDist', label:'活動類型分布', def:true },
+    { id:'campusDist', label:'院區分布', def:true },
+    { id:'detail', label:'活動明細', def:true },
+  ],
+  media: [
+    { id:'kpi', label:'KPI 總覽', def:true },
+    { id:'typeDist', label:'媒體類型分布', def:true },
+    { id:'natureDist', label:'曝光性質分布', def:true },
+    { id:'detail', label:'媒體曝光明細', def:true },
+  ],
+  clinic: [
+    { id:'kpi', label:'KPI 總覽', def:true },
+    { id:'deptDist', label:'科別分布 Top 10', def:true },
+    { id:'detail', label:'題材明細', def:true },
+  ],
+  line: [
+    { id:'kpi', label:'KPI 總覽', def:true },
+    { id:'detail', label:'LINE 貼文明細', def:true },
+  ],
+  web: [
+    { id:'kpi', label:'KPI 總覽（PV/UV/工作階段/跳出率）', def:true },
+    { id:'gaMonthly', label:'當月 GA4 摘要（月度資料）', def:true },
+    { id:'source', label:'流量來源 Top 10', def:true },
+    { id:'deptReg', label:'科別預約 Top 10', def:true },
+    { id:'device', label:'裝置分布', def:false },
+    { id:'quickMenu', label:'快速選單點擊', def:false },
+    { id:'doctor', label:'醫師預約 Top 10', def:false },
+    { id:'pages', label:'熱門頁面 Top 10', def:false },
+    { id:'gsc', label:'GSC 高搜尋量關鍵字 Top 10', def:true },
+    { id:'seoTop', label:'SEO 文章 Top 15', def:true },
+  ],
+  kol: [
+    { id:'kpi', label:'KPI 總覽', def:true },
+    { id:'detail', label:'KOL 合作明細', def:true },
+  ],
+  video: [
+    { id:'kpi', label:'KPI 總覽', def:true },
+    { id:'platformDist', label:'平台分布', def:true },
+    { id:'top10', label:'Top 10 高觸及影片', def:true },
+    { id:'detail', label:'完整影片列表', def:false },
+  ],
+  seoArticles: [
+    { id:'kpi', label:'KPI 總覽', def:true },
+    { id:'rankChange', label:'排名變化摘要', def:true },
+    { id:'deptDist', label:'科別分布', def:true },
+    { id:'detail', label:'SEO 文章完整列表', def:true },
+  ],
+};
+
+// 通用篩選 modal：支援所有 3 種報表
+function openReportFilterModal(reportType, reportKey, onConfirm) {
+  // reportType: 'channel' | 'crossTag' | 'monthly'
+  // reportKey: for channel - the channel id; for crossTag - tag name; for monthly - null
+  const saveKey = 'ktgh_reportfilter_' + reportType + '_' + (reportKey||'');
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(saveKey)||'{}'); } catch(e){}
+
+  // 取得區塊清單
+  let sections = [];
+  let title = '';
+  if (reportType === 'channel') {
+    sections = REPORT_SECTIONS[reportKey] || [];
+    title = '產生報表';
+  } else if (reportType === 'crossTag') {
+    sections = [
+      { id:'kpi', label:'KPI 彙總卡（8 管道）', def:true },
+      { id:'bar', label:'各管道執行次數長條圖', def:true },
+      { id:'fb', label:'FB 粉專貼文明細', def:true },
+      { id:'event', label:'活動/講座明細', def:true },
+      { id:'media', label:'新聞媒體明細', def:true },
+      { id:'clinic', label:'門診表題材明細', def:true },
+      { id:'line', label:'LINE 貼文明細', def:true },
+      { id:'seo', label:'SEO 文章明細', def:true },
+      { id:'yt', label:'YouTube 影片明細', def:true },
+      { id:'ig', label:'Instagram 影片明細', def:true },
+    ];
+    title = '產生「#'+reportKey+'」推廣報告';
+  } else if (reportType === 'monthly') {
+    sections = [
+      { id:'fb', label:'粉專成效', def:true },
+      { id:'event', label:'活動成效', def:true },
+      { id:'media', label:'媒體成效', def:true },
+      { id:'clinic', label:'門診表', def:true },
+      { id:'line', label:'LINE@', def:true },
+      { id:'web', label:'官網/SEO', def:true },
+      { id:'kol', label:'KOL', def:true },
+      { id:'video', label:'YT/IG 影片', def:true },
+    ];
+    title = '產生月報';
+  }
+
+  // 取當前可用月份（用 gaAvailableMonths 或所有已知月份）
+  const availMonths = (typeof gaAvailableMonths === 'function') ? gaAvailableMonths() : [];
+
+  // 項目比對池（依 reportType 建立）
+  let itemCompareOpts = null;
+  if (reportType === 'channel' && reportKey === 'web') {
+    // 科別 / 管道
+    const depts = new Set();
+    Object.values(store.gaMonthly||{}).forEach(m => {
+      (m.deptReg||[]).forEach(d => depts.add(d.dept));
+      Object.keys(m.deptTraffic||{}).forEach(d => depts.add(d));
+    });
+    itemCompareOpts = { label:'科別', pool:[...depts].sort() };
+  } else if (reportType === 'channel' && reportKey === 'seoArticles') {
+    const depts = new Set();
+    (store.seoArticles||[]).filter(a=>!a.deleted_at).forEach(a => a.dept && depts.add(a.dept));
+    itemCompareOpts = { label:'科別', pool:[...depts].sort() };
+  } else if (reportType === 'channel' && (reportKey === 'fb' || reportKey === 'event' || reportKey === 'media')) {
+    // 標籤
+    const tags = (store.mediaTags||[]).filter(t=>!t.deleted_at).map(t=>t.name);
+    itemCompareOpts = { label:'標籤', pool:tags.sort() };
+  }
+
+  // 產生 HTML
+  const sectionChecks = sections.map(s => {
+    const checked = saved.sections ? saved.sections.includes(s.id) : s.def;
+    return '<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12.5px;"><input type="checkbox" data-section="'+s.id+'"'+(checked?' checked':'')+'> <span>'+s.label+'</span></label>';
+  }).join('');
+
+  const savedBase = saved.basePeriod || availMonths[0] || '';
+  const savedCompare = saved.comparePeriod || '';
+
+  const monthOpts = '<option value="">不比對</option>' + availMonths.map(m => '<option value="'+m+'">'+m+'</option>').join('');
+  const baseMonthOpts = availMonths.map(m => '<option value="'+m+'"'+(m===savedBase?' selected':'')+'>'+m+'</option>').join('');
+
+  const itemPoolHtml = itemCompareOpts ? (
+    '<div style="padding:12px;background:#F9FAFB;border-radius:8px;margin-top:12px;">'
+    + '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">③ 項目比對 — '+itemCompareOpts.label+'（可選，最多 6 項並列）</div>'
+    + '<div style="max-height:150px;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">'
+    + itemCompareOpts.pool.map(p => '<label style="display:flex;align-items:center;gap:4px;font-size:11.5px;cursor:pointer;"><input type="checkbox" data-item="'+p.replace(/"/g,'&quot;')+'"'+((saved.items||[]).includes(p)?' checked':'')+'> '+p+'</label>').join('')
+    + '</div></div>'
+  ) : '';
+
+  const chartType = saved.chartType || 'bar';
+
+  const html = '<div class="modal-overlay open" id="reportFilterModal">'
+    + '<div class="modal-box" style="max-width:640px;">'
+    + '<h3>'+title+' — 自訂設定</h3>'
+    + '<div style="padding:12px;background:#F9FAFB;border-radius:8px;margin-bottom:12px;">'
+    +   '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">① 包含區塊</div>'
+    +   '<div style="display:flex;flex-wrap:wrap;gap:2px;">'+sectionChecks+'</div>'
+    +   '<div style="margin-top:8px;display:flex;gap:6px;">'
+    +     '<button type="button" class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="document.querySelectorAll(\'#reportFilterModal input[data-section]\').forEach(e=>e.checked=true);">全選</button>'
+    +     '<button type="button" class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="document.querySelectorAll(\'#reportFilterModal input[data-section]\').forEach(e=>e.checked=false);">全不選</button>'
+    +   '</div>'
+    + '</div>'
+    + (availMonths.length ? (
+        '<div style="padding:12px;background:#F9FAFB;border-radius:8px;margin-bottom:12px;">'
+        + '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">② 時間比對（適用 GA4 月度資料）</div>'
+        + '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'
+        +   '<label style="font-size:12px;">基準月份：<select id="rfBase">'+baseMonthOpts+'</select></label>'
+        +   '<label style="font-size:12px;">比對月份：<select id="rfCompare">'+monthOpts.replace('value="'+savedCompare+'"', 'value="'+savedCompare+'" selected')+'</select></label>'
+        +   '<button type="button" class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="(function(){var b=document.getElementById(\'rfBase\').value;var d=new Date(b+\'-01\');d.setMonth(d.getMonth()-1);document.getElementById(\'rfCompare\').value=d.toISOString().slice(0,7);})();">上月</button>'
+        +   '<button type="button" class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="(function(){var b=document.getElementById(\'rfBase\').value;document.getElementById(\'rfCompare\').value=(parseInt(b.slice(0,4))-1)+b.slice(4);})();">去年同月</button>'
+        + '</div></div>'
+      ) : '')
+    + itemPoolHtml
+    + '<div style="padding:12px;background:#F9FAFB;border-radius:8px;margin-bottom:12px;">'
+    +   '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">④ 主要圖表類型</div>'
+    +   '<div style="display:flex;gap:10px;">'
+    +     ['bar','line','pie'].map(t => '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="rfChart" value="'+t+'"'+(t===chartType?' checked':'')+'> '+({bar:'長條圖',line:'折線圖',pie:'圓餅圖'}[t])+'</label>').join('')
+    +   '</div>'
+    + '</div>'
+    + '<div class="modal-footer">'
+    +   '<button class="btn btn-outline" onclick="document.getElementById(\'reportFilterModal\').remove()">取消</button>'
+    +   '<button class="btn btn-primary" onclick="window._reportFilterConfirm()">產生報表</button>'
+    + '</div></div></div>';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  document.body.appendChild(tmp.firstElementChild);
+
+  window._reportFilterConfirm = function() {
+    const modal = document.getElementById('reportFilterModal');
+    const sections = [...modal.querySelectorAll('input[data-section]:checked')].map(e => e.getAttribute('data-section'));
+    const items = [...modal.querySelectorAll('input[data-item]:checked')].map(e => e.getAttribute('data-item'));
+    const basePeriod = (document.getElementById('rfBase')||{}).value || '';
+    const comparePeriod = (document.getElementById('rfCompare')||{}).value || '';
+    const chartType = (modal.querySelector('input[name="rfChart"]:checked')||{}).value || 'bar';
+    const opts = { sections:new Set(sections), items, basePeriod, comparePeriod, chartType };
+    try { localStorage.setItem(saveKey, JSON.stringify({ sections, items, basePeriod, comparePeriod, chartType })); } catch(e){}
+    modal.remove();
+    onConfirm(opts);
+  };
+}
+
 function openChannelReport(channel) {
+  openReportFilterModal('channel', channel, (opts) => _generateChannelReport(channel, opts));
+}
+
+function _generateChannelReport(channel, opts) {
+  opts = opts || { sections: null, items: [], basePeriod: '', comparePeriod: '', chartType: 'bar' };
   const CH = {
     fb:    { title:'粉專貼文成效報表',    color:'#1877F2' },
     event: { title:'活動 / 講座成效報表', color:'#F59E0B' },
@@ -8047,8 +8261,8 @@ function openChannelReport(channel) {
   const cfg = CH[channel];
   if (!cfg) { showToast('未知的傳達管道類型'); return; }
 
-  // 讀取期間
-  const periodLabel = (() => {
+  // 讀取期間（若 opts.basePeriod 有值則優先用）
+  const periodLabel = opts.basePeriod || (() => {
     try {
       const el = document.getElementById('channelReportPeriod_' + channel);
       if (el && el.value && el.value !== 'all') return el.value;
@@ -8061,15 +8275,15 @@ function openChannelReport(channel) {
   // ── 依傳達管道建立 body ──
   let body = '';
   try {
-    if (channel === 'fb')    body = _rptFb(periodLabel);
-    if (channel === 'event') body = _rptEvent(periodLabel);
-    if (channel === 'media') body = _rptMedia(periodLabel);
-    if (channel === 'clinic')body = _rptClinic(periodLabel);
-    if (channel === 'line')  body = _rptLine(periodLabel);
-    if (channel === 'web')   body = _rptWeb(periodLabel);
-    if (channel === 'kol')   body = _rptKol(periodLabel);
-    if (channel === 'video') body = _rptVideo(periodLabel);
-    if (channel === 'seoArticles') body = _rptSeoArticles(periodLabel);
+    if (channel === 'fb')    body = _rptFb(periodLabel, opts);
+    if (channel === 'event') body = _rptEvent(periodLabel, opts);
+    if (channel === 'media') body = _rptMedia(periodLabel, opts);
+    if (channel === 'clinic')body = _rptClinic(periodLabel, opts);
+    if (channel === 'line')  body = _rptLine(periodLabel, opts);
+    if (channel === 'web')   body = _rptWeb(periodLabel, opts);
+    if (channel === 'kol')   body = _rptKol(periodLabel, opts);
+    if (channel === 'video') body = _rptVideo(periodLabel, opts);
+    if (channel === 'seoArticles') body = _rptSeoArticles(periodLabel, opts);
   } catch(err) { body = '<p style="color:#dc2626;">產生報表時發生錯誤：' + err.message + '</p>'; }
 
   const html =
@@ -8149,43 +8363,70 @@ function _rptBarChart(rows) {
   }).join('');
 }
 
-function _rptFb(period) {
-  const list = _rptFilterByPeriod(activePosts(), period);
+// 檢查 section 是否要顯示（未設定 opts 或 sections 時預設全顯示）
+function _hasSec(opts, id) {
+  return !opts || !opts.sections || opts.sections.size === 0 || opts.sections.has(id);
+}
+// 項目過濾（根據 opts.items 過濾資料陣列）
+function _filterByItems(arr, getter, opts) {
+  if (!opts || !opts.items || !opts.items.length) return arr;
+  const set = new Set(opts.items);
+  return arr.filter(x => {
+    const v = getter(x);
+    if (Array.isArray(v)) return v.some(t => set.has(t));
+    return set.has(v);
+  });
+}
+
+function _rptFb(period, opts) {
+  opts = opts || {};
+  let list = _rptFilterByPeriod(activePosts(), period);
+  // 項目比對：依標籤篩選
+  list = _filterByItems(list, p => p.tags||[], opts);
   if (!list.length) return '<div class="empty">此期間無貼文資料</div>';
   const total = list.length;
   const reachSum = list.reduce((s,p)=>s+(+p.reach||0),0);
   const clickSum = list.reduce((s,p)=>s+(+p.click||0),0);
   const engageSum = list.reduce((s,p)=>s+(+p.engage||0),0);
   const avgReach = Math.round(reachSum/total);
-  const ctr = reachSum?(clickSum/reachSum*100).toFixed(2)+'%':'—';
   const engRate = reachSum?(engageSum/reachSum*100).toFixed(2)+'%':'—';
-  // 分類分布
   const byCat = {};
   list.forEach(p => { const c = p.cat||'未分類'; byCat[c] = (byCat[c]||0)+1; });
   const catRows = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v]) => ({ label:k, value:v, display:v+' 篇' }));
-  // 月度趨勢
   const byMonth = {};
   list.forEach(p => { const m = (p.month||p.date||'').slice(0,7); if (m) { byMonth[m] = byMonth[m]||{c:0,r:0}; byMonth[m].c++; byMonth[m].r += +p.reach||0; } });
   const monthRows = Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v]) => ({ label:k, value:v.r, display:v.c+'篇 觸及'+v.r.toLocaleString() }));
-  // Top 10 觸及
-  const top = [...list].sort((a,b)=>(b.reach||0)-(a.reach||0)).slice(0,10);
-  return _rptKpiCards([
+  const top = [...list].sort((a,b)=>(b.reach||0)-(a.reach||0)).slice(0,opts.sections && opts.sections.has('detail') ? 100 : 10);
+  const chartFn = opts.chartType === 'pie' ? _rptPieLike : _rptBarChart;
+  let out = '';
+  if (_hasSec(opts,'kpi')) out += _rptKpiCards([
     { label:'總貼文數', val: total + ' 篇' },
     { label:'累計觸及', val: reachSum.toLocaleString() },
     { label:'平均觸及 / 篇', val: avgReach.toLocaleString() },
     { label:'累計互動', val: engageSum.toLocaleString(), sub:'互動率 ' + engRate },
-  ]) +
-  '<h2>📂 內容分類分布</h2>' + _rptBarChart(catRows) +
-  '<h2>📅 月度趨勢（依觸及）</h2>' + _rptBarChart(monthRows) +
-  '<h2>🏆 Top 10 高觸及貼文</h2>' +
-  '<table><thead><tr><th>排名</th><th>日期</th><th>標題</th><th>分類</th><th>觸及</th><th>互動</th><th>互動率</th></tr></thead><tbody>' +
-  top.map((p,i) => {
-    const er = p.reach?((p.engage||0)/p.reach*100).toFixed(1)+'%':'—';
-    return '<tr><td style="text-align:center;font-weight:700;">' + (i+1) + '</td><td>' + p.date + '</td><td style="font-weight:600;">' + (p.title||'') + '</td><td>' + (p.cat||'') + '</td><td style="text-align:right;">' + (p.reach||0).toLocaleString() + '</td><td style="text-align:right;">' + (p.engage||0).toLocaleString() + '</td><td style="text-align:right;">' + er + '</td></tr>';
-  }).join('') + '</tbody></table>';
+  ]);
+  if (_hasSec(opts,'catDist')) out += '<h2>內容分類分布</h2>' + chartFn(catRows);
+  if (_hasSec(opts,'trend')) out += '<h2>月度趨勢（依觸及）</h2>' + _rptBarChart(monthRows);
+  if (_hasSec(opts,'top5') || _hasSec(opts,'detail')) out +=
+    '<h2>' + (_hasSec(opts,'detail')?'全部貼文明細':'Top 10 高觸及貼文') + '</h2>' +
+    '<table><thead><tr><th>排名</th><th>日期</th><th>標題</th><th>分類</th><th>觸及</th><th>互動</th><th>互動率</th></tr></thead><tbody>' +
+    top.map((p,i) => {
+      const er = p.reach?((p.engage||0)/p.reach*100).toFixed(1)+'%':'—';
+      return '<tr><td style="text-align:center;font-weight:700;">' + (i+1) + '</td><td>' + p.date + '</td><td style="font-weight:600;">' + (p.title||'') + '</td><td>' + (p.cat||'') + '</td><td style="text-align:right;">' + (p.reach||0).toLocaleString() + '</td><td style="text-align:right;">' + (p.engage||0).toLocaleString() + '</td><td style="text-align:right;">' + er + '</td></tr>';
+    }).join('') + '</tbody></table>';
+  return out;
 }
 
-function _rptEvent(period) {
+// Pie-like chart: 以表格形式呈現比例（報表頁用，不依賴 SVG renderer）
+function _rptPieLike(rows) {
+  const total = rows.reduce((s,r)=>s+r.value,0) || 1;
+  let h = '<table style="max-width:420px;"><thead><tr><th>項目</th><th style="text-align:right;">數值</th><th style="text-align:right;">占比</th></tr></thead><tbody>';
+  rows.forEach(r => { h += '<tr><td>'+r.label+'</td><td style="text-align:right;">'+(r.value||0).toLocaleString()+'</td><td style="text-align:right;">'+(r.value/total*100).toFixed(1)+'%</td></tr>'; });
+  h += '</tbody></table>';
+  return h;
+}
+
+function _rptEvent(period, opts) {
   const list = _rptFilterByPeriod(activeEvents(), period);
   if (!list.length) return '<div class="empty">此期間無活動資料</div>';
   const total = list.length;
@@ -8220,7 +8461,7 @@ function _rptEvent(period) {
   }).join('') + '</tbody></table>';
 }
 
-function _rptMedia(period) {
+function _rptMedia(period, opts) {
   const list = _rptFilterByPeriod(activeMedia(), period);
   if (!list.length) return '<div class="empty">此期間無媒體記錄</div>';
   const total = list.length;
@@ -8244,7 +8485,7 @@ function _rptMedia(period) {
   [...list].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(m => '<tr><td>' + (m.date||'') + '</td><td style="font-weight:600;">' + (m.name||'') + '</td><td>' + (m.type||'') + '</td><td>' + (m.title||'') + '</td><td>' + (m.nature||'') + '</td><td style="text-align:right;">' + (m.reach||0).toLocaleString() + '</td></tr>').join('') + '</tbody></table>';
 }
 
-function _rptClinic(period) {
+function _rptClinic(period, opts) {
   const list = _rptFilterByPeriod(activeMediaItems(), period, 'month');
   if (!list.length) return '<div class="empty">此期間無門診表題材</div>';
   const total = list.length;
@@ -8285,7 +8526,7 @@ function _rptClinic(period) {
   }).join('') + '</tbody></table>';
 }
 
-function _rptLine(period) {
+function _rptLine(period, opts) {
   const posts = _rptFilterByPeriod(activeLinePosts(), period);
   const daily = _rptFilterByPeriod((store.lineMetrics||[]), period);
   if (!posts.length && !daily.length) return '<div class="empty">此期間無 LINE 資料</div>';
@@ -8318,96 +8559,151 @@ function _rptLine(period) {
     : '<div class="empty">此期間無 LINE 貼文記錄</div>');
 }
 
-function _rptWeb(period) {
+function _rptWeb(period, opts) {
+  opts = opts || {};
   const ga = _rptFilterByPeriod((store.webMetrics||[]), period);
   const articles = (store.seoArticles||[]).filter(x=>!x.deleted_at);
   const scopedArticles = _rptFilterByPeriod(articles, period);
-  // 若有 gaMonthly，取當前選中月份 (dashboard) 的摘要
-  const curMonth = (document.getElementById('gaPeriodMonth')||{}).value || '';
+  // 優先使用 opts.basePeriod / opts.comparePeriod 做月比對
+  const curMonth = opts.basePeriod || (document.getElementById('gaPeriodMonth')||{}).value || '';
   const gaM = (store.gaMonthly||{})[curMonth] || null;
+  const cmpMonth = opts.comparePeriod || '';
+  const gaMCmp = cmpMonth ? (store.gaMonthly||{})[cmpMonth] : null;
   if (!ga.length && !scopedArticles.length && !gaM) return '<div class="empty">此期間無官網資料</div>';
-  const pvSum = ga.reduce((s,r)=>s+(+r.pv||0),0);
-  const uvSum = ga.reduce((s,r)=>s+(+r.uv||0),0);
-  const sessSum = ga.reduce((s,r)=>s+(+r.sessions||0),0);
-  const avgDur = ga.length ? Math.round(ga.reduce((s,r)=>s+(+r.avg_duration||0),0)/ga.length) : 0;
-  const avgBounce = ga.length ? (ga.reduce((s,r)=>s+(+r.bounce_rate||0),0)/ga.length).toFixed(1) : '—';
-  const lastWithSrc = [...ga].reverse().find(r => r.sources);
-  const sources = lastWithSrc ? lastWithSrc.sources : null;
-  const srcRows = sources ? Object.entries(sources).sort((a,b)=>b[1]-a[1]).map(([k,v]) => ({ label:k, value:v, display:v+'%' })) : [];
-  const seoVolume = scopedArticles.reduce((s,a)=>s+(+a.searchVolume||0),0);
-  const seoRanked = scopedArticles.filter(a => +a.rank);
-  const seoAvgRank = seoRanked.length ? (seoRanked.reduce((s,a)=>s+(+a.rank||0),0)/seoRanked.length).toFixed(1) : '—';
-  const topArticles = [...scopedArticles].sort((a,b)=>(+b.searchVolume||0)-(+a.searchVolume||0)).slice(0,15);
-  // 優先用 gaMonthly（月度報表）
-  let gaMonthlyCards = '', gaMonthlySections = '';
-  if (gaM) {
+  const chartFn = opts.chartType === 'pie' ? _rptPieLike : _rptBarChart;
+
+  let out = '';
+
+  // KPI
+  if (_hasSec(opts, 'kpi')) {
+    const pvSum = ga.reduce((s,r)=>s+(+r.pv||0),0);
+    const uvSum = ga.reduce((s,r)=>s+(+r.uv||0),0);
+    const sessSum = ga.reduce((s,r)=>s+(+r.sessions||0),0);
+    const avgDur = ga.length ? Math.round(ga.reduce((s,r)=>s+(+r.avg_duration||0),0)/ga.length) : 0;
+    const avgBounce = ga.length ? (ga.reduce((s,r)=>s+(+r.bounce_rate||0),0)/ga.length).toFixed(1) : '—';
+    const seoVolume = scopedArticles.reduce((s,a)=>s+(+a.searchVolume||0),0);
+    const seoRanked = scopedArticles.filter(a => +a.rank);
+    const seoAvgRank = seoRanked.length ? (seoRanked.reduce((s,a)=>s+(+a.rank||0),0)/seoRanked.length).toFixed(1) : '—';
+    out += _rptKpiCards([
+      { label:'累計 PV / UV', val: pvSum.toLocaleString() + ' / ' + uvSum.toLocaleString() },
+      { label:'工作階段', val: sessSum.toLocaleString(), sub:'平均停留 ' + avgDur + 's' },
+      { label:'跳出率', val: avgBounce + '%' },
+      { label:'SEO 文章 / 平均排名', val: scopedArticles.length + ' 篇 / ' + seoAvgRank, sub:'總月搜尋量 ' + seoVolume.toLocaleString() },
+    ]);
+  }
+
+  // gaMonthly 當月摘要
+  if (_hasSec(opts, 'gaMonthly') && gaM) {
+    const cmpLabel = cmpMonth ? ' (對比 '+cmpMonth+')' : '';
     const userCur = (gaM.users && gaM.users['活躍使用者']) || 0;
+    const userCmp = gaMCmp ? (gaMCmp.users && gaMCmp.users['活躍使用者']) || 0 : 0;
     const sessCur = (gaM.siteTraffic && gaM.siteTraffic['全站統計'] && gaM.siteTraffic['全站統計']['工作階段']) || 0;
+    const sessCmp = gaMCmp ? (gaMCmp.siteTraffic && gaMCmp.siteTraffic['全站統計'] && gaMCmp.siteTraffic['全站統計']['工作階段']) || 0 : 0;
     const convCur = (gaM.siteTraffic && gaM.siteTraffic['全站統計'] && gaM.siteTraffic['全站統計']['轉換率']) || 0;
     const regCur  = (gaM.siteTraffic && gaM.siteTraffic['全站統計'] && gaM.siteTraffic['全站統計']['科別預約']) || 0;
-    gaMonthlyCards = _rptKpiCards([
-      { label:'分析月份', val: curMonth },
-      { label:'活躍使用者', val: userCur.toLocaleString() },
-      { label:'工作階段', val: sessCur.toLocaleString() },
-      { label:'科別預約 / 轉換率', val: regCur.toLocaleString() + ' / ' + (convCur*100).toFixed(2) + '%' },
+    const regCmp  = gaMCmp ? (gaMCmp.siteTraffic && gaMCmp.siteTraffic['全站統計'] && gaMCmp.siteTraffic['全站統計']['科別預約']) || 0 : 0;
+    const pctOf = (c,p) => p ? ((c-p)/p*100).toFixed(1)+'%' : '—';
+    out += '<h2>' + curMonth + ' GA4 月度摘要' + cmpLabel + '</h2>';
+    out += _rptKpiCards([
+      { label:'活躍使用者', val: userCur.toLocaleString(), sub: userCmp ? 'MoM ' + pctOf(userCur,userCmp) : '' },
+      { label:'工作階段', val: sessCur.toLocaleString(), sub: sessCmp ? 'MoM ' + pctOf(sessCur,sessCmp) : '' },
+      { label:'科別預約', val: regCur.toLocaleString(), sub: regCmp ? 'MoM ' + pctOf(regCur,regCmp) : '' },
+      { label:'轉換率', val: (convCur*100).toFixed(2) + '%' },
     ]);
-    // 流量來源 Top 10
-    if (gaM.sourceUsers) {
-      const srcs = Object.entries(gaM.sourceUsers).filter(([k])=>k!=='合計').sort((a,b)=>b[1]-a[1]).slice(0,10);
-      const max = Math.max(1, ...srcs.map(s=>s[1]));
-      gaMonthlySections += '<h2>流量來源 Top 10</h2>' + _rptBarChart(srcs.map(s => ({ label:s[0], value:s[1], display:s[1].toLocaleString() })));
+  }
+
+  // 流量來源
+  if (_hasSec(opts, 'source') && gaM && gaM.sourceUsers) {
+    const srcs = Object.entries(gaM.sourceUsers).filter(([k])=>k!=='合計').sort((a,b)=>b[1]-a[1]).slice(0,10);
+    out += '<h2>流量來源 Top 10</h2>' + chartFn(srcs.map(s => ({ label:s[0], value:s[1], display:s[1].toLocaleString() })));
+  }
+
+  // 科別預約 — 支援 opts.items 過濾
+  if (_hasSec(opts, 'deptReg') && gaM && gaM.deptReg) {
+    let arr = gaM.deptReg.slice();
+    if (opts.items && opts.items.length) {
+      const set = new Set(opts.items);
+      arr = arr.filter(d => set.has(d.dept));
+      out += '<h2>科別預約（已篩選 '+arr.length+' 個科別）</h2>';
+    } else {
+      arr = arr.slice(0,10);
+      out += '<h2>科別預約 Top 10</h2>';
     }
-    if (gaM.deptReg && gaM.deptReg.length) {
-      gaMonthlySections += '<h2>科別預約 Top 10</h2>' + _rptBarChart(gaM.deptReg.slice(0,10).map(x => ({ label:x.dept, value:x.count, display:x.count.toLocaleString() })));
-    }
-    if (gaM.deviceUsers) {
-      const devs = Object.entries(gaM.deviceUsers).filter(([k])=>k!=='合計').sort((a,b)=>b[1]-a[1]);
-      const total = devs.reduce((s,d)=>s+d[1],0);
-      gaMonthlySections += '<h2>裝置分布</h2>' + _rptBarChart(devs.map(d => ({ label:d[0], value:d[1], display:d[1].toLocaleString()+' ('+(total?(d[1]/total*100).toFixed(1)+'%':'0%')+')' })));
-    }
-    if (gaM.quickMenu) {
-      const qs = Object.entries(gaM.quickMenu).sort((a,b)=>b[1]-a[1]).slice(0,8);
-      gaMonthlySections += '<h2>快速選單點擊</h2>' + _rptBarChart(qs.map(q => ({ label:q[0], value:q[1], display:q[1].toLocaleString() })));
-    }
-    if (gaM.doctorReg && gaM.doctorReg.length) {
-      gaMonthlySections += '<h2>醫師預約 Top 10</h2><table><thead><tr><th>排名</th><th>醫師</th><th>科別</th><th style="text-align:right;">預約完成數</th></tr></thead><tbody>'
-        + gaM.doctorReg.slice(0,10).map((d,i) => '<tr><td style="text-align:center;">'+(i+1)+'</td><td style="font-weight:600;">'+(d.name||'')+'</td><td>'+(d.dept||'')+'</td><td style="text-align:right;font-weight:700;">'+(d.count||0).toLocaleString()+'</td></tr>').join('')
-        + '</tbody></table>';
-    }
-    if (gaM.pageViews && gaM.pageViews.length) {
-      gaMonthlySections += '<h2>熱門頁面 Top 10</h2><table><thead><tr><th>#</th><th>類別</th><th>頁面</th><th style="text-align:right;">瀏覽</th></tr></thead><tbody>'
-        + gaM.pageViews.slice(0,10).map((p,i) => '<tr><td style="text-align:center;">'+(i+1)+'</td><td>'+(p.category||'')+'</td><td style="font-weight:600;">'+(p.name||'')+'</td><td style="text-align:right;">'+(p.views||0).toLocaleString()+'</td></tr>').join('')
-        + '</tbody></table>';
+    // 若有 compareMonth，並列顯示
+    if (gaMCmp && gaMCmp.deptReg) {
+      const cmpMap = {};
+      gaMCmp.deptReg.forEach(d => cmpMap[d.dept] = d.count);
+      out += '<table><thead><tr><th>科別</th><th style="text-align:right;">'+curMonth+'</th><th style="text-align:right;">'+cmpMonth+'</th><th style="text-align:right;">變化</th></tr></thead><tbody>';
+      arr.forEach(d => {
+        const cmp = cmpMap[d.dept] || 0;
+        const delta = cmp ? ((d.count-cmp)/cmp*100).toFixed(1)+'%' : '—';
+        const color = cmp && d.count > cmp ? '#059669' : cmp && d.count < cmp ? '#DC2626' : '#888';
+        out += '<tr><td style="font-weight:600;">'+d.dept+'</td><td style="text-align:right;">'+d.count.toLocaleString()+'</td><td style="text-align:right;color:#888;">'+cmp.toLocaleString()+'</td><td style="text-align:right;color:'+color+';font-weight:700;">'+delta+'</td></tr>';
+      });
+      out += '</tbody></table>';
+    } else {
+      out += chartFn(arr.map(x => ({ label:x.dept, value:x.count, display:x.count.toLocaleString() })));
     }
   }
-  // GSC 關鍵字佈局
-  const gsc = (store.gscKeywords||[]).filter(k => !k.deleted_at);
-  let gscSection = '';
-  if (gsc.length) {
+
+  // 裝置分布
+  if (_hasSec(opts, 'device') && gaM && gaM.deviceUsers) {
+    const devs = Object.entries(gaM.deviceUsers).filter(([k])=>k!=='合計').sort((a,b)=>b[1]-a[1]);
+    const total = devs.reduce((s,d)=>s+d[1],0);
+    out += '<h2>裝置分布</h2>' + chartFn(devs.map(d => ({ label:d[0], value:d[1], display:d[1].toLocaleString()+' ('+(total?(d[1]/total*100).toFixed(1)+'%':'0%')+')' })));
+  }
+
+  // 快速選單
+  if (_hasSec(opts, 'quickMenu') && gaM && gaM.quickMenu) {
+    const qs = Object.entries(gaM.quickMenu).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    out += '<h2>快速選單點擊</h2>' + chartFn(qs.map(q => ({ label:q[0], value:q[1], display:q[1].toLocaleString() })));
+  }
+
+  // 醫師預約
+  if (_hasSec(opts, 'doctor') && gaM && gaM.doctorReg) {
+    out += '<h2>醫師預約 Top 10</h2><table><thead><tr><th>排名</th><th>醫師</th><th>科別</th><th style="text-align:right;">預約完成數</th></tr></thead><tbody>'
+      + gaM.doctorReg.slice(0,10).map((d,i) => '<tr><td style="text-align:center;">'+(i+1)+'</td><td style="font-weight:600;">'+(d.name||'')+'</td><td>'+(d.dept||'')+'</td><td style="text-align:right;font-weight:700;">'+(d.count||0).toLocaleString()+'</td></tr>').join('')
+      + '</tbody></table>';
+  }
+
+  // 熱門頁面
+  if (_hasSec(opts, 'pages') && gaM && gaM.pageViews) {
+    out += '<h2>熱門頁面 Top 10</h2><table><thead><tr><th>#</th><th>類別</th><th>頁面</th><th style="text-align:right;">瀏覽</th></tr></thead><tbody>'
+      + gaM.pageViews.slice(0,10).map((p,i) => '<tr><td style="text-align:center;">'+(i+1)+'</td><td>'+(p.category||'')+'</td><td style="font-weight:600;">'+(p.name||'')+'</td><td style="text-align:right;">'+(p.views||0).toLocaleString()+'</td></tr>').join('')
+      + '</tbody></table>';
+  }
+
+  // GSC
+  if (_hasSec(opts, 'gsc')) {
+    const gsc = (store.gscKeywords||[]).filter(k => !k.deleted_at);
     const top = gsc.filter(k => +k.avgSearchVolume).sort((a,b)=>(+b.avgSearchVolume||0)-(+a.avgSearchVolume||0)).slice(0,10);
     if (top.length) {
-      gscSection = '<h2>GSC 高搜尋量關鍵字 Top 10</h2><table><thead><tr><th>主題</th><th>關鍵字</th><th style="text-align:right;">月搜尋量</th><th style="text-align:center;">困難度</th></tr></thead><tbody>'
+      out += '<h2>GSC 高搜尋量關鍵字 Top 10</h2><table><thead><tr><th>主題</th><th>關鍵字</th><th style="text-align:right;">月搜尋量</th><th style="text-align:center;">困難度</th></tr></thead><tbody>'
         + top.map(k => '<tr><td>'+(k.topic||'—')+'</td><td style="font-weight:600;">'+(k.keyword||'')+'</td><td style="text-align:right;">'+((+k.avgSearchVolume||0).toLocaleString())+'</td><td style="text-align:center;">'+(k.difficulty||'—')+'</td></tr>').join('')
         + '</tbody></table>';
     }
   }
-  return gaMonthlyCards + gaMonthlySections + gscSection + _rptKpiCards([
-    { label:'累計 PV / UV', val: pvSum.toLocaleString() + ' / ' + uvSum.toLocaleString() },
-    { label:'工作階段（舊日資料）', val: sessSum.toLocaleString(), sub:'平均停留 ' + avgDur + 's' },
-    { label:'跳出率', val: avgBounce + '%' },
-    { label:'SEO 文章 / 平均排名', val: scopedArticles.length + ' 篇 / ' + seoAvgRank, sub:'總月搜尋量 ' + seoVolume.toLocaleString() },
-  ]) +
-  (srcRows.length ? '<h2>流量來源分布（最新 ' + lastWithSrc.date + '）</h2>' + _rptBarChart(srcRows) : '') +
-  '<h2>Top 15 SEO 文章（依月搜尋量）</h2>' +
-  (topArticles.length ?
-    '<table><thead><tr><th>日期</th><th>科別</th><th>文章標題</th><th>關鍵字</th><th style="text-align:right;">排名</th><th style="text-align:right;">月搜尋量</th></tr></thead><tbody>' +
-    topArticles.map(a => '<tr><td>'+(a.date||'')+'</td><td>'+(a.dept||'')+'</td><td style="font-weight:600;">'+(a.title||'')+'</td><td>'+(a.keyword||'')+'</td><td style="text-align:right;">'+(a.rank||'—')+'</td><td style="text-align:right;">'+((+a.searchVolume||0).toLocaleString())+'</td></tr>').join('') +
-    '</tbody></table>'
-    : '<div class="empty">尚未建立 SEO 文章</div>');
+
+  // SEO 文章 Top 15
+  if (_hasSec(opts, 'seoTop')) {
+    let topArticles = [...scopedArticles].sort((a,b)=>(+b.searchVolume||0)-(+a.searchVolume||0)).slice(0,15);
+    if (opts.items && opts.items.length) {
+      const set = new Set(opts.items);
+      topArticles = scopedArticles.filter(a => set.has(a.dept)).sort((a,b)=>(+b.searchVolume||0)-(+a.searchVolume||0));
+    }
+    out += '<h2>Top ' + topArticles.length + ' SEO 文章（依月搜尋量）</h2>';
+    out += topArticles.length ?
+      '<table><thead><tr><th>日期</th><th>科別</th><th>文章標題</th><th>關鍵字</th><th style="text-align:right;">排名</th><th style="text-align:right;">月搜尋量</th></tr></thead><tbody>' +
+      topArticles.map(a => '<tr><td>'+(a.date||'')+'</td><td>'+(a.dept||'')+'</td><td style="font-weight:600;">'+(a.title||'')+'</td><td>'+(a.keyword||'')+'</td><td style="text-align:right;">'+(a.rank||'—')+'</td><td style="text-align:right;">'+((+a.searchVolume||0).toLocaleString())+'</td></tr>').join('') +
+      '</tbody></table>'
+      : '<div class="empty">尚未建立 SEO 文章</div>';
+  }
+
+  return out || '<div class="empty">未勾選任何區塊</div>';
 }
 
 // ── SEO 文章專用一鍵報表 ──
-function _rptSeoArticles(period) {
+function _rptSeoArticles(period, opts) {
   const articles = _rptFilterByPeriod((store.seoArticles||[]).filter(x=>!x.deleted_at), period);
   if (!articles.length) return '<div class="empty">此期間無 SEO 文章</div>';
   const totalVolume = articles.reduce((s,a)=>s+(+a.searchVolume||0),0);
@@ -8440,7 +8736,7 @@ function _rptSeoArticles(period) {
   '</tbody></table>';
 }
 
-function _rptKol(period) {
+function _rptKol(period, opts) {
   const list = _rptFilterByPeriod(activeKols(), period);
   if (!list.length) return '<div class="empty">此期間無 KOL 記錄</div>';
   const total = list.length;
@@ -8462,7 +8758,7 @@ function _rptKol(period) {
   [...list].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(k => '<tr><td>' + (k.date||'') + '</td><td style="font-weight:600;">' + (k.name||'') + '</td><td>' + (k.platform||'') + '</td><td style="text-align:right;">' + (k.followers||0).toLocaleString() + '</td><td style="text-align:right;">' + (k.reach||0).toLocaleString() + '</td><td style="text-align:right;">' + (k.engage||0).toLocaleString() + '</td><td>' + (k.campaign||'') + '</td></tr>').join('') + '</tbody></table>';
 }
 
-function _rptVideo(period) {
+function _rptVideo(period, opts) {
   const all = _rptFilterByPeriod(activeVideoItems(), period);
   if (!all.length) return '<div class="empty">此期間無影片資料，請至「影片總覽 (YT / IG)」新增或匯入。</div>';
   const yt = all.filter(v => v.platform === 'YouTube');
@@ -8495,6 +8791,11 @@ function _rptVideo(period) {
 //  PDF EXPORT
 // ═══════════════════════════════════════════
 function exportReport() {
+  openReportFilterModal('monthly', null, (opts) => _generateExportReport(opts));
+}
+
+function _generateExportReport(opts) {
+  window._monthlyOpts = opts || {};
   // Serialize data for the report window — 包含全部 8 個傳達管道
   const rptData = JSON.stringify({
     posts: activePosts(),
@@ -8509,7 +8810,8 @@ function exportReport() {
     line: (store.lineMetrics||[]).filter(x=>!x.deleted_at),
     video: (store.videoItems||[]).filter(x=>!x.deleted_at),
     gaMonthly: store.gaMonthly || {},
-    gscKeywords: (store.gscKeywords||[]).filter(x=>!x.deleted_at)
+    gscKeywords: (store.gscKeywords||[]).filter(x=>!x.deleted_at),
+    _monthlyOpts: (window._monthlyOpts || {})
   });
 
   const w = window.open('', '_blank', 'width=960,height=750');
@@ -8625,6 +8927,33 @@ function exportReport() {
     'rebuildReport();' +
   '}' +
   'function rebuildReport(){' +
+    /* 套用 _monthlyOpts.sections：隱藏未勾選的分頁 */
+    'var mOpts=RAW._monthlyOpts||{};' +
+    'if(mOpts.sections && mOpts.sections.length){' +
+      'var secMap={fb:"rpt-fb",event:"rpt-ev",media:"rpt-md",clinic:"rpt-cl",line:"rpt-ln",web:"rpt-wb",kol:"rpt-kl",video:"rpt-vd"};' +
+      'var secSet=new Set(mOpts.sections);' +
+      'Object.keys(secMap).forEach(function(k){' +
+        'var id=secMap[k];' +
+        'var show=secSet.has(k);' +
+        'var btn=document.querySelector(".tab[onclick*=\\""+id+"\\"]");' +
+        'if(btn) btn.style.display=show?"":"none";' +
+        'var tc=document.getElementById(id);' +
+        'if(tc && !show) tc.classList.remove("active");' +
+      '});' +
+      /* 若目前 active tab 被隱藏，切到第一個可見 tab */
+      'var active=document.querySelector(".tab-content.active");' +
+      'if(!active || active.style.display==="none"){' +
+        'var firstVisible=document.querySelector(".tab-content");' +
+        'document.querySelectorAll(".tab-content").forEach(function(t){t.classList.remove("active");});' +
+        'document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});' +
+        'Object.keys(secMap).forEach(function(k){' +
+          'if(secSet.has(k)){' +
+            'var id=secMap[k]; var tc=document.getElementById(id);' +
+            'if(tc){tc.classList.add("active"); var btn=document.querySelector(".tab[onclick*=\\""+id+"\\"]"); if(btn)btn.classList.add("active"); return false;}' +
+          '}' +
+        '});' +
+      '}' +
+    '}' +
     'var type=document.getElementById("rptPeriodType").value;' +
     'var period=type==="all"?"all":document.getElementById("rptPeriodValue").value;' +
     'var posts=filterByPeriod(RAW.posts,period,"date");' +
