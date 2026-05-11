@@ -2345,16 +2345,55 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           <button class="btn btn-primary" onclick="saveTargets()" style="margin-top:10px;">儲存目標</button>
         </div>
 
+        <!-- 完整資料雲端同步（推薦：跨電腦使用） -->
+        <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:14px;padding:28px;border:1px solid #93C5FD;margin-bottom:20px;">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;color:#1E3A8A;">☁️ 完整資料雲端同步（跨電腦推薦）</h3>
+          <p style="font-size:12.5px;color:#1E40AF;margin-bottom:14px;line-height:1.7;">
+            包含全部資料：<b>GA4 月度、SEO 文章、GSC 關鍵字、影片、門診表、LINE 貼文、OKR、待辦、標籤字典…</b><br>
+            儲存至 Google Drive 一個 JSON 檔（避開 Sheets 儲存格 50KB 上限），可在任何電腦透過 GAS URL 拉取。<br>
+            ⚠️ 第一次使用前需在 GAS 加入 2 個 action，請見 <code>docs/gas-state-sync.md</code>。
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+            <button class="btn btn-primary" data-perm="admin" onclick="pushFullStateToGAS()" style="background:#1E40AF;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              推送完整資料至雲端
+            </button>
+            <button class="btn btn-outline" onclick="pullFullStateFromGAS()" style="border-color:#1E40AF;color:#1E40AF;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              從雲端拉取完整資料
+            </button>
+            <button class="btn btn-outline" onclick="downloadFullStateJson()" style="color:#0891B2;border-color:#0891B2;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              下載 JSON 備份檔
+            </button>
+            <input type="file" id="restoreJsonInput" accept=".json" style="display:none;" onchange="restoreFullStateJson(event)">
+            <button class="btn btn-outline" data-perm="admin" onclick="document.getElementById('restoreJsonInput').click()" style="color:#0891B2;border-color:#0891B2;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              從 JSON 還原
+            </button>
+          </div>
+          <div id="fullStateSyncStatus" style="font-size:12px;color:#1E40AF;"></div>
+          <details style="margin-top:10px;font-size:11.5px;color:#1E40AF;">
+            <summary style="cursor:pointer;font-weight:600;">📋 同步資料明細（共 14 種類型）</summary>
+            <div style="margin-top:6px;padding-left:14px;line-height:1.7;">
+              FB 貼文 / 活動 / 媒體曝光 / KOL 合作 / 門診表題材 / 標籤字典 /<br>
+              LINE 貼文 / SEO 文章 / YT/IG 影片 / GA4 月度 / GSC 關鍵字 /<br>
+              OKR 目標 / 待辦事項 / 設定值（KPI 目標）
+            </div>
+          </details>
+        </div>
+
         <div style="background:var(--surface);border-radius:14px;padding:28px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:20px;">
-          <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">資料管理</h3>
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:8px;">傳統資料同步（僅 FB / 活動 / 媒體 / KOL）</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">不含新功能資料；若使用「完整雲端同步」可忽略此區。</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-outline" onclick="syncFromGAS()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-              從 Sheets 重新同步
+              從 Sheets 重新同步（FB 等 4 種）
             </button>
             <button class="btn btn-outline" onclick="pushAllToGAS()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              推送本機資料到 Sheets
+              推送至 Sheets（FB 等 4 種）
             </button>
             <button class="btn btn-outline" onclick="if(confirm('確定清除本機快取並重新載入？')){ localStorage.removeItem(STORE_KEY); location.reload(); }" style="color:var(--warn);border-color:var(--warn);">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -3123,6 +3162,157 @@ async function pushAllToGAS() {
 async function _gasWrite(action, data) {
   if (!config.gasUrl) return;
   try { await gasGet(action, { data }); } catch(e) { console.warn('GAS write failed:', e.message); }
+}
+
+// ═══════════════════════════════════════════
+// 完整資料雲端同步（含所有新增資料類型）
+// ═══════════════════════════════════════════
+
+// POST 大資料到 GAS（避開 URL 長度限制）
+async function gasPost(action, body) {
+  if (!config.gasUrl) throw new Error('GAS URL 未設定');
+  const url = new URL(config.gasUrl);
+  url.searchParams.set('action', action);
+  // text/plain 避免 GAS 觸發 CORS preflight
+  const res = await fetch(url.toString(), {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(body),
+  });
+  const text = await res.text();
+  let json;
+  try { json = JSON.parse(text); } catch(e) { throw new Error('GAS 回傳非 JSON：' + text.slice(0,200)); }
+  if (!json.ok) throw new Error(json.error || 'GAS error');
+  return json.data;
+}
+
+// 取得完整 state 物件（涵蓋所有資料類型）
+function _buildFullState() {
+  return {
+    posts: store.posts || [],
+    events: store.events || [],
+    media: store.media || [],
+    kols: store.kols || [],
+    mediaItems: store.mediaItems || [],
+    mediaTags: store.mediaTags || [],
+    mediaDoctors: store.mediaDoctors || [],
+    linePosts: store.linePosts || [],
+    seoArticles: store.seoArticles || [],
+    videoItems: store.videoItems || [],
+    gaMonthly: store.gaMonthly || {},
+    gscKeywords: store.gscKeywords || [],
+    okr: store.okr || [],
+    tasks: store.tasks || [],
+    seoKeywords: store.seoKeywords || [],
+    webMetrics: store.webMetrics || [],
+    lineMetrics: store.lineMetrics || [],
+    searchMetrics: store.searchMetrics || [],
+    _meta: {
+      pushedAt: new Date().toISOString(),
+      pushedFrom: navigator.userAgent.slice(0, 100),
+      version: 'state_v1',
+    },
+  };
+}
+
+function _setFullStateStatus(msg, color) {
+  const el = document.getElementById('fullStateSyncStatus');
+  if (el) { el.innerHTML = msg; el.style.color = color || '#1E40AF'; }
+}
+
+async function pushFullStateToGAS() {
+  if (!config.gasUrl) { showToast('請先設定 GAS URL'); return; }
+  if (!isAdmin()) { showToast('僅組長可推送完整資料'); return; }
+  const state = _buildFullState();
+  const sizeKB = (JSON.stringify(state).length/1024).toFixed(1);
+  const counts = [
+    'FB 貼文 '+state.posts.length,
+    '活動 '+state.events.length,
+    '媒體 '+state.media.length,
+    '門診表 '+state.mediaItems.length,
+    'LINE '+state.linePosts.length,
+    'SEO 文章 '+state.seoArticles.length,
+    'YT/IG '+state.videoItems.length,
+    'GA4 月 '+Object.keys(state.gaMonthly).length,
+    'GSC '+state.gscKeywords.length,
+    'OKR '+state.okr.length,
+    '待辦 '+state.tasks.length,
+  ].join('、');
+  if (!confirm('將推送完整資料至雲端 Drive（' + sizeKB + ' KB）：\n' + counts + '\n\n會覆蓋雲端既有檔案，確定？')) return;
+  takeSnapshot('推送完整資料前');
+  _setFullStateStatus('⏳ 推送中…（' + sizeKB + ' KB）');
+  try {
+    await gasPost('saveState', state);
+    _setFullStateStatus('✓ 推送成功 ' + new Date().toLocaleString('zh-TW') + '（' + sizeKB + ' KB）', '#059669');
+    showToast('完整資料已推送至雲端');
+  } catch(e) {
+    _setFullStateStatus('✗ 推送失敗：' + e.message + '<br>請確認 GAS 已加入 saveState action（見 docs/gas-state-sync.md）', '#DC2626');
+    showToast('推送失敗：' + e.message);
+  }
+}
+
+async function pullFullStateFromGAS() {
+  if (!config.gasUrl) { showToast('請先設定 GAS URL'); return; }
+  if (!confirm('將從雲端拉取完整資料，覆蓋本機所有資料（包含 GA4、SEO、OKR、待辦…）。確定？\n\n（會自動快照本機資料以便回復）')) return;
+  takeSnapshot('拉取雲端資料前');
+  _setFullStateStatus('⏳ 拉取中…');
+  try {
+    const remote = await gasGet('loadState');
+    if (!remote || typeof remote !== 'object') {
+      _setFullStateStatus('⚠️ 雲端尚無資料，請先在原電腦推送一次', '#F59E0B');
+      return;
+    }
+    // 套用到 store
+    const keys = ['posts','events','media','kols','mediaItems','mediaTags','mediaDoctors',
+      'linePosts','seoArticles','videoItems','gaMonthly','gscKeywords','okr','tasks',
+      'seoKeywords','webMetrics','lineMetrics','searchMetrics'];
+    keys.forEach(k => { if (remote[k] !== undefined) store[k] = remote[k]; });
+    saveStore();
+    const pushedAt = remote._meta && remote._meta.pushedAt;
+    _setFullStateStatus('✓ 拉取成功（雲端最後更新：' + (pushedAt? new Date(pushedAt).toLocaleString('zh-TW'):'未知') + '）', '#059669');
+    showToast('已套用雲端資料，3 秒後重新載入');
+    setTimeout(() => location.reload(), 3000);
+  } catch(e) {
+    _setFullStateStatus('✗ 拉取失敗：' + e.message + '<br>請確認 GAS 已加入 loadState action', '#DC2626');
+    showToast('拉取失敗：' + e.message);
+  }
+}
+
+// 下載 JSON 備份檔（無需 GAS，可手動丟 Drive / Dropbox / AirDrop）
+function downloadFullStateJson() {
+  const state = _buildFullState();
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ktgh_marketing_state_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  _setFullStateStatus('✓ JSON 備份檔已下載', '#059669');
+}
+
+function restoreFullStateJson(evt) {
+  if (!isAdmin()) { showToast('僅組長可還原'); return; }
+  const f = evt.target.files && evt.target.files[0];
+  if (!f) return;
+  if (!confirm('還原會覆蓋本機所有資料，確定要繼續嗎？\n\n檔案：' + f.name)) { evt.target.value=''; return; }
+  takeSnapshot('還原 JSON 前');
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const remote = JSON.parse(e.target.result);
+      const keys = ['posts','events','media','kols','mediaItems','mediaTags','mediaDoctors',
+        'linePosts','seoArticles','videoItems','gaMonthly','gscKeywords','okr','tasks',
+        'seoKeywords','webMetrics','lineMetrics','searchMetrics'];
+      keys.forEach(k => { if (remote[k] !== undefined) store[k] = remote[k]; });
+      saveStore();
+      _setFullStateStatus('✓ 還原成功，3 秒後重新載入', '#059669');
+      setTimeout(() => location.reload(), 3000);
+    } catch(err) {
+      _setFullStateStatus('✗ 還原失敗：' + err.message, '#DC2626');
+    } finally { evt.target.value = ''; }
+  };
+  reader.readAsText(f);
 }
 
 function saveGasUrl() {
