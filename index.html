@@ -10758,6 +10758,8 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSettingsUI();
   restoreNavState();
   updateCrossTagDatalist();
+  // 預設首頁是「戰情首頁」(sec-warroom-dashboard.active)，需要主動 render 一次
+  if (typeof renderWarRoom === 'function') renderWarRoom();
   if (config.gasUrl) {
     setSyncStatus('正在同步…', 'var(--brand)');
     if (!localStorage.getItem(PUSH_FLAG)) {

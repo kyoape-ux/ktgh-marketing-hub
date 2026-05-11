@@ -17,7 +17,7 @@
  */
 
 // ── 設定 ──────────────────────────────────────────────
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE'; // ← 換成你的試算表 ID
+const SPREADSHEET_ID = '1MtKTbrcoxP7-YVUB0rILdYrM3vOh_O0JXqEWNdJFrKI'; // 光田醫院行銷資料庫
 
 // ── 欄位定義（與前台完全對應）──────────────────────────
 const SCHEMAS = {
