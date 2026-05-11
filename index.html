@@ -7853,35 +7853,71 @@ function _processQuickImportFile(file) {
             || (rows[0] && ('platform' in rows[0] || 'views' in rows[0] || '觀看' in rows[0]));
           if (isVideo) {
             if (!store.videoItems) store.videoItems = [];
-            let added = 0, updated = 0;
-            const normMonth = (d) => {
-              const s = String(d||'').trim().replace(/\./g,'-');
+            let added = 0, updated = 0, skipped = 0;
+            const normDate = (d) => {
+              if (!d) return '';
+              const s = String(d).trim().replace(/\./g,'-').replace(/\//g,'-');
               const m = s.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?/);
-              if (m) return m[1]+'-'+String(m[2]).padStart(2,'0')+(m[3]?'-'+String(m[3]).padStart(2,'0'):'');
+              if (m) return m[1]+'-'+String(m[2]).padStart(2,'0')+(m[3]?'-'+String(m[3]).padStart(2,'0'):'-01');
               return s;
             };
-            rows.forEach(r => {
+            // 去除 BOM 與空白 key
+            const cleanRow = (r) => {
+              const out = {};
+              Object.keys(r).forEach(k => {
+                const cleanK = k.replace(/^﻿/, '').trim();
+                out[cleanK] = r[k];
+              });
+              return out;
+            };
+            const num = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+            rows.forEach(rawRow => {
+              const r = cleanRow(rawRow);
+              const date = normDate(r.date || r['日期'] || '');
               const title = String(r.title || r['標題'] || r['影片標題'] || '').trim();
-              const date = normMonth(r.date || r['日期'] || '');
-              if (!title || !date) return;
-              const platform = (r.platform || r['平台'] || 'YouTube').toString().trim();
-              const tagsRaw = String(r.tags || r['標籤'] || '');
-              const tags = tagsRaw.split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
+              if (!date || !title) { skipped++; return; }
+              // 共用：類別/類型/企劃 當作 tags
+              const baseTags = [r['類別'], r['類型']].filter(Boolean).map(s => String(s).trim());
+              const userTags = String(r.tags || r['標籤'] || '').split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
+              const tags = [...new Set([...baseTags, ...userTags])];
               ensureTagsExist(tags);
-              const obj = {
-                date, platform, title,
-                views: +(r.views || r['觀看'] || r['觀看數'] || 0) || 0,
-                engage: +(r.engage || r['互動'] || r['互動數'] || 0) || 0,
-                external_url: String(r.external_url || r.url || r['連結'] || r['網址'] || '').trim(),
-                tags,
-                updated_at: new Date().toISOString(),
-              };
-              const existing = store.videoItems.find(v => !v.deleted_at && v.date === obj.date && v.title === obj.title && v.platform === obj.platform);
-              if (existing) { Object.assign(existing, obj); updated++; }
-              else { obj.created_at = obj.updated_at; store.videoItems.push(obj); added++; }
+
+              // 多平台展開：YouTube / Facebook / Instagram 各自展開為一筆
+              const platforms = [
+                { name:'YouTube', views: num(r['YT觀看']), engage: num(r['YT讚'])+num(r['YT留言']), url: String(r['YT連結']||'').trim() },
+                { name:'Facebook', views: num(r['FB觀看']) || num(r['FB觸及']), engage: num(r['FB讚'])+num(r['FB留言'])+num(r['FB分享']), url: String(r['FB連結']||'').trim() },
+                { name:'Instagram', views: num(r['IG觀看']) || num(r['IG觸及']), engage: num(r['IG讚'])+num(r['IG留言'])+num(r['IG分享']), url: String(r['IG連結']||'').trim() },
+              ];
+              // 兼容單一平台欄位（platform/views/engage）
+              if (r.platform || r['平台']) {
+                const p = (r.platform || r['平台']).toString().trim();
+                platforms.push({
+                  name: p,
+                  views: num(r.views || r['觀看'] || r['觀看數']),
+                  engage: num(r.engage || r['互動'] || r['互動數']),
+                  url: String(r.external_url || r.url || r['連結'] || r['網址'] || '').trim(),
+                });
+              }
+              let pushedAny = false;
+              platforms.forEach(p => {
+                // 只在「有觀看數」或「有連結」時建立記錄
+                if (p.views === 0 && !p.url) return;
+                const obj = {
+                  date, platform: p.name, title,
+                  views: p.views, engage: p.engage,
+                  external_url: p.url,
+                  tags: tags.slice(),
+                  updated_at: new Date().toISOString(),
+                };
+                const existing = store.videoItems.find(v => !v.deleted_at && v.date === obj.date && v.title === obj.title && v.platform === obj.platform);
+                if (existing) { Object.assign(existing, obj); updated++; }
+                else { obj.created_at = obj.updated_at; store.videoItems.push(obj); added++; }
+                pushedAny = true;
+              });
+              if (!pushedAny) skipped++;
             });
             saveStore();
-            return resolve({ ok:true, filename, detected:'YT/IG 影片', msg:'新增 '+added+'、更新 '+updated+' 則' });
+            return resolve({ ok:true, filename, detected:'YT/IG 影片', msg:'新增 '+added+'、更新 '+updated+' 則'+(skipped?'，跳過 '+skipped+' 筆無觀看數/連結':'') });
           }
           // 不是影片，無法辨識
           return resolve({ ok:false, filename, detected:'未知 (CSV/JSON)', msg:'檔名需含「影片/video/yt/ig」或欄位需含 platform/views' });
