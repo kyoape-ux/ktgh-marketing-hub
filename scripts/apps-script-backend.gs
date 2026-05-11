@@ -79,6 +79,9 @@ function doGet(e) {
       case 'bulkAddKols':   return jsonResponse(bulkUpsert('kols', data, r => (r.date||'')+'|'+(r.name||'')));
       // 管理
       case 'initSheets':    return jsonResponse(initSheets());
+      // 完整資料雲端同步（儲存於 Google Drive JSON 檔）
+      case 'loadState':     return jsonResponse(loadState());
+      case 'saveState':     return jsonResponse(saveState(e));
       default:              return errResponse('Unknown action: ' + action);
     }
   } catch(err) {
@@ -86,7 +89,61 @@ function doGet(e) {
   }
 }
 
-function doPost(e) { return doGet(e); }
+// doPost 處理大 JSON body（saveState 用 POST 避開 URL 長度限制）
+function doPost(e) {
+  try {
+    const action = (e.parameter || {}).action;
+    if (action === 'saveState') {
+      return jsonResponse(saveState(e));
+    }
+    // 其他 action 回到 doGet 流程
+    return doGet(e);
+  } catch(err) {
+    return errResponse(err.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  完整資料雲端同步 — KTGH Marketing Hub State Sync
+// ═══════════════════════════════════════════════════════
+const STATE_FILE_NAME = 'ktgh_marketing_state.json';
+const STATE_FOLDER_NAME = 'KTGH Marketing State';
+
+function _getOrCreateStateFolder() {
+  const folders = DriveApp.getFoldersByName(STATE_FOLDER_NAME);
+  if (folders.hasNext()) return folders.next();
+  return DriveApp.createFolder(STATE_FOLDER_NAME);
+}
+
+function _getStateFile() {
+  const folder = _getOrCreateStateFolder();
+  const files = folder.getFilesByName(STATE_FILE_NAME);
+  return files.hasNext() ? files.next() : null;
+}
+
+function loadState() {
+  const file = _getStateFile();
+  if (!file) return null;
+  try {
+    return JSON.parse(file.getBlob().getDataAsString('UTF-8'));
+  } catch (err) {
+    throw new Error('讀取雲端 state 失敗：' + err.message);
+  }
+}
+
+function saveState(e) {
+  if (!e || !e.postData || !e.postData.contents) {
+    throw new Error('缺少 POST body（需用 POST 推送 JSON）');
+  }
+  const folder = _getOrCreateStateFolder();
+  const file = _getStateFile();
+  if (file) {
+    file.setContent(e.postData.contents);
+  } else {
+    folder.createFile(STATE_FILE_NAME, e.postData.contents, 'application/json');
+  }
+  return { savedAt: new Date().toISOString(), bytes: e.postData.contents.length };
+}
 
 // ═══════════════════════════════════════════════════════
 //  通用讀取：工作表 → JSON 陣列
