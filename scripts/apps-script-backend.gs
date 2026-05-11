@@ -90,13 +90,19 @@ function doGet(e) {
 }
 
 // doPost 處理大 JSON body（saveState 用 POST 避開 URL 長度限制）
+// 支援兩種來源：(1) raw JSON 在 e.postData.contents (curl 風格)
+//              (2) form field 'data' 在 e.parameter.data (iframe form POST 風格)
 function doPost(e) {
   try {
     const action = (e.parameter || {}).action;
     if (action === 'saveState') {
+      // 從 form field 取得 JSON
+      if (e.parameter && e.parameter.data) {
+        return jsonResponse(saveState({ postData: { contents: e.parameter.data } }));
+      }
+      // 從 raw body 取得 JSON
       return jsonResponse(saveState(e));
     }
-    // 其他 action 回到 doGet 流程
     return doGet(e);
   } catch(err) {
     return errResponse(err.message);
