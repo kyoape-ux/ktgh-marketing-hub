@@ -857,10 +857,23 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <h2><span class="dot"></span>行銷整合分析中心</h2>
   </div>
   <nav>
+    <div class="nav-group" data-key="warroom">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>🎯 戰情中心</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
+    <a class="nav-item active" onclick="switchSection('warroom','dashboard')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> 戰情首頁
+    </a>
+    <a class="nav-item" data-perm="edit" onclick="switchSection('warroom','okr')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> OKR 目標設定
+    </a>
+    <a class="nav-item" data-perm="edit" onclick="switchSection('warroom','quickimport')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span> 快速匯入區
+    </a>
+    </div></div>
     <div class="nav-group" data-key="fb">
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>粉專追蹤</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
-    <a class="nav-item active" onclick="switchSection('fb','overview')">
+    <a class="nav-item" onclick="switchSection('fb','overview')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 總覽 Dashboard
     </a>
     <a class="nav-item" onclick="switchSection('fb','upload')">
@@ -1017,8 +1030,58 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 
   <div class="content">
 
+    <!-- ══ 🎯 戰情首頁 ══ -->
+    <div class="section active" id="sec-warroom-dashboard">
+      <div id="warRoomContent">
+        <!-- 由 renderWarRoom 動態產生 -->
+        <div style="padding:60px;text-align:center;color:var(--text-muted);">載入中…</div>
+      </div>
+    </div>
+
+    <!-- ══ OKR 目標設定 ══ -->
+    <div class="section" id="sec-warroom-okr">
+      <div style="background:#EFF6FF;border:1px solid #BFDBFE;padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A;">
+        <b>OKR 目標管理</b>：設定本月、本季、本年度的關鍵指標目標，戰情首頁會自動顯示達成率進度條（綠 ≥80% / 黃 60–80% / 紅 &lt;60%）。
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="btn btn-primary" data-perm="edit" onclick="openOkrModal(-1)">+ 新增 OKR 目標</button>
+      </div>
+      <div id="okrListContent"></div>
+    </div>
+
+    <!-- ══ ⚡ 快速匯入區 ══ -->
+    <div class="section" id="sec-warroom-quickimport">
+      <div style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);border-radius:14px;padding:24px;border:1px solid #93C5FD;margin-bottom:20px;">
+        <h2 style="font-size:18px;font-weight:900;margin-bottom:8px;color:#1E3A8A;">⚡ 一站式快速匯入</h2>
+        <p style="font-size:13px;color:#1E40AF;margin-bottom:14px;line-height:1.7;">
+          將 <b>所有月度 .xlsx 檔案一次拖入</b>，系統會自動辨識（GA4 / GSC / SEO 文章 / 影片 / LINE / 競品）並寫入對應資料庫。
+          匯入完成後可一鍵跳到「戰情首頁」立即查看分析結果。
+        </p>
+      </div>
+
+      <div id="quickImportDrop" style="border:3px dashed #93C5FD;border-radius:14px;padding:60px 20px;text-align:center;background:#F9FBFF;margin-bottom:18px;transition:all .15s;cursor:pointer;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div style="font-size:15px;font-weight:700;color:#1E3A8A;margin-bottom:6px;">拖曳 .xlsx 檔案到此處</div>
+        <div style="font-size:12px;color:#64748B;margin-bottom:14px;">或點擊選擇檔案（可多選）</div>
+        <input type="file" id="quickImportInput" accept=".xlsx" multiple style="display:none;" onchange="handleQuickImport(event)">
+        <button class="btn btn-primary" onclick="document.getElementById('quickImportInput').click()">選擇檔案</button>
+      </div>
+
+      <div id="quickImportLog"></div>
+
+      <div style="background:#F9FAFB;border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:18px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px;">📋 系統可自動辨識的檔案類型</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;font-size:12px;color:#555;">
+          <div>• GA4報表YYYY.xlsx — 9 個工作表（年齡/裝置/來源/科別/醫師/快速選單/評鑑用報表/捲動/科別流量）</div>
+          <div>• GSC報表YYYY.xlsx — 標準格式化_科別工作表</div>
+          <div>• SEO文章YYYY.xlsx — 總表（文章名/日期/科別/關鍵字/排名）</div>
+          <div>• 影片資料.xlsx — JSON/CSV 格式（依檔名「影片/video/YT」識別）</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ FB OVERVIEW ══ -->
-    <div class="section active" id="sec-fb-overview">
+    <div class="section" id="sec-fb-overview">
       
       <!-- Period selector (dynamic) -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;" id="overviewPeriodSelector">
@@ -2705,6 +2768,8 @@ function loadStore() {
       if (!d.seoArticles)  d.seoArticles  = [];
       if (!d.gaMonthly)    d.gaMonthly    = {};
       if (!d.gscKeywords)  d.gscKeywords  = [];
+      if (!d.okr)          d.okr          = [];
+      if (!d.tasks)        d.tasks        = [];
       // 首次載入或舊版 seed 時，自動帶入最新內建光田資料（2025/7–2026/3）
       // v2 seed 修正：新增 siteTraffic 工作階段/科別預約/轉換率 資料
       const SEED_VERSION = 'v3';
@@ -2735,7 +2800,8 @@ function loadStore() {
     linePosts: [], seoKeywords: [], videoItems: [],
     seoArticles: (Array.isArray(window.BUILTIN_SEO_ARTICLES) ? JSON.parse(JSON.stringify(window.BUILTIN_SEO_ARTICLES)) : []),
     gaMonthly:   (window.BUILTIN_GA_MONTHLY ? JSON.parse(JSON.stringify(window.BUILTIN_GA_MONTHLY)) : {}),
-    gscKeywords: (Array.isArray(window.BUILTIN_GSC_KEYWORDS) ? JSON.parse(JSON.stringify(window.BUILTIN_GSC_KEYWORDS)) : [])
+    gscKeywords: (Array.isArray(window.BUILTIN_GSC_KEYWORDS) ? JSON.parse(JSON.stringify(window.BUILTIN_GSC_KEYWORDS)) : []),
+    okr: [], tasks: []
   });
 }
 
@@ -3280,6 +3346,9 @@ function switchSection(module, sub) {
     'crosstag-library': ['共用標籤建立',        '管理跨傳達管道共用的標籤'],
     'video-list':       ['影片總覽 (YT / IG)',   'YouTube / Instagram 影片成效追蹤'],
     'video-import':     ['匯入 YT / IG 資料',     '從影片管理系統批次匯入 JSON / CSV'],
+    'warroom-dashboard':['🎯 戰情首頁',           '一頁掌握全部 KPI、警報、目標達成度與行動建議'],
+    'warroom-okr':      ['OKR 目標設定',          '本月/本季/年度關鍵指標目標管理'],
+    'warroom-quickimport':['⚡ 快速匯入區',       '拖拽多個 .xlsx 自動辨識並寫入對應資料庫'],
   };
   const key = `${module}-${sub}`;
   if (titles[key]) {
@@ -3314,6 +3383,9 @@ function switchSection(module, sub) {
   if (key === 'crosstag-library') renderCrossTagLibrary();
   if (key === 'video-list')       renderVideoList();
   if (key === 'video-import')     renderVideoImport();
+  if (key === 'warroom-dashboard') renderWarRoom();
+  if (key === 'warroom-okr')       renderOkrList();
+  if (key === 'warroom-quickimport') initQuickImport();
   // auto-expand sidebar group containing active item
   try {
     const activeItem = document.querySelector('.nav-item.active');
@@ -6642,6 +6714,851 @@ function clearGscKeywords() {
   saveStore();
   document.getElementById('gscExcelStatus').innerHTML = '<span style="color:#888;">已清除。</span>';
   renderGaDashboard();
+}
+
+// ═══════════════════════════════════════════
+// 🎯 戰情中心 — 戰情首頁 / OKR / 快速匯入
+// ═══════════════════════════════════════════
+
+// ── 小工具 ──
+function _sparkline(values, opts) {
+  opts = opts || {};
+  const w = opts.width || 80, h = opts.height || 20, color = opts.color || '#1E40AF';
+  if (!values || values.length < 2) return '<svg width="'+w+'" height="'+h+'"></svg>';
+  const nums = values.map(v => +v || 0);
+  const max = Math.max(...nums), min = Math.min(...nums);
+  const range = max - min || 1;
+  const pts = nums.map((v, i) => {
+    const x = (i / (nums.length - 1)) * (w - 2) + 1;
+    const y = h - 2 - ((v - min) / range) * (h - 4);
+    return x + ',' + y;
+  }).join(' ');
+  return '<svg width="'+w+'" height="'+h+'" style="vertical-align:middle;"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+}
+
+function _progressBar(current, target, color) {
+  const pct = Math.min(100, target ? (current/target*100) : 0);
+  const fillColor = pct >= 80 ? '#16A34A' : pct >= 60 ? '#F59E0B' : '#DC2626';
+  return '<div style="position:relative;height:18px;background:#F1F5F9;border-radius:9px;overflow:hidden;">'
+    + '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,'+fillColor+','+fillColor+'CC);"></div>'
+    + '<div style="position:absolute;top:0;left:8px;right:8px;height:100%;display:flex;align-items:center;justify-content:space-between;font-size:10.5px;font-weight:700;color:#fff;mix-blend-mode:difference;"><span>'+pct.toFixed(0)+'%</span><span>'+current.toLocaleString()+' / '+target.toLocaleString()+'</span></div>'
+    + '</div>';
+}
+
+function _statusDot(level) {
+  const colors = { red:'#DC2626', amber:'#F59E0B', green:'#16A34A', gray:'#94A3B8' };
+  return '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+(colors[level]||'#94A3B8')+';box-shadow:0 0 0 3px '+(colors[level]||'#94A3B8')+'22;margin-right:6px;vertical-align:middle;"></span>';
+}
+
+function _warCard(title, body, opts) {
+  opts = opts || {};
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);'+(opts.style||'')+'">'
+    + (title ? '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="font-size:13px;font-weight:700;color:var(--text);">'+title+'</div>'+(opts.action||'')+'</div>' : '')
+    + body
+    + '</div>';
+}
+
+// ═══════════════════════════════════════════
+// 戰情首頁 主渲染
+// ═══════════════════════════════════════════
+function renderWarRoom() {
+  const wrap = document.getElementById('warRoomContent');
+  if (!wrap) return;
+  const months = (typeof gaAvailableMonths==='function' ? gaAvailableMonths() : []);
+  if (!months.length) {
+    wrap.innerHTML = '<div style="padding:60px;text-align:center;background:var(--surface);border-radius:14px;border:1px solid var(--border);">'
+      + '<div style="font-size:48px;margin-bottom:12px;">📡</div>'
+      + '<div style="font-size:14px;color:var(--text-muted);">尚無 GA4 資料，請先到「⚡ 快速匯入區」上傳檔案</div>'
+      + '<button class="btn btn-primary" style="margin-top:14px;" onclick="switchSection(\'warroom\',\'quickimport\')">前往快速匯入</button>'
+      + '</div>';
+    return;
+  }
+  const curYm = months[0]; // 最新月份
+  const cur = (store.gaMonthly||{})[curYm] || {};
+
+  // 並排組裝
+  wrap.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;">'
+    + _warSectionAlerts(curYm, cur)
+    + _warSectionKpiSnapshot(curYm, cur, months)
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">'
+    + _warSectionOkr(curYm)
+    + _warSectionWeekEvents()
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;">'
+    + _warSectionChannels()
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">'
+    + _warSectionInsights(curYm, cur, months)
+    + _warSectionSeoRadar()
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">'
+    + _warSectionHighlights()
+    + '<div style="display:grid;grid-template-rows:1fr 1fr;gap:16px;">'
+    +   _warSectionTasks()
+    +   _warSectionDataHealth()
+    + '</div>'
+    + '</div>';
+}
+
+// ── ① 危機警報 ──
+function _warSectionAlerts(curYm, cur) {
+  const alerts = computeAlerts(curYm, cur);
+  if (!alerts.length) {
+    return _warCard('🟢 系統健康狀態',
+      '<div style="padding:12px;color:#16A34A;font-size:13px;">✓ 目前無嚴重警報，各管道運作正常</div>');
+  }
+  const html = alerts.map(a => {
+    const colorMap = { red:'#DC2626', amber:'#F59E0B' };
+    const labelMap = { red:'🔴 嚴重', amber:'🟡 警示' };
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:'+colorMap[a.level]+'10;border-left:4px solid '+colorMap[a.level]+';border-radius:6px;margin-bottom:6px;font-size:12.5px;">'
+      + '<span style="font-weight:700;color:'+colorMap[a.level]+';white-space:nowrap;">'+labelMap[a.level]+'</span>'
+      + '<span style="flex:1;">'+a.msg+'</span>'
+      + (a.action ? '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="'+a.action+'">'+a.actionLabel+' ▶</button>' : '')
+      + '</div>';
+  }).join('');
+  return _warCard('🚨 危機警報 ('+alerts.length+')', html);
+}
+
+function computeAlerts(curYm, cur) {
+  const alerts = [];
+  const store_ga = store.gaMonthly || {};
+  const months = (typeof gaAvailableMonths==='function' ? gaAvailableMonths() : []).sort();
+  const prevYm = (typeof _gaMoMMonth==='function') ? _gaMoMMonth(curYm) : null;
+  const prev = prevYm ? store_ga[prevYm] : null;
+
+  // 規則 1: 活躍使用者 MoM < -30%
+  if (cur.users && prev && prev.users) {
+    const c = +cur.users['活躍使用者']||0, p = +prev.users['活躍使用者']||0;
+    if (p && (c-p)/p < -0.3) {
+      alerts.push({ level:'red', msg:'活躍使用者較上月暴跌 '+Math.round((c-p)/p*-100)+'%（'+p.toLocaleString()+' → '+c.toLocaleString()+'）', action:'switchSection(\'warroom\',\'dashboard\')', actionLabel:'查看' });
+    }
+  }
+  // 規則 2: 工作階段 MoM < -30%
+  if (cur.siteTraffic && prev && prev.siteTraffic) {
+    const c = (cur.siteTraffic['全站統計']||{})['工作階段']||0;
+    const p = (prev.siteTraffic['全站統計']||{})['工作階段']||0;
+    if (p && (c-p)/p < -0.3) {
+      alerts.push({ level:'red', msg:'官網工作階段較上月下滑 '+Math.round((c-p)/p*-100)+'%（'+p.toLocaleString()+' → '+c.toLocaleString()+'）', action:'switchSection(\'web\',\'overview\')', actionLabel:'查 GA4' });
+    }
+  }
+  // 規則 3: SEO 文章排名單月跌 5 名以上
+  (store.seoArticles||[]).filter(a => !a.deleted_at && +a.rank && +a.prevRank).forEach(a => {
+    if ((+a.rank - +a.prevRank) >= 5) {
+      alerts.push({ level:'amber', msg:'SEO 文章「'+(a.title||'').slice(0,28)+'」排名 #'+a.prevRank+' → #'+a.rank+'（跌 '+(+a.rank - +a.prevRank).toFixed(0)+' 名）', action:'switchSection(\'web\',\'seoArticles\')', actionLabel:'查文章' });
+    }
+  });
+  // 規則 4: 高搜尋量關鍵字未寫文章 (GSC)
+  const articleKeywords = new Set((store.seoArticles||[]).filter(a=>!a.deleted_at).map(a => (a.keyword||'').trim()).filter(Boolean));
+  (store.gscKeywords||[]).filter(k => !k.deleted_at && +k.avgSearchVolume > 5000).forEach(k => {
+    if (k.keyword && !articleKeywords.has(k.keyword.trim())) {
+      // 只取前 2 個未寫
+      if (alerts.filter(a => a.msg.startsWith('高搜尋量關鍵字')).length < 2) {
+        alerts.push({ level:'amber', msg:'高搜尋量關鍵字「'+k.keyword+'」（月搜 '+(+k.avgSearchVolume).toLocaleString()+'）尚未寫過 SEO 文章', action:'switchSection(\'web\',\'seoArticles\')', actionLabel:'寫文章' });
+      }
+    }
+  });
+  // 規則 5: 資料延遲 > 30 天
+  if (months.length) {
+    const latest = months[months.length-1];
+    const now = new Date();
+    const latestDate = new Date(latest+'-01');
+    const daysOld = Math.floor((now - latestDate) / (1000*60*60*24));
+    if (daysOld > 60) {
+      alerts.push({ level:'amber', msg:'GA4 資料已過時 '+daysOld+' 天（最新為 '+latest+'），請補充最新月份', action:'switchSection(\'warroom\',\'quickimport\')', actionLabel:'匯入新資料' });
+    }
+  }
+  return alerts.slice(0, 6);
+}
+
+// ── ② KPI 今日重點 ──
+function _warSectionKpiSnapshot(curYm, cur, months) {
+  const prevYm = (typeof _gaMoMMonth==='function') ? _gaMoMMonth(curYm) : null;
+  const yoyYm = (typeof _gaYoYMonth==='function') ? _gaYoYMonth(curYm) : null;
+  const store_ga = store.gaMonthly || {};
+  const prev = prevYm ? store_ga[prevYm] : null;
+  const yoy = yoyYm ? store_ga[yoyYm] : null;
+
+  const getMetric = (m, path) => {
+    if (!m) return 0;
+    if (path === 'users') return +(m.users||{})['活躍使用者']||0;
+    if (path === 'sessions') return +(m.siteTraffic||{})['全站統計']?.['工作階段']||0;
+    if (path === 'reg') return +(m.siteTraffic||{})['全站統計']?.['科別預約']||0;
+    if (path === 'conv') return +(m.siteTraffic||{})['全站統計']?.['轉換率']||0;
+    return 0;
+  };
+
+  // 近 7 個月 sparkline
+  const last7 = months.slice(0, 7).reverse();
+  const userSpark = last7.map(ym => getMetric(store_ga[ym], 'users'));
+  const sessSpark = last7.map(ym => getMetric(store_ga[ym], 'sessions'));
+  const regSpark = last7.map(ym => getMetric(store_ga[ym], 'reg'));
+  const convSpark = last7.map(ym => getMetric(store_ga[ym], 'conv'));
+
+  const card = (label, val, mom, yoy_, spark, color) => {
+    const momHtml = mom !== null && mom !== '' ? '<span style="font-size:10px;color:'+(mom>0?'#16A34A':mom<0?'#DC2626':'#888')+';font-weight:700;">'+(mom>0?'↑':mom<0?'↓':'—')+' '+Math.abs(mom).toFixed(1)+'%</span>' : '';
+    const yoyHtml = yoy_ !== null && yoy_ !== '' ? '<span style="font-size:10px;color:'+(yoy_>0?'#16A34A':yoy_<0?'#DC2626':'#888')+';font-weight:700;">YoY '+(yoy_>0?'+':'')+yoy_.toFixed(1)+'%</span>' : '';
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-top:3px solid '+color+';">'
+      + '<div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:4px;">'+label+'</div>'
+      + '<div style="font-size:22px;font-weight:900;color:'+color+';line-height:1.1;font-family:Inter,sans-serif;">'+val+'</div>'
+      + '<div style="display:flex;gap:6px;margin-top:4px;">'+momHtml+yoyHtml+'</div>'
+      + '<div style="margin-top:4px;">'+_sparkline(spark, { color:color, width:140, height:24 })+'</div>'
+      + '</div>';
+  };
+
+  const pct = (c, p) => p ? ((c-p)/p*100) : null;
+  const userCur = getMetric(cur,'users'), userPrev = getMetric(prev,'users'), userYoy = getMetric(yoy,'users');
+  const sessCur = getMetric(cur,'sessions'), sessPrev = getMetric(prev,'sessions'), sessYoy = getMetric(yoy,'sessions');
+  const regCur = getMetric(cur,'reg'), regPrev = getMetric(prev,'reg'), regYoy = getMetric(yoy,'reg');
+  const convCur = getMetric(cur,'conv'), convPrev = getMetric(prev,'conv');
+
+  const body = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">'
+    + card('活躍使用者', userCur.toLocaleString(), pct(userCur,userPrev), pct(userCur,userYoy), userSpark, '#1E40AF')
+    + card('工作階段', sessCur.toLocaleString(), pct(sessCur,sessPrev), pct(sessCur,sessYoy), sessSpark, '#7C3AED')
+    + card('科別預約', regCur.toLocaleString(), pct(regCur,regPrev), pct(regCur,regYoy), regSpark, '#EC4899')
+    + card('轉換率', (convCur*100).toFixed(2)+'%', convPrev?(convCur-convPrev)*100:null, null, convSpark, '#F59E0B')
+    + '</div>';
+  return _warCard('📊 ' + curYm + ' 重點 KPI（MoM / YoY 對比 + 7 月趨勢）', body);
+}
+
+// ── ③ OKR 進度 ──
+function _warSectionOkr(curYm) {
+  const okrs = (store.okr||[]).filter(o => !o.deleted_at && (o.period === curYm || o.period === curYm.slice(0,4) || o.period === 'all'));
+  if (!okrs.length) {
+    return _warCard('🎯 本月 OKR 達成度',
+      '<div style="padding:14px;color:var(--text-muted);font-size:12px;">尚未設定 OKR 目標。<a href="#" onclick="switchSection(\'warroom\',\'okr\');return false;" style="color:#1E40AF;text-decoration:underline;">立即設定 →</a></div>',
+      { action: '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="switchSection(\'warroom\',\'okr\')">管理 OKR</button>' });
+  }
+  const body = okrs.map(o => {
+    const current = _computeOkrCurrent(o);
+    return '<div style="margin-bottom:12px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:12px;">'
+      +   '<span style="font-weight:600;">'+o.label+'</span>'
+      +   '<span style="color:#888;">'+current.toLocaleString()+' / '+(+o.target||0).toLocaleString()+'</span>'
+      + '</div>'
+      + _progressBar(current, +o.target||0, o.color||'#1E40AF')
+      + '</div>';
+  }).join('');
+  return _warCard('🎯 本月 OKR 達成度',
+    body,
+    { action: '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="switchSection(\'warroom\',\'okr\')">管理</button>' });
+}
+
+function _computeOkrCurrent(okr) {
+  // 動態計算當期實際值
+  const m = okr.metric || '';
+  const store_ga = store.gaMonthly || {};
+  const ym = okr.period && okr.period.length === 7 ? okr.period : null;
+  const gaM = ym ? store_ga[ym] : null;
+  if (m === 'ga_users') return +(gaM?.users||{})['活躍使用者']||0;
+  if (m === 'ga_sessions') return +(gaM?.siteTraffic||{})['全站統計']?.['工作階段']||0;
+  if (m === 'ga_reg') return +(gaM?.siteTraffic||{})['全站統計']?.['科別預約']||0;
+  if (m === 'fb_reach') {
+    const inMonth = d => ym ? (d||'').slice(0,7) === ym : true;
+    return (store.posts||[]).filter(p => !p.deleted_at && inMonth(p.date)).reduce((s,p) => s+(+p.reach||0), 0);
+  }
+  if (m === 'media_count') {
+    const inMonth = d => ym ? (d||'').slice(0,7) === ym : true;
+    return (store.media||[]).filter(p => !p.deleted_at && inMonth(p.date)).length;
+  }
+  if (m === 'seo_articles') {
+    const inMonth = d => ym ? (d||'').slice(0,7) === ym : true;
+    return (store.seoArticles||[]).filter(a => !a.deleted_at && inMonth(a.date)).length;
+  }
+  if (m === 'events') {
+    const inMonth = d => ym ? (d||'').slice(0,7) === ym : true;
+    return (store.events||[]).filter(e => !e.deleted_at && inMonth(e.date)).length;
+  }
+  return +okr.current||0;
+}
+
+// ── ④ 本週行銷活動 ──
+function _warSectionWeekEvents() {
+  const now = new Date();
+  const today = now.toISOString().slice(0,10);
+  const weekLater = new Date(now.getTime() + 7*24*60*60*1000).toISOString().slice(0,10);
+  const events = (store.events||[]).filter(e => !e.deleted_at && e.date >= today && e.date <= weekLater).sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  const videos = (store.videoItems||[]).filter(v => !v.deleted_at && v.date >= today && v.date <= weekLater);
+  const items = events.map(e => ({ date:e.date, type:'活動', title:e.name||'未命名活動' }))
+    .concat(videos.map(v => ({ date:v.date, type:v.platform||'影片', title:v.title||'未命名影片' })))
+    .sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  if (!items.length) {
+    return _warCard('📅 本週行銷活動',
+      '<div style="padding:14px;color:var(--text-muted);font-size:12px;">本週無排定活動。</div>');
+  }
+  const body = items.map(i => {
+    const d = new Date(i.date);
+    const wkday = ['日','一','二','三','四','五','六'][d.getDay()];
+    return '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #F1F5F9;font-size:12.5px;">'
+      + '<div style="font-weight:700;color:#1E40AF;min-width:50px;">'+i.date.slice(5)+' '+wkday+'</div>'
+      + '<div style="background:#EFF6FF;color:#1E40AF;padding:1px 8px;border-radius:4px;font-size:10.5px;font-weight:600;align-self:center;">'+i.type+'</div>'
+      + '<div style="flex:1;">'+i.title+'</div>'
+      + '</div>';
+  }).join('');
+  return _warCard('📅 本週行銷活動 ('+items.length+')',
+    body,
+    { action: '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="switchSection(\'fb\',\'calendar\')">內容日曆 →</button>' });
+}
+
+// ── ⑤ 各管道近 30 天表現 ──
+function _warSectionChannels() {
+  const now = new Date();
+  const start30 = new Date(now.getTime() - 30*24*60*60*1000).toISOString().slice(0,10);
+  const start60 = new Date(now.getTime() - 60*24*60*60*1000).toISOString().slice(0,10);
+  const inRecent = d => (d||'') >= start30;
+  const inPrev30 = d => (d||'') >= start60 && (d||'') < start30;
+
+  const channels = [
+    { icon:'📘', name:'FB 粉專', items: (store.posts||[]).filter(p=>!p.deleted_at), dateField:'date', valueField:'reach' },
+    { icon:'🎬', name:'YT/IG', items: (store.videoItems||[]).filter(v=>!v.deleted_at), dateField:'date', valueField:'views' },
+    { icon:'📰', name:'新聞媒體', items: (store.media||[]).filter(m=>!m.deleted_at), dateField:'date', valueField:'reach' },
+    { icon:'🎤', name:'活動', items: (store.events||[]).filter(e=>!e.deleted_at), dateField:'date', valueField:'attend' },
+    { icon:'💬', name:'LINE', items: (store.linePosts||[]).filter(l=>!l.deleted_at), dateField:'date', valueField:'reach' },
+    { icon:'🔍', name:'SEO 文章', items: (store.seoArticles||[]).filter(a=>!a.deleted_at), dateField:'date', valueField:'searchVolume' },
+    { icon:'🎙', name:'KOL', items: (store.kols||[]).filter(k=>!k.deleted_at), dateField:'date', valueField:'reach' },
+  ];
+
+  const body = '<table style="width:100%;font-size:12px;border-collapse:collapse;">'
+    + '<thead><tr style="background:#F8FAFC;"><th style="padding:8px 10px;text-align:left;">管道</th><th style="padding:8px 10px;text-align:right;">近 30 天 (數量)</th><th style="padding:8px 10px;text-align:right;">總觸及/觀看</th><th style="padding:8px 10px;text-align:right;">MoM</th></tr></thead>'
+    + '<tbody>'
+    + channels.map(c => {
+      const recent = c.items.filter(x => inRecent(x[c.dateField]));
+      const prev = c.items.filter(x => inPrev30(x[c.dateField]));
+      const recentVal = recent.reduce((s,x) => s+(+x[c.valueField]||0), 0);
+      const prevVal = prev.reduce((s,x) => s+(+x[c.valueField]||0), 0);
+      const mom = prevVal ? ((recentVal-prevVal)/prevVal*100) : null;
+      const color = mom===null ? '#888' : mom>0 ? '#16A34A' : mom<0 ? '#DC2626' : '#888';
+      const arrow = mom===null ? '—' : mom>0 ? '↑' : mom<0 ? '↓' : '→';
+      return '<tr style="border-top:1px solid #F1F5F9;">'
+        + '<td style="padding:7px 10px;font-weight:600;">'+c.icon+' '+c.name+'</td>'
+        + '<td style="padding:7px 10px;text-align:right;">'+recent.length+'</td>'
+        + '<td style="padding:7px 10px;text-align:right;font-family:Inter,sans-serif;">'+recentVal.toLocaleString()+'</td>'
+        + '<td style="padding:7px 10px;text-align:right;color:'+color+';font-weight:700;font-size:11px;">'+arrow+' '+(mom===null?'—':Math.abs(mom).toFixed(0)+'%')+'</td>'
+        + '</tr>';
+    }).join('')
+    + '</tbody></table>';
+  return _warCard('📡 各管道近 30 天表現',
+    body,
+    { action: '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="switchSection(\'crosstag\',\'stats\')">完整看板 →</button>' });
+}
+
+// ── ⑥ AI 洞察 + 行動 ──
+function _warSectionInsights(curYm, cur, months) {
+  const tips = [];
+  const store_ga = store.gaMonthly || {};
+  const prevYm = (typeof _gaMoMMonth==='function') ? _gaMoMMonth(curYm) : null;
+  const prev = prevYm ? store_ga[prevYm] : null;
+
+  // 提示 1: 流量大幅成長/下滑
+  if (cur.users && prev && prev.users) {
+    const c = +cur.users['活躍使用者']||0, p = +prev.users['活躍使用者']||0;
+    if (p && Math.abs((c-p)/p) > 0.15) {
+      const grow = c > p;
+      tips.push({
+        icon: grow ? '📈' : '📉',
+        text: grow
+          ? curYm + ' 活躍使用者較上月成長 '+Math.round((c-p)/p*100)+'%，建議乘勢加碼 FB / YT 投放'
+          : curYm + ' 活躍使用者較上月下滑 '+Math.round((p-c)/p*100)+'%，建議檢視內容策略與標題吸引度',
+        action: grow ? 'switchSection(\'campaign\',\'hub\')' : 'switchSection(\'fb\',\'analysis\')',
+        actionLabel: grow ? '建立 campaign' : '檢視 FB 分析'
+      });
+    }
+  }
+  // 提示 2: SEO 排名進步最多的文章
+  const seoImprove = (store.seoArticles||[]).filter(a => !a.deleted_at && +a.rank && +a.prevRank && (+a.prevRank - +a.rank) >= 3);
+  if (seoImprove.length) {
+    const best = seoImprove.sort((a,b) => (+b.prevRank - +b.rank) - (+a.prevRank - +a.rank))[0];
+    tips.push({
+      icon: '✨',
+      text: '「'+(best.title||'').slice(0,28)+'」排名 #'+best.prevRank+' → #'+best.rank+'（進步 '+(+best.prevRank - +best.rank).toFixed(0)+' 名），可考慮加投 FB 廣告擴大效益',
+      action: 'switchSection(\'web\',\'seoArticles\')',
+      actionLabel: '查看文章'
+    });
+  }
+  // 提示 3: 高流量科別建議優先補資料
+  if (cur.deptReg && cur.deptReg.length) {
+    const top = cur.deptReg[0];
+    tips.push({
+      icon: '🎯',
+      text: '本月預約 Top 1 科別「'+top.dept+'」共 '+(+top.count).toLocaleString()+' 人次，可優先在此科別加強 SEO 文章與衛教影片',
+      action: 'switchSection(\'web\',\'seoArticles\')',
+      actionLabel: '新增 SEO'
+    });
+  }
+  // 提示 4: LINE 完讀率 vs FB
+  const recentLine = (store.linePosts||[]).filter(l => !l.deleted_at && l.date >= curYm+'-01');
+  if (recentLine.length) {
+    const lineCtr = recentLine.reduce((s,l) => s+((+l.click||0)/(+l.reach||1)), 0)/recentLine.length;
+    if (lineCtr > 0.1) {
+      tips.push({
+        icon: '💬',
+        text: 'LINE 平均點擊率 '+(lineCtr*100).toFixed(1)+'%，明顯優於 FB 觸及，建議重要訊息優先用 LINE 廣播',
+        action: 'switchSection(\'line\',\'posts\')',
+        actionLabel: 'LINE 列表'
+      });
+    }
+  }
+
+  if (!tips.length) {
+    return _warCard('🧠 AI 洞察與建議',
+      '<div style="padding:14px;color:var(--text-muted);font-size:12px;">尚無足夠資料產出洞察，請先匯入更多月份。</div>');
+  }
+  const body = tips.slice(0,4).map(t =>
+    '<div style="padding:10px 12px;background:#FAFBFA;border-left:3px solid #1E40AF;border-radius:6px;margin-bottom:8px;font-size:12px;">'
+    + '<div style="margin-bottom:6px;">'+t.icon+' '+t.text+'</div>'
+    + (t.action ? '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="'+t.action+'">'+t.actionLabel+' →</button>' : '')
+    + '</div>'
+  ).join('');
+  return _warCard('🧠 AI 洞察與建議', body);
+}
+
+// ── ⑦ SEO 機會雷達 ──
+function _warSectionSeoRadar() {
+  const articleKeywords = new Set((store.seoArticles||[]).filter(a=>!a.deleted_at).map(a => (a.keyword||'').trim()).filter(Boolean));
+  const opportunities = (store.gscKeywords||[])
+    .filter(k => !k.deleted_at && +k.avgSearchVolume >= 500)
+    .map(k => {
+      const hasArticle = articleKeywords.has((k.keyword||'').trim());
+      const written = (store.seoArticles||[]).find(a => !a.deleted_at && (a.keyword||'').trim() === (k.keyword||'').trim());
+      const articleRank = written && +written.rank;
+      return { ...k, hasArticle, articleRank };
+    })
+    .filter(k => !k.hasArticle || (k.articleRank && k.articleRank > 10))
+    .sort((a,b) => (+b.avgSearchVolume||0) - (+a.avgSearchVolume||0))
+    .slice(0, 6);
+
+  if (!opportunities.length) {
+    return _warCard('🎯 SEO 機會雷達',
+      '<div style="padding:14px;color:var(--text-muted);font-size:12px;">所有高搜尋量關鍵字都已涵蓋。</div>');
+  }
+  const body = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">高月搜尋量 × (未寫文章 或 排名 &gt;10)</div>'
+    + opportunities.map(k => {
+      const tag = k.hasArticle ? '<span style="background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:3px;font-size:10px;">排名 #'+k.articleRank+'</span>' : '<span style="background:#FEE2E2;color:#DC2626;padding:1px 6px;border-radius:3px;font-size:10px;">未寫</span>';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F1F5F9;font-size:12px;">'
+        + '<div style="flex:1;"><b>'+(k.keyword||'')+'</b><br><span style="font-size:10.5px;color:#888;">主題：'+(k.topic||'—')+' ｜ '+(k.difficulty||'—')+'</span></div>'
+        + '<div style="text-align:right;font-weight:700;color:#1E40AF;">'+((+k.avgSearchVolume||0)/1000).toFixed(1)+'K</div>'
+        + tag
+        + '<button class="btn btn-outline" style="font-size:10.5px;padding:2px 6px;" onclick="_warOpenSeoArticleWithKeyword(\''+(k.keyword||'').replace(/\\'/g,"\\\\'")+'\')">寫文 →</button>'
+        + '</div>';
+    }).join('');
+  return _warCard('🎯 SEO 機會雷達', body);
+}
+
+function _warOpenSeoArticleWithKeyword(keyword) {
+  switchSection('web', 'seoArticles');
+  setTimeout(() => {
+    if (typeof openSeoArticleModal === 'function') {
+      openSeoArticleModal(-1);
+      setTimeout(() => {
+        const kwInput = document.getElementById('sa-keyword');
+        if (kwInput) kwInput.value = keyword;
+      }, 100);
+    }
+  }, 200);
+}
+
+// ── ⑧ 月亮點 ──
+function _warSectionHighlights() {
+  // 取當月最高表現 (FB 觸及 / YT 觀看 / 媒體觸及)
+  const curMonth = new Date().toISOString().slice(0,7);
+  const inMonth = d => (d||'').slice(0,7) === curMonth;
+  const fbTop = (store.posts||[]).filter(p => !p.deleted_at && inMonth(p.date)).sort((a,b) => (+b.reach||0)-(+a.reach||0))[0];
+  const ytTop = (store.videoItems||[]).filter(v => !v.deleted_at && inMonth(v.date) && v.platform==='YouTube').sort((a,b) => (+b.views||0)-(+a.views||0))[0];
+  const mediaTop = (store.media||[]).filter(m => !m.deleted_at && inMonth(m.date)).sort((a,b) => (+b.reach||0)-(+a.reach||0))[0];
+
+  const items = [];
+  if (fbTop) items.push({ rank:1, title:fbTop.title||'未命名貼文', metric:'觸及 '+(+fbTop.reach||0).toLocaleString()+' / 互動率 '+(fbTop.reach?((+fbTop.engage||0)/fbTop.reach*100).toFixed(1)+'%':'—'), type:'FB' });
+  if (ytTop) items.push({ rank:2, title:ytTop.title||'未命名影片', metric:'YT 觀看 '+(+ytTop.views||0).toLocaleString()+' / 互動 '+(+ytTop.engage||0).toLocaleString(), type:'YT' });
+  if (mediaTop) items.push({ rank:3, title:mediaTop.title||mediaTop.name||'未命名報導', metric:'觸及 '+(+mediaTop.reach||0).toLocaleString(), type:'媒體' });
+
+  if (!items.length) {
+    return _warCard('🏆 本月 Top 3 亮點',
+      '<div style="padding:14px;color:var(--text-muted);font-size:12px;">本月尚無資料。</div>');
+  }
+  const body = items.map(i => {
+    const colors = { FB:'#1877F2', YT:'#FF0000', 媒體:'#DC2626' };
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F1F5F9;">'
+      + '<div style="background:'+(colors[i.type]||'#888')+';color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;">#'+i.rank+'</div>'
+      + '<div style="flex:1;font-size:12.5px;"><div style="font-weight:600;margin-bottom:2px;">'+i.title.slice(0,40)+'</div><div style="color:#666;font-size:11px;">'+i.metric+'</div></div>'
+      + '<span style="background:#F1F5F9;color:#475569;padding:2px 8px;border-radius:4px;font-size:10.5px;font-weight:600;">'+i.type+'</span>'
+      + '</div>';
+  }).join('');
+  return _warCard('🏆 本月 Top 3 亮點', body);
+}
+
+// ── ⑨ 待辦 ──
+function _warSectionTasks() {
+  const tasks = (store.tasks||[]).filter(t => !t.done && !t.deleted_at);
+  if (!tasks.length) {
+    return _warCard('📋 待辦',
+      '<div style="padding:8px;color:var(--text-muted);font-size:11.5px;">無待辦事項</div>',
+      { action: '<button class="btn btn-outline" data-perm="edit" style="font-size:11px;padding:3px 8px;" onclick="openTaskModal(-1)">+</button>' });
+  }
+  const body = tasks.slice(0,5).map((t,i) => {
+    const idx = store.tasks.indexOf(t);
+    return '<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11.5px;cursor:pointer;">'
+      + '<input type="checkbox" data-perm="edit" onchange="toggleTask('+idx+', this.checked)">'
+      + '<span style="flex:1;">'+(t.title||'')+'</span>'
+      + (t.due ? '<span style="color:#888;font-size:10px;">'+t.due+'</span>' : '')
+      + '</label>';
+  }).join('');
+  return _warCard('📋 待辦 ('+tasks.length+')',
+    body,
+    { action: '<button class="btn btn-outline" data-perm="edit" style="font-size:11px;padding:3px 8px;" onclick="openTaskModal(-1)">+</button>' });
+}
+
+// ── ⑩ 資料健康度 ──
+function _warSectionDataHealth() {
+  const now = new Date();
+  const ago = ts => {
+    if (!ts) return null;
+    const d = new Date(ts);
+    return Math.floor((now - d) / (1000*60*60*24));
+  };
+  const checkSync = (arr, label) => {
+    const latest = (arr||[]).filter(x=>!x.deleted_at).map(x => x.updated_at||x.created_at).filter(Boolean).sort().reverse()[0];
+    const days = ago(latest);
+    let level = 'green';
+    if (days === null) level = 'gray';
+    else if (days > 30) level = 'red';
+    else if (days > 7) level = 'amber';
+    return { label, days, level };
+  };
+  const items = [
+    checkSync(store.posts, 'FB 貼文'),
+    checkSync(store.videoItems, 'YT/IG 影片'),
+    checkSync(store.linePosts, 'LINE 貼文'),
+    checkSync(store.seoArticles, 'SEO 文章'),
+  ];
+  // GA4 月度
+  const months = (typeof gaAvailableMonths==='function' ? gaAvailableMonths() : []);
+  if (months.length) {
+    const latest = months[0];
+    const d = new Date(latest+'-01');
+    const days = Math.floor((now - d) / (1000*60*60*24));
+    items.push({ label:'GA4 月度', days:days, level: days>60?'red':days>30?'amber':'green', isMonth:true });
+  }
+  const body = items.map(i => {
+    const txt = i.days === null ? '尚無資料' : i.isMonth ? '最新 '+i.days+' 天前' : '更新 '+i.days+' 天前';
+    return '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11.5px;">'
+      + _statusDot(i.level)
+      + '<span style="flex:1;">'+i.label+'</span>'
+      + '<span style="color:#888;">'+txt+'</span>'
+      + '</div>';
+  }).join('');
+  return _warCard('🩺 資料健康度', body);
+}
+
+// ═══════════════════════════════════════════
+// OKR 列表頁
+// ═══════════════════════════════════════════
+function renderOkrList() {
+  const wrap = document.getElementById('okrListContent');
+  if (!wrap) return;
+  const list = (store.okr||[]).filter(o => !o.deleted_at);
+  if (!list.length) {
+    wrap.innerHTML = '<div style="padding:40px;text-align:center;background:var(--surface);border-radius:12px;border:1px solid var(--border);color:var(--text-muted);">尚無 OKR 目標，點上方「+ 新增」開始設定。</div>';
+    return;
+  }
+  wrap.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;"><table style="width:100%;font-size:12.5px;border-collapse:collapse;">'
+    + '<thead><tr style="background:#F8FAFC;"><th style="padding:10px;text-align:left;">期間</th><th style="padding:10px;text-align:left;">目標</th><th style="padding:10px;text-align:left;">指標</th><th style="padding:10px;text-align:right;">目標值</th><th style="padding:10px;text-align:right;">當前</th><th style="padding:10px;text-align:left;">達成率</th><th style="padding:10px;">操作</th></tr></thead><tbody>'
+    + list.map((o,i) => {
+      const idx = store.okr.indexOf(o);
+      const current = _computeOkrCurrent(o);
+      const pct = +o.target ? (current/+o.target*100) : 0;
+      const color = pct >= 80 ? '#16A34A' : pct >= 60 ? '#F59E0B' : '#DC2626';
+      return '<tr style="border-top:1px solid #F1F5F9;">'
+        + '<td style="padding:8px 10px;">'+(o.period||'—')+'</td>'
+        + '<td style="padding:8px 10px;font-weight:600;">'+(o.label||'')+'</td>'
+        + '<td style="padding:8px 10px;color:#666;">'+_okrMetricLabel(o.metric)+'</td>'
+        + '<td style="padding:8px 10px;text-align:right;">'+(+o.target||0).toLocaleString()+'</td>'
+        + '<td style="padding:8px 10px;text-align:right;font-weight:700;">'+current.toLocaleString()+'</td>'
+        + '<td style="padding:8px 10px;"><div style="width:120px;">'+_progressBar(current, +o.target||0, color)+'</div></td>'
+        + '<td style="padding:8px 10px;text-align:center;"><button class="action-btn edit" onclick="openOkrModal('+idx+')">編輯</button> <button class="action-btn del" data-perm="edit" onclick="deleteOkr('+idx+')">刪</button></td>'
+        + '</tr>';
+    }).join('')
+    + '</tbody></table></div>';
+  applyPermissions();
+}
+
+function _okrMetricLabel(m) {
+  const map = {
+    ga_users:'GA4 活躍使用者',
+    ga_sessions:'GA4 工作階段',
+    ga_reg:'GA4 科別預約',
+    fb_reach:'FB 觸及人數',
+    media_count:'媒體曝光篇數',
+    seo_articles:'SEO 文章數',
+    events:'活動場次',
+    custom:'自訂指標',
+  };
+  return map[m] || m;
+}
+
+function openOkrModal(idx) {
+  if (!requireEdit()) return;
+  const isNew = idx === -1;
+  const o = isNew ? {} : store.okr[idx];
+  const html = '<div class="modal-overlay open" id="okrModal">'
+    + '<div class="modal-box" style="max-width:520px;">'
+    + '<h3>' + (isNew?'新增':'編輯') + ' OKR 目標</h3>'
+    + '<div class="form-grid" style="grid-template-columns:1fr 1fr;">'
+    +   '<div class="form-group"><label>期間 *</label><input type="text" id="okr-period" value="'+(o.period||new Date().toISOString().slice(0,7))+'" placeholder="2026-03 或 2026"></div>'
+    +   '<div class="form-group"><label>目標標籤 *</label><input type="text" id="okr-label" value="'+(o.label||'').replace(/"/g,'&quot;')+'" placeholder="例：FB 觸及 50 萬"></div>'
+    +   '<div class="form-group"><label>對應指標 *</label><select id="okr-metric">'
+    +     ['ga_users','ga_sessions','ga_reg','fb_reach','media_count','seo_articles','events','custom'].map(m =>
+            '<option value="'+m+'"'+(m===o.metric?' selected':'')+'>'+_okrMetricLabel(m)+'</option>').join('')
+    +   '</select></div>'
+    +   '<div class="form-group"><label>目標值 *</label><input type="number" id="okr-target" value="'+(o.target||'')+'"></div>'
+    +   '<div class="form-group" style="grid-column:1/-1;"><label>備註</label><input type="text" id="okr-note" value="'+(o.note||'').replace(/"/g,'&quot;')+'"></div>'
+    + '</div>'
+    + '<div class="modal-footer">'
+    +   '<button class="btn btn-outline" onclick="document.getElementById(\'okrModal\').remove()">取消</button>'
+    +   '<button class="btn btn-primary" onclick="saveOkr('+idx+')">儲存</button>'
+    + '</div></div></div>';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  document.body.appendChild(tmp.firstElementChild);
+}
+
+function saveOkr(idx) {
+  if (!requireEdit()) return;
+  const get = id => (document.getElementById(id)||{}).value || '';
+  const obj = {
+    period: get('okr-period').trim(),
+    label: get('okr-label').trim(),
+    metric: get('okr-metric'),
+    target: +get('okr-target') || 0,
+    note: get('okr-note'),
+    updated_at: new Date().toISOString(),
+  };
+  if (!obj.period || !obj.label || !obj.target) { showToast('請填寫期間、標籤、目標值'); return; }
+  if (!store.okr) store.okr = [];
+  if (idx === -1) { obj.id = 'okr_'+Date.now(); obj.created_at = obj.updated_at; store.okr.push(obj); }
+  else { store.okr[idx] = { ...store.okr[idx], ...obj }; }
+  saveStore();
+  const modal = document.getElementById('okrModal'); if (modal) modal.remove();
+  renderOkrList();
+  showToast(idx===-1?'OKR 已新增':'OKR 已更新');
+}
+
+function deleteOkr(idx) {
+  if (!requireEdit()) return;
+  if (!confirm('確定刪除此 OKR 目標？')) return;
+  store.okr[idx].deleted_at = new Date().toISOString();
+  saveStore();
+  renderOkrList();
+}
+
+// ═══════════════════════════════════════════
+// 待辦
+// ═══════════════════════════════════════════
+function openTaskModal(idx) {
+  if (!requireEdit()) return;
+  const isNew = idx === -1;
+  const t = isNew ? {} : store.tasks[idx];
+  const html = '<div class="modal-overlay open" id="taskModal">'
+    + '<div class="modal-box" style="max-width:480px;">'
+    + '<h3>' + (isNew?'新增':'編輯') + ' 待辦</h3>'
+    + '<div class="form-grid" style="grid-template-columns:1fr 1fr;">'
+    +   '<div class="form-group" style="grid-column:1/-1;"><label>內容 *</label><input type="text" id="task-title" value="'+(t.title||'').replace(/"/g,'&quot;')+'"></div>'
+    +   '<div class="form-group"><label>負責人</label><input type="text" id="task-owner" value="'+(t.owner||'')+'"></div>'
+    +   '<div class="form-group"><label>截止日</label><input type="date" id="task-due" value="'+(t.due||'')+'"></div>'
+    + '</div>'
+    + '<div class="modal-footer">'
+    +   '<button class="btn btn-outline" onclick="document.getElementById(\'taskModal\').remove()">取消</button>'
+    +   '<button class="btn btn-primary" onclick="saveTask('+idx+')">儲存</button>'
+    + '</div></div></div>';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  document.body.appendChild(tmp.firstElementChild);
+}
+
+function saveTask(idx) {
+  if (!requireEdit()) return;
+  const title = (document.getElementById('task-title')||{}).value.trim();
+  if (!title) { showToast('請輸入內容'); return; }
+  const obj = {
+    title,
+    owner: (document.getElementById('task-owner')||{}).value || '',
+    due: (document.getElementById('task-due')||{}).value || '',
+    updated_at: new Date().toISOString(),
+  };
+  if (!store.tasks) store.tasks = [];
+  if (idx === -1) { obj.id = 'task_'+Date.now(); obj.created_at = obj.updated_at; obj.done = false; store.tasks.push(obj); }
+  else { store.tasks[idx] = { ...store.tasks[idx], ...obj }; }
+  saveStore();
+  document.getElementById('taskModal').remove();
+  renderWarRoom();
+  showToast('已儲存');
+}
+
+function toggleTask(idx, done) {
+  if (!requireEdit()) return;
+  if (!store.tasks[idx]) return;
+  store.tasks[idx].done = done;
+  store.tasks[idx].done_at = done ? new Date().toISOString() : null;
+  saveStore();
+  renderWarRoom();
+}
+
+// ═══════════════════════════════════════════
+// 快速匯入區 — 多檔自動辨識
+// ═══════════════════════════════════════════
+function initQuickImport() {
+  const drop = document.getElementById('quickImportDrop');
+  if (!drop || drop.dataset.bound) return;
+  drop.dataset.bound = '1';
+  drop.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    drop.style.background = '#DBEAFE';
+    drop.style.borderColor = '#3B82F6';
+  });
+  drop.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    drop.style.background = '#F9FBFF';
+    drop.style.borderColor = '#93C5FD';
+  });
+  drop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    drop.style.background = '#F9FBFF';
+    drop.style.borderColor = '#93C5FD';
+    if (e.dataTransfer && e.dataTransfer.files) {
+      handleQuickImportFiles(e.dataTransfer.files);
+    }
+  });
+}
+
+function handleQuickImport(evt) {
+  if (evt.target && evt.target.files) handleQuickImportFiles(evt.target.files);
+}
+
+async function handleQuickImportFiles(files) {
+  if (!requireEdit()) return;
+  const log = document.getElementById('quickImportLog');
+  if (!log) return;
+  log.innerHTML = '';
+  if (typeof XLSX === 'undefined') {
+    log.innerHTML = '<div style="color:#DC2626;">XLSX 套件未載入</div>';
+    return;
+  }
+  const results = [];
+  for (const file of files) {
+    const item = await _processQuickImportFile(file);
+    results.push(item);
+    log.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;">'
+      + '<div style="font-size:13px;font-weight:700;margin-bottom:8px;">匯入紀錄</div>'
+      + results.map(r =>
+          '<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #F1F5F9;font-size:12px;align-items:center;">'
+          + (r.ok ? '<span style="color:#16A34A;">✓</span>' : '<span style="color:#DC2626;">✗</span>')
+          + '<span style="font-weight:600;">'+r.filename+'</span>'
+          + '<span style="background:#EFF6FF;color:#1E40AF;padding:1px 6px;border-radius:3px;font-size:10px;">'+r.detected+'</span>'
+          + '<span style="flex:1;color:#666;">'+r.msg+'</span>'
+          + '</div>'
+        ).join('')
+      + '<div style="margin-top:14px;text-align:center;">'
+      + '<button class="btn btn-primary" onclick="switchSection(\'warroom\',\'dashboard\');renderWarRoom();">📊 跳到戰情首頁查看分析</button>'
+      + '</div>'
+      + '</div>';
+  }
+}
+
+function _processQuickImportFile(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
+        const sheets = wb.SheetNames;
+        const filename = file.name;
+
+        // 自動辨識
+        let detected = '未知', msg = '無法自動辨識';
+        if (sheets.includes('科別流量') || sheets.includes('使用者來源') || sheets.includes('使用者來源媒介')) {
+          detected = 'GA4';
+          const yearMatch = filename.match(/(20\d{2})/);
+          const fallbackYear = yearMatch ? +yearMatch[1] : new Date().getFullYear();
+          const result = _parseGaWorkbook(wb, fallbackYear);
+          if (!store.gaMonthly) store.gaMonthly = {};
+          let count = 0;
+          Object.keys(result).forEach(ym => {
+            store.gaMonthly[ym] = Object.assign(store.gaMonthly[ym]||{}, result[ym]);
+            count++;
+          });
+          msg = '解析到 '+count+' 個月資料';
+          saveStore();
+          return resolve({ ok:true, filename, detected, msg });
+        }
+        if (sheets.includes('標準格式化_科別') || /GSC|search.console/i.test(filename)) {
+          detected = 'GSC';
+          const ws = wb.Sheets[sheets[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:null, raw:true });
+          const header = rows[0] || [];
+          const col = name => header.findIndex(h => h && String(h).trim() === name);
+          const c_topic = col('主題'), c_kw = col('關鍵字'), c_vol = col('每月平均搜尋量'), c_diff = col('困難度');
+          let added = 0; let curTopic = '';
+          if (!store.gscKeywords) store.gscKeywords = [];
+          for (let r = 1; r < rows.length; r++) {
+            const row = rows[r] || [];
+            if (c_topic >= 0 && row[c_topic]) curTopic = String(row[c_topic]).trim();
+            const kw = c_kw >= 0 ? row[c_kw] : null;
+            if (!kw) continue;
+            const exists = store.gscKeywords.find(k => k.topic === curTopic && k.keyword === String(kw).trim());
+            if (!exists) {
+              store.gscKeywords.push({
+                topic: curTopic, keyword: String(kw).trim(),
+                avgSearchVolume: (c_vol >= 0 && !isNaN(+row[c_vol])) ? +row[c_vol] : null,
+                difficulty: (c_diff >= 0 && row[c_diff]) ? String(row[c_diff]).trim() : '',
+              });
+              added++;
+            }
+          }
+          saveStore();
+          return resolve({ ok:true, filename, detected, msg:'新增 '+added+' 筆關鍵字' });
+        }
+        if (sheets.includes('總表') && /SEO/i.test(filename)) {
+          detected = 'SEO 文章';
+          const ws = wb.Sheets['總表'];
+          const rows = XLSX.utils.sheet_to_json(ws, { defval:'', raw:false });
+          let added = 0, updated = 0;
+          if (!store.seoArticles) store.seoArticles = [];
+          rows.forEach(r => {
+            const title = (r['文章名稱']||'').toString().trim();
+            if (!title) return;
+            let dateRaw = (r['日期']||'').toString().trim().replace(/\./g,'-').replace(/\s/g,'');
+            if (/^\d{4}-\d{1,2}$/.test(dateRaw)) {
+              const [y,m] = dateRaw.split('-'); dateRaw = y + '-' + String(m).padStart(2,'0');
+            }
+            const url = (r['網址']||'').toString().trim();
+            const existing = store.seoArticles.find(x => !x.deleted_at && ((url && x.url === url) || (x.title === title && x.date === dateRaw)));
+            const obj = {
+              date:dateRaw, dept:(r['科別']||'').toString().trim(),
+              title, keyword:(r['關鍵字']||'').toString().trim(),
+              rank: parseFloat(r['排名']) || '',
+              searchVolume: parseFloat(r['月搜尋量']) || '',
+              prevRank: parseFloat(r['排名(上個月)']) || '',
+              prevSearchVolume: parseFloat(r['月搜尋量(上個月)']) || '',
+              url, updated_at:new Date().toISOString()
+            };
+            if (existing) { Object.assign(existing, obj); updated++; }
+            else {
+              obj.id = 'sa_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+              obj.tags = []; obj.created_at = obj.updated_at;
+              store.seoArticles.push(obj); added++;
+            }
+          });
+          saveStore();
+          return resolve({ ok:true, filename, detected, msg:'新增 '+added+'、更新 '+updated+' 筆' });
+        }
+        // 未知檔案
+        resolve({ ok:false, filename, detected, msg });
+      } catch(err) {
+        resolve({ ok:false, filename:file.name, detected:'錯誤', msg:err.message });
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  });
 }
 
 // 還原光田內建資料（覆蓋現有 GA 月度 / SEO 文章 / GSC 關鍵字）
