@@ -7106,7 +7106,123 @@ function computeAlerts(curYm, cur) {
       alerts.push({ level:'amber', msg:'GA4 資料已過時 '+daysOld+' 天（最新為 '+latest+'），請補充最新月份', action:'switchSection(\'warroom\',\'quickimport\')', actionLabel:'匯入新資料' });
     }
   }
-  return alerts.slice(0, 6);
+  // 規則 6: 每月 10 號之後檢查上個月資料是否齊全
+  const missing = computeMonthlyDataMissing();
+  if (missing && missing.shouldCheck && missing.items.length) {
+    alerts.push({
+      level: missing.items.length >= 4 ? 'red' : 'amber',
+      msg: missing.label + '還缺 '+missing.items.length+' 項資料：'+missing.items.map(x=>x.platform).join('、'),
+      action: '_warShowMonthlyMissing()',
+      actionLabel: '查看清單'
+    });
+  }
+  return alerts.slice(0, 7);
+}
+
+// ═══════════════════════════════════════════
+// 每月 10 號自動「資料缺漏檢查」
+// 規則：今天 ≥10 號，檢查上個月該補齊的資料是否到齊
+// ═══════════════════════════════════════════
+function computeMonthlyDataMissing(forYm) {
+  const now = new Date();
+  const todayDay = now.getDate();
+  // 預設檢查上個月（每月 10 號後催收上月資料）
+  let targetYm = forYm;
+  if (!targetYm) {
+    const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    targetYm = prevMonth.getFullYear() + '-' + String(prevMonth.getMonth()+1).padStart(2,'0');
+  }
+  // 在 10 號之前不主動警示（避免月初就吵）
+  const shouldCheck = todayDay >= 10;
+  const ymLabel = targetYm.slice(0,4) + ' 年 ' + (+targetYm.slice(5,7)) + ' 月';
+
+  // 各平台檢查規則：minCount = 該月至少應有幾筆，0 = 只要有就算齊
+  const checks = [
+    { key:'ga4', platform:'GA4 月度報表', minCount:1,
+      check: () => !!(store.gaMonthly||{})[targetYm],
+      action: 'switchSection(\'warroom\',\'quickimport\')', owner:'網頁小組' },
+    { key:'gsc', platform:'GSC 關鍵字', minCount:5,
+      check: () => (store.gscKeywords||[]).filter(k=>!k.deleted_at).length >= 5,
+      action: 'switchSection(\'warroom\',\'quickimport\')', owner:'網頁小組' },
+    { key:'fb', platform:'FB 粉專貼文', minCount:8,
+      check: () => (store.posts||[]).filter(p=>!p.deleted_at && (p.month||(p.date||'').slice(0,7))===targetYm).length >= 8,
+      action: 'switchSection(\'fb\',\'upload\')', owner:'社群小組' },
+    { key:'line', platform:'LINE 推播', minCount:2,
+      check: () => (store.linePosts||[]).filter(p=>!p.deleted_at && (p.date||'').slice(0,7)===targetYm).length >= 2,
+      action: 'switchSection(\'line\',\'posts\')', owner:'LINE 小組' },
+    { key:'video', platform:'YT/IG 影片', minCount:1,
+      check: () => (store.videoItems||[]).filter(v=>!v.deleted_at && (v.date||'').slice(0,7)===targetYm).length >= 1,
+      action: 'switchSection(\'video\',\'list\')', owner:'影音小組' },
+    { key:'seo', platform:'SEO 文章', minCount:1,
+      check: () => (store.seoArticles||[]).filter(a=>!a.deleted_at && (a.date||'')===targetYm).length >= 1,
+      action: 'switchSection(\'web\',\'seoArticles\')', owner:'編輯小組' },
+    { key:'media', platform:'媒體曝光', minCount:1,
+      check: () => (store.media||[]).filter(m=>!m.deleted_at && (m.date||'').slice(0,7)===targetYm).length >= 1,
+      action: 'switchSection(\'media\',\'list\')', owner:'公關小組' },
+    { key:'event', platform:'活動/講座', minCount:1,
+      check: () => (store.events||[]).filter(e=>!e.deleted_at && (e.date||'').slice(0,7)===targetYm).length >= 1,
+      action: 'switchSection(\'event\',\'list\')', owner:'各企劃' },
+    { key:'kol', platform:'KOL 合作', minCount:0,
+      check: () => (store.kols||[]).filter(k=>!k.deleted_at && (k.date||'').slice(0,7)===targetYm).length >= 0,  // 選用
+      action: 'switchSection(\'kol\',\'list\')', owner:'公關小組' },
+    { key:'clinic', platform:'門診表題材', minCount:1,
+      check: () => (store.mediaItems||[]).filter(m=>!m.deleted_at && (m.month||'')===targetYm).length >= 1,
+      action: 'switchSection(\'clinic\',\'items\')', owner:'門診企劃' },
+  ];
+  const items = checks.filter(c => c.minCount > 0 && !c.check());
+  return { shouldCheck, ym: targetYm, label: ymLabel, items, todayDay };
+}
+
+// 點警報「查看清單」展開明細
+function _warShowMonthlyMissing() {
+  const result = computeMonthlyDataMissing();
+  if (!result || !result.items.length) {
+    showToast('本月資料已齊全');
+    return;
+  }
+  const list = result.items.map(c =>
+    '<tr><td style="padding:6px 10px;font-weight:600;">'+c.platform+'</td>'
+    + '<td style="padding:6px 10px;color:#888;">至少 '+c.minCount+' 筆</td>'
+    + '<td style="padding:6px 10px;color:#666;">'+c.owner+'</td>'
+    + '<td style="padding:6px 10px;text-align:center;"><button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="document.getElementById(\'missingModal\').remove(); '+c.action+'">前往補</button></td></tr>'
+  ).join('');
+  const html = '<div class="modal-overlay open" id="missingModal">'
+    + '<div class="modal-box" style="max-width:600px;">'
+    + '<h3>📋 '+result.label+' 資料缺漏清單（'+result.items.length+' 項）</h3>'
+    + '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#92400E;">每月 10 號後自動列出當期應補齊但尚未到位的資料，依負責小組分派</div>'
+    + '<table style="width:100%;font-size:12px;border-collapse:collapse;">'
+    +   '<thead><tr style="background:#F9FAFB;"><th style="padding:7px 10px;text-align:left;">平台</th><th style="padding:7px 10px;text-align:left;">門檻</th><th style="padding:7px 10px;text-align:left;">負責</th><th style="padding:7px 10px;">操作</th></tr></thead>'
+    +   '<tbody>'+list+'</tbody>'
+    + '</table>'
+    + '<div class="modal-footer">'
+    +   '<button class="btn btn-outline" onclick="document.getElementById(\'missingModal\').remove()">關閉</button>'
+    +   '<button class="btn btn-primary" onclick="_warEmailMissingReport()">📧 寄催收通知</button>'
+    + '</div></div></div>';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  document.body.appendChild(tmp.firstElementChild);
+}
+
+// 透過 GAS 寄送催收 email
+async function _warEmailMissingReport() {
+  if (!config.gasUrl) { showToast('請先設定 GAS URL'); return; }
+  const result = computeMonthlyDataMissing();
+  if (!result || !result.items.length) { showToast('沒有缺漏資料'); return; }
+  const recipients = prompt('輸入收件 Email（多筆用逗號分隔）：', localStorage.getItem('ktgh_missing_email') || '');
+  if (!recipients) return;
+  localStorage.setItem('ktgh_missing_email', recipients);
+  try {
+    const url = config.gasUrl + '?action=emailMissing&ym=' + encodeURIComponent(result.ym) + '&to=' + encodeURIComponent(recipients);
+    const payload = {
+      ym: result.ym,
+      label: result.label,
+      items: result.items.map(i => ({ platform: i.platform, owner: i.owner, minCount: i.minCount })),
+    };
+    await gasPost('emailMissing', payload);
+    showToast('催收 Email 已寄出至 ' + recipients);
+  } catch(e) {
+    showToast('寄送失敗：' + e.message);
+  }
 }
 
 // ── ② KPI 今日重點 ──

@@ -82,6 +82,9 @@ function doGet(e) {
       // 完整資料雲端同步（儲存於 Google Drive JSON 檔）
       case 'loadState':     return jsonResponse(loadState());
       case 'saveState':     return jsonResponse(saveState(e));
+      // 資料缺漏催收 email
+      case 'emailMissing':  return jsonResponse(emailMissing(e));
+      case 'checkMissingNow': return jsonResponse(autoCheckAndEmailMissing());
       default:              return errResponse('Unknown action: ' + action);
     }
   } catch(err) {
@@ -102,6 +105,12 @@ function doPost(e) {
       }
       // 從 raw body 取得 JSON
       return jsonResponse(saveState(e));
+    }
+    if (action === 'emailMissing') {
+      if (e.parameter && e.parameter.data) {
+        return jsonResponse(emailMissing({ postData: { contents: e.parameter.data }, parameter: e.parameter }));
+      }
+      return jsonResponse(emailMissing(e));
     }
     return doGet(e);
   } catch(err) {
@@ -246,4 +255,108 @@ function bulkUpsert(sheetName, dataArr, keyFn) {
   }
 
   return { added, updated, total: sheet.getLastRow() - 1 };
+}
+
+// ═══════════════════════════════════════════════════════
+//  📋 資料缺漏催收 Email
+// ═══════════════════════════════════════════════════════
+
+// 從前端 emailMissing API 呼叫：寄催收 email
+function emailMissing(e) {
+  const toParam = (e && e.parameter && e.parameter.to) || '';
+  const raw = (e && e.postData && e.postData.contents) || '';
+  let data = {};
+  try { data = raw ? JSON.parse(raw) : {}; } catch(err) { throw new Error('payload 解析失敗：' + err.message); }
+  const ymLabel = data.label || data.ym || '本月';
+  const items = data.items || [];
+  if (!toParam) throw new Error('缺少收件人 to');
+  if (!items.length) throw new Error('沒有缺漏項目');
+
+  const subject = '[光田行銷] ' + ymLabel + ' 資料缺漏催收（' + items.length + ' 項）';
+  const baseUrl = 'https://kyoape-ux.github.io/ktgh-marketing-hub/';
+  let body = '<div style="font-family:Arial,sans-serif;max-width:640px;">';
+  body += '<h2 style="color:#1E40AF;margin-bottom:8px;">📋 ' + ymLabel + ' 資料缺漏催收</h2>';
+  body += '<p style="color:#666;font-size:13px;">每月 10 號自動寄發。下列平台資料尚未到位，請各負責小組儘快補齊。</p>';
+  body += '<table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;">';
+  body += '<thead><tr style="background:#F1F5F9;"><th style="padding:8px;text-align:left;border:1px solid #E5E7EB;">平台</th><th style="padding:8px;text-align:left;border:1px solid #E5E7EB;">負責小組</th><th style="padding:8px;text-align:left;border:1px solid #E5E7EB;">門檻</th></tr></thead><tbody>';
+  items.forEach(function(it) {
+    body += '<tr>'
+      + '<td style="padding:8px;border:1px solid #E5E7EB;font-weight:600;">' + it.platform + '</td>'
+      + '<td style="padding:8px;border:1px solid #E5E7EB;color:#666;">' + (it.owner||'未指派') + '</td>'
+      + '<td style="padding:8px;border:1px solid #E5E7EB;color:#888;">至少 ' + (it.minCount||1) + ' 筆</td>'
+      + '</tr>';
+  });
+  body += '</tbody></table>';
+  body += '<p style="margin-top:18px;"><a href="' + baseUrl + '" style="background:#1E40AF;color:#fff;padding:10px 22px;text-decoration:none;border-radius:6px;display:inline-block;font-weight:700;">前往行銷整合分析中心補資料 →</a></p>';
+  body += '<p style="margin-top:14px;color:#999;font-size:11px;">本郵件由「行銷整合分析中心」GAS 排程自動發送。 設定變更請聯絡網管。</p>';
+  body += '</div>';
+
+  MailApp.sendEmail({ to: toParam, subject: subject, htmlBody: body });
+  return { sent: toParam, count: items.length, ym: data.ym };
+}
+
+// 每月 10 號自動執行（請在 GAS 設定時間驅動觸發條件 → 月份 → 10 日 → 09:00）
+// 觸發時自動從雲端 state 讀本月應有資料、計算缺漏、寄催收 email
+function autoCheckAndEmailMissing() {
+  const props = PropertiesService.getScriptProperties();
+  const recipients = props.getProperty('MISSING_REPORT_TO');
+  if (!recipients) {
+    Logger.log('未設定 MISSING_REPORT_TO 屬性，跳過');
+    return { skipped: true, reason: 'no recipients' };
+  }
+  // 載入雲端 state
+  let state = loadState();
+  if (!state) state = {};
+
+  // 計算上個月 YYYY-MM
+  const now = new Date();
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const targetYm = prev.getFullYear() + '-' + String(prev.getMonth() + 1).padStart(2, '0');
+  const ymLabel = prev.getFullYear() + ' 年 ' + (prev.getMonth() + 1) + ' 月';
+
+  // 平台檢查規則（與前端 computeMonthlyDataMissing 一致）
+  const checks = [
+    { platform:'GA4 月度報表', minCount:1, owner:'網頁小組', test: () => !!(state.gaMonthly||{})[targetYm] },
+    { platform:'GSC 關鍵字', minCount:5, owner:'網頁小組', test: () => (state.gscKeywords||[]).filter(function(k){return !k.deleted_at;}).length >= 5 },
+    { platform:'FB 粉專貼文', minCount:8, owner:'社群小組', test: () => (state.posts||[]).filter(function(p){return !p.deleted_at && (p.month||(p.date||'').slice(0,7))===targetYm;}).length >= 8 },
+    { platform:'LINE 推播', minCount:2, owner:'LINE 小組', test: () => (state.linePosts||[]).filter(function(p){return !p.deleted_at && (p.date||'').slice(0,7)===targetYm;}).length >= 2 },
+    { platform:'YT/IG 影片', minCount:1, owner:'影音小組', test: () => (state.videoItems||[]).filter(function(v){return !v.deleted_at && (v.date||'').slice(0,7)===targetYm;}).length >= 1 },
+    { platform:'SEO 文章', minCount:1, owner:'編輯小組', test: () => (state.seoArticles||[]).filter(function(a){return !a.deleted_at && (a.date||'')===targetYm;}).length >= 1 },
+    { platform:'媒體曝光', minCount:1, owner:'公關小組', test: () => (state.media||[]).filter(function(m){return !m.deleted_at && (m.date||'').slice(0,7)===targetYm;}).length >= 1 },
+    { platform:'活動/講座', minCount:1, owner:'各企劃', test: () => (state.events||[]).filter(function(e){return !e.deleted_at && (e.date||'').slice(0,7)===targetYm;}).length >= 1 },
+    { platform:'門診表題材', minCount:1, owner:'門診企劃', test: () => (state.mediaItems||[]).filter(function(m){return !m.deleted_at && (m.month||'')===targetYm;}).length >= 1 },
+  ];
+  const missing = checks.filter(function(c){ return !c.test(); }).map(function(c){
+    return { platform: c.platform, minCount: c.minCount, owner: c.owner };
+  });
+  if (!missing.length) {
+    Logger.log('資料齊全，不寄催收');
+    return { skipped: true, reason: 'all complete', ym: targetYm };
+  }
+  // 寄送
+  return emailMissing({
+    parameter: { to: recipients },
+    postData: { contents: JSON.stringify({ ym: targetYm, label: ymLabel, items: missing }) }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  ⚙️ 一次性設定：建立每月 10 號 09:00 自動觸發條件
+//  使用方式：在 GAS 編輯器手動執行 setupMonthlyTrigger() 一次
+//  另外請到「專案設定 → 指令碼屬性」設定 MISSING_REPORT_TO=收件人,逗號分隔
+// ═══════════════════════════════════════════════════════
+function setupMonthlyTrigger() {
+  // 移除既有同名觸發條件，避免重複
+  ScriptApp.getProjectTriggers().forEach(function(t) {
+    if (t.getHandlerFunction() === 'autoCheckAndEmailMissing') {
+      ScriptApp.deleteTrigger(t);
+    }
+  });
+  // 建立新觸發條件：每月 10 號 09:00
+  ScriptApp.newTrigger('autoCheckAndEmailMissing')
+    .timeBased()
+    .onMonthDay(10)
+    .atHour(9)
+    .create();
+  return '✓ 已建立每月 10 號 09:00 自動催收觸發條件';
 }
