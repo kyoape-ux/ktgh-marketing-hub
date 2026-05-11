@@ -20,28 +20,28 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@600;700;800&display=swap');
 
   :root {
-    --brand:      #0ba360;
-    --brand-light:#3cba92;
-    --brand-dim:  #079354;
-    --brand-bg:   #ECFDF5;
-    --brand-bd:   #A7F3D0;
-    --brand-mid:  #3cba92;
-    --ci-green:   #22C55E;
-    --ci-blue:    #3B82F6;
+    --brand:      #007497;
+    --brand-light:#02b949;
+    --brand-dim:  #004c88;
+    --brand-bg:   #E6F4F9;
+    --brand-bd:   #B3D9E4;
+    --brand-mid:  #00997f;
+    --ci-green:   #02b949;
+    --ci-blue:    #004c88;
     --gold:       #F59E0B;
     --warn:       #DC2626;
-    --bg:         #F7FAF9;
+    --bg:         #F4F8FA;
     --surface:    #FFFFFF;
     --border:     #E5E7EB;
     --text:       #1A1A2E;
     --text-sub:   #6B7280;
     --text-muted: #9CA3AF;
-    --shadow:     0 2px 16px rgba(11,163,96,0.08);
-    --shadow-lg:  0 8px 40px rgba(11,163,96,0.14);
-    /* 新主視覺漸層 — 深翠綠 → 亮綠 */
-    --brand-gradient:   linear-gradient(to top, #0ba360 0%, #3cba92 100%);
-    --brand-gradient-h: linear-gradient(to right, #0ba360 0%, #3cba92 100%);
-    --brand-gradient-d: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
+    --shadow:     0 2px 16px rgba(0,76,136,0.10);
+    --shadow-lg:  0 8px 40px rgba(0,76,136,0.16);
+    /* 主視覺漸層 — 海軍藍 → 藍 → 青 → 翠 → 亮綠（5 段多色）*/
+    --brand-gradient:   linear-gradient(to top, #002459, #004c88, #007497, #00997f, #02b949);
+    --brand-gradient-h: linear-gradient(to right, #002459, #004c88, #007497, #00997f, #02b949);
+    --brand-gradient-d: linear-gradient(to right top, #002459, #004c88, #007497, #00997f, #02b949);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +61,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     display: flex; flex-direction: column;
     z-index: 100;
     padding: 0 0 24px;
-    box-shadow: 2px 0 16px rgba(11,163,96,0.18);
+    box-shadow: 2px 0 16px rgba(0,76,136,0.22);
   }
   .sidebar-logo {
     padding: 28px 20px 20px;
@@ -139,8 +139,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     cursor: pointer; border: none; font-family: inherit; transition: all 0.2s;
     display: inline-flex; align-items: center; gap: 6px;
   }
-  .btn-primary { background: var(--brand-gradient-h); color: #fff; box-shadow: 0 2px 8px rgba(11,163,96,0.25); }
-  .btn-primary:hover { background: var(--brand-gradient-d); box-shadow: 0 4px 14px rgba(11,163,96,0.35); transform: translateY(-1px); }
+  .btn-primary { background: var(--brand-gradient-h); color: #fff; box-shadow: 0 2px 8px rgba(0,76,136,0.30); }
+  .btn-primary:hover { background: var(--brand-gradient-d); box-shadow: 0 4px 14px rgba(0,76,136,0.40); transform: translateY(-1px); }
   .btn-outline { background: transparent; color: var(--brand); border: 1.5px solid var(--brand); }
   .btn-outline:hover { background: var(--brand-bg); }
   /* Header action buttons — capsule outline style (green) */
@@ -476,8 +476,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
   /* ── GUIDE STYLES ── */
   .guide-toc-item { display:flex;align-items:center;gap:8px;padding:8px 20px;font-size:13px;color:#6B7280;cursor:pointer;text-decoration:none;border-left:3px solid transparent;transition:all .15s; }
   .guide-toc-item svg { flex-shrink:0; }
-  .guide-toc-item:hover { background:#ECFDF5;color:#059669; }
-  .guide-toc-item.active { background:#ECFDF5;color:#059669;border-left-color:#059669;font-weight:600; }
+  .guide-toc-item:hover { background:#E6F4F9;color:#059669; }
+  .guide-toc-item.active { background:#E6F4F9;color:#059669;border-left-color:#059669;font-weight:600; }
   .guide-sec { display:none; }
   .guide-sec.active { display:block; }
   .guide-sec h3 { font-size:17px;font-weight:800;color:#1A1A2E;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #ECFDF5; }
@@ -485,7 +485,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
   .guide-sec p { font-size:13.5px;line-height:1.8;color:#374151;margin-bottom:10px; }
   .guide-sec ul, .guide-sec ol { font-size:13.5px;line-height:1.9;color:#374151;margin:0 0 12px 20px; }
   .guide-sec li { margin-bottom:4px; }
-  .guide-tip { background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:12px 16px;font-size:12.5px;color:#047857;margin:12px 0;line-height:1.7; }
+  .guide-tip { background:#E6F4F9;border:1px solid #A7F3D0;border-radius:8px;padding:12px 16px;font-size:12.5px;color:#047857;margin:12px 0;line-height:1.7; }
   .guide-table { width:100%;border-collapse:collapse;font-size:13px;margin:12px 0; }
   .guide-table th { background:#F7FAF9;padding:8px 12px;text-align:left;font-weight:700;font-size:12px;color:#059669;border-bottom:2px solid #A7F3D0; }
   .guide-table td { padding:8px 12px;border-bottom:1px solid #E5E7EB; }
@@ -497,14 +497,14 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 <!-- LOGIN OVERLAY -->
 <div id="loginOverlay" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
   <div style="background:#fff;border-radius:16px;padding:40px 36px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;">
-    <div style="width:56px;height:56px;background:linear-gradient(to top,#0ba360 0%,#3cba92 100%);border-radius:14px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(11,163,96,0.35);">
+    <div style="width:56px;height:56px;background:linear-gradient(to top,#002459,#004c88,#007497,#00997f,#02b949);border-radius:14px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,76,136,0.40);">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
     <h2 style="font-size:20px;font-weight:800;color:#1A1A2E;margin-bottom:4px;">行銷整合分析中心</h2>
     <p style="font-size:13px;color:#9CA3AF;margin-bottom:24px;">請選擇登入身份</p>
     <div id="loginMsg" style="font-size:12px;color:#DC2626;margin-bottom:12px;min-height:18px;"></div>
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <button onclick="loginAs('admin')" style="padding:12px;border:none;border-radius:10px;background:linear-gradient(to right,#0ba360 0%,#3cba92 100%);color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(11,163,96,0.3);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> 組長登入（最高權限）</button>
+      <button onclick="loginAs('admin')" style="padding:12px;border:none;border-radius:10px;background:linear-gradient(to right,#002459,#004c88,#007497,#00997f,#02b949);color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(11,163,96,0.3);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> 組長登入（最高權限）</button>
       <button onclick="loginAs('editor')" style="padding:12px;border:1.5px solid #3B82F6;border-radius:10px;background:#EFF6FF;color:#3B82F6;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> 組員登入（可編輯）</button>
       <button onclick="loginAs('viewer')" style="padding:12px;border:1.5px solid #9CA3AF;border-radius:10px;background:#F9FAFB;color:#6B7280;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> 唯讀瀏覽</button>
     </div>
@@ -1941,7 +1941,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <div style="background:var(--surface);border-radius:12px;padding:16px;border:1px solid var(--border);box-shadow:var(--shadow);overflow-x:auto;">
         <div id="clinicMatrixWrap"></div>
       </div>
-      <div style="margin-top:12px;background:#ECFDF5;border-left:4px solid var(--brand);padding:12px 16px;border-radius:6px;font-size:12px;color:var(--text-sub);line-height:1.7;">
+      <div style="margin-top:12px;background:#E6F4F9;border-left:4px solid var(--brand);padding:12px 16px;border-radius:6px;font-size:12px;color:var(--text-sub);line-height:1.7;">
         <b>使用說明</b>：這張矩陣對應紙本「門診表傳達管道」表。每列是題材、每欄是傳達管道，點擊儲存格切換 ✓/✗。點擊題材名稱可編輯詳細資料與標籤。
       </div>
     </div>
@@ -1957,7 +1957,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           <option value="">所有月份</option>
         </select>
         <div id="clinicItemCount" style="font-size:12px;color:var(--text-muted);"></div>
-        <button class="btn" onclick="openChannelReport('clinic')" style="background:linear-gradient(to right,#0ba360,#3cba92);color:#fff;margin-left:auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 產生報表</button>
+        <button class="btn" onclick="openChannelReport('clinic')" style="background:linear-gradient(to right,#02b949,#3cba92);color:#fff;margin-left:auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 產生報表</button>
       </div>
       <div id="clinicItemList"></div>
     </div>
@@ -2143,7 +2143,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 
     <!-- ══ 跨傳達管道 — 標籤統計 ══ -->
     <div class="section" id="sec-crosstag-stats">
-      <div style="background:#EEF7F2;border-left:4px solid #0ba360;padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:12.5px;line-height:1.7;color:#1B4332;">
+      <div style="background:#EEF7F2;border-left:4px solid #02b949;padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:12.5px;line-height:1.7;color:#1B4332;">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.9.8 1 1.5 1 2.3v1h6v-1c0-.8.1-1.5 1-2.3A7 7 0 0 0 12 2z"/></svg> <b>使用情境</b>：例如選擇 <b>「LDCT」</b> 標籤，可一次看出此主題在 FB 貼文、活動/講座、新聞曝光、門診表、LINE 貼文、SEO 關鍵字等所有傳達管道做了幾次、累積觸及與成效。
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
@@ -2154,7 +2154,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
         <select id="crossTagPeriod" onchange="renderCrossTagStats()" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:160px;">
           <option value="all">全部期間</option>
         </select>
-        <button class="btn" onclick="openCrossTagReport()" style="background:linear-gradient(to right,#0ba360,#3cba92);color:#fff;margin-left:auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 一鍵產出推廣報告</button>
+        <button class="btn" onclick="openCrossTagReport()" style="background:linear-gradient(to right,#02b949,#3cba92);color:#fff;margin-left:auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 一鍵產出推廣報告</button>
       </div>
       <div id="crossTagContent"></div>
     </div>
@@ -2243,7 +2243,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 
         <!-- GA4 官網 -->
         <div style="background:var(--surface);border-radius:12px;padding:24px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:20px;">
-          <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:#0ba360;">🟢 GA4 官網數據（每日一筆）</h3>
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:4px;color:#02b949;">🟢 GA4 官網數據（每日一筆）</h3>
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">對應 GA4 指標：使用者數、工作階段、事件數、平均互動時間等</p>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
             <div class="form-group"><label>日期 *</label><input type="date" id="ga-date"></div>
@@ -2710,7 +2710,7 @@ const SEASON_AUDIENCE = { 1:'女性', 2:'親子', 3:'男性', 4:'中高齡' };
 
 // 預設標籤字典
 function getDefaultMediaTags() {
-  const make = (name, category, color) => ({ id: 't_'+name, name, category, color: color||'#0ba360' });
+  const make = (name, category, color) => ({ id: 't_'+name, name, category, color: color||'#02b949' });
   return [
     // 科別 (35)
     ...['心臟內科','神經內科','神經外科','骨科','婦產科','兒科','耳鼻喉科','眼科',
@@ -2718,7 +2718,7 @@ function getDefaultMediaTags() {
         '急診','麻醉科','復健科','胸腔內科','腎臟內科','一般外科','大腸直腸外科','整形外科',
         '心臟血管外科','胸腔外科','乳房外科','內分泌科','風濕免疫科','腫瘤內科','感染科',
         '血液腫瘤科','老年醫學科','牙科','病理科']
-      .map(n => make(n,'dept','#0ba360')),
+      .map(n => make(n,'dept','#02b949')),
     // 中心 (16)
     ...['健康管理中心','醫美中心','運動醫學中心','癌症中心','失智症中心','睡眠中心',
         '腦中風中心','肺癌篩檢中心','長照中心','營養點滴中心','骨鬆照護中心',
@@ -5316,30 +5316,30 @@ function renderClinicMatrix() {
   MEDIA_CHANNELS.forEach(c => { if (!groups[c.group]) groups[c.group] = []; groups[c.group].push(c); });
   let html = '<table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:1400px;">';
   // Header group row
-  html += '<thead><tr><th rowspan="2" style="background:#0ba360;color:#fff;padding:8px;border:1px solid #0ba360;min-width:60px;">頁碼</th><th rowspan="2" style="background:#0ba360;color:#fff;padding:8px;border:1px solid #0ba360;min-width:160px;">主題</th><th rowspan="2" style="background:#0ba360;color:#fff;padding:8px;border:1px solid #0ba360;min-width:60px;">負責人</th>';
+  html += '<thead><tr><th rowspan="2" style="background:#02b949;color:#fff;padding:8px;border:1px solid #02b949;min-width:60px;">頁碼</th><th rowspan="2" style="background:#02b949;color:#fff;padding:8px;border:1px solid #02b949;min-width:160px;">主題</th><th rowspan="2" style="background:#02b949;color:#fff;padding:8px;border:1px solid #02b949;min-width:60px;">負責人</th>';
   Object.keys(groups).forEach(g => {
-    html += `<th colspan="${groups[g].length}" style="background:#1B4332;color:#fff;padding:6px;border:1px solid #0ba360;font-size:11px;">${g}</th>`;
+    html += `<th colspan="${groups[g].length}" style="background:#1B4332;color:#fff;padding:6px;border:1px solid #02b949;font-size:11px;">${g}</th>`;
   });
-  html += '<th rowspan="2" style="background:#0ba360;color:#fff;padding:8px;border:1px solid #0ba360;min-width:60px;">操作</th></tr><tr>';
+  html += '<th rowspan="2" style="background:#02b949;color:#fff;padding:8px;border:1px solid #02b949;min-width:60px;">操作</th></tr><tr>';
   Object.keys(groups).forEach(g => {
     groups[g].forEach(c => {
-      html += `<th style="background:#40916C;color:#fff;padding:6px 4px;border:1px solid #0ba360;font-size:10px;font-weight:600;min-width:38px;" title="${c.label}｜${c.owner}｜${c.spec}">${c.label.replace('海報 ','')}<br><span style="font-weight:400;opacity:0.8;font-size:9px;">(${c.owner})</span></th>`;
+      html += `<th style="background:#40916C;color:#fff;padding:6px 4px;border:1px solid #02b949;font-size:10px;font-weight:600;min-width:38px;" title="${c.label}｜${c.owner}｜${c.spec}">${c.label.replace('海報 ','')}<br><span style="font-weight:400;opacity:0.8;font-size:9px;">(${c.owner})</span></th>`;
     });
   });
   html += '</tr></thead><tbody>';
   items.forEach((it, i) => {
     const idx = store.mediaItems.indexOf(it);
-    html += `<tr><td style="padding:6px;border:1px solid #D4E5DB;text-align:center;font-weight:700;color:#0ba360;">${it.page_no||''}</td>`;
-    html += `<td style="padding:6px;border:1px solid #D4E5DB;"><a href="javascript:clinicEditItem(${idx})" style="color:#0ba360;text-decoration:none;font-weight:600;">${it.title||'(未命名)'}</a>`;
+    html += `<tr><td style="padding:6px;border:1px solid #D4E5DB;text-align:center;font-weight:700;color:#02b949;">${it.page_no||''}</td>`;
+    html += `<td style="padding:6px;border:1px solid #D4E5DB;"><a href="javascript:clinicEditItem(${idx})" style="color:#02b949;text-decoration:none;font-weight:600;">${it.title||'(未命名)'}</a>`;
     if (it.tags && it.tags.length) {
-      html += '<div style="margin-top:3px;">' + it.tags.slice(0,4).map(t => `<span style="display:inline-block;padding:1px 6px;background:#E8F0EC;color:#0ba360;border-radius:8px;font-size:9px;margin-right:3px;">${t}</span>`).join('') + '</div>';
+      html += '<div style="margin-top:3px;">' + it.tags.slice(0,4).map(t => `<span style="display:inline-block;padding:1px 6px;background:#E8F0EC;color:#02b949;border-radius:8px;font-size:9px;margin-right:3px;">${t}</span>`).join('') + '</div>';
     }
     html += '</td>';
     html += `<td style="padding:6px;border:1px solid #D4E5DB;text-align:center;">${it.content_owner||''}</td>`;
     Object.keys(groups).forEach(g => {
       groups[g].forEach(c => {
         const checked = it.channels && it.channels[c.key];
-        html += `<td onclick="clinicToggleChannel(${idx},'${c.key}')" style="padding:0;border:1px solid #D4E5DB;text-align:center;cursor:pointer;background:${checked?'#D4E5DB':'#fff'};font-size:14px;color:${checked?'#0ba360':'#ddd'};font-weight:900;" title="點擊切換">${checked?'✓':'·'}</td>`;
+        html += `<td onclick="clinicToggleChannel(${idx},'${c.key}')" style="padding:0;border:1px solid #D4E5DB;text-align:center;cursor:pointer;background:${checked?'#D4E5DB':'#fff'};font-size:14px;color:${checked?'#02b949':'#ddd'};font-weight:900;" title="點擊切換">${checked?'✓':'·'}</td>`;
       });
     });
     html += `<td style="padding:4px;border:1px solid #D4E5DB;text-align:center;white-space:nowrap;"><button class="action-btn edit" onclick="clinicEditItem(${idx})" style="font-size:10px;padding:3px 6px;">編輯</button><button class="action-btn del" onclick="clinicDeleteItem(${idx})" data-perm="edit" style="font-size:10px;padding:3px 6px;margin-left:2px;">刪</button></td>`;
@@ -5435,7 +5435,7 @@ function clinicEditItem(idx) {
   MEDIA_CHANNELS.forEach(c => { if (!channelGroups[c.group]) channelGroups[c.group] = []; channelGroups[c.group].push(c); });
   let chHtml = '';
   Object.keys(channelGroups).forEach(g => {
-    chHtml += `<div style="margin-bottom:8px;"><div style="font-size:11px;font-weight:700;color:#0ba360;margin-bottom:4px;">${g}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">`;
+    chHtml += `<div style="margin-bottom:8px;"><div style="font-size:11px;font-weight:700;color:#02b949;margin-bottom:4px;">${g}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">`;
     channelGroups[g].forEach(c => {
       const checked = it.channels && it.channels[c.key];
       chHtml += `<label style="display:inline-flex;align-items:center;gap:3px;padding:4px 8px;background:${checked?'#D4E5DB':'#F5F5F5'};border-radius:6px;font-size:11px;cursor:pointer;"><input type="checkbox" class="cedit-ch" data-key="${c.key}" ${checked?'checked':''}> ${c.label} <span style="color:#888;font-size:9px;">(${c.owner})</span></label>`;
@@ -5527,16 +5527,16 @@ function renderClinicItems() {
   wrap.innerHTML = items.map(it => {
     const idx = store.mediaItems.indexOf(it);
     const channelCount = Object.values(it.channels||{}).filter(v => v).length;
-    const tags = (it.tags||[]).map(t => `<span style="display:inline-block;padding:2px 8px;background:#E8F0EC;color:#0ba360;border-radius:10px;font-size:10px;margin-right:4px;">${t}</span>`).join('');
+    const tags = (it.tags||[]).map(t => `<span style="display:inline-block;padding:2px 8px;background:#E8F0EC;color:#02b949;border-radius:10px;font-size:10px;margin-right:4px;">${t}</span>`).join('');
     const nature = (it.nature||[]).map(n => `<span style="display:inline-block;padding:2px 8px;background:#FEF3C7;color:#92400E;border-radius:10px;font-size:10px;margin-right:4px;">${n}</span>`).join('');
     return `<div style="background:var(--surface);border-radius:10px;padding:16px;border:1px solid var(--border);margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;box-shadow:var(--shadow);">
-      <div style="text-align:center;min-width:60px;"><div style="font-size:18px;font-weight:900;color:#0ba360;">${it.page_no||'—'}</div><div style="font-size:10px;color:#888;">${it.month||''}</div></div>
+      <div style="text-align:center;min-width:60px;"><div style="font-size:18px;font-weight:900;color:#02b949;">${it.page_no||'—'}</div><div style="font-size:10px;color:#888;">${it.month||''}</div></div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">${it.title||'(未命名)'}</div>
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">${it.department||''} ${it.content_owner?' · '+it.content_owner:''} ${it.target_audience?' · 目標：'+it.target_audience:''}</div>
         <div style="margin-bottom:4px;">${tags}</div>
         <div>${nature}</div>
-        ${it.media_source?`<div style="font-size:11px;color:#888;margin-top:4px;">📰 ${it.media_source}${it.media_url?' · <a href="'+it.media_url+'" target="_blank" style="color:#0ba360;">連結</a>':''}</div>`:''}
+        ${it.media_source?`<div style="font-size:11px;color:#888;margin-top:4px;">📰 ${it.media_source}${it.media_url?' · <a href="'+it.media_url+'" target="_blank" style="color:#02b949;">連結</a>':''}</div>`:''}
       </div>
       <div style="text-align:right;"><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">已布署 ${channelCount} 傳達管道</div><button class="action-btn edit" onclick="clinicEditItem(${idx})">編輯</button><button class="action-btn del" onclick="clinicDeleteItem(${idx})" data-perm="edit" style="margin-left:4px;">刪除</button></div>
     </div>`;
@@ -5553,8 +5553,8 @@ function renderClinicTags() {
   (store.mediaTags||[]).forEach(t => { if (!grouped[t.category]) grouped[t.category] = []; grouped[t.category].push(t); });
   wrap.innerHTML = Object.keys(cats).filter(k => grouped[k]).map(k => {
     return `<div style="background:var(--surface);border-radius:10px;padding:16px 20px;border:1px solid var(--border);margin-bottom:12px;box-shadow:var(--shadow);">
-      <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:${grouped[k][0]&&grouped[k][0].color||'#0ba360'};">${cats[k]} <span style="color:#888;font-weight:400;font-size:11px;">(${grouped[k].length})</span></h3>
-      <div>${grouped[k].map(t => `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:${t.color||'#E8F0EC'}20;color:${t.color||'#0ba360'};border:1px solid ${t.color||'#0ba360'}40;border-radius:12px;font-size:12px;margin:2px;">${t.name}<button data-perm="edit" onclick="clinicDeleteTag('${t.id}')" style="background:none;border:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;padding:0;margin-left:2px;">×</button></span>`).join('')}</div>
+      <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:${grouped[k][0]&&grouped[k][0].color||'#02b949'};">${cats[k]} <span style="color:#888;font-weight:400;font-size:11px;">(${grouped[k].length})</span></h3>
+      <div>${grouped[k].map(t => `<span style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:${t.color||'#E8F0EC'}20;color:${t.color||'#02b949'};border:1px solid ${t.color||'#02b949'}40;border-radius:12px;font-size:12px;margin:2px;">${t.name}<button data-perm="edit" onclick="clinicDeleteTag('${t.id}')" style="background:none;border:none;color:inherit;cursor:pointer;font-size:14px;line-height:1;padding:0;margin-left:2px;">×</button></span>`).join('')}</div>
     </div>`;
   }).join('');
   applyPermissions();
@@ -5566,7 +5566,7 @@ function clinicAddTag() {
   const cat = document.getElementById('newTagCategory').value;
   if (!name) { showToast('請輸入標籤名稱'); return; }
   if ((store.mediaTags||[]).some(t => t.name === name)) { showToast('標籤已存在'); return; }
-  const colorMap = { dept:'#0ba360', center:'#1D4ED8', disease:'#DC2626', device:'#7C3AED', tech:'#6D28D9', checkup:'#0891B2', nature:'#F59E0B', culture:'#D97706', audience:'#DB2777', project:'#059669', other:'#6B7280' };
+  const colorMap = { dept:'#02b949', center:'#1D4ED8', disease:'#DC2626', device:'#7C3AED', tech:'#6D28D9', checkup:'#0891B2', nature:'#F59E0B', culture:'#D97706', audience:'#DB2777', project:'#059669', other:'#6B7280' };
   store.mediaTags = store.mediaTags || [];
   store.mediaTags.push({ id: 't_'+Date.now(), name, category: cat, color: colorMap[cat]||'#6B7280' });
   saveStore();
@@ -5607,23 +5607,23 @@ function renderClinicStats() {
   const total = items.length;
   wrap.innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
-      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">宣傳次數</div><div style="font-size:24px;font-weight:900;color:#0ba360;">${total}</div></div>
-      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">涵蓋月份</div><div style="font-size:24px;font-weight:900;color:#0ba360;">${Object.keys(byMonth).length}</div></div>
-      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">最早月份</div><div style="font-size:16px;font-weight:900;color:#0ba360;">${Object.keys(byMonth)[0]||'—'}</div></div>
-      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">最近月份</div><div style="font-size:16px;font-weight:900;color:#0ba360;">${Object.keys(byMonth).slice(-1)[0]||'—'}</div></div>
+      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">宣傳次數</div><div style="font-size:24px;font-weight:900;color:#02b949;">${total}</div></div>
+      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">涵蓋月份</div><div style="font-size:24px;font-weight:900;color:#02b949;">${Object.keys(byMonth).length}</div></div>
+      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">最早月份</div><div style="font-size:16px;font-weight:900;color:#02b949;">${Object.keys(byMonth)[0]||'—'}</div></div>
+      <div style="background:var(--surface);border-radius:10px;padding:16px;text-align:center;border:1px solid var(--border);"><div style="font-size:11px;color:var(--text-muted);">最近月份</div><div style="font-size:16px;font-weight:900;color:#02b949;">${Object.keys(byMonth).slice(-1)[0]||'—'}</div></div>
     </div>
     <div style="background:var(--surface);border-radius:10px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
       <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📅 月度宣傳時間軸</h3>
-      <div>${Object.keys(byMonth).sort().map(m => `<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;"><div style="min-width:80px;font-size:12px;font-weight:700;color:#0ba360;">${m}</div><div style="flex:1;height:24px;background:#ECFDF5;border-radius:4px;position:relative;"><div style="position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,#0ba360,#3cba92);width:${Math.min(byMonth[m]*20,100)}%;border-radius:4px;"></div></div><div style="min-width:40px;font-size:12px;font-weight:700;">${byMonth[m]} 次</div></div>`).join('')}</div>
+      <div>${Object.keys(byMonth).sort().map(m => `<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;"><div style="min-width:80px;font-size:12px;font-weight:700;color:#02b949;">${m}</div><div style="flex:1;height:24px;background:#E6F4F9;border-radius:4px;position:relative;"><div style="position:absolute;top:0;left:0;height:100%;background:linear-gradient(to right,#002459,#004c88,#007497,#00997f,#02b949);width:${Math.min(byMonth[m]*20,100)}%;border-radius:4px;"></div></div><div style="min-width:40px;font-size:12px;font-weight:700;">${byMonth[m]} 次</div></div>`).join('')}</div>
     </div>
     <div style="background:var(--surface);border-radius:10px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
       <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📢 傳達管道涵蓋率（${total} 次中使用了幾次）</h3>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">${Object.values(chStats).filter(c=>c.count>0).sort((a,b)=>b.count-a.count).map(c => `<div style="display:flex;align-items:center;gap:8px;font-size:12px;"><div style="min-width:140px;">${c.group} ${c.label}</div><div style="flex:1;height:16px;background:#ECFDF5;border-radius:3px;"><div style="height:100%;background:linear-gradient(90deg,#0ba360,#3cba92);width:${c.count/total*100}%;border-radius:3px;"></div></div><div style="min-width:60px;text-align:right;font-weight:700;">${c.count}/${total} (${Math.round(c.count/total*100)}%)</div></div>`).join('')}</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">${Object.values(chStats).filter(c=>c.count>0).sort((a,b)=>b.count-a.count).map(c => `<div style="display:flex;align-items:center;gap:8px;font-size:12px;"><div style="min-width:140px;">${c.group} ${c.label}</div><div style="flex:1;height:16px;background:#E6F4F9;border-radius:3px;"><div style="height:100%;background:linear-gradient(to right,#002459,#004c88,#007497,#00997f,#02b949);width:${c.count/total*100}%;border-radius:3px;"></div></div><div style="min-width:60px;text-align:right;font-weight:700;">${c.count}/${total} (${Math.round(c.count/total*100)}%)</div></div>`).join('')}</div>
     </div>
     <div style="background:var(--surface);border-radius:10px;padding:20px;border:1px solid var(--border);">
       <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;">📋 所有題材清單</h3>
-      <table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr><th style="padding:8px;text-align:left;background:#ECFDF5;">月份</th><th style="padding:8px;text-align:left;background:#ECFDF5;">頁碼</th><th style="padding:8px;text-align:left;background:#ECFDF5;">主題</th><th style="padding:8px;text-align:left;background:#ECFDF5;">負責人</th><th style="padding:8px;text-align:center;background:#ECFDF5;">傳達管道數</th></tr></thead><tbody>
-      ${items.map(x => { const idx = store.mediaItems.indexOf(x); const cc = Object.values(x.channels||{}).filter(v=>v).length; return `<tr><td style="padding:8px;border-bottom:1px solid #eee;">${x.month||''}</td><td style="padding:8px;border-bottom:1px solid #eee;">${x.page_no||'—'}</td><td style="padding:8px;border-bottom:1px solid #eee;"><a href="javascript:clinicEditItem(${idx})" style="color:#0ba360;text-decoration:none;font-weight:600;">${x.title||''}</a></td><td style="padding:8px;border-bottom:1px solid #eee;">${x.content_owner||''}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${cc}</td></tr>`; }).join('')}
+      <table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr><th style="padding:8px;text-align:left;background:#E6F4F9;">月份</th><th style="padding:8px;text-align:left;background:#E6F4F9;">頁碼</th><th style="padding:8px;text-align:left;background:#E6F4F9;">主題</th><th style="padding:8px;text-align:left;background:#E6F4F9;">負責人</th><th style="padding:8px;text-align:center;background:#E6F4F9;">傳達管道數</th></tr></thead><tbody>
+      ${items.map(x => { const idx = store.mediaItems.indexOf(x); const cc = Object.values(x.channels||{}).filter(v=>v).length; return `<tr><td style="padding:8px;border-bottom:1px solid #eee;">${x.month||''}</td><td style="padding:8px;border-bottom:1px solid #eee;">${x.page_no||'—'}</td><td style="padding:8px;border-bottom:1px solid #eee;"><a href="javascript:clinicEditItem(${idx})" style="color:#02b949;text-decoration:none;font-weight:600;">${x.title||''}</a></td><td style="padding:8px;border-bottom:1px solid #eee;">${x.content_owner||''}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">${cc}</td></tr>`; }).join('')}
       </tbody></table>
     </div>`;
 }
@@ -5772,9 +5772,9 @@ function renderWebImport() {
   const ga = store.webMetrics || [], sc = store.searchMetrics || [];
   wrap.innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
-      <div style="padding:14px;background:#ECFDF5;border-radius:8px;border:1px solid #B7D7C8;">
-        <div style="font-size:11px;color:#0ba360;font-weight:700;margin-bottom:4px;">🟢 GA4 官網</div>
-        <div style="font-size:20px;font-weight:900;color:#0ba360;">${ga.length} 筆</div>
+      <div style="padding:14px;background:#E6F4F9;border-radius:8px;border:1px solid #B7D7C8;">
+        <div style="font-size:11px;color:#02b949;font-weight:700;margin-bottom:4px;">🟢 GA4 官網</div>
+        <div style="font-size:20px;font-weight:900;color:#02b949;">${ga.length} 筆</div>
         <div style="font-size:10px;color:#888;">${ga.length?ga.sort((a,b)=>b.date.localeCompare(a.date))[0].date+' ~ '+ga.sort((a,b)=>a.date.localeCompare(b.date))[0].date:'尚無資料'}</div>
       </div>
       <div style="padding:14px;background:#EBF2FE;border-radius:8px;border:1px solid #B3D1FA;">
@@ -5807,9 +5807,9 @@ function _renderChannelImport_LEGACY() {
   const ga = store.webMetrics || [], line = store.lineMetrics || [], sc = store.searchMetrics || [];
   wrap.innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-      <div style="padding:14px;background:#ECFDF5;border-radius:8px;border:1px solid #B7D7C8;">
-        <div style="font-size:11px;color:#0ba360;font-weight:700;margin-bottom:4px;">🟢 GA4 官網</div>
-        <div style="font-size:20px;font-weight:900;color:#0ba360;">${ga.length} 筆</div>
+      <div style="padding:14px;background:#E6F4F9;border-radius:8px;border:1px solid #B7D7C8;">
+        <div style="font-size:11px;color:#02b949;font-weight:700;margin-bottom:4px;">🟢 GA4 官網</div>
+        <div style="font-size:20px;font-weight:900;color:#02b949;">${ga.length} 筆</div>
         <div style="font-size:10px;color:#888;">${ga.length?ga.sort((a,b)=>b.date.localeCompare(a.date))[0].date+' ~ '+ga.sort((a,b)=>a.date.localeCompare(b.date))[0].date:'尚無資料'}</div>
       </div>
       <div style="padding:14px;background:#E6F7E6;border-radius:8px;border:1px solid #99E699;">
@@ -5864,15 +5864,15 @@ function _renderChannelOverview_LEGACY() {
   const sources = lastGaWithSrc ? lastGaWithSrc.sources : null;
   wrap.innerHTML = `
     <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
-      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#0ba360;">🟢 GA4 官網 — ${gaF.length} 天</h3>
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#02b949;">🟢 GA4 官網 — ${gaF.length} 天</h3>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 PV</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${pvSum.toLocaleString()}</div></div>
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 UV</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${uvSum.toLocaleString()}</div></div>
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">工作階段</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${sessSum.toLocaleString()}</div></div>
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均停留</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${avgDur}s</div></div>
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">跳出率</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${avgBounce}%</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 PV</div><div style="font-size:22px;font-weight:900;color:#02b949;">${pvSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 UV</div><div style="font-size:22px;font-weight:900;color:#02b949;">${uvSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">工作階段</div><div style="font-size:22px;font-weight:900;color:#02b949;">${sessSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均停留</div><div style="font-size:22px;font-weight:900;color:#02b949;">${avgDur}s</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">跳出率</div><div style="font-size:22px;font-weight:900;color:#02b949;">${avgBounce}%</div></div>
       </div>
-      ${sources?`<h4 style="font-size:12px;font-weight:700;margin:16px 0 8px;color:#666;">流量來源分布（最新一筆 ${lastGaWithSrc.date}）</h4>${Object.entries(sources).map(([k,v]) => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px;"><div style="width:100px;">${k}</div><div style="flex:1;height:16px;background:#ECFDF5;border-radius:3px;"><div style="height:100%;background:linear-gradient(90deg,#0ba360,#3cba92);width:${v}%;border-radius:3px;"></div></div><div style="width:50px;text-align:right;font-weight:700;">${v}%</div></div>`).join('')}`:'<div style="margin-top:10px;font-size:11px;color:#aaa;font-style:italic;">（尚無流量來源資料 — 在匯入時可填 sources JSON）</div>'}
+      ${sources?`<h4 style="font-size:12px;font-weight:700;margin:16px 0 8px;color:#666;">流量來源分布（最新一筆 ${lastGaWithSrc.date}）</h4>${Object.entries(sources).map(([k,v]) => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px;"><div style="width:100px;">${k}</div><div style="flex:1;height:16px;background:#E6F4F9;border-radius:3px;"><div style="height:100%;background:linear-gradient(to right,#002459,#004c88,#007497,#00997f,#02b949);width:${v}%;border-radius:3px;"></div></div><div style="width:50px;text-align:right;font-weight:700;">${v}%</div></div>`).join('')}`:'<div style="margin-top:10px;font-size:11px;color:#aaa;font-style:italic;">（尚無流量來源資料 — 在匯入時可填 sources JSON）</div>'}
     </div>
     <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
       <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#00B900;">💬 LINE@ — ${lineF.length} 天</h3>
@@ -5936,7 +5936,7 @@ function ensureTagsExist(names) {
   if (!Array.isArray(names) || !names.length) return;
   if (!Array.isArray(store.mediaTags)) store.mediaTags = [];
   const existing = new Set(store.mediaTags.filter(t => !t.deleted_at).map(t => t.name));
-  const palette = ['#0ba360','#1E40AF','#F59E0B','#DC2626','#7C3AED','#0891B2','#B45309','#059669'];
+  const palette = ['#02b949','#1E40AF','#F59E0B','#DC2626','#7C3AED','#0891B2','#B45309','#059669'];
   names.forEach(n => {
     if (!existing.has(n)) {
       store.mediaTags.push({
@@ -8257,15 +8257,15 @@ function renderWebOverview() {
   const scAvgPos = scF.length ? (scF.reduce((s,r)=>s+(+r.avg_position||0),0)/scF.length).toFixed(1) : 0;
   wrap.innerHTML = `
     <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px;">
-      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#0ba360;">🟢 GA4 官網 — ${gaF.length} 天</h3>
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#02b949;">🟢 GA4 官網 — ${gaF.length} 天</h3>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 PV</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${pvSum.toLocaleString()}</div></div>
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 UV</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${uvSum.toLocaleString()}</div></div>
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">工作階段</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${sessSum.toLocaleString()}</div></div>
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均停留</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${avgDur}s</div></div>
-        <div style="padding:14px;background:#ECFDF5;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">跳出率</div><div style="font-size:22px;font-weight:900;color:#0ba360;">${avgBounce}%</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 PV</div><div style="font-size:22px;font-weight:900;color:#02b949;">${pvSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">累計 UV</div><div style="font-size:22px;font-weight:900;color:#02b949;">${uvSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">工作階段</div><div style="font-size:22px;font-weight:900;color:#02b949;">${sessSum.toLocaleString()}</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">平均停留</div><div style="font-size:22px;font-weight:900;color:#02b949;">${avgDur}s</div></div>
+        <div style="padding:14px;background:#E6F4F9;border-radius:8px;text-align:center;"><div style="font-size:11px;color:#888;">跳出率</div><div style="font-size:22px;font-weight:900;color:#02b949;">${avgBounce}%</div></div>
       </div>
-      ${sources?`<h4 style="font-size:12px;font-weight:700;margin:16px 0 8px;color:#666;">流量來源分布（最新一筆 ${lastGaWithSrc.date}）</h4>${Object.entries(sources).map(([k,v]) => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px;"><div style="width:100px;">${k}</div><div style="flex:1;height:16px;background:#ECFDF5;border-radius:3px;"><div style="height:100%;background:linear-gradient(90deg,#0ba360,#3cba92);width:${v}%;border-radius:3px;"></div></div><div style="width:50px;text-align:right;font-weight:700;">${v}%</div></div>`).join('')}`:'<div style="margin-top:10px;font-size:11px;color:#aaa;font-style:italic;">（尚無流量來源資料）</div>'}
+      ${sources?`<h4 style="font-size:12px;font-weight:700;margin:16px 0 8px;color:#666;">流量來源分布（最新一筆 ${lastGaWithSrc.date}）</h4>${Object.entries(sources).map(([k,v]) => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:12px;"><div style="width:100px;">${k}</div><div style="flex:1;height:16px;background:#E6F4F9;border-radius:3px;"><div style="height:100%;background:linear-gradient(to right,#002459,#004c88,#007497,#00997f,#02b949);width:${v}%;border-radius:3px;"></div></div><div style="width:50px;text-align:right;font-weight:700;">${v}%</div></div>`).join('')}`:'<div style="margin-top:10px;font-size:11px;color:#aaa;font-style:italic;">（尚無流量來源資料）</div>'}
     </div>
     <div style="background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);">
       <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:#1E40AF;">🔍 Search Console SEO — ${scF.length} 天</h3>
@@ -8635,8 +8635,8 @@ function renderCrossTagLibrary() {
         ${arr.map(t => {
           const u = usage[t.name] || {};
           const total = (u.posts||0)+(u.events||0)+(u.media||0)+(u.clinic||0)+(u.linePosts||0)+(u.seo||0)+(u.video||0);
-          return `<div style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:${t.color||'#0ba360'}18;border:1px solid ${t.color||'#0ba360'}55;border-radius:16px;font-size:12px;">
-            <span style="font-weight:700;color:${t.color||'#0ba360'};">${t.name}</span>
+          return `<div style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:${t.color||'#02b949'}18;border:1px solid ${t.color||'#02b949'}55;border-radius:16px;font-size:12px;">
+            <span style="font-weight:700;color:${t.color||'#02b949'};">${t.name}</span>
             <span style="font-size:10px;color:var(--text-muted);">${total} 次</span>
             <button onclick="crossDeleteTag('${t.id}')" data-perm="edit" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:13px;padding:0 2px;">×</button>
           </div>`;
@@ -8652,7 +8652,7 @@ function crossAddTag() {
   if (!name) { showToast('請輸入標籤名稱'); return; }
   const existing = (store.mediaTags||[]).filter(t => !t.deleted_at).find(t => t.name === name);
   if (existing) { showToast('此標籤已存在'); return; }
-  const palette = ['#0ba360','#1E40AF','#F59E0B','#DC2626','#7C3AED','#0891B2'];
+  const palette = ['#02b949','#1E40AF','#F59E0B','#DC2626','#7C3AED','#0891B2'];
   if (!store.mediaTags) store.mediaTags = [];
   store.mediaTags.push({
     id: 'tag_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
@@ -8823,7 +8823,7 @@ function renderCrossTagStats() {
     { icon:svgIcon('smartphone'), name:'FB 粉專貼文', count:postsHit.length, metric:`觸及 ${postsReach.toLocaleString()} / 互動 ${postsEngage.toLocaleString()}`, color:'#1877F2' },
     { icon:svgIcon('mic'), name:'活動 / 講座', count:eventsHit.length, metric:`報名 ${eventsReg} / 出席 ${eventsAttend}`, color:'#F59E0B' },
     { icon:svgIcon('newspaper'), name:'新聞媒體曝光', count:mediaHit.length, metric:`累計觸及 ${mediaReach.toLocaleString()}`, color:'#DC2626' },
-    { icon:svgIcon('clipboard'), name:'門診表題材', count:clinicHit.length, metric:`${clinicHit.length} 次刊登`, color:'#0ba360' },
+    { icon:svgIcon('clipboard'), name:'門診表題材', count:clinicHit.length, metric:`${clinicHit.length} 次刊登`, color:'#02b949' },
     { icon:svgIcon('message'), name:'LINE 貼文', count:linePostsHit.length, metric:`觸及 ${linePostsReach.toLocaleString()} / 點擊 ${linePostsClick.toLocaleString()}`, color:'#00B900' },
     { icon:svgIcon('search'), name:'SEO 文章', count:seoHit.length, metric:`總搜尋量 ${seoVolume.toLocaleString()}${seoAvgRank?(' / 平均排名 '+seoAvgRank.toFixed(1)):''}`, color:'#1E40AF' },
     { icon:svgIcon('youtube'), name:'YouTube 影片', count:ytHit.length, metric:`觀看 ${ytViews.toLocaleString()} / 互動 ${ytEngage.toLocaleString()}`, color:'#FF0000' },
@@ -8831,7 +8831,7 @@ function renderCrossTagStats() {
   ];
 
   wrap.innerHTML = `
-    <div style="background:linear-gradient(135deg,#0ba360,#3cba92);border-radius:14px;padding:24px;color:#fff;margin-bottom:18px;">
+    <div style="background:linear-gradient(to right top,#002459,#004c88,#007497,#00997f,#02b949);border-radius:14px;padding:24px;color:#fff;margin-bottom:18px;">
       <div style="font-size:12px;opacity:.85;margin-bottom:4px;">標籤</div>
       <div style="font-size:28px;font-weight:900;margin-bottom:4px;">#${tagName}</div>
       <div style="font-size:13px;opacity:.9;">跨傳達管道共執行 <b style="font-size:18px;">${totalCount}</b> 次</div>
@@ -8857,7 +8857,7 @@ function renderCrossTagStats() {
     ${renderCrossTagDetail('新聞媒體曝光', '#DC2626', mediaHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
       ['日期','媒體名稱','類型','報導標題','觸及','連結'],
       m => [m.date||'', m.name||'—', m.type||'—', m.title||'—', (m.reach||0).toLocaleString(), m.url||m.link||''])}
-    ${renderCrossTagDetail('門診表題材', '#0ba360', clinicHit.sort((a,b)=>(b.month||'').localeCompare(a.month||'')),
+    ${renderCrossTagDetail('門診表題材', '#02b949', clinicHit.sort((a,b)=>(b.month||'').localeCompare(a.month||'')),
       ['月份','頁碼','題材','科別','負責人','備註'],
       c => [c.month||'', c.page||'—', c.title||'—', c.dept||'—', c.owner||'—', c.note||''])}
     ${renderCrossTagDetail('LINE 貼文', '#00B900', linePostsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
@@ -8937,7 +8937,7 @@ function renderCrossTagDetailTable(title, items, mapper) {
     <h3 style="font-size:13px;font-weight:700;margin-bottom:10px;">${title} <span style="color:var(--text-muted);font-weight:400;">（${items.length}）</span></h3>
     <div class="table-wrap"><table style="width:100%;font-size:12px;">
       <thead><tr style="background:#F5F9F7;"><th style="text-align:left;padding:6px 8px;">日期</th><th style="text-align:left;padding:6px 8px;">標題 / 內容</th><th style="text-align:left;padding:6px 8px;">數據</th><th style="text-align:left;padding:6px 8px;">備註</th></tr></thead>
-      <tbody>${items.map(it => { const c = mapper(it); return `<tr><td style="padding:5px 8px;color:#666;">${c[0]||''}</td><td style="padding:5px 8px;font-weight:600;">${c[1]||''}</td><td style="padding:5px 8px;color:#0ba360;">${c[2]||''}</td><td style="padding:5px 8px;color:#888;">${c[3]||''}</td></tr>`; }).join('')}</tbody>
+      <tbody>${items.map(it => { const c = mapper(it); return `<tr><td style="padding:5px 8px;color:#666;">${c[0]||''}</td><td style="padding:5px 8px;font-weight:600;">${c[1]||''}</td><td style="padding:5px 8px;color:#02b949;">${c[2]||''}</td><td style="padding:5px 8px;color:#888;">${c[3]||''}</td></tr>`; }).join('')}</tbody>
     </table></div>
   </div>`;
 }
@@ -9185,7 +9185,7 @@ function _generateCrossTagReport(opts) {
     { icon:svgIcon('smartphone',14), name:'FB 粉專貼文',   count:postsHit.length,  metric:'觸及 '+postsReach.toLocaleString()+' / 互動 '+postsEngage.toLocaleString(), color:'#1877F2' },
     { icon:svgIcon('mic',14),        name:'活動 / 講座',   count:eventsHit.length, metric:'報名 '+eventsReg+' / 出席 '+eventsAttend, color:'#F59E0B' },
     { icon:svgIcon('newspaper',14),  name:'新聞媒體曝光',  count:mediaHit.length,  metric:'累計觸及 '+mediaReach.toLocaleString(), color:'#DC2626' },
-    { icon:svgIcon('clipboard',14),  name:'門診表題材',    count:clinicHit.length, metric:clinicHit.length+' 次刊登', color:'#0ba360' },
+    { icon:svgIcon('clipboard',14),  name:'門診表題材',    count:clinicHit.length, metric:clinicHit.length+' 次刊登', color:'#02b949' },
     { icon:svgIcon('message',14),    name:'LINE 貼文',     count:lineHit.length,   metric:'觸及 '+lineReach.toLocaleString()+' / 點擊 '+lineClick.toLocaleString(), color:'#00B900' },
     { icon:svgIcon('search',14),     name:'SEO 文章',      count:seoHit.length,    metric:'總搜尋量 '+seoVolume.toLocaleString()+(seoAvgRank?' / 平均排名 '+seoAvgRank.toFixed(1):''), color:'#1E40AF' },
     { icon:svgIcon('youtube',14),    name:'YouTube 影片',  count:ytHit.length,     metric:'觀看 '+ytViews.toLocaleString()+' / 互動 '+ytEngage.toLocaleString(), color:'#FF0000' },
@@ -9267,28 +9267,28 @@ function _generateCrossTagReport(opts) {
     + "body{font-family:'Noto Sans TC',sans-serif;background:#EEF2F0;color:#1A1A2E;padding:20px;}"
     + '.toolbar{position:fixed;top:14px;right:14px;z-index:99;display:flex;gap:8px;}'
     + '.toolbar button{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;}'
-    + '.btn-print{background:#0ba360;color:#fff;} .btn-close{background:#888;color:#fff;}'
+    + '.btn-print{background:#02b949;color:#fff;} .btn-close{background:#888;color:#fff;}'
     + '.page{max-width:960px;margin:0 auto;background:#fff;padding:48px 56px;box-shadow:0 4px 24px rgba(0,0,0,.08);border-radius:6px;}'
-    + '.hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:4px solid #0ba360;padding-bottom:14px;margin-bottom:24px;}'
+    + '.hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:4px solid #02b949;padding-bottom:14px;margin-bottom:24px;}'
     + '.hdr h1{font-size:24px;color:#1B4332;font-weight:900;}'
     + '.hdr .meta{font-size:12px;color:#666;text-align:right;line-height:1.6;}'
-    + '.hero{background:linear-gradient(135deg,#0ba360,#3cba92);border-radius:14px;padding:24px 28px;color:#fff;margin-bottom:24px;}'
+    + '.hero{background:linear-gradient(to right top,#002459,#004c88,#007497,#00997f,#02b949);border-radius:14px;padding:24px 28px;color:#fff;margin-bottom:24px;}'
     + '.hero .label{font-size:12px;opacity:.85;}'
     + '.hero .tag{font-size:36px;font-weight:900;margin:4px 0 8px;}'
     + '.hero .stat{font-size:14px;opacity:.95;}'
     + '.hero .stat b{font-size:22px;}'
-    + 'h2{font-size:15px;font-weight:700;margin:24px 0 10px;padding:6px 12px;border-left:4px solid #0ba360;background:#ECFDF5;color:#1B4332;}'
+    + 'h2{font-size:15px;font-weight:700;margin:24px 0 10px;padding:6px 12px;border-left:4px solid #02b949;background:#E6F4F9;color:#1B4332;}'
     + '.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:8px;}'
     + '.kpi{background:#F8FAF9;border:1px solid #E5E7EB;border-radius:10px;padding:14px;}'
     + '.kpi-label{font-size:11px;color:#666;margin-bottom:4px;font-weight:600;}'
     + '.kpi-val{font-size:26px;font-weight:900;line-height:1.1;}'
     + '.kpi-sub{font-size:11px;color:#888;margin-top:4px;}'
     + 'table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:8px;}'
-    + 'th{background:#ECFDF5;padding:7px 8px;text-align:left;font-weight:700;font-size:11px;color:#1B4332;border-bottom:2px solid #0ba360;}'
+    + 'th{background:#E6F4F9;padding:7px 8px;text-align:left;font-weight:700;font-size:11px;color:#1B4332;border-bottom:2px solid #02b949;}'
     + 'td{padding:6px 8px;border-bottom:1px solid #EEE;}'
     + '.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}'
     + '.bar-label{width:120px;text-align:right;font-size:11px;font-weight:700;color:#555;}'
-    + '.bar-track{flex:1;height:22px;background:#ECFDF5;border-radius:4px;overflow:hidden;}'
+    + '.bar-track{flex:1;height:22px;background:#E6F4F9;border-radius:4px;overflow:hidden;}'
     + '.bar-fill{height:100%;border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}'
     + '.footer{margin-top:32px;padding-top:14px;border-top:1px solid #eee;text-align:center;font-size:11px;color:#999;}'
     + '@media print{body{background:#fff;padding:0;} .toolbar{display:none;} .page{box-shadow:none;border-radius:0;padding:24px 32px;max-width:none;}}'
@@ -9526,7 +9526,7 @@ function _generateChannelReport(channel, opts) {
     fb:    { title:'粉專貼文成效報表',    color:'#1877F2' },
     event: { title:'活動 / 講座成效報表', color:'#F59E0B' },
     media: { title:'新聞媒體曝光報表',    color:'#DC2626' },
-    clinic:{ title:'門診表題材推廣報表',  color:'#0ba360' },
+    clinic:{ title:'門診表題材推廣報表',  color:'#02b949' },
     line:  { title:'LINE@ 官方帳號報表',   color:'#00B900' },
     web:   { title:'官網 GA4 / SEO 報表',  color:'#1E40AF' },
     kol:   { title:'KOL 合作成效報表',     color:'#7C3AED' },
@@ -9999,7 +9999,7 @@ function _rptSeoArticles(period, opts) {
   ]) +
   '<h2>排名變化摘要</h2>' +
   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">'
-    + '<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:14px;"><div style="font-size:12px;color:#059669;font-weight:700;">↑ 排名進步（' + improving.length + ' 篇）</div>'
+    + '<div style="background:#E6F4F9;border:1px solid #A7F3D0;border-radius:8px;padding:14px;"><div style="font-size:12px;color:#059669;font-weight:700;">↑ 排名進步（' + improving.length + ' 篇）</div>'
     + improving.slice(0,6).map(a => '<div style="font-size:11px;margin-top:4px;">'+(a.title||'').slice(0,40)+' ('+(a.prevRank||'—')+' → '+(a.rank||'—')+')</div>').join('') + '</div>'
     + '<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:14px;"><div style="font-size:12px;color:#DC2626;font-weight:700;">↓ 排名退步（' + declining.length + ' 篇）</div>'
     + declining.slice(0,6).map(a => '<div style="font-size:11px;margin-top:4px;">'+(a.title||'').slice(0,40)+' ('+(a.prevRank||'—')+' → '+(a.rank||'—')+')</div>').join('') + '</div>'
@@ -10099,37 +10099,37 @@ function _generateExportReport(opts) {
     '.sub{font-size:12px;color:#888;margin-bottom:20px;}' +
     '.tabs{display:flex;gap:0;margin-bottom:0;border-bottom:2px solid #E5E7EB;}' +
     '.tab{padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;color:#9CA3AF;margin-bottom:-2px;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;display:inline-flex;align-items:center;gap:6px;}' +
-    '.tab.active{color:#0ba360;border-bottom-color:#0ba360;}' +
-    '.tab:hover{color:#0ba360;}' +
+    '.tab.active{color:#02b949;border-bottom-color:#02b949;}' +
+    '.tab:hover{color:#02b949;}' +
     '.tab svg{width:16px;height:16px;vertical-align:middle;}' +
     '.tab-content{display:none;} .tab-content.active{display:block;}' +
     '.filter-bar{display:flex;gap:10px;align-items:center;padding:12px 0;margin-bottom:16px;flex-wrap:wrap;}' +
-    '.filter-bar select{padding:6px 12px;border:1px solid #B7D7C8;border-radius:6px;font-size:13px;font-family:inherit;color:#0ba360;background:#ECFDF5;cursor:pointer;}' +
+    '.filter-bar select{padding:6px 12px;border:1px solid #B7D7C8;border-radius:6px;font-size:13px;font-family:inherit;color:#02b949;background:#E6F4F9;cursor:pointer;}' +
     '.filter-bar label{font-size:12px;color:#888;font-weight:700;}' +
     '.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}' +
-    '.kpi{background:#ECFDF5;border:1px solid #B7D7C8;border-radius:10px;padding:16px;text-align:center;}' +
+    '.kpi{background:#E6F4F9;border:1px solid #B7D7C8;border-radius:10px;padding:16px;text-align:center;}' +
     '.kpi-label{font-size:11px;color:#888;margin-bottom:4px;}' +
-    ".kpi-val{font-size:24px;font-weight:900;color:#0ba360;font-family:Inter,sans-serif;}" +
+    ".kpi-val{font-size:24px;font-weight:900;color:#02b949;font-family:Inter,sans-serif;}" +
     '.kpi-sub{font-size:11px;color:#aaa;margin-top:2px;}' +
     'h2{font-size:15px;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #E8F0EC;color:#1A1A2E;}' +
     'table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:24px;}' +
-    'th{background:#ECFDF5;padding:8px 10px;text-align:left;font-weight:700;font-size:11px;color:#0ba360;border-bottom:2px solid #B7D7C8;}' +
+    'th{background:#E6F4F9;padding:8px 10px;text-align:left;font-weight:700;font-size:11px;color:#02b949;border-bottom:2px solid #B7D7C8;}' +
     'td{padding:7px 10px;border-bottom:1px solid #EEE;}' +
     '.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}' +
     '.bar-label{width:50px;text-align:right;font-size:11px;font-weight:700;color:#555;}' +
-    '.bar-track{flex:1;height:22px;background:#ECFDF5;border-radius:4px;overflow:hidden;}' +
-    '.bar-fill{height:100%;background:linear-gradient(90deg,#0ba360,#40916C);border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}' +
+    '.bar-track{flex:1;height:22px;background:#E6F4F9;border-radius:4px;overflow:hidden;}' +
+    '.bar-fill{height:100%;background:linear-gradient(90deg,#02b949,#40916C);border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}' +
     '.footer{margin-top:30px;text-align:center;font-size:11px;color:#bbb;border-top:1px solid #eee;padding-top:16px;}' +
     '.cat-section{margin-bottom:24px;}' +
     '.cat-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;}' +
     '.cat-dot{width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0;}' +
-    '.cat-bar-track{flex:1;height:16px;background:#ECFDF5;border-radius:3px;overflow:hidden;}' +
+    '.cat-bar-track{flex:1;height:16px;background:#E6F4F9;border-radius:3px;overflow:hidden;}' +
     '.cat-bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:10px;font-weight:600;color:#fff;white-space:nowrap;}' +
     '@media print{body{padding:20px 30px;} .no-print{display:none;}}' +
   '</style></head><body>' +
   '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
     '<h1>光田綜合醫院｜行銷成效月報</h1>' +
-    '<button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#0ba360;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">列印 / 存 PDF</button>' +
+    '<button class="no-print" onclick="window.print()" style="padding:8px 18px;background:#02b949;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">列印 / 存 PDF</button>' +
   '</div>' +
   '<div class="sub" id="rpt-sub"></div>' +
   '<div class="tabs no-print">' +
@@ -10551,37 +10551,37 @@ function openHealthArtReport() {
     "body{font-family:'Noto Sans TC',sans-serif;background:#F5F5F5;color:#1A1A2E;line-height:1.75;padding:20px 0;font-size:16px;}",
     '.page{background:#fff;max-width:960px;margin:0 auto 20px;padding:60px 70px 50px;box-shadow:0 2px 12px rgba(0,0,0,0.08);min-height:1100px;page-break-after:always;}',
     '.cover h1{font-size:36px;font-weight:900;color:#1B4332;text-align:center;margin:120px 0 30px;letter-spacing:2px;line-height:1.5;}',
-    '.cover .deco{width:100px;height:5px;background:#0ba360;margin:0 auto 40px;}',
+    '.cover .deco{width:100px;height:5px;background:#02b949;margin:0 auto 40px;}',
     '.cover .info{font-size:17px;color:#444;text-align:center;margin-bottom:10px;}',
-    '.cover .info b{color:#0ba360;}',
-    '.cover .summary{margin:60px 30px 0;padding:28px 32px;background:#ECFDF5;border-left:6px solid #0ba360;font-size:16px;color:#333;line-height:2;border-radius:4px;}',
-    'h2.sec-title{font-size:24px;font-weight:900;color:#1B4332;margin:30px 0 20px;padding-bottom:12px;border-bottom:3px solid #0ba360;display:flex;align-items:center;gap:10px;}',
+    '.cover .info b{color:#02b949;}',
+    '.cover .summary{margin:60px 30px 0;padding:28px 32px;background:#E6F4F9;border-left:6px solid #02b949;font-size:16px;color:#333;line-height:2;border-radius:4px;}',
+    'h2.sec-title{font-size:24px;font-weight:900;color:#1B4332;margin:30px 0 20px;padding-bottom:12px;border-bottom:3px solid #02b949;display:flex;align-items:center;gap:10px;}',
     'h2.sec-title:first-child{margin-top:0;}',
-    'h3{font-size:18px;font-weight:700;color:#0ba360;margin:22px 0 12px;padding-left:12px;border-left:5px solid #52B788;}',
+    'h3{font-size:18px;font-weight:700;color:#02b949;margin:22px 0 12px;padding-left:12px;border-left:5px solid #52B788;}',
     'p{font-size:16px;color:#333;margin-bottom:12px;text-indent:0;line-height:1.9;}',
-    'table{width:100%;border-collapse:collapse;font-size:15px;margin:12px 0 22px;border:1.5px solid #0ba360;}',
-    'th{background:#0ba360;color:#fff;padding:12px 14px;text-align:left;font-weight:700;font-size:15px;border:1px solid #0ba360;}',
+    'table{width:100%;border-collapse:collapse;font-size:15px;margin:12px 0 22px;border:1.5px solid #02b949;}',
+    'th{background:#02b949;color:#fff;padding:12px 14px;text-align:left;font-weight:700;font-size:15px;border:1px solid #02b949;}',
     'th.center,td.center{text-align:center;}',
     'td{padding:11px 14px;border:1px solid #D4E5DB;vertical-align:top;color:#333;font-size:15px;line-height:1.8;}',
     'tr:nth-child(even) td{background:#F7FBF8;}',
-    '.badge{display:inline-block;padding:4px 12px;border-radius:12px;background:#E8F0EC;color:#0ba360;font-size:13px;font-weight:700;}',
+    '.badge{display:inline-block;padding:4px 12px;border-radius:12px;background:#E8F0EC;color:#02b949;font-size:13px;font-weight:700;}',
     '.star{color:#F59E0B;font-weight:900;font-size:16px;}',
-    '.high{color:#0ba360;font-weight:900;}',
+    '.high{color:#02b949;font-weight:900;}',
     '.callout{background:#FFF7E6;border-left:5px solid #F59E0B;padding:16px 20px;margin:16px 0;font-size:16px;border-radius:4px;line-height:1.9;}',
     '.callout b{color:#92400E;}',
     '.editable{background:#FAFFFB;border:1.5px dashed #B7D7C8;padding:14px 18px;margin:8px 0 18px;font-size:16px;border-radius:6px;color:#333;line-height:1.9;min-height:28px;}',
-    '.editable:hover{background:#ECFDF5;border-color:#52B788;}',
-    '.editable:focus{background:#fff;outline:none;border-color:#0ba360;border-style:solid;box-shadow:0 0 0 3px rgba(45,106,79,0.15);}',
+    '.editable:hover{background:#E6F4F9;border-color:#52B788;}',
+    '.editable:focus{background:#fff;outline:none;border-color:#02b949;border-style:solid;box-shadow:0 0 0 3px rgba(45,106,79,0.15);}',
     '.editable[data-placeholder]:empty:before{content:attr(data-placeholder);color:#aaa;font-style:italic;}',
     '.tip{font-size:13px;color:#888;margin:4px 0 14px;font-style:italic;}',
     'ul{margin:10px 0 16px 28px;font-size:16px;color:#333;line-height:2;} li{margin-bottom:6px;}',
     '.numlist{counter-reset:nl;list-style:none;margin:14px 0 16px 0;padding:0;}',
     '.numlist li{counter-increment:nl;font-size:16px;color:#333;line-height:2;margin-bottom:14px;padding-left:48px;position:relative;}',
-    '.numlist li:before{content:counter(nl);position:absolute;left:0;top:2px;width:32px;height:32px;border-radius:50%;background:#0ba360;color:#fff;text-align:center;line-height:32px;font-weight:900;font-family:Inter,sans-serif;font-size:15px;}',
+    '.numlist li:before{content:counter(nl);position:absolute;left:0;top:2px;width:32px;height:32px;border-radius:50%;background:#02b949;color:#fff;text-align:center;line-height:32px;font-weight:900;font-family:Inter,sans-serif;font-size:15px;}',
     '.toolbar{position:fixed;top:14px;right:14px;display:flex;gap:8px;z-index:999;}',
-    '.toolbar button{padding:10px 18px;background:#0ba360;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:14px;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.15);}',
+    '.toolbar button{padding:10px 18px;background:#02b949;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:14px;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.15);}',
     '.toolbar button:hover{background:#1B4332;}',
-    '.toolbar button.alt{background:#fff;color:#0ba360;border:1.5px solid #0ba360;}',
+    '.toolbar button.alt{background:#fff;color:#02b949;border:1.5px solid #02b949;}',
     '@media print{body{background:#fff;padding:0;} .page{box-shadow:none;margin:0;padding:30px 40px;min-height:auto;} .toolbar{display:none;} .editable{border:none;background:transparent;padding:0;} h2.sec-title{break-after:avoid;}}'
   ].join('');
 
