@@ -1066,9 +1066,9 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 
       <div id="quickImportDrop" style="border:3px dashed #93C5FD;border-radius:14px;padding:60px 20px;text-align:center;background:#F9FBFF;margin-bottom:18px;transition:all .15s;cursor:pointer;">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <div style="font-size:15px;font-weight:700;color:#1E3A8A;margin-bottom:6px;">拖曳 .xlsx 檔案到此處</div>
+        <div style="font-size:15px;font-weight:700;color:#1E3A8A;margin-bottom:6px;">拖曳 .xlsx / .csv / .json 檔案到此處</div>
         <div style="font-size:12px;color:#64748B;margin-bottom:14px;">或點擊選擇檔案（可多選）</div>
-        <input type="file" id="quickImportInput" accept=".xlsx" multiple style="display:none;" onchange="handleQuickImport(event)">
+        <input type="file" id="quickImportInput" accept=".xlsx,.csv,.json" multiple style="display:none;" onchange="handleQuickImport(event)">
         <button class="btn btn-primary" onclick="document.getElementById('quickImportInput').click()">選擇檔案</button>
       </div>
 
@@ -7824,12 +7824,81 @@ async function handleQuickImportFiles(files) {
 
 function _processQuickImportFile(file) {
   return new Promise(resolve => {
+    const filename = file.name;
+    const isCSV = /\.csv$/i.test(filename);
+    const isJSON = /\.json$/i.test(filename);
+
+    // ── CSV / JSON 處理（影片資料等） ──
+    if (isCSV || isJSON) {
+      const txtReader = new FileReader();
+      txtReader.onload = (te) => {
+        try {
+          const text = String(te.target.result || '').trim();
+          // 嘗試判斷是不是影片資料（檔名含 video/影片/YT/IG，或內容欄位含 platform/views/engage）
+          let rows = [];
+          if (isJSON) {
+            const parsed = JSON.parse(text);
+            rows = Array.isArray(parsed) ? parsed : [parsed];
+          } else {
+            // CSV：用 SheetJS 解析（自動處理引號、逗號）
+            const wb = XLSX.read(text, { type:'string' });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            rows = XLSX.utils.sheet_to_json(ws, { defval:'', raw:false });
+          }
+          if (!rows.length) {
+            return resolve({ ok:false, filename, detected:'未知', msg:'CSV/JSON 無資料列' });
+          }
+          // 偵測類型：影片
+          const isVideo = /影片|video|^yt[_-]|^ig[_-]|youtube|instagram/i.test(filename)
+            || (rows[0] && ('platform' in rows[0] || 'views' in rows[0] || '觀看' in rows[0]));
+          if (isVideo) {
+            if (!store.videoItems) store.videoItems = [];
+            let added = 0, updated = 0;
+            const normMonth = (d) => {
+              const s = String(d||'').trim().replace(/\./g,'-');
+              const m = s.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?/);
+              if (m) return m[1]+'-'+String(m[2]).padStart(2,'0')+(m[3]?'-'+String(m[3]).padStart(2,'0'):'');
+              return s;
+            };
+            rows.forEach(r => {
+              const title = String(r.title || r['標題'] || r['影片標題'] || '').trim();
+              const date = normMonth(r.date || r['日期'] || '');
+              if (!title || !date) return;
+              const platform = (r.platform || r['平台'] || 'YouTube').toString().trim();
+              const tagsRaw = String(r.tags || r['標籤'] || '');
+              const tags = tagsRaw.split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
+              ensureTagsExist(tags);
+              const obj = {
+                date, platform, title,
+                views: +(r.views || r['觀看'] || r['觀看數'] || 0) || 0,
+                engage: +(r.engage || r['互動'] || r['互動數'] || 0) || 0,
+                external_url: String(r.external_url || r.url || r['連結'] || r['網址'] || '').trim(),
+                tags,
+                updated_at: new Date().toISOString(),
+              };
+              const existing = store.videoItems.find(v => !v.deleted_at && v.date === obj.date && v.title === obj.title && v.platform === obj.platform);
+              if (existing) { Object.assign(existing, obj); updated++; }
+              else { obj.created_at = obj.updated_at; store.videoItems.push(obj); added++; }
+            });
+            saveStore();
+            return resolve({ ok:true, filename, detected:'YT/IG 影片', msg:'新增 '+added+'、更新 '+updated+' 則' });
+          }
+          // 不是影片，無法辨識
+          return resolve({ ok:false, filename, detected:'未知 (CSV/JSON)', msg:'檔名需含「影片/video/yt/ig」或欄位需含 platform/views' });
+        } catch(err) {
+          return resolve({ ok:false, filename, detected:'錯誤', msg:err.message });
+        }
+      };
+      txtReader.readAsText(file, 'UTF-8');
+      return;
+    }
+
+    // ── XLSX 處理 ──
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const wb = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
         const sheets = wb.SheetNames;
-        const filename = file.name;
 
         // 自動辨識
         let detected = '未知', msg = '無法自動辨識';
