@@ -7822,6 +7822,482 @@ async function handleQuickImportFiles(files) {
   }
 }
 
+// ═══════════════════════════════════════════
+// 智慧欄位映射字典（同義詞列表，可不斷擴充）
+// 每個 key 是系統內部欄位，value 是各種可能的人為命名
+// ═══════════════════════════════════════════
+const SMART_FIELD_DICT = {
+  // 通用
+  date:        ['date','日期','發布日期','上線日','上線日期','刊登日','publish_date','publishdate','published_at','刊登','日期(yyyy-mm)','日期(yyyy/mm)','日期(yyyy-mm-dd)','發稿日','日'],
+  title:       ['title','標題','影片標題','名稱','主題','影片名稱','影片名','video_title','name','文章標題','貼文標題','報導標題','活動名稱','題目'],
+  dept:        ['dept','科別','department','部門','負責科別','所屬科別','專科','科'],
+  keyword:     ['keyword','關鍵字','search_keyword','搜尋字','keyword_list','關鍵詞','主要關鍵字'],
+  url:         ['url','連結','網址','link','external_url','分享連結','原文連結','影片連結','文章連結','發布連結'],
+  tags:        ['tags','標籤','category','類別','類型','topic','tag','標籤(逗號)','分類'],
+  note:        ['note','備註','description','說明','remarks','memo','補充'],
+  // 影片相關
+  platform:    ['platform','平台','channel','管道','發布平台','社群平台'],
+  views:       ['views','觀看','觀看數','view_count','play_count','播放數','播放次數','播放','觀看次數','觸及','reach','曝光'],
+  engage:      ['engage','互動','互動數','engagement','engagement_count','interaction','engage_count','按讚+留言+分享'],
+  duration:    ['duration','時長','影片長度','length','video_length','秒數'],
+  // FB 相關
+  reach:       ['reach','觸及','觸及人數','觸及數','fb_reach','觸及率分母'],
+  click:       ['click','點擊','點擊數','點擊次數','click_count','clicks','click_through'],
+  engage_fb:   ['engage','互動','心情+留言+分享','心情留言分享','engagement'],
+  cat:         ['cat','分類','category','內容類型','內容分類','貼文類型','文章類型'],
+  // 活動
+  reg:         ['reg','報名','報名人數','registration','sign_up','報名數','預約人數'],
+  attend:      ['attend','出席','出席人數','attendance','實到人數','到場人數','出席數'],
+  sat:         ['sat','滿意度','滿意','satisfaction','評分'],
+  campus:      ['campus','院區','分院','location'],
+  type:        ['type','類型','活動類型','event_type','分類','種類'],
+  speaker:     ['speaker','講者','主講','主講者','speaker_name','講師'],
+  budget:      ['budget','預算','預算金額','planned_cost'],
+  expense:     ['expense','實際支出','支出','支出金額','實際花費','cost'],
+  // 媒體
+  mediaName:   ['name','媒體名稱','媒體','報導媒體','刊登媒體','media_name','source','publication'],
+  mediaType:   ['type','媒體類型','類型','media_type','type_of_media'],
+  section:     ['section','版面','報導版面','section_name','版位'],
+  nature:      ['nature','性質','報導性質','正/負面','tone','屬性'],
+  // SEO 文章
+  rank:        ['rank','排名','search_rank','排序','名次','當月排名'],
+  searchVolume:['searchvolume','月搜尋量','搜尋量','search_volume','monthly_search','impressions','曝光量'],
+  prevRank:    ['prevrank','上月排名','排名(上個月)','上期排名'],
+  prevSearchVolume:['prevsearchvolume','上月搜尋量','月搜尋量(上個月)','上期搜尋量'],
+};
+
+// 把欄位名稱正規化（去除空白、大小寫、半形全形差異、移除符號）
+function _normalizeFieldName(s) {
+  return String(s||'').trim().toLowerCase()
+    .replace(/[\s_\-(\)（）\/、,，:：]/g, '')
+    .replace(/^﻿/, ''); // 去 BOM
+}
+
+// 自動猜測：給一個輸入欄位名，找最匹配的系統欄位
+function _guessSystemField(inputName, allowedFields) {
+  const norm = _normalizeFieldName(inputName);
+  if (!norm) return null;
+  // 精確比對
+  for (const sysField of (allowedFields || Object.keys(SMART_FIELD_DICT))) {
+    const synonyms = SMART_FIELD_DICT[sysField] || [];
+    if (synonyms.some(s => _normalizeFieldName(s) === norm)) return sysField;
+  }
+  // 部分包含比對
+  for (const sysField of (allowedFields || Object.keys(SMART_FIELD_DICT))) {
+    const synonyms = SMART_FIELD_DICT[sysField] || [];
+    if (synonyms.some(s => norm.includes(_normalizeFieldName(s)) || _normalizeFieldName(s).includes(norm))) return sysField;
+  }
+  return null;
+}
+
+// 平台特定欄位偵測（FB觀看/YT觀看/IG觀看）
+function _detectPlatformField(inputName) {
+  const n = _normalizeFieldName(inputName);
+  const platforms = [
+    { name:'YouTube', match: /^(yt|youtube)/, alt:[] },
+    { name:'Facebook', match: /^(fb|facebook)/, alt:[] },
+    { name:'Instagram', match: /^(ig|instagram|insta)/, alt:[] },
+    { name:'TikTok', match: /^(tt|tiktok|抖音)/, alt:[] },
+    { name:'Threads', match: /^(threads|串)/, alt:[] },
+    { name:'LINE', match: /^(line)/, alt:[] },
+  ];
+  for (const p of platforms) {
+    if (p.match.test(n)) {
+      const rest = n.replace(p.match, '');
+      // rest 可能是 觀看/讚/留言/連結/觸及/曝光…
+      if (/(views?|觀看|播放|reach|觸及)/.test(rest)) return { platform:p.name, role:'views' };
+      if (/(likes?|讚)/.test(rest)) return { platform:p.name, role:'likes' };
+      if (/(comments?|留言)/.test(rest)) return { platform:p.name, role:'comments' };
+      if (/(shares?|分享)/.test(rest)) return { platform:p.name, role:'shares' };
+      if (/(link|連結|url|網址)/.test(rest)) return { platform:p.name, role:'url' };
+      if (/(impressions?|曝光)/.test(rest)) return { platform:p.name, role:'impressions' };
+      if (/(ctr)/.test(rest)) return { platform:p.name, role:'ctr' };
+    }
+  }
+  return null;
+}
+
+// 智慧匯入：分析 row 結構並產生映射預覽
+// data type 推測 + 自動匹配 + 預覽 modal
+function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
+  // sourceType: 'csv' | 'json' | 'xlsx'
+  if (!rows || !rows.length) return false;
+  const sample = rows[0];
+  const inputCols = Object.keys(sample).map(k => k.replace(/^﻿/,'').trim()).filter(Boolean);
+
+  // 推測資料類型（priority order）
+  const candidates = [
+    { type:'video', score: 0, label:'YT/IG/FB 影片', requiredFields:['date','title'] },
+    { type:'fb',    score: 0, label:'FB 粉專貼文', requiredFields:['date','title','reach'] },
+    { type:'event', score: 0, label:'活動 / 講座', requiredFields:['date','title','reg'] },
+    { type:'media', score: 0, label:'新聞媒體曝光', requiredFields:['date','mediaName','title'] },
+    { type:'seo',   score: 0, label:'SEO 文章', requiredFields:['date','title','keyword'] },
+  ];
+
+  // 自動匹配每個輸入欄位
+  const autoMap = {};
+  const platformDetected = new Set();
+  inputCols.forEach(col => {
+    const platformField = _detectPlatformField(col);
+    if (platformField) {
+      autoMap[col] = { platform: platformField.platform, role: platformField.role };
+      platformDetected.add(platformField.platform);
+      candidates[0].score += 3; // video
+      return;
+    }
+    const sys = _guessSystemField(col);
+    if (sys) {
+      autoMap[col] = { systemField: sys };
+      // 累積每種類型分數
+      if (['date','title','platform','views','engage','duration','tags'].includes(sys)) candidates[0].score++;
+      if (['date','title','reach','click','engage','cat'].includes(sys)) candidates[1].score++;
+      if (['date','title','reg','attend','speaker','campus'].includes(sys)) candidates[2].score++;
+      if (['date','title','mediaName','mediaType','nature','reach'].includes(sys)) candidates[3].score++;
+      if (['date','title','keyword','rank','searchVolume','dept'].includes(sys)) candidates[4].score++;
+    } else {
+      autoMap[col] = { systemField: null };
+    }
+  });
+  // 平台偵測 → 強烈傾向 video
+  if (platformDetected.size >= 1) candidates[0].score += platformDetected.size * 2;
+  // 檔名輔助
+  if (/影片|video|yt|ig/i.test(filename)) candidates[0].score += 5;
+  if (/event|活動|講座/i.test(filename)) candidates[2].score += 5;
+  if (/media|媒體|新聞|報導/i.test(filename)) candidates[3].score += 5;
+  if (/seo|文章/i.test(filename)) candidates[4].score += 5;
+  if (/post|貼文|粉專/i.test(filename)) candidates[1].score += 5;
+
+  const best = candidates.sort((a,b) => b.score-a.score)[0];
+
+  // 開預覽 modal
+  _openImportMappingModal({ rows, filename, inputCols, autoMap, candidates, best, platformDetected });
+  return true;
+}
+
+// 開啟智慧映射 modal
+function _openImportMappingModal(ctx) {
+  const { rows, filename, inputCols, autoMap, candidates, best, platformDetected } = ctx;
+  // 儲存到 window 供後續引用
+  window._importCtx = ctx;
+  const targetTypeOpts = candidates.map(c => '<option value="'+c.type+'"'+(c.type===best.type?' selected':'')+'>'+c.label+' (匹配分數 '+c.score+')</option>').join('');
+
+  // 對 video 類型，systemFields 是 'date,title,tags,note'，加上平台特殊
+  const sysFieldOpts = {
+    video: ['date','title','platform','views','engage','duration','tags','url','note'],
+    fb:    ['date','title','cat','reach','click','engage','tags','url','note'],
+    event: ['date','title','type','campus','reg','attend','speaker','sat','reach','budget','expense','tags','note'],
+    media: ['date','mediaName','mediaType','section','title','nature','reach','url','tags','note'],
+    seo:   ['date','dept','title','keyword','rank','searchVolume','prevRank','prevSearchVolume','url','tags','note'],
+  };
+  const sysFields = sysFieldOpts[best.type] || sysFieldOpts.video;
+
+  // 每個輸入欄位給選單
+  const mappingRows = inputCols.map((col, i) => {
+    const am = autoMap[col] || {};
+    let selectedVal = '__ignore__';
+    if (am.platform) selectedVal = 'platform:'+am.platform+':'+am.role;
+    else if (am.systemField) selectedVal = am.systemField;
+    const opts = ['<option value="__ignore__"'+(selectedVal==='__ignore__'?' selected':'')+'>（略過）</option>'];
+    // 系統欄位選項
+    sysFields.forEach(f => {
+      opts.push('<option value="'+f+'"'+(selectedVal===f?' selected':'')+'>'+f+'</option>');
+    });
+    // 平台特殊選項（適用 video）
+    if (best.type === 'video') {
+      ['YouTube','Facebook','Instagram','TikTok','Threads'].forEach(p => {
+        ['views','likes','comments','shares','url','impressions'].forEach(r => {
+          const v = 'platform:'+p+':'+r;
+          opts.push('<option value="'+v+'"'+(selectedVal===v?' selected':'')+'>'+p+' · '+r+'</option>');
+        });
+      });
+    }
+    const sampleVal = String((rows[0]||{})[col] || '').slice(0, 28);
+    const matchBadge = am.platform || am.systemField
+      ? '<span style="background:#D1FAE5;color:#065F46;padding:1px 6px;border-radius:3px;font-size:10px;">自動匹配</span>'
+      : '<span style="background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:3px;font-size:10px;">需確認</span>';
+    return '<tr>'
+      + '<td style="padding:6px 10px;font-weight:600;">'+col+'</td>'
+      + '<td style="padding:6px 10px;color:#888;font-size:11px;">'+sampleVal+'</td>'
+      + '<td style="padding:6px 10px;"><select id="impMap_'+i+'" style="width:100%;padding:4px 8px;font-size:12px;border:1px solid var(--border);border-radius:6px;">'+opts.join('')+'</select></td>'
+      + '<td style="padding:6px 10px;">'+matchBadge+'</td>'
+      + '</tr>';
+  }).join('');
+
+  const html = '<div class="modal-overlay open" id="importMapModal">'
+    + '<div class="modal-box" style="max-width:840px;max-height:88vh;overflow-y:auto;">'
+    + '<h3>🔍 智慧匯入 — 確認欄位對應</h3>'
+    + '<div style="background:#EFF6FF;border-left:3px solid #1E40AF;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A;line-height:1.7;">'
+    +   '<b>偵測到：</b>'+filename+' 共 '+rows.length+' 筆資料、'+inputCols.length+' 個欄位<br>'
+    +   '<b>系統判斷類型：</b>'+best.label+'（匹配分數最高）'
+    +   (platformDetected.size ? '<br><b>偵測到平台：</b>' + [...platformDetected].join('、') : '')
+    + '</div>'
+    + '<div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">'
+    +   '<label style="font-size:12.5px;font-weight:700;">資料類型：</label>'
+    +   '<select id="impTargetType" onchange="_refreshMappingDropdowns()" style="padding:6px 12px;font-size:12.5px;border-radius:6px;border:1.5px solid var(--border);">'+targetTypeOpts+'</select>'
+    +   '<label style="font-size:12px;margin-left:14px;"><input type="checkbox" id="impSaveTemplate" checked> 儲存欄位對應模板（下次自動套用）</label>'
+    + '</div>'
+    + '<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:50vh;overflow-y:auto;">'
+    + '<table style="width:100%;font-size:12px;border-collapse:collapse;">'
+    + '<thead style="position:sticky;top:0;background:#F8FAFC;z-index:1;"><tr><th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);">你的欄位</th><th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);">範例值</th><th style="padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);">對應到系統</th><th style="padding:8px 10px;border-bottom:1px solid var(--border);">狀態</th></tr></thead>'
+    + '<tbody>' + mappingRows + '</tbody></table>'
+    + '</div>'
+    + '<div id="impPreview" style="margin-top:14px;font-size:11.5px;color:#666;"></div>'
+    + '<div class="modal-footer">'
+    +   '<button class="btn btn-outline" onclick="document.getElementById(\'importMapModal\').remove()">取消</button>'
+    +   '<button class="btn btn-outline" onclick="_previewMappedRows()">預覽前 3 筆</button>'
+    +   '<button class="btn btn-primary" onclick="_confirmMappingImport()">確認匯入</button>'
+    + '</div></div></div>';
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  document.body.appendChild(tmp.firstElementChild);
+}
+
+// 切換資料類型時刷新欄位選單
+function _refreshMappingDropdowns() {
+  const ctx = window._importCtx; if (!ctx) return;
+  const newType = document.getElementById('impTargetType').value;
+  // 重建 modal 但保留現有勾選
+  const currentMap = {};
+  ctx.inputCols.forEach((col, i) => {
+    currentMap[col] = document.getElementById('impMap_'+i)?.value;
+  });
+  // 重 set ctx.best.type
+  ctx.best = ctx.candidates.find(c => c.type === newType) || ctx.best;
+  // 重新打開 modal（先移除舊的）
+  document.getElementById('importMapModal').remove();
+  _openImportMappingModal(ctx);
+  // 還原使用者選擇
+  setTimeout(() => {
+    ctx.inputCols.forEach((col, i) => {
+      const sel = document.getElementById('impMap_'+i);
+      if (sel && currentMap[col]) {
+        const opt = [...sel.options].find(o => o.value === currentMap[col]);
+        if (opt) sel.value = currentMap[col];
+      }
+    });
+  }, 50);
+}
+
+// 預覽前 3 筆映射結果
+function _previewMappedRows() {
+  const records = _applyMapping(true).slice(0, 3);
+  const preview = document.getElementById('impPreview');
+  if (!records.length) {
+    preview.innerHTML = '<div style="background:#FEE2E2;color:#991B1B;padding:10px 14px;border-radius:6px;">⚠️ 對應後沒有任何有效資料，請檢查欄位映射（至少要對應到 date / title）</div>';
+    return;
+  }
+  preview.innerHTML = '<div style="font-weight:700;margin-bottom:6px;">預覽前 '+records.length+' 筆映射結果：</div>'
+    + records.map((r,i) => '<pre style="background:#F1F5F9;padding:8px 12px;margin-bottom:4px;font-size:11px;border-radius:4px;overflow-x:auto;">'+(i+1)+'. '+JSON.stringify(r, null, 2)+'</pre>').join('');
+}
+
+// 套用映射，回傳記錄陣列
+function _applyMapping(silent) {
+  const ctx = window._importCtx; if (!ctx) return [];
+  const type = document.getElementById('impTargetType').value;
+  const mapping = {}; // input col → { systemField } or { platform, role }
+  ctx.inputCols.forEach((col, i) => {
+    const v = document.getElementById('impMap_'+i)?.value || '__ignore__';
+    if (v === '__ignore__') return;
+    if (v.startsWith('platform:')) {
+      const [, platform, role] = v.split(':');
+      mapping[col] = { platform, role };
+    } else {
+      mapping[col] = { systemField: v };
+    }
+  });
+
+  // 收集每筆 row 的對應值
+  const results = [];
+  ctx.rows.forEach(rawRow => {
+    // 把 row 的 keys 清空 BOM
+    const row = {};
+    Object.keys(rawRow).forEach(k => { row[k.replace(/^﻿/,'').trim()] = rawRow[k]; });
+
+    if (type === 'video') {
+      // 展開多平台
+      const base = {}; // date, title, tags, note
+      const platforms = {}; // platform -> { views, engage_likes, engage_comments, engage_shares, url }
+      ctx.inputCols.forEach(col => {
+        const m = mapping[col]; if (!m) return;
+        const val = row[col];
+        if (m.systemField) base[m.systemField] = val;
+        if (m.platform) {
+          if (!platforms[m.platform]) platforms[m.platform] = {};
+          platforms[m.platform][m.role] = val;
+        }
+      });
+      const date = _normDate(base.date);
+      const title = String(base.title||'').trim();
+      if (!date || !title) return;
+      const tags = String(base.tags||'').split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
+
+      const sysPlatform = String(base.platform||'').trim();
+      if (sysPlatform && !Object.keys(platforms).length) {
+        // 單一 platform 欄位模式
+        platforms[sysPlatform] = {
+          views: row[Object.keys(mapping).find(k=>mapping[k].systemField==='views')] || 0,
+          url: row[Object.keys(mapping).find(k=>mapping[k].systemField==='url')] || '',
+        };
+      }
+      // 對每個 platform 建立 record
+      Object.keys(platforms).forEach(p => {
+        const pd = platforms[p];
+        const views = parseFloat(pd.views)||0;
+        const likes = parseFloat(pd.likes)||0;
+        const comments = parseFloat(pd.comments)||0;
+        const shares = parseFloat(pd.shares)||0;
+        const url = String(pd.url||'').trim();
+        if (views === 0 && !url && likes === 0 && comments === 0) return;
+        results.push({
+          date, platform: p, title,
+          views, engage: likes + comments + shares,
+          external_url: url, tags: tags.slice(),
+        });
+      });
+    } else if (type === 'fb') {
+      const obj = { tags: [] };
+      ctx.inputCols.forEach(col => {
+        const m = mapping[col]; if (!m || !m.systemField) return;
+        const v = row[col];
+        if (['reach','click','engage'].includes(m.systemField)) obj[m.systemField] = parseFloat(v)||0;
+        else if (m.systemField === 'tags') obj.tags = String(v||'').split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
+        else obj[m.systemField] = String(v||'').trim();
+      });
+      if (obj.date) obj.date = _normDate(obj.date);
+      if (obj.date && obj.title) results.push(obj);
+    } else if (type === 'event' || type === 'media' || type === 'seo') {
+      const obj = { tags: [] };
+      ctx.inputCols.forEach(col => {
+        const m = mapping[col]; if (!m || !m.systemField) return;
+        const v = row[col];
+        if (['reg','attend','reach','rank','searchVolume','prevRank','prevSearchVolume','budget','expense','sat','click'].includes(m.systemField)) {
+          obj[m.systemField] = parseFloat(v) || (typeof v==='string'?v:0);
+        }
+        else if (m.systemField === 'tags') obj.tags = String(v||'').split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
+        else obj[m.systemField] = String(v||'').trim();
+      });
+      if (obj.date) obj.date = _normDate(obj.date);
+      // SEO 用 title 也行；media 用 mediaName + title 或 title 即可；event 用 title
+      if (obj.date && (obj.title || obj.mediaName)) results.push(obj);
+    }
+  });
+  return results;
+}
+
+function _normDate(d) {
+  if (!d) return '';
+  const s = String(d).trim().replace(/\./g,'-').replace(/\//g,'-');
+  const m = s.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?/);
+  if (m) return m[1]+'-'+String(m[2]).padStart(2,'0')+(m[3]?'-'+String(m[3]).padStart(2,'0'):'-01');
+  return s;
+}
+
+// 確認匯入 — 寫入 store
+function _confirmMappingImport() {
+  if (!requireEdit()) return;
+  const ctx = window._importCtx; if (!ctx) return;
+  const type = document.getElementById('impTargetType').value;
+  const records = _applyMapping(false);
+  if (!records.length) {
+    showToast('沒有可匯入的資料 — 請檢查欄位對應');
+    return;
+  }
+  const saveTpl = document.getElementById('impSaveTemplate')?.checked;
+  let added = 0, updated = 0;
+  if (type === 'video') {
+    if (!store.videoItems) store.videoItems = [];
+    records.forEach(r => {
+      r.updated_at = new Date().toISOString();
+      ensureTagsExist(r.tags||[]);
+      const existing = store.videoItems.find(v => !v.deleted_at && v.date===r.date && v.title===r.title && v.platform===r.platform);
+      if (existing) { Object.assign(existing, r); updated++; }
+      else { r.created_at = r.updated_at; store.videoItems.push(r); added++; }
+    });
+  } else if (type === 'fb') {
+    if (!store.posts) store.posts = [];
+    records.forEach(r => {
+      r.updated_at = new Date().toISOString();
+      r.month = (r.date||'').slice(0,7);
+      ensureTagsExist(r.tags||[]);
+      const existing = store.posts.find(p => !p.deleted_at && p.date===r.date && p.title===r.title);
+      if (existing) { Object.assign(existing, r); updated++; }
+      else { r.created_at = r.updated_at; store.posts.push(r); added++; }
+    });
+  } else if (type === 'event') {
+    if (!store.events) store.events = [];
+    records.forEach(r => {
+      r.updated_at = new Date().toISOString();
+      ensureTagsExist(r.tags||[]);
+      const existing = store.events.find(e => !e.deleted_at && e.date===r.date && (e.name||e.title)===r.title);
+      if (existing) { Object.assign(existing, r); updated++; }
+      else { r.created_at = r.updated_at; if (r.title && !r.name) r.name = r.title; store.events.push(r); added++; }
+    });
+  } else if (type === 'media') {
+    if (!store.media) store.media = [];
+    records.forEach(r => {
+      r.updated_at = new Date().toISOString();
+      ensureTagsExist(r.tags||[]);
+      const existing = store.media.find(m => !m.deleted_at && m.date===r.date && (m.name||m.mediaName)===(r.mediaName||r.title));
+      if (existing) { Object.assign(existing, r); updated++; }
+      else { r.created_at = r.updated_at; if (r.mediaName && !r.name) r.name = r.mediaName; store.media.push(r); added++; }
+    });
+  } else if (type === 'seo') {
+    if (!store.seoArticles) store.seoArticles = [];
+    records.forEach(r => {
+      r.updated_at = new Date().toISOString();
+      ensureTagsExist(r.tags||[]);
+      const existing = store.seoArticles.find(a => !a.deleted_at && a.title===r.title && (a.date||'').slice(0,7)===(r.date||'').slice(0,7));
+      if (existing) { Object.assign(existing, r); updated++; }
+      else {
+        r.id = 'sa_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+        r.created_at = r.updated_at;
+        store.seoArticles.push(r); added++;
+      }
+    });
+  }
+  saveStore();
+
+  // 儲存映射模板
+  if (saveTpl) {
+    const mapping = {};
+    ctx.inputCols.forEach((col, i) => {
+      mapping[col] = document.getElementById('impMap_'+i)?.value;
+    });
+    const templates = JSON.parse(localStorage.getItem('ktgh_import_tpl_v1') || '{}');
+    // 用「資料類型 + 欄位名稱組合」做 key
+    const tplKey = type + '|' + ctx.inputCols.slice().sort().join(',');
+    templates[tplKey] = { type, mapping, savedAt: new Date().toISOString(), filename: ctx.filename };
+    localStorage.setItem('ktgh_import_tpl_v1', JSON.stringify(templates));
+  }
+
+  document.getElementById('importMapModal').remove();
+  showToast('✓ 已匯入：新增 '+added+'、更新 '+updated+' 筆');
+
+  // 更新匯入 log
+  const log = document.getElementById('quickImportLog');
+  if (log) {
+    log.innerHTML += '<div style="margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;"><span style="color:#059669;">✓</span> <b>'+ctx.filename+'</b> — '+({video:'YT/IG/FB 影片',fb:'FB 貼文',event:'活動',media:'媒體',seo:'SEO 文章'}[type])+' · 新增 '+added+'、更新 '+updated+'</div>';
+  }
+}
+
+// 嘗試從已儲存模板自動套用
+function _tryAutoApplyTemplate(rows, filename) {
+  try {
+    const templates = JSON.parse(localStorage.getItem('ktgh_import_tpl_v1') || '{}');
+    if (!Object.keys(templates).length) return false;
+    const cols = Object.keys(rows[0]||{}).map(k => k.replace(/^﻿/,'').trim()).sort().join(',');
+    for (const k of Object.keys(templates)) {
+      const [type, tplCols] = k.split('|');
+      if (tplCols === cols) {
+        // 完全匹配，直接套用
+        const tpl = templates[k];
+        return { matched: true, type, mapping: tpl.mapping };
+      }
+    }
+  } catch(e){}
+  return false;
+}
+
 function _processQuickImportFile(file) {
   return new Promise(resolve => {
     const filename = file.name;
@@ -7834,13 +8310,11 @@ function _processQuickImportFile(file) {
       txtReader.onload = (te) => {
         try {
           const text = String(te.target.result || '').trim();
-          // 嘗試判斷是不是影片資料（檔名含 video/影片/YT/IG，或內容欄位含 platform/views/engage）
           let rows = [];
           if (isJSON) {
             const parsed = JSON.parse(text);
             rows = Array.isArray(parsed) ? parsed : [parsed];
           } else {
-            // CSV：用 SheetJS 解析（自動處理引號、逗號）
             const wb = XLSX.read(text, { type:'string' });
             const ws = wb.Sheets[wb.SheetNames[0]];
             rows = XLSX.utils.sheet_to_json(ws, { defval:'', raw:false });
@@ -7848,79 +8322,32 @@ function _processQuickImportFile(file) {
           if (!rows.length) {
             return resolve({ ok:false, filename, detected:'未知', msg:'CSV/JSON 無資料列' });
           }
-          // 偵測類型：影片
-          const isVideo = /影片|video|^yt[_-]|^ig[_-]|youtube|instagram/i.test(filename)
-            || (rows[0] && ('platform' in rows[0] || 'views' in rows[0] || '觀看' in rows[0]));
-          if (isVideo) {
-            if (!store.videoItems) store.videoItems = [];
-            let added = 0, updated = 0, skipped = 0;
-            const normDate = (d) => {
-              if (!d) return '';
-              const s = String(d).trim().replace(/\./g,'-').replace(/\//g,'-');
-              const m = s.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?/);
-              if (m) return m[1]+'-'+String(m[2]).padStart(2,'0')+(m[3]?'-'+String(m[3]).padStart(2,'0'):'-01');
-              return s;
-            };
-            // 去除 BOM 與空白 key
-            const cleanRow = (r) => {
-              const out = {};
-              Object.keys(r).forEach(k => {
-                const cleanK = k.replace(/^﻿/, '').trim();
-                out[cleanK] = r[k];
-              });
-              return out;
-            };
-            const num = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
-            rows.forEach(rawRow => {
-              const r = cleanRow(rawRow);
-              const date = normDate(r.date || r['日期'] || '');
-              const title = String(r.title || r['標題'] || r['影片標題'] || '').trim();
-              if (!date || !title) { skipped++; return; }
-              // 共用：類別/類型/企劃 當作 tags
-              const baseTags = [r['類別'], r['類型']].filter(Boolean).map(s => String(s).trim());
-              const userTags = String(r.tags || r['標籤'] || '').split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
-              const tags = [...new Set([...baseTags, ...userTags])];
-              ensureTagsExist(tags);
-
-              // 多平台展開：YouTube / Facebook / Instagram 各自展開為一筆
-              const platforms = [
-                { name:'YouTube', views: num(r['YT觀看']), engage: num(r['YT讚'])+num(r['YT留言']), url: String(r['YT連結']||'').trim() },
-                { name:'Facebook', views: num(r['FB觀看']) || num(r['FB觸及']), engage: num(r['FB讚'])+num(r['FB留言'])+num(r['FB分享']), url: String(r['FB連結']||'').trim() },
-                { name:'Instagram', views: num(r['IG觀看']) || num(r['IG觸及']), engage: num(r['IG讚'])+num(r['IG留言'])+num(r['IG分享']), url: String(r['IG連結']||'').trim() },
-              ];
-              // 兼容單一平台欄位（platform/views/engage）
-              if (r.platform || r['平台']) {
-                const p = (r.platform || r['平台']).toString().trim();
-                platforms.push({
-                  name: p,
-                  views: num(r.views || r['觀看'] || r['觀看數']),
-                  engage: num(r.engage || r['互動'] || r['互動數']),
-                  url: String(r.external_url || r.url || r['連結'] || r['網址'] || '').trim(),
-                });
-              }
-              let pushedAny = false;
-              platforms.forEach(p => {
-                // 只在「有觀看數」或「有連結」時建立記錄
-                if (p.views === 0 && !p.url) return;
-                const obj = {
-                  date, platform: p.name, title,
-                  views: p.views, engage: p.engage,
-                  external_url: p.url,
-                  tags: tags.slice(),
-                  updated_at: new Date().toISOString(),
-                };
-                const existing = store.videoItems.find(v => !v.deleted_at && v.date === obj.date && v.title === obj.title && v.platform === obj.platform);
-                if (existing) { Object.assign(existing, obj); updated++; }
-                else { obj.created_at = obj.updated_at; store.videoItems.push(obj); added++; }
-                pushedAny = true;
-              });
-              if (!pushedAny) skipped++;
+          // 嘗試自動套用已儲存模板
+          const autoTpl = _tryAutoApplyTemplate(rows, filename);
+          if (autoTpl && autoTpl.matched) {
+            // 完全相同欄位 → 直接寫入 store，不開 modal
+            window._importCtx = { rows, filename, inputCols: Object.keys(rows[0]||{}).map(k=>k.replace(/^﻿/,'').trim()) };
+            // 把 mapping 寫入 DOM-style 暫存（用 hidden select 模擬）
+            const tmpDiv = document.createElement('div');
+            tmpDiv.style.display = 'none';
+            window._importCtx.inputCols.forEach((col, i) => {
+              const opt = document.createElement('select'); opt.id = 'impMap_'+i;
+              const o = document.createElement('option'); o.value = autoTpl.mapping[col] || '__ignore__';
+              opt.appendChild(o); opt.value = autoTpl.mapping[col] || '__ignore__';
+              tmpDiv.appendChild(opt);
             });
-            saveStore();
-            return resolve({ ok:true, filename, detected:'YT/IG 影片', msg:'新增 '+added+'、更新 '+updated+' 則'+(skipped?'，跳過 '+skipped+' 筆無觀看數/連結':'') });
+            const t = document.createElement('select'); t.id = 'impTargetType';
+            const to = document.createElement('option'); to.value = autoTpl.type; t.appendChild(to); t.value = autoTpl.type;
+            tmpDiv.appendChild(t);
+            const sv = document.createElement('input'); sv.type='checkbox'; sv.id='impSaveTemplate'; tmpDiv.appendChild(sv);
+            document.body.appendChild(tmpDiv);
+            _confirmMappingImport();
+            tmpDiv.remove();
+            return resolve({ ok:true, filename, detected:'自動套用模板 ('+autoTpl.type+')', msg:'已依先前模板匯入 '+rows.length+' 筆' });
           }
-          // 不是影片，無法辨識
-          return resolve({ ok:false, filename, detected:'未知 (CSV/JSON)', msg:'檔名需含「影片/video/yt/ig」或欄位需含 platform/views' });
+          // 開啟智慧映射 modal — 使用者確認後才寫入 store
+          _analyzeRowsAndOpenMappingModal(rows, filename, isJSON?'json':'csv');
+          return resolve({ ok:true, filename, detected:'待確認', msg:'已偵測 '+rows.length+' 筆，請於彈窗確認欄位對應' });
         } catch(err) {
           return resolve({ ok:false, filename, detected:'錯誤', msg:err.message });
         }
