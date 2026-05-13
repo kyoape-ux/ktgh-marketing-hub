@@ -3549,40 +3549,40 @@ function getBuiltinMedia() {
 // ═══════════════════════════════════════════
 const FEATURE_CATALOG = [
   // 戰情
-  { k:'warroom-dashboard',   cat:'戰情', icon:'⚡', color:'#1a8454', title:'戰情首頁',     desc:'KPI、警報、達成度' },
-  { k:'warroom-okr',         cat:'戰情', icon:'🎯', color:'#DC2626', title:'OKR 目標',     desc:'設定本月關鍵指標' },
-  { k:'warroom-quickimport', cat:'匯入', icon:'⚡', color:'#1E40AF', title:'快速匯入區',   desc:'拖多檔自動辨識' },
+  { k:'warroom-dashboard',   cat:'戰情', icon:'zap',    color:'#1a8454', title:'戰情首頁',     desc:'KPI、警報、達成度' },
+  { k:'warroom-okr',         cat:'戰情', icon:'target', color:'#DC2626', title:'OKR 目標',     desc:'設定本月關鍵指標' },
+  { k:'warroom-quickimport', cat:'匯入', icon:'upload', color:'#1E40AF', title:'快速匯入區',   desc:'拖多檔自動辨識' },
   // 數據分析
-  { k:'fb-overview',     cat:'數據', icon:'📘', color:'#1877F2', title:'FB 粉專',     desc:'觸及互動分析', stat: () => (store.posts||[]).filter(x=>!x.deleted_at).length+' 篇' },
-  { k:'event-list',      cat:'數據', icon:'🎪', color:'#F59E0B', title:'活動講座',     desc:'出席率、滿意度', stat: () => (store.events||[]).filter(x=>!x.deleted_at).length+' 場' },
-  { k:'media-list',      cat:'數據', icon:'📰', color:'#DC2626', title:'新聞媒體',     desc:'曝光觸及紀錄', stat: () => (store.media||[]).filter(x=>!x.deleted_at).length+' 則' },
-  { k:'web-overview',    cat:'數據', icon:'🌐', color:'#1E40AF', title:'官網 GA4',     desc:'流量分析儀表板', stat: () => Object.keys(store.gaMonthly||{}).length+' 個月' },
-  { k:'line-overview',   cat:'數據', icon:'💬', color:'#00B900', title:'LINE@',       desc:'好友、觸及、點擊', stat: () => (store.linePosts||[]).filter(x=>!x.deleted_at).length+' 則' },
-  { k:'video-list',      cat:'數據', icon:'🎬', color:'#F97316', title:'YT/IG 影片',  desc:'觀看互動追蹤', stat: () => (store.videoItems||[]).filter(x=>!x.deleted_at).length+' 支' },
-  { k:'web-seoArticles', cat:'數據', icon:'🔍', color:'#1E40AF', title:'SEO 文章',     desc:'排名與搜尋量', stat: () => (store.seoArticles||[]).filter(x=>!x.deleted_at).length+' 篇' },
-  { k:'kol-list',        cat:'數據', icon:'🎙', color:'#7C3AED', title:'KOL 合作',     desc:'觸及互動成果', stat: () => (store.kols||[]).filter(x=>!x.deleted_at).length+' 案' },
+  { k:'fb-overview',     cat:'數據', icon:'facebook',  color:'#1877F2', title:'FB 粉專',     desc:'觸及互動分析', stat: () => (store.posts||[]).filter(x=>!x.deleted_at).length+' 篇' },
+  { k:'event-list',      cat:'數據', icon:'tent',      color:'#F59E0B', title:'活動講座',     desc:'出席率、滿意度', stat: () => (store.events||[]).filter(x=>!x.deleted_at).length+' 場' },
+  { k:'media-list',      cat:'數據', icon:'newspaper', color:'#DC2626', title:'新聞媒體',     desc:'曝光觸及紀錄', stat: () => (store.media||[]).filter(x=>!x.deleted_at).length+' 則' },
+  { k:'web-overview',    cat:'數據', icon:'globe',     color:'#1E40AF', title:'官網 GA4',     desc:'流量分析儀表板', stat: () => Object.keys(store.gaMonthly||{}).length+' 個月' },
+  { k:'line-overview',   cat:'數據', icon:'message',   color:'#00B900', title:'LINE@',       desc:'好友、觸及、點擊', stat: () => (store.linePosts||[]).filter(x=>!x.deleted_at).length+' 則' },
+  { k:'video-list',      cat:'數據', icon:'video',     color:'#F97316', title:'YT/IG 影片',  desc:'觀看互動追蹤', stat: () => (store.videoItems||[]).filter(x=>!x.deleted_at).length+' 支' },
+  { k:'web-seoArticles', cat:'數據', icon:'search',    color:'#1E40AF', title:'SEO 文章',     desc:'排名與搜尋量', stat: () => (store.seoArticles||[]).filter(x=>!x.deleted_at).length+' 篇' },
+  { k:'kol-list',        cat:'數據', icon:'mic',       color:'#7C3AED', title:'KOL 合作',     desc:'觸及互動成果', stat: () => (store.kols||[]).filter(x=>!x.deleted_at).length+' 案' },
   // 進階分析
-  { k:'fb-analysis',  cat:'進階', icon:'📊', color:'#1877F2', title:'組合分析',     desc:'貼文交叉矩陣' },
-  { k:'fb-ab',        cat:'進階', icon:'🔬', color:'#1877F2', title:'A/B 分析',     desc:'貼文對照測試' },
-  { k:'fb-predict',   cat:'進階', icon:'🎯', color:'#1877F2', title:'貼文預測',     desc:'AI 觸及預測' },
-  { k:'fb-sop',       cat:'進階', icon:'⚙️', color:'#1877F2', title:'SOP 模板',     desc:'建議標題格式' },
-  { k:'fb-calendar',  cat:'進階', icon:'📅', color:'#1877F2', title:'內容日曆',     desc:'發布時間軸' },
-  { k:'campaign-hub', cat:'進階', icon:'🎯', color:'#7C3AED', title:'Campaign 看板', desc:'跨平台整合成效' },
-  { k:'crosstag-stats',   cat:'進階', icon:'🏷', color:'#2D6A4F', title:'各管道分析', desc:'依標籤跨管道統計' },
-  { k:'crosstag-library', cat:'進階', icon:'🗂', color:'#2D6A4F', title:'標籤建立',   desc:'共用標籤字典' },
-  { k:'clinic-matrix', cat:'進階', icon:'📋', color:'#2D6A4F', title:'月度傳達矩陣', desc:'門診表跨管道追蹤' },
-  { k:'clinic-stats',  cat:'進階', icon:'📈', color:'#2D6A4F', title:'門診標籤統計', desc:'依標籤撈歷年成果' },
+  { k:'fb-analysis',  cat:'進階', icon:'bar-chart',   color:'#1877F2', title:'組合分析',     desc:'貼文交叉矩陣' },
+  { k:'fb-ab',        cat:'進階', icon:'flask',       color:'#1877F2', title:'A/B 分析',     desc:'貼文對照測試' },
+  { k:'fb-predict',   cat:'進階', icon:'trending-up', color:'#1877F2', title:'貼文預測',     desc:'AI 觸及預測' },
+  { k:'fb-sop',       cat:'進階', icon:'sliders',     color:'#1877F2', title:'SOP 模板',     desc:'建議標題格式' },
+  { k:'fb-calendar',  cat:'進階', icon:'calendar',    color:'#1877F2', title:'內容日曆',     desc:'發布時間軸' },
+  { k:'campaign-hub', cat:'進階', icon:'compass',     color:'#7C3AED', title:'Campaign 看板', desc:'跨平台整合成效' },
+  { k:'crosstag-stats',   cat:'進階', icon:'tag',       color:'#2D6A4F', title:'各管道分析', desc:'依標籤跨管道統計' },
+  { k:'crosstag-library', cat:'進階', icon:'folder',    color:'#2D6A4F', title:'標籤建立',   desc:'共用標籤字典' },
+  { k:'clinic-matrix', cat:'進階', icon:'check-list',  color:'#2D6A4F', title:'月度傳達矩陣', desc:'門診表跨管道追蹤' },
+  { k:'clinic-stats',  cat:'進階', icon:'chart-pie',   color:'#2D6A4F', title:'門診標籤統計', desc:'依標籤撈歷年成果' },
   // 匯入
-  { k:'fb-upload',     cat:'匯入', icon:'📥', color:'#1E40AF', title:'匯入貼文',  desc:'Excel/JSON 批次' },
-  { k:'web-import',    cat:'匯入', icon:'📥', color:'#1E40AF', title:'匯入 GA4/GSC', desc:'.xlsx 自動解析' },
-  { k:'line-import',   cat:'匯入', icon:'📥', color:'#1E40AF', title:'匯入 LINE',  desc:'每日指標 / CSV' },
-  { k:'video-import',  cat:'匯入', icon:'📥', color:'#1E40AF', title:'匯入影片',  desc:'JSON/CSV 批次' },
+  { k:'fb-upload',     cat:'匯入', icon:'upload',  color:'#1E40AF', title:'匯入貼文',  desc:'Excel/JSON 批次' },
+  { k:'web-import',    cat:'匯入', icon:'upload',  color:'#1E40AF', title:'匯入 GA4/GSC', desc:'.xlsx 自動解析' },
+  { k:'line-import',   cat:'匯入', icon:'upload',  color:'#1E40AF', title:'匯入 LINE',  desc:'每日指標 / CSV' },
+  { k:'video-import',  cat:'匯入', icon:'upload',  color:'#1E40AF', title:'匯入影片',  desc:'JSON/CSV 批次' },
   // 報表
-  { k:'__exportReport', cat:'報表', icon:'📄', color:'#059669', title:'匯出月報',     desc:'A4 PDF 8 分頁', fn:'exportReport' },
+  { k:'__exportReport', cat:'報表', icon:'file', color:'#059669', title:'匯出月報',     desc:'A4 PDF 8 分頁', fn:'exportReport' },
   // 系統
-  { k:'settings-main',   cat:'系統', icon:'⚙️', color:'#6B7280', title:'設定',         desc:'同步、權限、目標' },
-  { k:'settings-backup', cat:'系統', icon:'💾', color:'#6B7280', title:'備份還原',     desc:'快照、軟刪除' },
-  { k:'__guide',         cat:'系統', icon:'📚', color:'#6B7280', title:'使用指南',     desc:'功能操作手冊', fn:'openGuide' },
+  { k:'settings-main',   cat:'系統', icon:'settings', color:'#6B7280', title:'設定',         desc:'同步、權限、目標' },
+  { k:'settings-backup', cat:'系統', icon:'save',     color:'#6B7280', title:'備份還原',     desc:'快照、軟刪除' },
+  { k:'__guide',         cat:'系統', icon:'book',     color:'#6B7280', title:'使用指南',     desc:'功能操作手冊', fn:'openGuide' },
 ];
 
 function _featureUsage() {
@@ -3608,10 +3608,12 @@ function _renderFeatureCard(f, opts) {
   const onclick = f.fn
     ? `${f.fn}();_trackFeatureUsage('${f.k}');if(document.getElementById('featureLauncherModal'))document.getElementById('featureLauncherModal').remove();`
     : `switchSection('${f.k.split('-')[0]}','${f.k.split('-').slice(1).join('-')}');if(document.getElementById('featureLauncherModal'))document.getElementById('featureLauncherModal').remove();`;
+  // 用 SVG icon（從 svgIcon helper），顏色繼承 CSS color
+  const iconSvg = (typeof svgIcon === 'function') ? svgIcon(f.icon, 22) : '';
   return '<div class="feature-card" onclick="' + onclick + '" style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:120px;position:relative;" '
     + 'onmouseover="this.style.borderColor=\''+f.color+'\';this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 8px 18px '+f.color+'25\';" '
     + 'onmouseout="this.style.borderColor=\'var(--border)\';this.style.transform=\'none\';this.style.boxShadow=\'none\';">'
-    + '<div style="width:36px;height:36px;background:'+f.color+'18;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;">' + f.icon + '</div>'
+    + '<div style="width:38px;height:38px;background:'+f.color+'18;border-radius:9px;display:flex;align-items:center;justify-content:center;color:'+f.color+';">' + iconSvg + '</div>'
     + '<div style="font-size:13px;font-weight:700;color:var(--text);">' + f.title + '</div>'
     + '<div style="font-size:11px;color:var(--text-muted);line-height:1.4;">' + f.desc + '</div>'
     + (stat ? '<div style="font-size:11px;font-weight:700;color:'+f.color+';margin-top:auto;">' + stat + '</div>' : '')
@@ -3634,7 +3636,13 @@ function openFeatureLauncher() {
     groups[f.cat].push(f);
   });
   const catOrder = ['戰情','數據','進階','匯入','報表','系統'];
-  const catLabels = { '戰情':'🎯 戰情中心', '數據':'📊 數據分析', '進階':'🧠 進階分析', '匯入':'📥 資料匯入', '報表':'📄 報表 & 同步', '系統':'⚙️ 系統' };
+  const catIcon = { '戰情':'target', '數據':'bar-chart', '進階':'brain', '匯入':'upload', '報表':'file', '系統':'settings' };
+  const catColor = { '戰情':'#1a8454', '數據':'#1877F2', '進階':'#7C3AED', '匯入':'#1E40AF', '報表':'#059669', '系統':'#6B7280' };
+  const catName = { '戰情':'戰情中心', '數據':'數據分析', '進階':'進階分析', '匯入':'資料匯入', '報表':'報表 & 同步', '系統':'系統' };
+  const catLabels = {};
+  catOrder.forEach(c => {
+    catLabels[c] = '<span style="display:inline-flex;align-items:center;gap:6px;color:'+catColor[c]+';"><span style="display:inline-flex;align-items:center;">'+svgIcon(catIcon[c], 14)+'</span>'+catName[c]+'</span>';
+  });
 
   let html = '<div class="modal-overlay open" id="featureLauncherModal" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);">'
     + '<div style="background:var(--surface);width:92%;max-width:1100px;max-height:90vh;border-radius:18px;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.3);">'
@@ -3654,7 +3662,7 @@ function openFeatureLauncher() {
   // 我的常用
   if (topUsedFeatures.length) {
     html += '<div class="feat-group" data-cat="all">';
-    html += '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><span>⭐ 我的常用</span><span style="font-size:11px;color:var(--text-muted);font-weight:400;">依使用頻率排序</span></div>';
+    html += '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><span style="display:inline-flex;color:#F59E0B;">'+svgIcon('star',14)+'</span><span>我的常用</span><span style="font-size:11px;color:var(--text-muted);font-weight:400;">依使用頻率排序</span></div>';
     html += '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px;">';
     html += topUsedFeatures.map(f => _renderFeatureCard(f)).join('');
     html += '</div></div>';
@@ -7232,11 +7240,12 @@ function _warSectionQuickLauncher() {
   const importCards = pick('匯入', 4); // 4 個匯入
   const reportCards = [...pick('報表', 2), ...pick('系統', 2)]; // 報表 + 系統
 
-  const section = (label, color, cards) =>
+  const section = (iconName, label, color, cards) =>
     '<div style="margin-top:18px;">'
     + '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:8px;">'
     +   '<span style="width:4px;height:14px;background:'+color+';border-radius:2px;"></span>'
-    +   label
+    +   '<span style="display:inline-flex;align-items:center;color:'+color+';">'+svgIcon(iconName, 14)+'</span>'
+    +   '<span>'+label+'</span>'
     + '</div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">'
     + cards.map(f => _renderFeatureCard(f)).join('')
@@ -7245,15 +7254,15 @@ function _warSectionQuickLauncher() {
   return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 24px;box-shadow:var(--shadow);">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">'
     +   '<div>'
-    +     '<div style="font-size:15px;font-weight:800;color:var(--text);">🚀 快速功能入口</div>'
+    +     '<div style="font-size:15px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;"><span style="display:inline-flex;color:#1a8454;">'+svgIcon('zap',18)+'</span><span>快速功能入口</span></div>'
     +     '<div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">最常用的功能，點擊即跳轉</div>'
     +   '</div>'
     +   '<button class="btn btn-outline" onclick="openFeatureLauncher()" style="font-size:12px;padding:6px 14px;">全部功能 ('+FEATURE_CATALOG.length+') ▶</button>'
     + '</div>'
-    + section('📊 數據分析', '#1877F2', dataCards)
-    + section('🧠 進階分析', '#7C3AED', advCards)
-    + section('📥 資料管理', '#1E40AF', importCards)
-    + section('📄 報表 & 系統', '#059669', reportCards)
+    + section('bar-chart', '數據分析', '#1877F2', dataCards)
+    + section('brain', '進階分析', '#7C3AED', advCards)
+    + section('upload', '資料管理', '#1E40AF', importCards)
+    + section('file', '報表 & 系統', '#059669', reportCards)
     + '</div>';
 }
 
@@ -9672,6 +9681,27 @@ function svgIcon(name, size) {
     'megaphone': '<svg '+s+'><path d="M3 11l18-8v18l-18-8zM3 11v0a4 4 0 0 0 4 4h4l3-6H7a4 4 0 0 0-4 2"/></svg>',
     'pin':       '<svg '+s+'><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
     'bulb':      '<svg '+s+'><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 1 4 12.7V17H8v-2.3A7 7 0 0 1 12 2z"/></svg>',
+    'zap':       '<svg '+s+'><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    'target':    '<svg '+s+'><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    'facebook':  '<svg '+s+'><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>',
+    'calendar':  '<svg '+s+'><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    'tent':      '<svg '+s+'><path d="M12 4l10 17H2l10-17z"/><line x1="12" y1="4" x2="12" y2="21"/></svg>',
+    'flask':     '<svg '+s+'><path d="M9 2v7L4.2 16.2A2 2 0 0 0 5.8 19h12.4a2 2 0 0 0 1.6-2.8L15 9V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="7" y1="14" x2="17" y2="14"/></svg>',
+    'trending-up':'<svg '+s+'><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+    'settings':  '<svg '+s+'><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    'tag':       '<svg '+s+'><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+    'folder':    '<svg '+s+'><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+    'chart-pie': '<svg '+s+'><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>',
+    'file':      '<svg '+s+'><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+    'save':      '<svg '+s+'><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
+    'book':      '<svg '+s+'><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+    'check-list':'<svg '+s+'><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    'grid':      '<svg '+s+'><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+    'brain':     '<svg '+s+'><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>',
+    'sliders':   '<svg '+s+'><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+    'compass':   '<svg '+s+'><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>',
+    'eye':       '<svg '+s+'><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    'star':      '<svg '+s+'><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   };
   return map[name] || '';
 }
