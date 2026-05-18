@@ -8971,7 +8971,39 @@ function _processQuickImportFile(file) {
           saveStore();
           return resolve({ ok:true, filename, detected, msg:'新增 '+added+'、更新 '+updated+' 筆' });
         }
-        // 未知檔案
+        // 未知結構的 Excel — 嘗試以智慧映射處理（先試所有 sheet 找最像 data 的那張）
+        let bestRows = []; let bestSheet = '';
+        for (const sn of sheets) {
+          const ws = wb.Sheets[sn];
+          const rows = XLSX.utils.sheet_to_json(ws, { defval:'', raw:false });
+          if (rows.length > bestRows.length) { bestRows = rows; bestSheet = sn; }
+        }
+        if (bestRows.length) {
+          // 嘗試自動套用模板
+          const autoTpl = _tryAutoApplyTemplate(bestRows, filename);
+          if (autoTpl && autoTpl.matched) {
+            window._importCtx = { rows: bestRows, filename, inputCols: Object.keys(bestRows[0]||{}).map(k=>k.replace(/^﻿/,'').trim()) };
+            const tmpDiv = document.createElement('div'); tmpDiv.style.display = 'none';
+            window._importCtx.inputCols.forEach((col, i) => {
+              const opt = document.createElement('select'); opt.id = 'impMap_'+i;
+              const o = document.createElement('option'); o.value = autoTpl.mapping[col] || '__ignore__';
+              opt.appendChild(o); opt.value = autoTpl.mapping[col] || '__ignore__';
+              tmpDiv.appendChild(opt);
+            });
+            const t = document.createElement('select'); t.id = 'impTargetType';
+            const to = document.createElement('option'); to.value = autoTpl.type; t.appendChild(to); t.value = autoTpl.type;
+            tmpDiv.appendChild(t);
+            const sv = document.createElement('input'); sv.type='checkbox'; sv.id='impSaveTemplate'; tmpDiv.appendChild(sv);
+            document.body.appendChild(tmpDiv);
+            _confirmMappingImport();
+            tmpDiv.remove();
+            return resolve({ ok:true, filename, detected:'自動套用模板 ('+autoTpl.type+')', msg:'已依先前模板匯入 '+bestRows.length+' 筆' });
+          }
+          // 跳出智慧映射 modal
+          _analyzeRowsAndOpenMappingModal(bestRows, filename, 'xlsx');
+          return resolve({ ok:true, filename, detected:'待確認 (XLSX)', msg:'已偵測「'+bestSheet+'」'+bestRows.length+' 筆，請於彈窗確認欄位對應' });
+        }
+        // 真的找不到任何資料
         resolve({ ok:false, filename, detected, msg });
       } catch(err) {
         resolve({ ok:false, filename:file.name, detected:'錯誤', msg:err.message });
