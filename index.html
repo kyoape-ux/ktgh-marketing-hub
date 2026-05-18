@@ -1067,9 +1067,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 
       <div id="quickImportDrop" style="border:3px dashed #93C5FD;border-radius:14px;padding:60px 20px;text-align:center;background:#F9FBFF;margin-bottom:18px;transition:all .15s;cursor:pointer;">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <div style="font-size:15px;font-weight:700;color:#1E3A8A;margin-bottom:6px;">拖曳 .xlsx / .csv / .json 檔案到此處</div>
+        <div style="font-size:15px;font-weight:700;color:#1E3A8A;margin-bottom:6px;">拖曳 Excel / CSV / JSON / 截圖 / PDF / Word 檔案到此處</div>
+        <div style="font-size:11.5px;color:#64748B;margin-bottom:8px;">Excel/CSV 自動解析 ｜ 截圖/PDF/Word 手動選平台後快速填表</div>
         <div style="font-size:12px;color:#64748B;margin-bottom:14px;">或點擊選擇檔案（可多選）</div>
-        <input type="file" id="quickImportInput" accept=".xlsx,.csv,.json" multiple style="display:none;" onchange="handleQuickImport(event)">
+        <input type="file" id="quickImportInput" accept=".xlsx,.csv,.json,.pdf,.docx,.doc,image/*" multiple style="display:none;" onchange="handleQuickImport(event)">
         <button class="btn btn-primary" onclick="document.getElementById('quickImportInput').click()">選擇檔案</button>
       </div>
 
@@ -8520,13 +8521,320 @@ function _tryAutoApplyTemplate(rows, filename) {
   return false;
 }
 
+// ═══════════════════════════════════════════
+// Phase 1: 截圖 / PDF / Word 平台選擇 + 快速輸入表單
+// ═══════════════════════════════════════════
+
+// 8 個平台快速輸入欄位定義（每個都有 tags）
+const QUICK_ENTRY_FORMS = {
+  fb: {
+    title:'Facebook 粉專貼文', icon:'facebook', color:'#1877F2', store:'posts',
+    fields:[
+      { k:'date', label:'發布日期', type:'date', required:true },
+      { k:'title', label:'貼文標題', type:'text', required:true, full:true },
+      { k:'cat', label:'內容分類', type:'select',
+        options:['案例類','衛教類','品牌/節慶','地位建立','活動/講座','影片類','招募類','公益類','待優化'] },
+      { k:'type', label:'類型', type:'select', options:['相片','影片'] },
+      { k:'reach', label:'觸及人數', type:'number', required:true },
+      { k:'engage', label:'互動次數', type:'number', hint:'讚+留言+分享' },
+      { k:'click', label:'總點擊次數', type:'number' },
+      { k:'url', label:'貼文連結', type:'url', full:true },
+      { k:'tags', label:'跨管道標籤（逗號分隔）', type:'tags', full:true },
+    ]
+  },
+  yt: {
+    title:'YouTube 影片', icon:'youtube', color:'#FF0000', store:'videoItems',
+    platform:'YouTube',
+    fields:[
+      { k:'date', label:'發布日期', type:'date', required:true },
+      { k:'title', label:'影片標題', type:'text', required:true, full:true },
+      { k:'views', label:'觀看數', type:'number', required:true },
+      { k:'engage', label:'互動（讚+留言）', type:'number' },
+      { k:'external_url', label:'影片連結', type:'url', full:true },
+      { k:'tags', label:'跨管道標籤（逗號分隔）', type:'tags', full:true },
+    ]
+  },
+  ig: {
+    title:'Instagram 影片 / 貼文', icon:'instagram', color:'#E1306C', store:'videoItems',
+    platform:'Instagram',
+    fields:[
+      { k:'date', label:'發布日期', type:'date', required:true },
+      { k:'title', label:'貼文標題', type:'text', required:true, full:true },
+      { k:'views', label:'觀看 / 觸及', type:'number', required:true },
+      { k:'engage', label:'互動（讚+留言+分享）', type:'number' },
+      { k:'external_url', label:'貼文連結', type:'url', full:true },
+      { k:'tags', label:'跨管道標籤（逗號分隔）', type:'tags', full:true },
+    ]
+  },
+  line: {
+    title:'LINE@ 推播', icon:'message', color:'#00B900', store:'linePosts',
+    fields:[
+      { k:'date', label:'推播日期', type:'date', required:true },
+      { k:'title', label:'訊息標題', type:'text', required:true, full:true },
+      { k:'type', label:'類型', type:'select', options:['推播','圖文選單','Rich Menu','自動回覆'] },
+      { k:'reach', label:'觸及人數', type:'number', required:true },
+      { k:'click', label:'點擊次數', type:'number' },
+      { k:'url', label:'連結', type:'url', full:true },
+      { k:'tags', label:'跨管道標籤（逗號分隔）', type:'tags', full:true },
+    ]
+  },
+  web: {
+    title:'官網 GA4 月度', icon:'globe', color:'#1E40AF', store:'gaMonthly',
+    fields:[
+      { k:'ym', label:'月份（YYYY-MM）', type:'text', placeholder:'2026-04', required:true },
+      { k:'activeUsers', label:'活躍使用者', type:'number', required:true },
+      { k:'newUsers', label:'新使用者', type:'number' },
+      { k:'sessions', label:'工作階段', type:'number' },
+      { k:'deptReg', label:'科別預約', type:'number' },
+      { k:'convRate', label:'轉換率（百分比，例 4.77）', type:'number', placeholder:'4.77' },
+      { k:'tags', label:'備註標籤（逗號分隔，選填）', type:'tags', full:true },
+    ]
+  },
+  media: {
+    title:'新聞媒體曝光', icon:'newspaper', color:'#DC2626', store:'media',
+    fields:[
+      { k:'date', label:'刊登日期', type:'date', required:true },
+      { k:'name', label:'媒體名稱', type:'text', required:true },
+      { k:'type', label:'媒體類型', type:'select', options:['電視','報紙','雜誌','網路媒體','廣播'] },
+      { k:'section', label:'報導版面', type:'text' },
+      { k:'title', label:'報導標題', type:'text', required:true, full:true },
+      { k:'nature', label:'報導性質', type:'select', options:['正面報導','中性報導','業配置入'] },
+      { k:'reach', label:'預估觸及', type:'number' },
+      { k:'url', label:'報導連結', type:'url', full:true },
+      { k:'tags', label:'跨管道標籤（逗號分隔）', type:'tags', full:true },
+    ]
+  },
+  event: {
+    title:'活動 / 講座', icon:'tent', color:'#F59E0B', store:'events',
+    fields:[
+      { k:'date', label:'活動日期', type:'date', required:true },
+      { k:'name', label:'活動名稱', type:'text', required:true, full:true },
+      { k:'type', label:'活動類型', type:'select', options:['健康講座','義診活動','院內活動','社區活動','媒體活動','其他'] },
+      { k:'campus', label:'院區', type:'select', options:['向上院區','大甲院區'] },
+      { k:'reg', label:'報名人數', type:'number' },
+      { k:'attend', label:'出席人數', type:'number', required:true },
+      { k:'sat', label:'滿意度（1-5）', type:'number', placeholder:'4.5' },
+      { k:'speaker', label:'講者', type:'text' },
+      { k:'tags', label:'跨管道標籤（逗號分隔）', type:'tags', full:true },
+    ]
+  },
+  seo: {
+    title:'SEO 文章', icon:'search', color:'#1E40AF', store:'seoArticles',
+    fields:[
+      { k:'date', label:'上線月份（YYYY-MM）', type:'text', placeholder:'2026-04', required:true },
+      { k:'title', label:'文章標題', type:'text', required:true, full:true },
+      { k:'dept', label:'科別', type:'text', required:true },
+      { k:'keyword', label:'主關鍵字', type:'text' },
+      { k:'rank', label:'排名', type:'number', placeholder:'例：4.5' },
+      { k:'searchVolume', label:'月搜尋量', type:'number' },
+      { k:'url', label:'文章連結', type:'url', full:true },
+      { k:'tags', label:'跨管道標籤（逗號分隔）', type:'tags', full:true },
+    ]
+  },
+};
+
+// 從檔名與檔案類型，猜測平台
+function _guessPlatformFromFile(file) {
+  const n = file.name.toLowerCase();
+  if (/\bfb\b|facebook|粉專|貼文/.test(n)) return 'fb';
+  if (/yt|youtube|影片(?!.*ig)/.test(n)) return 'yt';
+  if (/\big\b|instagram|insta/.test(n)) return 'ig';
+  if (/line/.test(n)) return 'line';
+  if (/ga4|gsc|官網|search.console|搜尋成效/.test(n)) return 'web';
+  if (/媒體|報導|新聞|press|news/.test(n)) return 'media';
+  if (/活動|講座|event/.test(n)) return 'event';
+  if (/seo|文章/.test(n)) return 'seo';
+  return null;
+}
+
+// 開啟「選擇來源平台」Modal
+function _openPlatformPickerModal(file) {
+  const suggested = _guessPlatformFromFile(file);
+  const platformInfo = QUICK_ENTRY_FORMS;
+  const order = ['fb','yt','ig','line','web','media','event','seo'];
+  let html = '<div class="modal-overlay open" id="platformPickerModal">'
+    + '<div class="modal-box" style="max-width:680px;">'
+    + '<h3>📂 選擇來源平台</h3>'
+    + '<div style="background:#EFF6FF;border-left:3px solid #1E40AF;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A;">'
+    +   '檔案：<b>'+_esc(file.name)+'</b>（'+(file.size>1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : (file.size/1024).toFixed(1)+' KB')+'）'
+    +   (suggested ? '<br>系統建議：<b style="color:'+platformInfo[suggested].color+';">'+platformInfo[suggested].title+'</b>（依檔名判斷）' : '')
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">'
+    + order.map(k => {
+        const p = platformInfo[k];
+        const highlight = (k === suggested);
+        return '<button onclick="_openQuickEntryForm(\''+k+'\', window._pickerFile);document.getElementById(\'platformPickerModal\').remove();" '
+          + 'style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;background:'+(highlight?p.color+'18':'#fff')+';border:2px solid '+(highlight?p.color:'var(--border)')+';border-radius:10px;cursor:pointer;font-family:inherit;transition:all .15s;" '
+          + 'onmouseover="this.style.borderColor=\''+p.color+'\';this.style.background=\''+p.color+'18\';" '
+          + 'onmouseout="this.style.borderColor=\''+(highlight?p.color:'var(--border)')+'\';this.style.background=\''+(highlight?p.color+'18':'#fff')+'\';">'
+          + '<span style="color:'+p.color+';">'+svgIcon(p.icon, 28)+'</span>'
+          + '<span style="font-size:12.5px;font-weight:700;color:'+p.color+';">'+p.title+'</span>'
+          + (highlight ? '<span style="font-size:10px;background:'+p.color+';color:#fff;padding:1px 6px;border-radius:3px;">建議</span>' : '')
+          + '</button>';
+      }).join('')
+    + '</div>'
+    + '<div class="modal-footer">'
+    +   '<button class="btn btn-outline" onclick="document.getElementById(\'platformPickerModal\').remove();delete window._pickerFile;">取消</button>'
+    + '</div></div></div>';
+  window._pickerFile = file;
+  const tmp = document.createElement('div'); tmp.innerHTML = html;
+  document.body.appendChild(tmp.firstElementChild);
+}
+
+// 開啟「快速輸入表單」Modal（左圖右表單）
+function _openQuickEntryForm(platformKey, file) {
+  if (!requireEdit()) return;
+  const cfg = QUICK_ENTRY_FORMS[platformKey];
+  if (!cfg) { showToast('未知平台'); return; }
+
+  // 檔案預覽 HTML
+  const fileUrl = URL.createObjectURL(file);
+  let previewHtml = '';
+  if (file.type.startsWith('image/')) {
+    previewHtml = '<img src="'+fileUrl+'" style="width:100%;height:auto;border-radius:8px;display:block;cursor:zoom-in;" onclick="window.open(this.src,\'_blank\')">';
+  } else if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
+    previewHtml = '<embed src="'+fileUrl+'" type="application/pdf" style="width:100%;height:520px;border:none;border-radius:8px;">';
+  } else {
+    // Word / other
+    previewHtml = '<div style="padding:30px;background:#F1F5F9;border-radius:8px;text-align:center;">'
+      + '<div style="font-size:48px;margin-bottom:8px;">📄</div>'
+      + '<div style="font-size:13px;font-weight:600;color:#475569;">'+_esc(file.name)+'</div>'
+      + '<div style="font-size:11px;color:#94A3B8;margin-top:4px;">'+(file.size>1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : (file.size/1024).toFixed(1)+' KB')+'</div>'
+      + '<a href="'+fileUrl+'" target="_blank" style="display:inline-block;margin-top:14px;padding:6px 14px;background:'+cfg.color+';color:#fff;border-radius:6px;text-decoration:none;font-size:12px;">另開檔案查看 ↗</a>'
+      + '</div>';
+  }
+
+  // 標籤 datalist
+  const tagOpts = ((store.mediaTags||[]).filter(t=>!t.deleted_at).map(t=>t.name)).map(t=>'<option value="'+_esc(t)+'">').join('');
+
+  const fieldsHtml = cfg.fields.map(f => {
+    const required = f.required ? ' required' : '';
+    const colSpan = f.full ? ' style="grid-column:1/-1;"' : '';
+    let input = '';
+    if (f.type === 'select') {
+      input = '<select id="qe_'+f.k+'"'+required+' style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;"><option value="">— 選擇 —</option>'
+        + (f.options||[]).map(o=>'<option value="'+o+'">'+o+'</option>').join('')+'</select>';
+    } else if (f.type === 'tags') {
+      input = '<input id="qe_'+f.k+'" type="text" list="qe_tags_list" placeholder="'+_esc(f.placeholder||'例：LDCT, 達文西')+'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;">'
+        + '<datalist id="qe_tags_list">'+tagOpts+'</datalist>';
+    } else {
+      input = '<input id="qe_'+f.k+'" type="'+f.type+'"'+required+(f.placeholder?' placeholder="'+_esc(f.placeholder)+'"':'')+' style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;">';
+    }
+    const hint = f.hint ? '<div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">'+f.hint+'</div>' : '';
+    return '<div class="form-group"'+colSpan+'>'
+      + '<label style="font-size:12px;font-weight:600;color:var(--text-sub);display:block;margin-bottom:4px;">'+f.label+(f.required?' <span style="color:#DC2626;">*</span>':'')+'</label>'
+      + input + hint
+      + '</div>';
+  }).join('');
+
+  const html = '<div class="modal-overlay open" id="quickEntryModal">'
+    + '<div class="modal-box" style="max-width:1080px;width:96%;max-height:92vh;display:flex;flex-direction:column;padding:0;">'
+    + '<div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">'
+    +   '<span style="color:'+cfg.color+';">'+svgIcon(cfg.icon, 22)+'</span>'
+    +   '<h3 style="margin:0;font-size:16px;font-weight:800;color:'+cfg.color+';">'+cfg.title+' — 快速建立</h3>'
+    +   '<span style="font-size:11px;color:var(--text-muted);margin-left:auto;">看著左邊截圖填右邊欄位</span>'
+    + '</div>'
+    + '<div class="quick-entry-body" style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:0;overflow:hidden;min-height:0;">'
+    +   '<div style="padding:18px;border-right:1px solid var(--border);overflow-y:auto;background:#F8FAFC;">' + previewHtml + '</div>'
+    +   '<div style="padding:18px 24px;overflow-y:auto;">'
+    +     '<div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + fieldsHtml + '</div>'
+    +   '</div>'
+    + '</div>'
+    + '<div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;">'
+    +   '<button class="btn btn-outline" onclick="_closeQuickEntry()">取消</button>'
+    +   '<button class="btn btn-primary" style="background:'+cfg.color+';" onclick="_saveQuickEntry(\''+platformKey+'\')">儲存</button>'
+    + '</div></div></div>'
+    + '<style>@media (max-width:900px){.quick-entry-body{grid-template-columns:1fr !important;}}</style>';
+
+  window._quickEntryFileUrl = fileUrl;
+  const tmp = document.createElement('div'); tmp.innerHTML = html;
+  document.body.appendChild(tmp.firstElementChild);
+}
+
+function _closeQuickEntry() {
+  if (window._quickEntryFileUrl) { URL.revokeObjectURL(window._quickEntryFileUrl); delete window._quickEntryFileUrl; }
+  document.getElementById('quickEntryModal')?.remove();
+}
+
+// 儲存到對應的 store
+function _saveQuickEntry(platformKey) {
+  if (!requireEdit()) return;
+  const cfg = QUICK_ENTRY_FORMS[platformKey]; if (!cfg) return;
+  const obj = { created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+  let valid = true;
+  cfg.fields.forEach(f => {
+    const el = document.getElementById('qe_'+f.k);
+    if (!el) return;
+    let v = el.value.trim();
+    if (f.required && !v) { valid = false; el.style.borderColor='#DC2626'; }
+    else { el.style.borderColor='var(--border)'; }
+    if (f.type === 'number') v = v === '' ? null : parseFloat(v);
+    if (f.type === 'tags') v = v.split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
+    obj[f.k] = v;
+  });
+  if (!valid) { showToast('請填寫必填欄位 (紅框)'); return; }
+
+  // 確保標籤存在
+  if (Array.isArray(obj.tags)) ensureTagsExist(obj.tags);
+
+  // 寫入對應 store
+  if (cfg.store === 'gaMonthly') {
+    // 特殊處理：寫入 gaMonthly[ym]
+    const ym = obj.ym;
+    if (!ym) { showToast('月份必填'); return; }
+    if (!store.gaMonthly) store.gaMonthly = {};
+    if (!store.gaMonthly[ym]) store.gaMonthly[ym] = {};
+    if (!store.gaMonthly[ym].users) store.gaMonthly[ym].users = {};
+    if (obj.activeUsers) store.gaMonthly[ym].users['活躍使用者'] = obj.activeUsers;
+    if (obj.newUsers) store.gaMonthly[ym].users['新使用者'] = obj.newUsers;
+    if (!store.gaMonthly[ym].siteTraffic) store.gaMonthly[ym].siteTraffic = {};
+    if (!store.gaMonthly[ym].siteTraffic['全站統計']) store.gaMonthly[ym].siteTraffic['全站統計'] = {};
+    const st = store.gaMonthly[ym].siteTraffic['全站統計'];
+    if (obj.sessions) st['工作階段'] = obj.sessions;
+    if (obj.deptReg) st['科別預約'] = obj.deptReg;
+    if (obj.convRate != null) st['轉換率'] = (obj.convRate > 1 ? obj.convRate/100 : obj.convRate);
+  } else {
+    // 通用：push 到 store[storeKey]
+    const key = cfg.store;
+    if (!store[key]) store[key] = [];
+    // 特殊欄位處理
+    if (cfg.platform) obj.platform = cfg.platform;
+    if (obj.date && (cfg.store === 'posts')) obj.month = String(obj.date).slice(0,7);
+    if (cfg.store === 'seoArticles') {
+      obj.id = 'sa_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    }
+    store[key].push(obj);
+  }
+  saveStore();
+  _closeQuickEntry();
+  showToast('✓ '+cfg.title+' 已新增');
+  // 更新匯入 log
+  const log = document.getElementById('quickImportLog');
+  if (log) {
+    log.innerHTML += '<div style="margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;"><span style="color:#059669;">✓</span> 手動建立 — <b>'+cfg.title+'</b></div>';
+  }
+}
+
+// HTML escape helper
+function _esc(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
 function _processQuickImportFile(file) {
   return new Promise(resolve => {
     const filename = file.name;
     const isCSV = /\.csv$/i.test(filename);
     const isJSON = /\.json$/i.test(filename);
+    const isXLSX = /\.xlsx$/i.test(filename);
+    const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(filename);
+    const isPDF = file.type === 'application/pdf' || /\.pdf$/i.test(filename);
+    const isWord = /\.(doc|docx)$/i.test(filename);
 
-    // ── CSV / JSON 處理（影片資料等） ──
+    // ── 截圖 / PDF / Word：開啟平台選擇 ──
+    if (isImage || isPDF || isWord) {
+      _openPlatformPickerModal(file);
+      return resolve({ ok:true, filename, detected:'手動填入', msg:'請於彈窗選擇平台並填寫表單' });
+    }
+
+    // ── CSV / JSON 處理 ──
     if (isCSV || isJSON) {
       const txtReader = new FileReader();
       txtReader.onload = (te) => {
