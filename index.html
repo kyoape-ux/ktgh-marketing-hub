@@ -1613,8 +1613,43 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label>備註 / 後記</label>
-          <textarea id="ev-note" rows="3" placeholder="活動觀察、現場狀況、改進建議..."></textarea>
+          <textarea id="ev-note" rows="2" placeholder="簡短備註..."></textarea>
         </div>
+
+        <!-- 成果報告專用欄位 (Stage A) -->
+        <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:700;color:#064E2C;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#064E2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            成果報告欄位（填了就能一鍵產出活動成果報告）
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;color:var(--text-sub);">活動目的 / 背景</label>
+            <textarea id="ev-purpose" rows="2" placeholder="為什麼舉辦這場活動？想達成什麼目標..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;color:var(--text-sub);">主要活動內容 <span style="color:#888;font-weight:400;">（200 字內）</span></label>
+            <textarea id="ev-content" rows="3" placeholder="當天進行的主要環節、講題、互動..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;color:var(--text-sub);">質化觀察 / 心得</label>
+            <textarea id="ev-observation" rows="2" placeholder="現場互動觀察、學員回饋摘要..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;color:var(--text-sub);">改進建議 / 後續行動</label>
+            <textarea id="ev-improvement" rows="2" placeholder="下次可以改善的部分、後續追蹤..."></textarea>
+          </div>
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0;">
+            <div class="form-group">
+              <label style="font-size:12px;font-weight:600;color:var(--text-sub);">活動照片連結（Google Drive / 雲端）</label>
+              <input type="url" id="ev-photo-url" placeholder="https://drive.google.com/...">
+            </div>
+            <div class="form-group">
+              <label style="font-size:12px;font-weight:600;color:var(--text-sub);">跨管道標籤（逗號分隔）</label>
+              <input type="text" id="ev-tags" list="crossTagDatalist" placeholder="例：GWD全球健康日, 健康講座">
+            </div>
+          </div>
+        </div>
+
         <div class="predict-panel">
           <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 智慧預測（基於 Q2–Q4 2025 歷史數據）</h4>
           <div class="predict-row"><span>預估報名人數</span><span class="predict-val" id="pred-reg">—</span></div>
@@ -2561,6 +2596,33 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <div class="form-group" style="grid-column:1/-1">
         <label>跨傳達管道標籤（可多選，逗號分隔）</label>
         <input type="text" id="em-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
+      </div>
+      <!-- 成果報告專用欄位 (Stage A) -->
+      <div style="grid-column:1/-1;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:14px;margin-top:6px;">
+        <div style="font-size:13px;font-weight:600;color:#064E2C;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          成果報告專用欄位（用於一鍵生成院長/主管版報告）
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:12px;">活動目的 / 緣由</label>
+          <textarea id="em-purpose" rows="2" placeholder="為什麼舉辦這場活動？想達成什麼目標..." style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:12px;">活動內容摘要</label>
+          <textarea id="em-content" rows="3" placeholder="當天進行的主要環節、講題、互動..." style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:12px;">現場觀察 / 回饋</label>
+          <textarea id="em-observation" rows="2" placeholder="現場互動觀察、學員回饋摘要..." style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:12px;">改善建議 / 後續追蹤</label>
+          <textarea id="em-improvement" rows="2" placeholder="下次可以改善的部分、後續追蹤..." style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label style="font-size:12px;">活動照片 URL（Google Drive 資料夾或圖片連結）</label>
+          <input type="url" id="em-photo-url" placeholder="https://drive.google.com/...">
+        </div>
       </div>
     </div>
     <input type="hidden" id="em-idx" value="-1">
@@ -4258,7 +4320,8 @@ function renderEvents() {
       <td class="text-mono">${stars}</td>
       <td style="max-width:140px;font-size:12px;color:var(--text-muted)">${e.note||''}</td>
       <td style="white-space:nowrap;">
-        <button class="action-btn edit" onclick="openEventModal(${i})">編輯</button>
+        <button class="action-btn" onclick="openEventReport(${i})" style="background:#064E2C;color:#fff;border:none;padding:4px 10px;border-radius:4px;font-size:12px;cursor:pointer;">成果報告</button>
+        <button class="action-btn edit" onclick="openEventModal(${i})" style="margin-left:4px;">編輯</button>
         <button class="action-btn del" onclick="deleteEvent(${i})" style="margin-left:4px;">刪除</button>
       </td>
     </tr>`;
@@ -4270,6 +4333,10 @@ function addEvent() {
   const name = document.getElementById('ev-name').value.trim();
   const date = document.getElementById('ev-date').value;
   if (!name || !date) { showToast('請填寫活動名稱和日期'); return; }
+  // 標籤處理
+  const tagsRaw = document.getElementById('ev-tags')?.value || '';
+  const tags = tagsRaw.split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
+  if (tags.length && typeof ensureTagsExist === 'function') ensureTagsExist(tags);
   store.events.push({
     date, name,
     type:     document.getElementById('ev-type').value,
@@ -4285,11 +4352,19 @@ function addEvent() {
     expense:  +document.getElementById('ev-expense').value  || 0,
     yt_url:   document.getElementById('ev-yt-url').value,
     yt_views: +document.getElementById('ev-yt-views').value || 0,
+    // Stage A 新增 6 欄
+    purpose:     document.getElementById('ev-purpose')?.value     || '',
+    content:     document.getElementById('ev-content')?.value     || '',
+    observation: document.getElementById('ev-observation')?.value || '',
+    improvement: document.getElementById('ev-improvement')?.value || '',
+    photo_url:   document.getElementById('ev-photo-url')?.value   || '',
+    tags,
   });
   saveStore();
   _gasWrite('addEvent', store.events[store.events.length - 1]);
   showToast('活動記錄已儲存');
-  ['ev-name','ev-date','ev-reg','ev-sample','ev-attend','ev-reach','ev-sat','ev-speaker','ev-note','ev-budget','ev-expense','ev-yt-url','ev-yt-views'].forEach(id => {
+  ['ev-name','ev-date','ev-reg','ev-sample','ev-attend','ev-reach','ev-sat','ev-speaker','ev-note','ev-budget','ev-expense','ev-yt-url','ev-yt-views',
+   'ev-purpose','ev-content','ev-observation','ev-improvement','ev-photo-url','ev-tags'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -4639,6 +4714,12 @@ function openEventModal(idx) {
   document.getElementById('em-yt-url').value    = e.yt_url   || '';
   document.getElementById('em-note').value      = e.note     || '';
   document.getElementById('em-tags').value      = (e.tags || []).join(', ');
+  // Stage A 新增 5 欄
+  document.getElementById('em-purpose').value      = e.purpose      || '';
+  document.getElementById('em-content').value      = e.content      || '';
+  document.getElementById('em-observation').value  = e.observation  || '';
+  document.getElementById('em-improvement').value  = e.improvement  || '';
+  document.getElementById('em-photo-url').value    = e.photo_url    || '';
   updateCrossTagDatalist();
   openModal('eventModal');
 }
@@ -4666,6 +4747,12 @@ function saveEventEdit() {
     yt_url:   document.getElementById('em-yt-url').value,
     yt_views: +document.getElementById('em-yt-views').value || 0,
     tags:     parseTagInput('em-tags'),
+    // Stage A 新增 5 欄
+    purpose:     document.getElementById('em-purpose').value     || '',
+    content:     document.getElementById('em-content').value     || '',
+    observation: document.getElementById('em-observation').value || '',
+    improvement: document.getElementById('em-improvement').value || '',
+    photo_url:   document.getElementById('em-photo-url').value   || '',
   };
   ensureTagsExist(store.events[idx].tags);
   saveStore();
@@ -4685,6 +4772,358 @@ function deleteEvent(idx) {
   saveStore();
   renderEvents();
   showToast('活動已刪除（可從資料備份還原）');
+}
+
+// ═══════════════════════════════════════════
+//  EVENT REPORT GENERATOR (Stage B)
+//  一鍵生成成果報告 — 院長版 / 主管版
+//  自動關聯：FB 貼文 / 媒體曝光 / YT 影片
+// ═══════════════════════════════════════════
+
+// 工具：日期區間內自動關聯（±7 天 或 tag/campaign 命中）
+function _eventRelatedItems(ev) {
+  const eventDate = new Date(ev.date);
+  if (isNaN(eventDate)) return { posts: [], media: [], yts: [] };
+  const dayMs = 86400000;
+  const before = new Date(eventDate.getTime() - 14 * dayMs);
+  const after  = new Date(eventDate.getTime() + 14 * dayMs);
+  const evTags = new Set((ev.tags || []).map(t => (t||'').toLowerCase()));
+  const evName = (ev.name || '').toLowerCase();
+
+  const matchTag = (item) => {
+    if (evTags.size === 0) return false;
+    const t = (item.tags || []).map(x => (x||'').toLowerCase());
+    return t.some(x => evTags.has(x));
+  };
+  const matchName = (text) => {
+    if (!evName || !text) return false;
+    return (text||'').toLowerCase().includes(evName);
+  };
+  const inWindow = (dateStr) => {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    if (isNaN(d)) return false;
+    return d >= before && d <= after;
+  };
+
+  // 關聯 FB 貼文（campaign 命中、tag 命中、或活動日期 ±14 天且標題含活動名稱）
+  const posts = (store.posts || []).filter(p => {
+    if (p.deleted_at) return false;
+    if ((p.campaign||'').toLowerCase() === evName) return true;
+    if (matchTag(p)) return true;
+    if (inWindow(p.date) && matchName(p.title)) return true;
+    return false;
+  }).sort((a,b)=> (b.reach||0) - (a.reach||0));
+
+  // 關聯媒體
+  const media = (store.media || []).filter(m => {
+    if (m.deleted_at) return false;
+    if (matchTag(m)) return true;
+    if (inWindow(m.date) && matchName(m.title)) return true;
+    return false;
+  }).sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+  // YT 影片（活動本身 yt_url 為主，亦從 posts 抓 YT 類）
+  const yts = [];
+  if (ev.yt_url) {
+    yts.push({ url: ev.yt_url, views: ev.yt_views || 0, title: ev.name });
+  }
+
+  return { posts, media, yts };
+}
+
+// 工具：千分位
+function _fmt(n) {
+  if (n == null || n === '' || isNaN(+n)) return '—';
+  return (+n).toLocaleString();
+}
+
+// 開啟報告選擇介面
+function openEventReport(idx) {
+  const ev = store.events[idx];
+  if (!ev) { showToast('找不到該活動'); return; }
+  // 顯示版本選擇器（先 inline modal）
+  const html = `
+    <div class="modal-overlay" id="reportPickerModal" style="display:flex;">
+      <div class="modal-box" style="max-width:560px;">
+        <h3 style="margin:0 0 8px 0;display:flex;align-items:center;gap:8px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#064E2C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          選擇報告版本
+        </h3>
+        <p style="color:var(--text-sub);font-size:13px;margin:0 0 16px 0;">活動：<strong>${ev.name}</strong>（${ev.date}）</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <button onclick="closeModal('reportPickerModal');document.getElementById('reportPickerModal')?.remove();generateEventReport(${idx},'director')" style="text-align:left;padding:16px;background:linear-gradient(135deg,#064E2C,#1a8454);color:#fff;border:none;border-radius:10px;cursor:pointer;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px;">院長版 (A)</div>
+            <div style="font-size:12px;opacity:0.9;line-height:1.5;">高階主管角度<br>聚焦：成效摘要、品牌曝光、策略意義</div>
+          </button>
+          <button onclick="closeModal('reportPickerModal');document.getElementById('reportPickerModal')?.remove();generateEventReport(${idx},'manager')" style="text-align:left;padding:16px;background:#fff;color:#064E2C;border:2px solid #064E2C;border-radius:10px;cursor:pointer;">
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px;">主管版 (B)</div>
+            <div style="font-size:12px;opacity:0.9;line-height:1.5;">部門主管角度<br>聚焦：執行細節、數據完整、改善建議</div>
+          </button>
+        </div>
+        <div style="margin-top:16px;text-align:right;">
+          <button class="btn btn-outline" onclick="document.getElementById('reportPickerModal')?.remove()">取消</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// 主：生成報告（在新視窗開啟可編輯的 HTML）
+function generateEventReport(idx, audience) {
+  const ev = store.events[idx];
+  if (!ev) { showToast('找不到該活動'); return; }
+  const audienceName = audience === 'director' ? '院長版' : '主管版';
+  const { posts, media, yts } = _eventRelatedItems(ev);
+
+  // 計算關聯指標
+  const fbTotalReach = posts.reduce((s,p)=>s+(p.reach||0),0);
+  const fbTotalEngage = posts.reduce((s,p)=>s+(p.engage||0),0);
+  const mediaCount = media.length;
+  const ytViews = yts.reduce((s,y)=>s+(y.views||0),0);
+  const attendRate = ev.reg > 0 ? Math.round((ev.attend||0)/ev.reg*100) : null;
+
+  // 院長版：摘要式、聚焦品牌與戰略
+  // 主管版：詳細數據、含執行檢討
+  const isDirector = audience === 'director';
+
+  const reportHtml = _buildReportHtml({
+    ev, audienceName, isDirector, posts, media, yts,
+    fbTotalReach, fbTotalEngage, mediaCount, ytViews, attendRate
+  });
+
+  // 開新視窗
+  const w = window.open('', '_blank', 'width=900,height=1000,scrollbars=yes');
+  if (!w) { showToast('請允許瀏覽器開啟新視窗'); return; }
+  w.document.write(reportHtml);
+  w.document.close();
+  // 標記視窗 title 方便辨識
+  setTimeout(() => { try { w.document.title = `${ev.name} - ${audienceName}成果報告`; } catch(e){} }, 100);
+}
+
+// 組裝報告 HTML（可編輯、可列印、可匯出）
+function _buildReportHtml(o) {
+  const { ev, audienceName, isDirector, posts, media, yts,
+          fbTotalReach, fbTotalEngage, mediaCount, ytViews, attendRate } = o;
+
+  const dirSummary = `本院於 ${ev.date} 舉辦「${ev.name}」，活動順利圓滿。報名 ${_fmt(ev.reg)} 人、實際出席 ${_fmt(ev.attend)} 人${attendRate!=null?`（出席率 ${attendRate}%）`:''}，滿意度 ${ev.sat || '—'} / 5。透過 FB 貼文累計觸及 ${_fmt(fbTotalReach)} 人、互動 ${_fmt(fbTotalEngage)} 次；媒體曝光 ${mediaCount} 則；YouTube 影片觀看 ${_fmt(ytViews)} 次。本次活動有效強化光田綜合醫院的品牌形象與社區連結。`;
+
+  const mgrSummary = `${ev.date} 於${ev.campus||'院內'}執行「${ev.name}」（${ev.type||'活動'}）。主講：${ev.speaker||'—'}。報名 ${_fmt(ev.reg)} / 出席 ${_fmt(ev.attend)}${attendRate!=null?` (${attendRate}%)`:''}，滿意度 ${ev.sat||'—'}。預算 ${_fmt(ev.budget)} 元 / 實際支出 ${_fmt(ev.expense)} 元。FB 觸及 ${_fmt(fbTotalReach)} / 互動 ${_fmt(fbTotalEngage)}（共 ${posts.length} 篇相關貼文）；媒體 ${mediaCount} 則；YT 觀看 ${_fmt(ytViews)}。`;
+
+  const summaryText = isDirector ? dirSummary : mgrSummary;
+
+  // KPI 卡（院長版 4 個，主管版 6 個）
+  const kpis = [
+    { label: '報名 / 出席', value: `${_fmt(ev.reg)} / ${_fmt(ev.attend)}`, sub: attendRate!=null?`出席率 ${attendRate}%`:'' },
+    { label: '滿意度', value: ev.sat ? `${ev.sat} / 5` : '—', sub: '' },
+    { label: 'FB 觸及', value: _fmt(fbTotalReach), sub: `${posts.length} 篇貼文` },
+    { label: '媒體曝光', value: `${mediaCount} 則`, sub: '' },
+  ];
+  if (!isDirector) {
+    kpis.push({ label: 'FB 互動', value: _fmt(fbTotalEngage), sub: '心情+留言+分享' });
+    kpis.push({ label: '預算 / 支出', value: `${_fmt(ev.budget)} / ${_fmt(ev.expense)}`, sub: ev.budget>0&&ev.expense>0?`執行率 ${Math.round(ev.expense/ev.budget*100)}%`:'' });
+  }
+
+  const kpiHtml = kpis.map(k => `
+    <div style="background:#fff;border:1px solid #DDE8E3;border-left:4px solid #064E2C;border-radius:8px;padding:14px 16px;">
+      <div style="font-size:12px;color:#5A7A6A;margin-bottom:6px;">${k.label}</div>
+      <div style="font-size:22px;font-weight:700;color:#064E2C;font-family:'Inter',sans-serif;">${k.value}</div>
+      ${k.sub ? `<div style="font-size:11px;color:#90A89E;margin-top:2px;">${k.sub}</div>` : ''}
+    </div>
+  `).join('');
+
+  // FB 貼文表（取前 5 篇）
+  const postsTable = posts.length ? `
+    <h3 style="color:#064E2C;margin:24px 0 10px 0;font-size:16px;">📱 相關 Facebook 貼文（取觸及前 ${Math.min(5,posts.length)} 篇）</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:#ECFDF5;">
+        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">日期</th>
+        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">貼文標題</th>
+        <th style="padding:8px;text-align:right;border:1px solid #A7F3D0;">觸及</th>
+        <th style="padding:8px;text-align:right;border:1px solid #A7F3D0;">互動</th>
+      </tr></thead>
+      <tbody>
+        ${posts.slice(0,5).map(p => `
+          <tr>
+            <td style="padding:8px;border:1px solid #DDE8E3;font-family:'Inter',sans-serif;">${p.date||'—'}</td>
+            <td style="padding:8px;border:1px solid #DDE8E3;">${p.url ? `<a href="${p.url}" target="_blank" style="color:#00AAC8;text-decoration:none;">${p.title||'(無標題)'}</a>` : (p.title||'(無標題)')}</td>
+            <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(p.reach)}</td>
+            <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(p.engage)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  ` : '';
+
+  // 媒體曝光表
+  const mediaTable = media.length ? `
+    <h3 style="color:#064E2C;margin:24px 0 10px 0;font-size:16px;">📰 媒體曝光記錄</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:#ECFDF5;">
+        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">日期</th>
+        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">媒體</th>
+        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">標題</th>
+        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">性質</th>
+      </tr></thead>
+      <tbody>
+        ${media.map(m => `
+          <tr>
+            <td style="padding:8px;border:1px solid #DDE8E3;font-family:'Inter',sans-serif;">${m.date||'—'}</td>
+            <td style="padding:8px;border:1px solid #DDE8E3;">${m.mediaName||'—'}<br><small style="color:#90A89E;">${m.mediaType||''}</small></td>
+            <td style="padding:8px;border:1px solid #DDE8E3;">${m.url ? `<a href="${m.url}" target="_blank" style="color:#00AAC8;text-decoration:none;">${m.title||'—'}</a>` : (m.title||'—')}</td>
+            <td style="padding:8px;border:1px solid #DDE8E3;">${m.nature||'—'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  ` : '';
+
+  // YT 區塊
+  const ytBlock = yts.length ? `
+    <h3 style="color:#064E2C;margin:24px 0 10px 0;font-size:16px;">▶ YouTube 影片紀錄</h3>
+    ${yts.map(y => `
+      <div style="background:#fff;border:1px solid #DDE8E3;border-radius:8px;padding:12px 16px;margin-bottom:8px;">
+        <div style="font-weight:600;">${y.title||'活動影片'}</div>
+        <div style="color:#5A7A6A;font-size:13px;margin-top:4px;">觀看次數：<strong style="font-family:'Inter',sans-serif;">${_fmt(y.views)}</strong></div>
+        ${y.url ? `<div style="margin-top:6px;"><a href="${y.url}" target="_blank" style="color:#00AAC8;font-size:13px;">${y.url}</a></div>` : ''}
+      </div>
+    `).join('')}
+  ` : '';
+
+  // 敘述區塊（院長版簡化、主管版完整）
+  const narrativeBlocks = [];
+  if (ev.purpose)     narrativeBlocks.push(['活動目的 / 緣由', ev.purpose]);
+  if (ev.content)     narrativeBlocks.push(['活動內容摘要', ev.content]);
+  if (!isDirector) {
+    if (ev.observation) narrativeBlocks.push(['現場觀察 / 回饋', ev.observation]);
+    if (ev.improvement) narrativeBlocks.push(['改善建議 / 後續追蹤', ev.improvement]);
+  }
+  const narrativeHtml = narrativeBlocks.map(([title, body]) => `
+    <div style="margin-bottom:16px;">
+      <h3 style="color:#064E2C;margin:0 0 8px 0;font-size:15px;border-left:3px solid #6EC300;padding-left:10px;">${title}</h3>
+      <div contenteditable="true" style="background:#fff;border:1px dashed #DDE8E3;border-radius:6px;padding:12px;font-size:14px;line-height:1.7;color:#1A2820;outline:none;">${(body||'').replace(/\n/g,'<br>')}</div>
+    </div>
+  `).join('');
+
+  // 活動照片
+  const photoBlock = ev.photo_url ? `
+    <h3 style="color:#064E2C;margin:24px 0 10px 0;font-size:16px;">📷 活動照片</h3>
+    <div style="background:#fff;border:1px solid #DDE8E3;border-radius:8px;padding:14px 16px;">
+      <a href="${ev.photo_url}" target="_blank" style="color:#00AAC8;font-size:14px;word-break:break-all;">${ev.photo_url}</a>
+    </div>
+  ` : '';
+
+  return `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>${ev.name} - ${audienceName}成果報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Noto Sans TC', sans-serif; background: #F3F9F6; color: #1A2820; margin: 0; padding: 20px; }
+  .report-toolbar { position: sticky; top: 0; background: #fff; border: 1px solid #DDE8E3; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; z-index: 100; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .report-toolbar button { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; font-family: inherit; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-print { background: #064E2C; color: #fff; }
+  .btn-print:hover { background: #1a8454; }
+  .btn-word  { background: #2B579A; color: #fff; }
+  .btn-pdf   { background: #C0313D; color: #fff; }
+  .btn-copy  { background: #00AAC8; color: #fff; }
+  .btn-edit-toggle { background: #FFB900; color: #1A2820; }
+  .report { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 40px 50px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .report-header { border-bottom: 3px solid #064E2C; padding-bottom: 16px; margin-bottom: 24px; }
+  .report-meta { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #5A7A6A; margin-bottom: 8px; }
+  .report-meta .badge { background: #064E2C; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  h1 { color: #064E2C; font-size: 24px; margin: 0; }
+  h2 { color: #064E2C; font-size: 18px; margin: 24px 0 12px 0; border-left: 4px solid #6EC300; padding-left: 12px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(${kpis.length<=4?'4':'3'}, 1fr); gap: 12px; margin: 16px 0 24px 0; }
+  .summary-box { background: #ECFDF5; border-left: 4px solid #064E2C; border-radius: 6px; padding: 16px 20px; font-size: 14px; line-height: 1.8; }
+  .summary-box[contenteditable="true"]:focus { outline: 2px solid #6EC300; outline-offset: 2px; }
+  table { font-family: inherit; }
+  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #DDE8E3; font-size: 12px; color: #90A89E; text-align: center; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .report-toolbar { display: none; }
+    .report { box-shadow: none; padding: 0; }
+    a { color: #1A2820 !important; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="report-toolbar">
+    <strong style="color:#064E2C;margin-right:8px;">${audienceName}成果報告</strong>
+    <button class="btn-print" onclick="window.print()">🖨️ 列印 / 存 PDF</button>
+    <button class="btn-word" onclick="exportWord()">📄 匯出 Word</button>
+    <button class="btn-copy" onclick="copyAll()">📋 複製全文</button>
+    <button class="btn-edit-toggle" onclick="toggleEditAll()">✏️ 切換編輯模式</button>
+    <span style="margin-left:auto;font-size:12px;color:#5A7A6A;">提示：點擊文字區塊即可直接修改</span>
+  </div>
+  <div class="report" id="reportRoot">
+    <div class="report-header">
+      <div class="report-meta">
+        <span class="badge">${audienceName}</span>
+        <span>光田綜合醫院 行銷企劃處</span>
+        <span>·</span>
+        <span>生成時間：${new Date().toLocaleString('zh-TW')}</span>
+      </div>
+      <h1 contenteditable="true">${ev.name} — 活動成果報告</h1>
+      <div style="margin-top:8px;font-size:13px;color:#5A7A6A;">
+        日期：${ev.date} ｜ 類型：${ev.type||'—'} ｜ 院區：${ev.campus||'—'} ｜ 主講：${ev.speaker||'—'}
+      </div>
+    </div>
+
+    <h2>一、執行摘要</h2>
+    <div class="summary-box" contenteditable="true">${summaryText}</div>
+
+    <h2>二、核心數據</h2>
+    <div class="kpi-grid">${kpiHtml}</div>
+
+    ${narrativeHtml ? `<h2>三、活動敘述</h2>${narrativeHtml}` : ''}
+
+    ${postsTable ? `<h2>${narrativeHtml?'四':'三'}、社群擴散成效</h2>${postsTable}` : ''}
+
+    ${mediaTable ? `<h2>媒體曝光紀錄</h2>${mediaTable}` : ''}
+
+    ${ytBlock}
+
+    ${photoBlock}
+
+    ${!isDirector && ev.note ? `<h2>備註</h2><div contenteditable="true" style="background:#fff;border:1px dashed #DDE8E3;border-radius:6px;padding:12px;font-size:14px;line-height:1.7;">${ev.note.replace(/\n/g,'<br>')}</div>` : ''}
+
+    <div class="footer">
+      光田綜合醫院 行銷企劃處 視覺多媒體設計組 · ${audienceName}成果報告
+    </div>
+  </div>
+
+<script>
+  function toggleEditAll() {
+    const root = document.getElementById('reportRoot');
+    const els = root.querySelectorAll('[contenteditable]');
+    const turnOn = els.length && els[0].getAttribute('contenteditable') === 'false';
+    els.forEach(el => el.setAttribute('contenteditable', turnOn ? 'true' : 'false'));
+    alert(turnOn ? '✏️ 編輯模式已啟用' : '🔒 編輯模式已關閉');
+  }
+  function copyAll() {
+    const text = document.getElementById('reportRoot').innerText;
+    navigator.clipboard.writeText(text).then(() => alert('✓ 報告全文已複製')).catch(()=>alert('複製失敗'));
+  }
+  function exportWord() {
+    const header = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${ev.name}</title></head><body>';
+    const footer = '</body></html>';
+    const sourceHTML = header + document.getElementById('reportRoot').outerHTML + footer;
+    const blob = new Blob(['\\ufeff', sourceHTML], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '${ev.name}-${audienceName}成果報告.doc';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>`;
 }
 
 // ═══════════════════════════════════════════
