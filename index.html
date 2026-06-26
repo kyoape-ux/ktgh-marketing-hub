@@ -862,14 +862,12 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <h2><span class="dot"></span>行銷整合分析中心</h2>
   </div>
   <nav>
+    <div class="nav-section">核心</div>
     <div class="nav-group" data-key="warroom">
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>🎯 戰情中心</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
     <a class="nav-item active" onclick="switchSection('warroom','dashboard')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> 戰情首頁
-    </a>
-    <a class="nav-item" data-perm="edit" onclick="switchSection('warroom','okr')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> OKR 目標設定
     </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('warroom','quickimport')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span> 快速匯入區
@@ -886,21 +884,6 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     </a>
     <a class="nav-item" onclick="switchSection('fb','posts')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> 貼文成效列表
-    </a>
-    <a class="nav-item" onclick="switchSection('fb','analysis')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> 組合分析
-    </a>
-    <a class="nav-item" onclick="switchSection('fb','calendar')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> 內容日曆
-    </a>
-    <a class="nav-item" onclick="switchSection('fb','ab')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></svg></span> A/B 分析
-    </a>
-    <a class="nav-item" onclick="switchSection('fb','predict')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12l7-7"/><circle cx="12" cy="12" r="3"/></svg></span> 貼文預測
-    </a>
-    <a class="nav-item" onclick="switchSection('fb','sop')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span> SOP 建議模板
     </a>
     </div></div>
     <div class="nav-group" data-key="event">
@@ -936,6 +919,30 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> KOL 成效追蹤
     </a>
     </div></div>
+
+    <div class="nav-section">進階 / 其他</div>
+    <div class="nav-group" data-key="fbadv">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>粉專進階分析</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
+    <a class="nav-item" onclick="switchSection('fb','analysis')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> 組合分析
+    </a>
+    <a class="nav-item" onclick="switchSection('fb','calendar')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> 內容日曆
+    </a>
+    <a class="nav-item" onclick="switchSection('fb','ab')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></svg></span> A/B 分析
+    </a>
+    <a class="nav-item" onclick="switchSection('fb','predict')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12l7-7"/><circle cx="12" cy="12" r="3"/></svg></span> 貼文預測
+    </a>
+    <a class="nav-item" onclick="switchSection('fb','sop')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span> SOP 建議模板
+    </a>
+    <a class="nav-item" data-perm="edit" onclick="switchSection('warroom','okr')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> OKR 目標設定
+    </a>
+    </div></div>
     <div class="nav-group" data-key="clinic">
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>門診表資料庫</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
@@ -965,7 +972,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 GA4 / GSC 數據
     </a>
     </div></div>
-    <div class="nav-group" data-key="line">
+    <div class="nav-group" data-key="line" style="display:none"><!-- 暫時隱藏：無資料，要用再開 -->
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>LINE@ 官方帳號</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('line','overview')">
@@ -978,7 +985,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 LINE 數據
     </a>
     </div></div>
-    <div class="nav-group" data-key="video">
+    <div class="nav-group" data-key="video" style="display:none"><!-- 暫時隱藏：無資料，要用再開 -->
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>影片總覽 (YT / IG)</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('video','list')">
@@ -998,6 +1005,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="12" width="18" height="4" rx="1"/><line x1="3" y1="20" x2="21" y2="20"/></svg></span> 共用標籤建立
     </a>
     </div></div>
+
+    <div class="nav-section">系統</div>
     <div class="nav-group" data-key="settings">
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>系統</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
@@ -7023,16 +7032,17 @@ function toggleNavGroup(headerEl) {
   grp.classList.toggle('collapsed');
   try {
     const keys = [...document.querySelectorAll('.nav-group.collapsed')].map(g => g.dataset.key);
-    localStorage.setItem('ktgh_nav_collapsed', JSON.stringify(keys));
+    localStorage.setItem('ktgh_nav_collapsed_v2', JSON.stringify(keys));
   } catch(e){}
 }
 function restoreNavState() {
   try {
-    const raw = localStorage.getItem('ktgh_nav_collapsed');
+    const raw = localStorage.getItem('ktgh_nav_collapsed_v2');
     if (!raw) {
-      // default: collapse everything except fb (active)
+      // 預設：核心群組展開，進階/其他群組收合
+      const core = ['warroom','fb','event','media','campaign'];
       document.querySelectorAll('.nav-group').forEach(g => {
-        if (g.dataset.key !== 'fb') g.classList.add('collapsed');
+        if (!core.includes(g.dataset.key)) g.classList.add('collapsed');
       });
       return;
     }
