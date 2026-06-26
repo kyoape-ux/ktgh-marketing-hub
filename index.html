@@ -1554,11 +1554,12 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           </div>
           <div class="form-group">
             <label>活動類型</label>
-            <select id="ev-type" onchange="updateEventPrediction()">
+            <select id="ev-type" onchange="updateEventPrediction();onEventTypeChange('ev')">
               <option>健康講座</option>
               <option>義診活動</option>
               <option>院內活動</option>
               <option>社區活動</option>
+              <option>KOL公益活動</option>
               <option>媒體活動</option>
               <option>其他</option>
             </select>
@@ -1614,6 +1615,26 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
         <div class="form-group" style="margin-bottom:16px;">
           <label>備註 / 後記</label>
           <textarea id="ev-note" rows="2" placeholder="簡短備註..."></textarea>
+        </div>
+
+        <!-- 彈性曝光來源 -->
+        <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;background:#F8FBFA;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
+            <div style="font-size:13px;font-weight:700;color:#064E2C;">📣 社群／曝光來源</div>
+            <div style="font-size:12px;color:var(--text-sub);">合計觸及：<strong id="ev-channels-total" style="color:#064E2C;">0</strong></div>
+          </div>
+          <p style="font-size:11.5px;color:var(--text-sub);margin:0 0 10px;line-height:1.5;">可自由增列不同曝光管道：官方 FB／IG、民眾 FB 打卡、LINE 社群分享、KOL 曝光、媒體報導…，系統分管道呈現並加總。</p>
+          <div id="ev-channels"></div>
+          <button type="button" class="btn btn-outline" style="font-size:12px;padding:6px 14px;" onclick="addChannelRow('ev-channels')">＋ 新增曝光管道</button>
+        </div>
+
+        <!-- 類型專屬欄位（範本驅動，可自訂） -->
+        <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;background:#FFFDF5;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+            <div style="font-size:13px;font-weight:700;color:#7A5C00;">🧩 類型專屬欄位 <span id="ev-cf-typelabel" style="color:var(--text-sub);font-weight:500;"></span></div>
+            <button type="button" class="btn btn-outline" style="font-size:12px;padding:5px 12px;" onclick="openFieldManager('ev')">⚙ 管理欄位</button>
+          </div>
+          <div id="ev-custom-fields"></div>
         </div>
 
         <!-- 成果報告專用欄位 (Stage A) -->
@@ -2538,9 +2559,9 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       </div>
       <div class="form-group">
         <label>活動類型</label>
-        <select id="em-type">
+        <select id="em-type" onchange="onEventTypeChange('em')">
           <option>健康講座</option><option>義診活動</option><option>院內活動</option>
-          <option>社區活動</option><option>媒體活動</option><option>其他</option>
+          <option>社區活動</option><option>KOL公益活動</option><option>媒體活動</option><option>其他</option>
         </select>
       </div>
       <div class="form-group">
@@ -2596,6 +2617,23 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <div class="form-group" style="grid-column:1/-1">
         <label>跨傳達管道標籤（可多選，逗號分隔）</label>
         <input type="text" id="em-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
+      </div>
+      <!-- 彈性曝光來源 -->
+      <div style="grid-column:1/-1;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:6px;background:#F8FBFA;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+          <div style="font-size:13px;font-weight:700;color:#064E2C;">📣 社群／曝光來源</div>
+          <div style="font-size:12px;color:var(--text-sub);">合計觸及：<strong id="em-channels-total" style="color:#064E2C;">0</strong></div>
+        </div>
+        <div id="em-channels"></div>
+        <button type="button" class="btn btn-outline" style="font-size:12px;padding:6px 14px;" onclick="addChannelRow('em-channels')">＋ 新增曝光管道</button>
+      </div>
+      <!-- 類型專屬欄位（範本驅動，可自訂） -->
+      <div style="grid-column:1/-1;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:6px;background:#FFFDF5;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+          <div style="font-size:13px;font-weight:700;color:#7A5C00;">🧩 類型專屬欄位 <span id="em-cf-typelabel" style="color:var(--text-sub);font-weight:500;"></span></div>
+          <button type="button" class="btn btn-outline" style="font-size:12px;padding:5px 12px;" onclick="openFieldManager('em')">⚙ 管理欄位</button>
+        </div>
+        <div id="em-custom-fields"></div>
       </div>
       <!-- 成果報告專用欄位 (Stage A) -->
       <div style="grid-column:1/-1;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:14px;margin-top:6px;">
@@ -2723,6 +2761,34 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 
 <datalist id="campaignDatalist"></datalist>
 <datalist id="crossTagDatalist"></datalist>
+<datalist id="chPresetList">
+  <option value="官方FB貼文"><option value="官方IG貼文"><option value="官方IG限動/Reels"><option value="官方LINE"><option value="民眾FB打卡"><option value="LINE社群分享"><option value="KOL曝光"><option value="媒體報導"><option value="YouTube"><option value="實體現場"><option value="其他">
+</datalist>
+
+<!-- 欄位管理 modal -->
+<div class="modal-overlay" id="fieldManagerModal">
+  <div class="modal-box" style="max-width:520px;">
+    <h3 id="fmTitle" style="margin:0 0 4px;">管理欄位</h3>
+    <p style="color:var(--text-sub);font-size:12.5px;margin:0 0 14px;">新增或刪除此活動類型的專屬欄位。變更會套用到所有此類型的活動與成果報告。</p>
+    <input type="hidden" id="fmPrefix"><input type="hidden" id="fmType">
+    <div id="fmList" style="margin-bottom:14px;max-height:280px;overflow:auto;"></div>
+    <div style="border-top:1px dashed var(--border);padding-top:14px;">
+      <div style="font-size:12.5px;font-weight:700;color:#064E2C;margin-bottom:8px;">新增欄位</div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:8px;margin-bottom:10px;">
+        <input id="fm-new-label" placeholder="欄位名稱，例：篩檢人次" style="min-width:0;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;" onkeydown="if(event.key==='Enter')addTemplateField()">
+        <select id="fm-new-type" style="padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;">
+          <option value="number">數字</option>
+          <option value="text">文字</option>
+          <option value="textarea">多行文字</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" style="font-size:13px;padding:7px 16px;" onclick="addTemplateField()">＋ 新增欄位</button>
+    </div>
+    <div class="modal-footer" style="margin-top:16px;">
+      <button class="btn btn-outline" onclick="closeModal('fieldManagerModal')">完成</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════
@@ -3792,6 +3858,12 @@ function switchSection(module, sub) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const sec = document.getElementById(`sec-${module}-${sub}`);
   if (sec) sec.classList.add('active');
+  if (module === 'event' && sub === 'add') {
+    const chList = document.getElementById('ev-channels');
+    if (chList && !chList.querySelector('.ch-row')) addChannelRow('ev-channels');
+    const cfBox = document.getElementById('ev-custom-fields');
+    if (cfBox && !cfBox.innerHTML.trim()) refreshCustomFieldsUI('ev');
+  }
   // mark matching nav-item active by onclick match
   try {
     document.querySelectorAll('.nav-item').forEach(n => {
@@ -4328,6 +4400,186 @@ function renderEvents() {
   }).join('');
 }
 
+// ═══════════════════════════════════════════
+//  彈性曝光來源 (channels) — 共用工具
+//  ev.channels = [{name, reach, engage, note}]
+// ═══════════════════════════════════════════
+function _chEsc(s){ return (s||'').replace(/"/g,'&quot;'); }
+function channelRowHtml(ch){
+  ch = ch || {};
+  return `<div class="ch-row" style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) 32px;gap:8px;margin-bottom:8px;align-items:center;">
+    <input class="ch-name"  list="chPresetList" placeholder="管道名稱" value="${_chEsc(ch.name)}" oninput="updateChannelTotal(this)" style="min-width:0;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;">
+    <input class="ch-reach" type="number" placeholder="觸及/曝光" value="${ch.reach||''}" oninput="updateChannelTotal(this)" style="min-width:0;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;">
+    <input class="ch-engage" type="number" placeholder="互動(選填)" value="${ch.engage||''}" style="min-width:0;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;">
+    <input class="ch-note"  placeholder="備註(選填)" value="${_chEsc(ch.note)}" style="min-width:0;padding:7px 9px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;">
+    <button type="button" title="刪除此列" onclick="const l=this.closest('[id$=channels]');this.closest('.ch-row').remove();if(l)updateChannelTotalById(l.id);" style="background:#FEE2E2;color:#C0313D;border:none;border-radius:6px;width:32px;height:32px;cursor:pointer;font-weight:700;font-size:16px;line-height:1;">×</button>
+  </div>`;
+}
+function addChannelRow(listId, ch){
+  const list = document.getElementById(listId);
+  if (!list) return;
+  list.insertAdjacentHTML('beforeend', channelRowHtml(ch));
+  updateChannelTotalById(listId);
+}
+function renderChannelRows(listId, channels){
+  const list = document.getElementById(listId);
+  if (!list) return;
+  list.innerHTML = '';
+  (channels||[]).forEach(ch => list.insertAdjacentHTML('beforeend', channelRowHtml(ch)));
+  updateChannelTotalById(listId);
+}
+function collectChannels(listId){
+  const list = document.getElementById(listId);
+  if (!list) return [];
+  return [...list.querySelectorAll('.ch-row')].map(r => ({
+    name:   r.querySelector('.ch-name').value.trim(),
+    reach:  +r.querySelector('.ch-reach').value  || 0,
+    engage: +r.querySelector('.ch-engage').value || 0,
+    note:   r.querySelector('.ch-note').value.trim(),
+  })).filter(c => c.name || c.reach || c.engage);
+}
+function channelsTotal(channels){ return (channels||[]).reduce((s,c)=>s+(+c.reach||0),0); }
+function channelsEngage(channels){ return (channels||[]).reduce((s,c)=>s+(+c.engage||0),0); }
+function updateChannelTotalById(listId){
+  const el = document.getElementById(listId + '-total');
+  if (el) el.textContent = channelsTotal(collectChannels(listId)).toLocaleString();
+}
+function updateChannelTotal(input){
+  const list = input.closest('[id$=channels]');
+  if (list) updateChannelTotalById(list.id);
+}
+
+// ═══════════════════════════════════════════
+//  活動類型範本（自訂欄位）
+//  store.reportTemplates[type] = [{key,label,type}]
+//  ev.custom = { key: value }；ev.tplType = type
+// ═══════════════════════════════════════════
+const BUILTIN_TEMPLATES = {
+  '健康講座': [
+    {key:'topic',    label:'講題',            type:'text'},
+    {key:'qa_count', label:'互動問答數',      type:'number'},
+    {key:'handout',  label:'衛教資料發放(份)',type:'number'},
+  ],
+  '義診活動': [
+    {key:'screen_count',  label:'篩檢人次',      type:'number'},
+    {key:'refer_count',   label:'異常轉介數',    type:'number'},
+    {key:'consult_count', label:'衛教諮詢人次',  type:'number'},
+    {key:'service_hours', label:'服務時數',      type:'number'},
+  ],
+  '社區活動': [
+    {key:'citizen_count', label:'參與民眾數', type:'number'},
+    {key:'booth_count',   label:'攤位數',     type:'number'},
+    {key:'partner',       label:'合作單位',   type:'text'},
+  ],
+  'KOL公益活動': [
+    {key:'kol_count',   label:'KOL 人數',        type:'number'},
+    {key:'kol_fans',    label:'KOL 總粉絲數',    type:'number'},
+    {key:'family_count',label:'親友參與人數',    type:'number'},
+    {key:'survey_count',label:'問卷回收份數',    type:'number'},
+    {key:'survey_avg',  label:'問卷平均滿意度',  type:'text'},
+  ],
+  '媒體活動': [
+    {key:'media_houses',   label:'出席媒體家數', type:'number'},
+    {key:'press_count',    label:'發稿則數',     type:'number'},
+    {key:'interview_count',label:'採訪則數',     type:'number'},
+  ],
+  '院內活動': [],
+  '其他': [],
+};
+function _ensureTemplate(type){
+  if(!store.reportTemplates) store.reportTemplates = {};
+  if(!store.reportTemplates[type]) store.reportTemplates[type] = JSON.parse(JSON.stringify(BUILTIN_TEMPLATES[type]||[]));
+  return store.reportTemplates[type];
+}
+function getTemplateFields(type){
+  if(store.reportTemplates && store.reportTemplates[type]) return store.reportTemplates[type];
+  return BUILTIN_TEMPLATES[type] || [];
+}
+function renderCustomFields(containerId, type, values){
+  const c = document.getElementById(containerId);
+  if(!c) return;
+  const fields = getTemplateFields(type);
+  values = values || {};
+  if(!fields.length){
+    c.innerHTML = '<p style="font-size:12px;color:var(--text-sub);margin:0;">此類型尚無專屬欄位，可按右上「⚙ 管理欄位」新增（例如：篩檢人次、KOL人數…）。</p>';
+    return;
+  }
+  c.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">' + fields.map(f=>{
+    const v = values[f.key]!=null ? String(values[f.key]) : '';
+    const inp = f.type==='textarea'
+      ? `<textarea id="${containerId}-${f.key}" rows="2" style="width:100%;min-width:0;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;">${_chEsc(v)}</textarea>`
+      : `<input id="${containerId}-${f.key}" type="${f.type==='number'?'number':'text'}" value="${_chEsc(v)}" placeholder="${f.type==='number'?'0':''}" style="width:100%;min-width:0;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;">`;
+    return `<div class="form-group" style="margin:0;"><label style="font-size:12px;font-weight:600;color:var(--text-sub);">${f.label}</label>${inp}</div>`;
+  }).join('') + '</div>';
+}
+function collectCustomFields(containerId, type){
+  const fields = getTemplateFields(type);
+  const out = {};
+  fields.forEach(f=>{
+    const el = document.getElementById(`${containerId}-${f.key}`);
+    if(el){ const v = (el.value||'').trim(); if(v!=='') out[f.key] = (f.type==='number') ? (+v||0) : v; }
+  });
+  return out;
+}
+function refreshCustomFieldsUI(prefix, type, values){
+  type = type || (document.getElementById(prefix+'-type') ? document.getElementById(prefix+'-type').value : '');
+  renderCustomFields(prefix+'-custom-fields', type, values);
+  const lab = document.getElementById(prefix+'-cf-typelabel');
+  if(lab) lab.textContent = '（'+type+'）';
+}
+function onEventTypeChange(prefix){ refreshCustomFieldsUI(prefix); }
+
+// 欄位管理 modal（新增 / 刪除此類型的專屬欄位）
+function openFieldManager(prefix){
+  const type = document.getElementById(prefix+'-type').value;
+  document.getElementById('fmPrefix').value = prefix;
+  document.getElementById('fmType').value = type;
+  document.getElementById('fmTitle').textContent = `管理「${type}」的專屬欄位`;
+  renderFieldManagerList();
+  document.getElementById('fm-new-label').value = '';
+  document.getElementById('fm-new-type').value = 'number';
+  openModal('fieldManagerModal');
+}
+function renderFieldManagerList(){
+  const type = document.getElementById('fmType').value;
+  const fields = getTemplateFields(type);
+  const box = document.getElementById('fmList');
+  if(!fields.length){ box.innerHTML = '<p style="font-size:13px;color:var(--text-sub);padding:8px 0;">尚無欄位，請於下方新增。</p>'; return; }
+  box.innerHTML = fields.map((f,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">
+      <span style="flex:1;font-size:13px;font-weight:600;">${f.label}</span>
+      <span class="badge" style="background:#EEF2F0;color:#5A7A6A;font-size:11px;">${f.type==='number'?'數字':f.type==='textarea'?'多行文字':'文字'}</span>
+      <button type="button" onclick="deleteTemplateField(${i})" title="刪除" style="background:#FEE2E2;color:#C0313D;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-weight:700;">×</button>
+    </div>`).join('');
+}
+function addTemplateField(){
+  if(!requireEdit()) return;
+  const type = document.getElementById('fmType').value;
+  const label = document.getElementById('fm-new-label').value.trim();
+  const ftype = document.getElementById('fm-new-type').value;
+  if(!label){ showToast('請輸入欄位名稱'); return; }
+  const fields = _ensureTemplate(type);
+  const key = 'f' + (Date.now().toString(36)) + Math.floor(Math.random()*1000);
+  fields.push({ key, label, type: ftype });
+  saveStore();
+  document.getElementById('fm-new-label').value = '';
+  renderFieldManagerList();
+  const prefix = document.getElementById('fmPrefix').value;
+  refreshCustomFieldsUI(prefix, type, collectCustomFields(prefix+'-custom-fields', type));
+  showToast('已新增欄位');
+}
+function deleteTemplateField(idx){
+  if(!requireEdit()) return;
+  const type = document.getElementById('fmType').value;
+  const fields = _ensureTemplate(type);
+  fields.splice(idx,1);
+  saveStore();
+  renderFieldManagerList();
+  const prefix = document.getElementById('fmPrefix').value;
+  refreshCustomFieldsUI(prefix, type, collectCustomFields(prefix+'-custom-fields', type));
+  showToast('已刪除欄位');
+}
+
 function addEvent() {
   if (!requireEdit()) return;
   const name = document.getElementById('ev-name').value.trim();
@@ -4337,14 +4589,20 @@ function addEvent() {
   const tagsRaw = document.getElementById('ev-tags')?.value || '';
   const tags = tagsRaw.split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
   if (tags.length && typeof ensureTagsExist === 'function') ensureTagsExist(tags);
+  const channels = collectChannels('ev-channels');
+  const reachField = +document.getElementById('ev-reach').value || 0;
+  const evType = document.getElementById('ev-type').value;
   store.events.push({
     date, name,
-    type:     document.getElementById('ev-type').value,
+    type:     evType,
+    tplType:  evType,
+    custom:   collectCustomFields('ev-custom-fields', evType),
     campus:   document.getElementById('ev-campus').value,
     reg:      +document.getElementById('ev-reg').value      || 0,
     sample:   +document.getElementById('ev-sample').value   || 0,
     attend:   +document.getElementById('ev-attend').value   || 0,
-    reach:    +document.getElementById('ev-reach').value    || 0,
+    channels,
+    reach:    channels.length ? channelsTotal(channels) : reachField,
     sat:      +document.getElementById('ev-sat').value      || 0,
     speaker:  document.getElementById('ev-speaker').value,
     note:     document.getElementById('ev-note').value,
@@ -4368,6 +4626,8 @@ function addEvent() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  renderChannelRows('ev-channels', []);
+  refreshCustomFieldsUI('ev', '', {});
   switchSection('event','list');
 }
 
@@ -4720,6 +4980,8 @@ function openEventModal(idx) {
   document.getElementById('em-observation').value  = e.observation  || '';
   document.getElementById('em-improvement').value  = e.improvement  || '';
   document.getElementById('em-photo-url').value    = e.photo_url    || '';
+  renderChannelRows('em-channels', e.channels);
+  refreshCustomFieldsUI('em', e.type, e.custom);
   updateCrossTagDatalist();
   openModal('eventModal');
 }
@@ -4730,15 +4992,21 @@ function saveEventEdit() {
   const date = document.getElementById('em-date').value;
   if (!name || !date) { showToast('請填寫活動名稱和日期'); return; }
   const idx = +document.getElementById('em-idx').value;
+  const emChannels = collectChannels('em-channels');
+  const emReachField = +document.getElementById('em-reach').value || 0;
+  const emType = document.getElementById('em-type').value;
   store.events[idx] = {
     ...(store.events[idx]||{}),
     date, name,
-    type:     document.getElementById('em-type').value,
+    type:     emType,
+    tplType:  emType,
+    custom:   collectCustomFields('em-custom-fields', emType),
     campus:   document.getElementById('em-campus').value,
     reg:      +document.getElementById('em-reg').value      || 0,
     sample:   +document.getElementById('em-sample').value   || 0,
     attend:   +document.getElementById('em-attend').value   || 0,
-    reach:    +document.getElementById('em-reach').value    || 0,
+    channels: emChannels,
+    reach:    emChannels.length ? channelsTotal(emChannels) : emReachField,
     sat:      +document.getElementById('em-sat').value      || 0,
     speaker:  document.getElementById('em-speaker').value,
     note:     document.getElementById('em-note').value,
@@ -4889,7 +5157,7 @@ function generateEventReport(idx, audience) {
   const isDirector = audience === 'director';
 
   const reportHtml = _buildReportHtml({
-    ev, audienceName, isDirector, posts, media, yts,
+    ev, idx, audience, audienceName, isDirector, posts, media, yts,
     fbTotalReach, fbTotalEngage, mediaCount, ytViews, attendRate
   });
 
@@ -4902,9 +5170,141 @@ function generateEventReport(idx, audience) {
   setTimeout(() => { try { w.document.title = `${ev.name} - ${audienceName}成果報告`; } catch(e){} }, 100);
 }
 
+// ═══════════════════════════════════════════
+//  匯出引擎：真 .docx / .pptx（延遲載入 CDN 函式庫）
+//  由報告彈窗按鈕透過 window.opener 呼叫
+// ═══════════════════════════════════════════
+const _CDN_PPTX = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
+const _CDN_DOCX = 'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js';
+function _loadScript(src){
+  return new Promise((res, rej)=>{
+    if (document.querySelector(`script[data-lib="${src}"]`)) { res(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.dataset.lib = src;
+    s.onload = ()=>res(); s.onerror = ()=>rej(new Error('載入失敗 '+src));
+    document.head.appendChild(s);
+  });
+}
+function _saveBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+}
+function _eventReportModel(ev, audience){
+  const isDirector = audience === 'director';
+  const { posts, media, yts } = _eventRelatedItems(ev);
+  const fbReach  = posts.reduce((s,p)=>s+(p.reach||0),0);
+  const fbEngage = posts.reduce((s,p)=>s+(p.engage||0),0);
+  const ytViews  = yts.reduce((s,y)=>s+(y.views||0),0);
+  const chans    = ev.channels || [];
+  const chReach  = channelsTotal(chans);
+  const attendRate = ev.reg>0 ? Math.round((ev.attend||0)/ev.reg*100) : null;
+  const tplFields = getTemplateFields(ev.tplType || ev.type);
+  const customRows = (tplFields||[]).map(f=>({ label:f.label, val:(ev.custom && ev.custom[f.key]!=null && ev.custom[f.key]!=='') ? ev.custom[f.key] : null })).filter(r=>r.val!=null);
+  const summary = isDirector
+    ? `本院於 ${ev.date} 舉辦「${ev.name}」，活動順利圓滿。報名 ${_fmt(ev.reg)} 人、實際出席 ${_fmt(ev.attend)} 人${attendRate!=null?`（出席率 ${attendRate}%）`:''}，滿意度 ${ev.sat||'—'} / 5。${chans.length?`跨平台曝光觸及 ${_fmt(chReach)} 人次。`:`FB 累計觸及 ${_fmt(fbReach)} 人。`}本次活動有效強化光田綜合醫院的品牌形象與社區連結。`
+    : `${ev.date} 於${ev.campus||'院內'}執行「${ev.name}」（${ev.type||'活動'}）。主講：${ev.speaker||'—'}。報名 ${_fmt(ev.reg)} / 出席 ${_fmt(ev.attend)}${attendRate!=null?` (${attendRate}%)`:''}，滿意度 ${ev.sat||'—'}。${chans.length?`跨平台曝光觸及 ${_fmt(chReach)} 人次（${chans.length} 個管道）；`:''}FB 觸及 ${_fmt(fbReach)} / 互動 ${_fmt(fbEngage)}（${posts.length} 篇）；媒體 ${media.length} 則。`;
+  const kpis = [
+    ['報名 / 出席', `${_fmt(ev.reg)} / ${_fmt(ev.attend)}`],
+    ['滿意度', ev.sat ? `${ev.sat} / 5` : '—'],
+    [chans.length?'跨平台曝光觸及':'FB 觸及', _fmt(chans.length?chReach:fbReach)],
+    ['媒體曝光', `${media.length} 則`],
+  ];
+  const narrative = [];
+  if (ev.purpose) narrative.push(['活動目的 / 緣由', ev.purpose]);
+  if (ev.content) narrative.push(['活動內容摘要', ev.content]);
+  if (!isDirector){
+    if (ev.observation) narrative.push(['現場觀察 / 回饋', ev.observation]);
+    if (ev.improvement) narrative.push(['改善建議 / 後續追蹤', ev.improvement]);
+  }
+  return { ev, isDirector, audienceName:isDirector?'院長版':'主管版', posts, media, yts, fbReach, fbEngage, ytViews, chans, chReach, chEngage:channelsEngage(chans), attendRate, customRows, summary, kpis, narrative };
+}
+
+// ───── 匯出 PPT (.pptx) ─────
+async function exportEventPptx(idx, audience){
+  const ev = store.events[idx]; if(!ev){ showToast('找不到活動'); return; }
+  showToast('PPT 產生中…');
+  try { await _loadScript(_CDN_PPTX); } catch(e){ showToast('PPT 函式庫載入失敗，請確認網路'); return; }
+  try {
+    const m = _eventReportModel(ev, audience);
+    const G='064E2C', L='6EC300', SUB='5A7A6A', MUT='90A89E';
+    const pptx = new PptxGenJS();
+    const head = (s, title)=>{ s.background={color:'FFFFFF'}; s.addText(title,{x:0.6,y:0.35,w:12,h:0.7,fontSize:26,bold:true,color:G}); s.addShape(pptx.ShapeType.rect,{x:0.62,y:1.05,w:1.3,h:0.07,fill:{color:L}}); };
+    const tblOpt = { x:0.6, y:1.45, w:12.1, fontSize:14, color:'1A2820', border:{type:'solid',color:'DDE8E3',pt:1}, align:'left', valign:'middle' };
+    const th = t => ({ text:t, options:{ bold:true, color:G, fill:{color:'ECFDF5'} } });
+    // 封面
+    let s = pptx.addSlide(); s.background={color:'F3F9F6'};
+    s.addText('活動成果報告', {x:0.8,y:2.0,w:11.7,h:0.5,fontSize:18,color:SUB});
+    s.addText(ev.name, {x:0.8,y:2.6,w:11.7,h:1.2,fontSize:40,bold:true,color:G});
+    s.addText(`${ev.date}    ·    ${ev.type||''}    ·    ${ev.campus||''}${ev.speaker?'    ·    '+ev.speaker:''}`, {x:0.8,y:4.0,w:11.7,h:0.5,fontSize:15,color:SUB});
+    s.addText('光田綜合醫院 行銷企劃處  ·  '+m.audienceName, {x:0.8,y:6.7,w:11.7,h:0.4,fontSize:12,color:MUT});
+    // 執行摘要
+    s = pptx.addSlide(); head(s,'執行摘要');
+    s.addShape(pptx.ShapeType.roundRect,{x:0.6,y:1.6,w:12.1,h:4.6,fill:{color:'ECFDF5'},line:{color:'A7F3D0'},rectRadius:0.1});
+    s.addText(m.summary,{x:1.0,y:1.9,w:11.3,h:4.0,fontSize:18,color:'1A2820',lineSpacingMultiple:1.4,valign:'top'});
+    // 核心數據
+    s = pptx.addSlide(); head(s,'核心數據');
+    m.kpis.forEach((k,i)=>{ const x=0.6+(i%2)*6.15, y=1.5+Math.floor(i/2)*2.2; s.addShape(pptx.ShapeType.roundRect,{x,y,w:5.85,h:1.9,fill:{color:'FFFFFF'},line:{color:'DDE8E3'},rectRadius:0.08}); s.addShape(pptx.ShapeType.rect,{x,y,w:0.12,h:1.9,fill:{color:G}}); s.addText(k[0],{x:x+0.35,y:y+0.25,w:5.3,h:0.5,fontSize:14,color:SUB}); s.addText(String(k[1]),{x:x+0.35,y:y+0.8,w:5.3,h:0.9,fontSize:32,bold:true,color:G}); });
+    // 活動專屬數據
+    if (m.customRows.length){ s = pptx.addSlide(); head(s,'活動專屬數據'); const rows=[[th('項目'),th('數值')]].concat(m.customRows.map(r=>[String(r.label), String(typeof r.val==='number'?_fmt(r.val):r.val)])); s.addTable(rows, {...tblOpt, colW:[6.05,6.05]}); }
+    // 社群/曝光來源
+    if (m.chans.length){ s = pptx.addSlide(); head(s,'社群 / 曝光來源'); const rows=[[th('管道'),th('觸及 / 曝光'),th('互動'),th('備註')]].concat(m.chans.map(c=>[c.name||'—', _fmt(c.reach), c.engage?_fmt(c.engage):'—', c.note||''])); rows.push([{text:'合計',options:{bold:true,fill:{color:'F1F8F4'}}},{text:_fmt(m.chReach),options:{bold:true,fill:{color:'F1F8F4'}}},{text:_fmt(m.chEngage),options:{bold:true,fill:{color:'F1F8F4'}}},{text:'',options:{fill:{color:'F1F8F4'}}}]); s.addTable(rows, {...tblOpt, colW:[3.5,3.0,2.4,3.2]}); }
+    // FB 貼文
+    if (m.posts.length){ s = pptx.addSlide(); head(s,'社群擴散成效（前 5 篇）'); const rows=[[th('日期'),th('貼文標題'),th('觸及'),th('互動')]].concat(m.posts.slice(0,5).map(p=>[p.date||'—', (p.title||'(無標題)').slice(0,40), _fmt(p.reach), _fmt(p.engage)])); s.addTable(rows, {...tblOpt, colW:[2.0,6.5,1.8,1.8]}); }
+    // 敘述
+    m.narrative.forEach(([t,b])=>{ s = pptx.addSlide(); head(s,t); s.addText(b||'', {x:0.6,y:1.6,w:12.1,h:5.0,fontSize:18,color:'1A2820',lineSpacingMultiple:1.4,valign:'top'}); });
+    const blob = await pptx.write({ outputType:'blob' });
+    _saveBlob(blob, `${ev.name}-${m.audienceName}成果報告.pptx`);
+    showToast('PPT 已下載');
+  } catch(e){ showToast('PPT 產生失敗：'+e.message); }
+}
+
+// ───── 匯出 Word (.docx) ─────
+async function exportEventDocx(idx, audience){
+  const ev = store.events[idx]; if(!ev){ showToast('找不到活動'); return; }
+  showToast('Word 產生中…');
+  try { await _loadScript(_CDN_DOCX); } catch(e){ showToast('Word 函式庫載入失敗，請確認網路'); return; }
+  try {
+    const D = window.docx, m = _eventReportModel(ev, audience);
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType } = D;
+    const GREEN='064E2C';
+    const h1 = t => new Paragraph({ heading:HeadingLevel.HEADING_1, spacing:{before:200,after:120}, children:[new TextRun({text:t,bold:true,color:GREEN,size:32})] });
+    const h2 = t => new Paragraph({ spacing:{before:200,after:100}, children:[new TextRun({text:t,bold:true,color:GREEN,size:26})] });
+    const p  = t => new Paragraph({ spacing:{after:100}, children:[new TextRun({text:t||'',size:22})] });
+    const cell = (t, opt)=> new TableCell({ width:{size:opt&&opt.w||2500,type:WidthType.DXA}, shading: opt&&opt.head?{fill:'ECFDF5'}:undefined, children:[ new Paragraph({ alignment: opt&&opt.right?AlignmentType.RIGHT:AlignmentType.LEFT, children:[ new TextRun({ text:String(t==null?'':t), bold:!!(opt&&opt.head), size:20 }) ] }) ] });
+    const table = (header, rows, widths)=> new Table({ width:{size:100,type:WidthType.PERCENTAGE}, rows:[
+      new TableRow({ tableHeader:true, children:header.map((t,i)=>cell(t,{head:true,w:widths&&widths[i]})) }),
+      ...rows.map(r=> new TableRow({ children:r.map((c,i)=>cell(c.t!=null?c.t:c, {right:c.right||(widths&&i>0&&typeof (c.t!=null?c.t:c)==='string'&&false), w:widths&&widths[i]})) }) ),
+    ]});
+    const kids = [];
+    kids.push(new Paragraph({ children:[new TextRun({text:`${ev.name} — 活動成果報告`,bold:true,color:GREEN,size:40})] }));
+    kids.push(new Paragraph({ spacing:{after:160}, children:[new TextRun({text:`${m.audienceName}　|　日期：${ev.date}　|　類型：${ev.type||'—'}　|　院區：${ev.campus||'—'}　|　主講：${ev.speaker||'—'}`,size:20,color:'5A7A6A'})] }));
+    kids.push(h1('一、執行摘要')); kids.push(p(m.summary));
+    kids.push(h1('二、核心數據'));
+    kids.push(table(['項目','數值'], m.kpis.map(k=>[k[0],k[1]]), [5000,5000]));
+    if (m.customRows.length){ kids.push(h1('三、活動專屬數據')); kids.push(table(['項目','數值'], m.customRows.map(r=>[r.label, typeof r.val==='number'?_fmt(r.val):r.val]), [5000,5000])); }
+    if (m.chans.length){ kids.push(h1('四、社群 / 曝光來源'));
+      const rows = m.chans.map(c=>[c.name||'—', _fmt(c.reach), c.engage?_fmt(c.engage):'—', c.note||'']);
+      rows.push(['合計', _fmt(m.chReach), _fmt(m.chEngage), '']);
+      kids.push(table(['管道','觸及 / 曝光','互動','備註'], rows, [3000,2200,1800,3000])); }
+    if (m.posts.length){ kids.push(h1('五、社群擴散成效（前 5 篇）'));
+      kids.push(table(['日期','貼文標題','觸及','互動'], m.posts.slice(0,5).map(po=>[po.date||'—',(po.title||'(無標題)'),_fmt(po.reach),_fmt(po.engage)]), [1800,4400,1900,1900])); }
+    if (m.media.length){ kids.push(h1('媒體曝光紀錄'));
+      kids.push(table(['日期','媒體','標題','性質'], m.media.map(md=>[md.date||'—',(md.mediaName||md.name||'—'),(md.title||'—'),(md.nature||'—')]), [1800,2400,4000,1800])); }
+    m.narrative.forEach(([t,b])=>{ kids.push(h2(t)); kids.push(p(b)); });
+    if (ev.photo_url){ kids.push(h2('活動照片')); kids.push(p(ev.photo_url)); }
+    kids.push(new Paragraph({ spacing:{before:300}, children:[new TextRun({text:`光田綜合醫院 行銷企劃處 視覺多媒體設計組 · ${m.audienceName}成果報告`,size:18,color:'90A89E'})] }));
+    const doc = new Document({ sections:[{ children:kids }] });
+    const blob = await Packer.toBlob(doc);
+    _saveBlob(blob, `${ev.name}-${m.audienceName}成果報告.docx`);
+    showToast('Word 已下載');
+  } catch(e){ showToast('Word 產生失敗：'+e.message); }
+}
+
 // 組裝報告 HTML（可編輯、可列印、可匯出）
 function _buildReportHtml(o) {
-  const { ev, audienceName, isDirector, posts, media, yts,
+  const { ev, idx, audience, audienceName, isDirector, posts, media, yts,
           fbTotalReach, fbTotalEngage, mediaCount, ytViews, attendRate } = o;
 
   const dirSummary = `本院於 ${ev.date} 舉辦「${ev.name}」，活動順利圓滿。報名 ${_fmt(ev.reg)} 人、實際出席 ${_fmt(ev.attend)} 人${attendRate!=null?`（出席率 ${attendRate}%）`:''}，滿意度 ${ev.sat || '—'} / 5。透過 FB 貼文累計觸及 ${_fmt(fbTotalReach)} 人、互動 ${_fmt(fbTotalEngage)} 次；媒體曝光 ${mediaCount} 則；YouTube 影片觀看 ${_fmt(ytViews)} 次。本次活動有效強化光田綜合醫院的品牌形象與社區連結。`;
@@ -4924,6 +5324,51 @@ function _buildReportHtml(o) {
     kpis.push({ label: 'FB 互動', value: _fmt(fbTotalEngage), sub: '心情+留言+分享' });
     kpis.push({ label: '預算 / 支出', value: `${_fmt(ev.budget)} / ${_fmt(ev.expense)}`, sub: ev.budget>0&&ev.expense>0?`執行率 ${Math.round(ev.expense/ev.budget*100)}%`:'' });
   }
+
+  // 曝光來源（彈性管道）
+  const chans = ev.channels || [];
+  const chReachR = channelsTotal(chans);
+  if (chans.length) {
+    kpis.splice(2, 0, { label: '跨平台曝光觸及', value: _fmt(chReachR), sub: `${chans.length} 個管道` });
+  }
+  const channelsBlock = chans.length ? `
+    <h2>📣 社群 / 曝光來源</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:#ECFDF5;">
+        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">管道</th>
+        <th style="padding:8px;text-align:right;border:1px solid #A7F3D0;">觸及 / 曝光</th>
+        <th style="padding:8px;text-align:right;border:1px solid #A7F3D0;">互動</th>
+        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">備註</th>
+      </tr></thead>
+      <tbody>
+        ${chans.map(c=>`<tr>
+          <td style="padding:8px;border:1px solid #DDE8E3;">${c.name||'—'}</td>
+          <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(c.reach)}</td>
+          <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${c.engage?_fmt(c.engage):'—'}</td>
+          <td style="padding:8px;border:1px solid #DDE8E3;">${c.note||''}</td>
+        </tr>`).join('')}
+        <tr style="background:#F1F8F4;font-weight:700;">
+          <td style="padding:8px;border:1px solid #DDE8E3;">合計</td>
+          <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(chReachR)}</td>
+          <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(channelsEngage(chans))}</td>
+          <td style="padding:8px;border:1px solid #DDE8E3;"></td>
+        </tr>
+      </tbody>
+    </table>
+  ` : '';
+
+  // 類型專屬數據（自訂欄位）
+  const tplFields = getTemplateFields(ev.tplType || ev.type);
+  const customRows = (tplFields||[]).map(f=>({ label:f.label, val:(ev.custom && ev.custom[f.key]!=null && ev.custom[f.key]!=='') ? ev.custom[f.key] : null })).filter(r=>r.val!=null);
+  const customBlock = customRows.length ? `
+    <h2>🧩 活動專屬數據</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
+      ${customRows.map(r=>`<div style="background:#fff;border:1px solid #DDE8E3;border-left:4px solid #FFB900;border-radius:8px;padding:12px 14px;">
+        <div style="font-size:12px;color:#5A7A6A;margin-bottom:4px;">${r.label}</div>
+        <div style="font-size:18px;font-weight:700;color:#064E2C;">${typeof r.val==='number'?_fmt(r.val):r.val}</div>
+      </div>`).join('')}
+    </div>
+  ` : '';
 
   const kpiHtml = kpis.map(k => `
     <div style="background:#fff;border:1px solid #DDE8E3;border-left:4px solid #064E2C;border-radius:8px;padding:14px 16px;">
@@ -5029,6 +5474,8 @@ function _buildReportHtml(o) {
   .btn-print { background: #064E2C; color: #fff; }
   .btn-print:hover { background: #1a8454; }
   .btn-word  { background: #2B579A; color: #fff; }
+  .btn-pptx  { background: #C04B1E; color: #fff; }
+  .btn-word2 { background: #5A7A6A; color: #fff; }
   .btn-pdf   { background: #C0313D; color: #fff; }
   .btn-copy  { background: #00AAC8; color: #fff; }
   .btn-edit-toggle { background: #FFB900; color: #1A2820; }
@@ -5055,7 +5502,9 @@ function _buildReportHtml(o) {
   <div class="report-toolbar">
     <strong style="color:#064E2C;margin-right:8px;">${audienceName}成果報告</strong>
     <button class="btn-print" onclick="window.print()">🖨️ 列印 / 存 PDF</button>
-    <button class="btn-word" onclick="exportWord()">📄 匯出 Word</button>
+    <button class="btn-word" onclick="exportDocx()">📄 匯出 Word (.docx)</button>
+    <button class="btn-pptx" onclick="exportPptx()">📑 匯出 PPT (.pptx)</button>
+    <button class="btn-word2" onclick="exportWord()">📝 簡易 Word (.doc)</button>
     <button class="btn-copy" onclick="copyAll()">📋 複製全文</button>
     <button class="btn-edit-toggle" onclick="toggleEditAll()">✏️ 切換編輯模式</button>
     <span style="margin-left:auto;font-size:12px;color:#5A7A6A;">提示：點擊文字區塊即可直接修改</span>
@@ -5079,6 +5528,10 @@ function _buildReportHtml(o) {
 
     <h2>二、核心數據</h2>
     <div class="kpi-grid">${kpiHtml}</div>
+
+    ${customBlock}
+
+    ${channelsBlock}
 
     ${narrativeHtml ? `<h2>三、活動敘述</h2>${narrativeHtml}` : ''}
 
@@ -5120,6 +5573,16 @@ function _buildReportHtml(o) {
     a.download = '${ev.name}-${audienceName}成果報告.doc';
     a.click();
     URL.revokeObjectURL(url);
+  }
+  function exportDocx() {
+    if (window.opener && !window.opener.closed && window.opener.exportEventDocx) {
+      window.opener.exportEventDocx(${idx}, '${audience}');
+    } else { alert('請從主系統視窗開啟此報告，才能匯出 .docx（或改用「簡易 Word」）'); }
+  }
+  function exportPptx() {
+    if (window.opener && !window.opener.closed && window.opener.exportEventPptx) {
+      window.opener.exportEventPptx(${idx}, '${audience}');
+    } else { alert('請從主系統視窗開啟此報告，才能匯出 .pptx'); }
   }
 <\/script>
 </body>
@@ -5386,7 +5849,8 @@ function renderCampaignHub() {
     const linkedMedia = activeMedia().filter(m => m.campaign === evName);
     const fbReach    = linkedPosts.reduce((s, p) => s + (p.reach||0), 0);
     const mediaReach = linkedMedia.reduce((s, m) => s + (m.reach||0), 0);
-    const totalReach = fbReach + mediaReach;
+    const chReach    = channelsTotal(ev.channels);
+    const totalReach = chReach || (fbReach + mediaReach);
     const safe = evName.replace(/'/g, "\\'");
     return `
       <div class="campaign-card" onclick="renderCampaignDetail('${safe}')">
@@ -5419,9 +5883,28 @@ function renderCampaignDetail(name) {
   const linkedMedia = activeMedia().filter(m => m.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
   const fbReach    = linkedPosts.reduce((s, p) => s + (p.reach||0), 0);
   const mediaReach = linkedMedia.reduce((s, m) => s + (m.reach||0), 0);
-  const totalReach = fbReach + mediaReach;
+  const chans      = ev.channels || [];
+  const chReach    = channelsTotal(chans);
+  const totalReach = chReach || (fbReach + mediaReach);
   const attendRate = ev.reg > 0 ? ((ev.attend||0) / ev.reg * 100).toFixed(0) + '%' : '—';
   const safe = name.replace(/'/g, "\\'");
+
+  const channelsHtml = chans.length
+    ? `<div class="table-card" style="margin-bottom:16px;">
+        <div class="table-header"><h3>社群／曝光來源（${chans.length} 個管道）</h3></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>管道</th><th>觸及 / 曝光</th><th>互動</th><th>備註</th></tr></thead>
+          <tbody>${chans.map(c => `<tr>
+            <td style="font-weight:600">${c.name||'—'}</td>
+            <td class="text-mono highlight">${(c.reach||0).toLocaleString()}</td>
+            <td class="text-mono">${c.engage?c.engage.toLocaleString():'—'}</td>
+            <td style="font-size:12.5px;color:var(--text-sub)">${c.note||'—'}</td>
+          </tr>`).join('')}
+          <tr style="background:#F1F8F4;font-weight:700"><td>合計</td><td class="text-mono highlight">${chReach.toLocaleString()}</td><td class="text-mono">${channelsEngage(chans).toLocaleString()}</td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>`
+    : '';
 
   const PHASES = ['前期預告','倒數預熱','活動當日','事後懶人包'];
   const phaseFlowHtml = linkedPosts.length ? (() => {
@@ -5476,10 +5959,11 @@ function renderCampaignDetail(name) {
     <div class="ev-kpi-grid" style="margin-bottom:20px;">
       <div class="kpi-card"><div class="kpi-label">FB 社群觸及</div><div class="kpi-value" style="font-size:26px;">${fbReach.toLocaleString()}</div><div class="kpi-change" style="color:var(--text-muted)">${linkedPosts.length} 篇貼文</div></div>
       <div class="kpi-card"><div class="kpi-label">媒體新聞觸及</div><div class="kpi-value" style="font-size:26px;">${mediaReach.toLocaleString()}</div><div class="kpi-change" style="color:var(--text-muted)">${linkedMedia.length} 篇報導</div></div>
-      <div class="kpi-card teal2"><div class="kpi-label">跨平台合計觸及</div><div class="kpi-value" style="font-size:26px;color:var(--brand)">${totalReach.toLocaleString()}</div><div class="kpi-change" style="color:var(--text-muted)">社群 + 媒體</div></div>
+      <div class="kpi-card teal2"><div class="kpi-label">跨平台合計觸及</div><div class="kpi-value" style="font-size:26px;color:var(--brand)">${totalReach.toLocaleString()}</div><div class="kpi-change" style="color:var(--text-muted)">${chans.length ? chans.length+' 個曝光管道' : '社群 + 媒體'}</div></div>
       <div class="kpi-card"><div class="kpi-label">實際出席人數</div><div class="kpi-value" style="font-size:26px;">${ev.attend||0}</div><div class="kpi-change" style="color:var(--text-muted)">出席率 ${attendRate}</div></div>
     </div>
 
+    ${channelsHtml}
     ${phaseFlowHtml}
     <div class="table-card" style="margin-bottom:16px;">
       <div class="table-header"><h3>FB 社群貼文（${linkedPosts.length} 篇）</h3></div>
@@ -5499,7 +5983,9 @@ function openCampaignReportModal(name) {
   const linkedMedia = activeMedia().filter(m => m.campaign === name).sort((a, b) => new Date(a.date) - new Date(b.date));
   const fbReach    = linkedPosts.reduce((s, p) => s + (p.reach||0), 0);
   const mediaReach = linkedMedia.reduce((s, m) => s + (m.reach||0), 0);
-  const totalReach = fbReach + mediaReach;
+  const chans      = ev.channels || [];
+  const chReach    = channelsTotal(chans);
+  const totalReach = chReach || (fbReach + mediaReach);
   const attendRate = ev.reg > 0 ? ((ev.attend||0) / ev.reg * 100).toFixed(0) + '%' : '—';
   const reelsPosts = linkedPosts.filter(p => p.img_type === 'Reels');
   const reelsReach = reelsPosts.reduce((s, p) => s + (p.reach||0), 0);
@@ -5512,6 +5998,10 @@ function openCampaignReportModal(name) {
     `🏥 類型：${ev.type}　院區：${ev.campus}`,
     ev.speaker ? `👤 主講：${ev.speaker}` : null,
     ``,
+    chans.length ? `📣 社群／曝光來源` : null,
+    ...chans.map(c => `    • ${c.name}：觸及 ${(c.reach||0).toLocaleString()}${c.engage?`、互動 ${c.engage.toLocaleString()}`:''}${c.note?`（${c.note}）`:''}`),
+    chans.length ? `  曝光來源合計觸及：${chReach.toLocaleString()} 人次` : null,
+    chans.length ? `` : null,
     `📱 社群媒體成效`,
     `  FB 貼文：${linkedPosts.length} 篇`,
     ...linkedPosts.map(p => `    • ${p.date}  ${p.title.slice(0,30)}  [${p.img_type||p.type}]  觸及 ${(p.reach||0).toLocaleString()}`),
