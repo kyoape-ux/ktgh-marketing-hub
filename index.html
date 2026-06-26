@@ -5192,17 +5192,21 @@ function _saveBlob(blob, filename){
   a.href = url; a.download = filename; document.body.appendChild(a); a.click();
   setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
 }
-function _eventReportModel(ev, audience){
+function _eventReportModel(ev, audience, overrides){
+  overrides = overrides || {};
   const isDirector = audience === 'director';
   const { posts, media, yts } = _eventRelatedItems(ev);
+  const kols = (store.kols||[]).filter(k => !k.deleted_at && (k.campaign||'').trim() === (ev.name||'').trim());
   const fbReach  = posts.reduce((s,p)=>s+(p.reach||0),0);
   const fbEngage = posts.reduce((s,p)=>s+(p.engage||0),0);
   const ytViews  = yts.reduce((s,y)=>s+(y.views||0),0);
   const chans    = ev.channels || [];
   const chReach  = channelsTotal(chans);
+  const kolFans  = kols.reduce((s,k)=>s+(k.followers||0),0);
   const attendRate = ev.reg>0 ? Math.round((ev.attend||0)/ev.reg*100) : null;
   const tplFields = getTemplateFields(ev.tplType || ev.type);
-  const customRows = (tplFields||[]).map(f=>({ label:f.label, val:(ev.custom && ev.custom[f.key]!=null && ev.custom[f.key]!=='') ? ev.custom[f.key] : null })).filter(r=>r.val!=null);
+  const cv = k => (ev.custom && ev.custom[k]!=null && ev.custom[k]!=='') ? ev.custom[k] : null;
+  const customRows = (tplFields||[]).map(f=>({ label:f.label, val:cv(f.key) })).filter(r=>r.val!=null);
   const summary = isDirector
     ? `本院於 ${ev.date} 舉辦「${ev.name}」，活動順利圓滿。報名 ${_fmt(ev.reg)} 人、實際出席 ${_fmt(ev.attend)} 人${attendRate!=null?`（出席率 ${attendRate}%）`:''}，滿意度 ${ev.sat||'—'} / 5。${chans.length?`跨平台曝光觸及 ${_fmt(chReach)} 人次。`:`FB 累計觸及 ${_fmt(fbReach)} 人。`}本次活動有效強化光田綜合醫院的品牌形象與社區連結。`
     : `${ev.date} 於${ev.campus||'院內'}執行「${ev.name}」（${ev.type||'活動'}）。主講：${ev.speaker||'—'}。報名 ${_fmt(ev.reg)} / 出席 ${_fmt(ev.attend)}${attendRate!=null?` (${attendRate}%)`:''}，滿意度 ${ev.sat||'—'}。${chans.length?`跨平台曝光觸及 ${_fmt(chReach)} 人次（${chans.length} 個管道）；`:''}FB 觸及 ${_fmt(fbReach)} / 互動 ${_fmt(fbEngage)}（${posts.length} 篇）；媒體 ${media.length} 則。`;
@@ -5212,92 +5216,148 @@ function _eventReportModel(ev, audience){
     [chans.length?'跨平台曝光觸及':'FB 觸及', _fmt(chans.length?chReach:fbReach)],
     ['媒體曝光', `${media.length} 則`],
   ];
-  const narrative = [];
-  if (ev.purpose) narrative.push(['活動目的 / 緣由', ev.purpose]);
-  if (ev.content) narrative.push(['活動內容摘要', ev.content]);
-  if (!isDirector){
-    if (ev.observation) narrative.push(['現場觀察 / 回饋', ev.observation]);
-    if (ev.improvement) narrative.push(['改善建議 / 後續追蹤', ev.improvement]);
-  }
-  return { ev, isDirector, audienceName:isDirector?'院長版':'主管版', posts, media, yts, fbReach, fbEngage, ytViews, chans, chReach, chEngage:channelsEngage(chans), attendRate, customRows, summary, kpis, narrative };
+  // ── 各段落敘述：預設值（系統有就帶、沒有留空可在報告編輯）；overrides 為報告上編輯後的覆寫 ──
+  const surveyN = cv('survey_count');
+  const N = (k, def) => (overrides[k]!=null && String(overrides[k]).trim()!=='') ? overrides[k] : def;
+  const narr = {
+    author:   N('author', '光田綜合醫院 行銷企劃處'),
+    period:   N('period', ev.date || ''),
+    overview: N('overview', [ev.purpose, ev.content].filter(Boolean).join('\n')),
+    promoCycle:    N('promoCycle', ''),
+    promoForm:     N('promoForm', ''),
+    coreMsg:       N('coreMsg', ''),
+    promoPlatform: N('promoPlatform', chans.length ? [...new Set(chans.map(c=>c.name).filter(Boolean))].join('、') : ''),
+    chAnalysis: N('chAnalysis', ''),
+    chSuggest:  N('chSuggest', ''),
+    fbAnalysis: N('fbAnalysis', ev.observation || ''),
+    fbSuggest:  N('fbSuggest', ''),
+    kolAnalysis:N('kolAnalysis', ''),
+    kolSuggest: N('kolSuggest', ''),
+    survey:   N('survey', (surveyN || ev.sat) ? `共回收 ${_fmt(surveyN)} 份問卷，整體滿意度平均 ${ev.sat||'—'} 分。` : ''),
+    conclusion: N('conclusion', summary),
+    future:   N('future', ev.improvement || ''),
+  };
+  return { ev, isDirector, audienceName:isDirector?'院長版':'主管版', posts, media, yts, kols, fbReach, fbEngage, ytViews, kolFans, chans, chReach, chEngage:channelsEngage(chans), attendRate, customRows, summary, kpis, narr };
 }
 
-// ───── 匯出 PPT (.pptx) ─────
-async function exportEventPptx(idx, audience){
+// ───── 匯出 PPT (.pptx) ── 架構：壹~陸 ─────
+async function exportEventPptx(idx, audience, overrides){
   const ev = store.events[idx]; if(!ev){ showToast('找不到活動'); return; }
   showToast('PPT 產生中…');
   try { await _loadScript(_CDN_PPTX); } catch(e){ showToast('PPT 函式庫載入失敗，請確認網路'); return; }
   try {
-    const m = _eventReportModel(ev, audience);
+    const m = _eventReportModel(ev, audience, overrides);
+    const n = m.narr;
     const G='064E2C', L='6EC300', SUB='5A7A6A', MUT='90A89E';
     const pptx = new PptxGenJS();
-    const head = (s, title)=>{ s.background={color:'FFFFFF'}; s.addText(title,{x:0.6,y:0.35,w:12,h:0.7,fontSize:26,bold:true,color:G}); s.addShape(pptx.ShapeType.rect,{x:0.62,y:1.05,w:1.3,h:0.07,fill:{color:L}}); };
-    const tblOpt = { x:0.6, y:1.45, w:12.1, fontSize:14, color:'1A2820', border:{type:'solid',color:'DDE8E3',pt:1}, align:'left', valign:'middle' };
+    const head = (s, title)=>{ s.background={color:'FFFFFF'}; s.addText(title,{x:0.6,y:0.35,w:10.8,h:0.7,fontSize:24,bold:true,color:G}); s.addShape(pptx.ShapeType.rect,{x:0.62,y:1.02,w:1.3,h:0.07,fill:{color:L}}); try{s.addImage({data:KTGH_LOGO,x:10.95,y:0.4,w:1.75,h:0.30});}catch(e){} };
+    const tblOpt = { x:0.6, y:1.4, w:12.1, fontSize:13, color:'1A2820', border:{type:'solid',color:'DDE8E3',pt:1}, valign:'middle' };
     const th = t => ({ text:t, options:{ bold:true, color:G, fill:{color:'ECFDF5'} } });
-    // 封面
-    let s = pptx.addSlide(); s.background={color:'F3F9F6'};
+    const bold = (t,c)=>({text:t,options:{bold:true,fill:{color:c||'F1F8F4'}}});
+    const note = (s, a, sug, y)=>{ const t=[a?('📌 分析：'+a):'', sug?('📌 建議：'+sug):''].filter(Boolean).join('\n'); if(t) s.addText(t,{x:0.6,y:y||5.0,w:12.1,h:1.9,fontSize:12,color:SUB,lineSpacingMultiple:1.25,valign:'top'}); };
+    const para = (s,txt,y)=> s.addText(txt||'—',{x:0.6,y:y||1.4,w:12.1,h:5.4,fontSize:15,color:'1A2820',lineSpacingMultiple:1.35,valign:'top'});
+    let s;
+    const _SX=['壹','貳','參','肆','伍','陸','柒','捌']; let _sx=1; const SEC=()=>_SX[_sx++]; const hasKol=m.kols.length>0;
+    // 壹 封面
+    s = pptx.addSlide(); s.background={color:'F3F9F6'};
     try { s.addImage({ data:KTGH_LOGO, x:9.4, y:0.5, w:3.3, h:0.57 }); } catch(e){}
     s.addText('活動成果報告', {x:0.8,y:2.0,w:11.7,h:0.5,fontSize:18,color:SUB});
-    s.addText(ev.name, {x:0.8,y:2.6,w:11.7,h:1.2,fontSize:40,bold:true,color:G});
-    s.addText(`${ev.date}    ·    ${ev.type||''}    ·    ${ev.campus||''}${ev.speaker?'    ·    '+ev.speaker:''}`, {x:0.8,y:4.0,w:11.7,h:0.5,fontSize:15,color:SUB});
-    s.addText('光田綜合醫院 行銷企劃處', {x:0.8,y:6.7,w:11.7,h:0.4,fontSize:12,color:MUT});
-    // 執行摘要
-    s = pptx.addSlide(); head(s,'執行摘要');
-    s.addShape(pptx.ShapeType.roundRect,{x:0.6,y:1.6,w:12.1,h:4.6,fill:{color:'ECFDF5'},line:{color:'A7F3D0'},rectRadius:0.1});
-    s.addText(m.summary,{x:1.0,y:1.9,w:11.3,h:4.0,fontSize:18,color:'1A2820',lineSpacingMultiple:1.4,valign:'top'});
-    // 核心數據
-    s = pptx.addSlide(); head(s,'核心數據');
-    m.kpis.forEach((k,i)=>{ const x=0.6+(i%2)*6.15, y=1.5+Math.floor(i/2)*2.2; s.addShape(pptx.ShapeType.roundRect,{x,y,w:5.85,h:1.9,fill:{color:'FFFFFF'},line:{color:'DDE8E3'},rectRadius:0.08}); s.addShape(pptx.ShapeType.rect,{x,y,w:0.12,h:1.9,fill:{color:G}}); s.addText(k[0],{x:x+0.35,y:y+0.25,w:5.3,h:0.5,fontSize:14,color:SUB}); s.addText(String(k[1]),{x:x+0.35,y:y+0.8,w:5.3,h:0.9,fontSize:32,bold:true,color:G}); });
-    // 活動專屬數據
-    if (m.customRows.length){ s = pptx.addSlide(); head(s,'活動專屬數據'); const rows=[[th('項目'),th('數值')]].concat(m.customRows.map(r=>[String(r.label), String(typeof r.val==='number'?_fmt(r.val):r.val)])); s.addTable(rows, {...tblOpt, colW:[6.05,6.05]}); }
-    // 社群/曝光來源
-    if (m.chans.length){ s = pptx.addSlide(); head(s,'社群 / 曝光來源'); const rows=[[th('管道'),th('觸及 / 曝光'),th('互動'),th('備註')]].concat(m.chans.map(c=>[c.name||'—', _fmt(c.reach), c.engage?_fmt(c.engage):'—', c.note||''])); rows.push([{text:'合計',options:{bold:true,fill:{color:'F1F8F4'}}},{text:_fmt(m.chReach),options:{bold:true,fill:{color:'F1F8F4'}}},{text:_fmt(m.chEngage),options:{bold:true,fill:{color:'F1F8F4'}}},{text:'',options:{fill:{color:'F1F8F4'}}}]); s.addTable(rows, {...tblOpt, colW:[3.5,3.0,2.4,3.2]}); }
-    // FB 貼文
-    if (m.posts.length){ s = pptx.addSlide(); head(s,'社群擴散成效（前 5 篇）'); const rows=[[th('日期'),th('貼文標題'),th('觸及'),th('互動')]].concat(m.posts.slice(0,5).map(p=>[p.date||'—', (p.title||'(無標題)').slice(0,40), _fmt(p.reach), _fmt(p.engage)])); s.addTable(rows, {...tblOpt, colW:[2.0,6.5,1.8,1.8]}); }
-    // 敘述
-    m.narrative.forEach(([t,b])=>{ s = pptx.addSlide(); head(s,t); s.addText(b||'', {x:0.6,y:1.6,w:12.1,h:5.0,fontSize:18,color:'1A2820',lineSpacingMultiple:1.4,valign:'top'}); });
+    s.addText(ev.name, {x:0.8,y:2.6,w:11.7,h:1.2,fontSize:38,bold:true,color:G});
+    s.addText(`活動期間：${n.period||ev.date}    ·    ${ev.type||''}    ·    ${ev.campus||''}`, {x:0.8,y:4.0,w:11.7,h:0.5,fontSize:15,color:SUB});
+    s.addText(`報告撰寫：${n.author}`, {x:0.8,y:6.7,w:11.7,h:0.4,fontSize:12,color:MUT});
+    // 貳 活動概述
+    s = pptx.addSlide(); head(s,SEC()+'、活動概述'); para(s, n.overview);
+    // 參 參與KOL受眾資料（僅有 KOL 時）
+    if (hasKol){ s = pptx.addSlide(); head(s,SEC()+'、參與KOL受眾資料');
+      const rows=[[th('姓名／藝名'),th('身分類別'),th('平台'),th('粉絲人數')]].concat(m.kols.map(k=>[k.name||'—',k.content_type||'—',k.platform||'—',_fmt(k.followers)]));
+      rows.push([bold('合計（KOL）'),bold(''),bold(m.kols.length+' 位'),bold(_fmt(m.kolFans))]);
+      s.addTable(rows,{...tblOpt,colW:[3.5,3.5,2.5,2.6]}); }
+    // 肆 社群宣傳與行銷成效（動態主編號 socN，子編號 SSUB）
+    const socN=SEC(); let _su=0; const SSUB=()=>socN+'-'+(++_su);
+    s = pptx.addSlide(); head(s,socN+'、社群宣傳與行銷成效');
+    s.addText(`宣傳週期：${n.promoCycle||'—'}\n宣傳形式：${n.promoForm||'—'}\n核心訊息：${n.coreMsg||'—'}\n宣傳平台：${n.promoPlatform||'—'}`,{x:0.6,y:1.4,w:12.1,h:4,fontSize:16,color:'1A2820',lineSpacingMultiple:1.6,valign:'top'});
+    if (m.chans.length){ s = pptx.addSlide(); head(s,SSUB()+'　社群／曝光來源彙總');
+      const rows=[[th('管道'),th('觸及/曝光'),th('互動'),th('備註')]].concat(m.chans.map(c=>[c.name||'—',_fmt(c.reach),c.engage?_fmt(c.engage):'—',c.note||'']));
+      rows.push([bold('合計'),bold(_fmt(m.chReach)),bold(_fmt(m.chEngage)),bold('')]);
+      s.addTable(rows,{...tblOpt,colW:[3.5,3.0,2.4,3.2]}); note(s, n.chAnalysis, n.chSuggest); }
+    if (m.posts.length){ s = pptx.addSlide(); head(s,SSUB()+'　FB 官方貼文觸及與互動');
+      const rows=[[th('日期'),th('發文主題'),th('總觸及數'),th('互動')]].concat(m.posts.slice(0,8).map(p=>[p.date||'—',(p.title||'(無標題)').slice(0,30),_fmt(p.reach),_fmt(p.engage)]));
+      rows.push([bold('總計'),bold(''),bold(_fmt(m.fbReach)),bold(_fmt(m.fbEngage))]);
+      s.addTable(rows,{...tblOpt,colW:[1.8,6.5,1.9,1.9]}); note(s, n.fbAnalysis, n.fbSuggest); }
+    if (hasKol){ s = pptx.addSlide(); head(s,SSUB()+'　KOL 社群對外互動');
+      const rows=[[th('日期'),th('KOL / 主題'),th('觀看 / 觸及'),th('互動')]].concat(m.kols.map(k=>[k.date||'—',k.name||'—',_fmt(k.reach),_fmt(k.engage)]));
+      s.addTable(rows,{...tblOpt,colW:[2.0,5.5,2.3,2.3]}); note(s, n.kolAnalysis, n.kolSuggest, 5.2); }
+    if (m.media.length){ s = pptx.addSlide(); head(s,SSUB()+'　媒體新聞曝光');
+      const rows=[[th('日期'),th('媒體'),th('標題'),th('性質')]].concat(m.media.map(md=>[md.date||'—',(md.mediaName||md.name||'—'),(md.title||'—'),(md.nature||'—')]));
+      s.addTable(rows,{...tblOpt,colW:[1.8,2.6,5.3,2.4]}); }
+    // 伍 活動照片
+    s = pptx.addSlide(); head(s,SEC()+'、活動照片記錄'); para(s, ev.photo_url ? ('照片連結：'+ev.photo_url) : '（請於此投影片插入活動照片）');
+    // 陸 成效與總結建議
+    s = pptx.addSlide(); head(s,SEC()+'、活動成效與總結建議');
+    s.addText(`一、問卷回饋摘要\n${n.survey||'—'}\n\n二、活動成效總結\n${n.conclusion||'—'}\n\n三、未來建議方向\n${n.future||'—'}`,{x:0.6,y:1.4,w:12.1,h:5.5,fontSize:14,color:'1A2820',lineSpacingMultiple:1.3,valign:'top'});
     const blob = await pptx.write({ outputType:'blob' });
     _saveBlob(blob, `${ev.name}-活動成果報告.pptx`);
     showToast('PPT 已下載');
   } catch(e){ showToast('PPT 產生失敗：'+e.message); }
 }
 
-// ───── 匯出 Word (.docx) ─────
-async function exportEventDocx(idx, audience){
+// ───── 匯出 Word (.docx) ── 架構：壹~陸 ─────
+async function exportEventDocx(idx, audience, overrides){
   const ev = store.events[idx]; if(!ev){ showToast('找不到活動'); return; }
   showToast('Word 產生中…');
   try { await _loadScript(_CDN_DOCX); } catch(e){ showToast('Word 函式庫載入失敗，請確認網路'); return; }
   try {
-    const D = window.docx, m = _eventReportModel(ev, audience);
+    const D = window.docx, m = _eventReportModel(ev, audience, overrides), n = m.narr;
     const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, ImageRun } = D;
     const GREEN='064E2C';
     const _b64u8 = b64 => { const s=atob(b64), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u; };
-    const h1 = t => new Paragraph({ heading:HeadingLevel.HEADING_1, spacing:{before:200,after:120}, children:[new TextRun({text:t,bold:true,color:GREEN,size:32})] });
-    const h2 = t => new Paragraph({ spacing:{before:200,after:100}, children:[new TextRun({text:t,bold:true,color:GREEN,size:26})] });
-    const p  = t => new Paragraph({ spacing:{after:100}, children:[new TextRun({text:t||'',size:22})] });
-    const cell = (t, opt)=> new TableCell({ width:{size:opt&&opt.w||2500,type:WidthType.DXA}, shading: opt&&opt.head?{fill:'ECFDF5'}:undefined, children:[ new Paragraph({ alignment: opt&&opt.right?AlignmentType.RIGHT:AlignmentType.LEFT, children:[ new TextRun({ text:String(t==null?'':t), bold:!!(opt&&opt.head), size:20 }) ] }) ] });
-    const table = (header, rows, widths)=> new Table({ width:{size:100,type:WidthType.PERCENTAGE}, rows:[
+    const h1 = t => new Paragraph({ spacing:{before:240,after:120}, border:{left:{style:'single',size:18,color:'6EC300',space:8}}, children:[new TextRun({text:t,bold:true,color:GREEN,size:30})] });
+    const h2 = t => new Paragraph({ spacing:{before:160,after:80}, children:[new TextRun({text:t,bold:true,color:GREEN,size:24})] });
+    const p  = t => new Paragraph({ spacing:{after:100}, children: String(t==null?'':t).split('\n').map((line,i)=> new TextRun({ text:line, size:22, break: i>0?1:0 })) });
+    const pNote = (label, t) => t ? new Paragraph({ spacing:{after:80}, children:[ new TextRun({text:'📌 '+label+'：',bold:true,size:21,color:GREEN}), ...String(t).split('\n').map((line,i)=>new TextRun({text:line,size:21,break:i>0?1:0})) ] }) : null;
+    const cell = (t, opt)=> new TableCell({ width:{size:opt&&opt.w||2500,type:WidthType.DXA}, shading: opt&&opt.head?{fill:'ECFDF5'}:(opt&&opt.tot?{fill:'F1F8F4'}:undefined), children:[ new Paragraph({ alignment: opt&&opt.right?AlignmentType.RIGHT:AlignmentType.LEFT, children:[ new TextRun({ text:String(t==null?'':t), bold:!!(opt&&(opt.head||opt.tot)), size:20 }) ] }) ] });
+    const table = (header, rows, widths, totRow)=> new Table({ width:{size:100,type:WidthType.PERCENTAGE}, rows:[
       new TableRow({ tableHeader:true, children:header.map((t,i)=>cell(t,{head:true,w:widths&&widths[i]})) }),
-      ...rows.map(r=> new TableRow({ children:r.map((c,i)=>cell(c.t!=null?c.t:c, {right:c.right||(widths&&i>0&&typeof (c.t!=null?c.t:c)==='string'&&false), w:widths&&widths[i]})) }) ),
+      ...rows.map((r,ri)=> new TableRow({ children:r.map((c,i)=>cell(c, {w:widths&&widths[i], tot: totRow && ri===rows.length-1})) }) ),
     ]});
     const kids = [];
+    // 壹 基本資訊
     try { kids.push(new Paragraph({ alignment:AlignmentType.RIGHT, children:[ new ImageRun({ data:_b64u8(KTGH_LOGO.split(',')[1]), transformation:{width:200,height:34} }) ] })); } catch(e){}
     kids.push(new Paragraph({ children:[new TextRun({text:`${ev.name} — 活動成果報告`,bold:true,color:GREEN,size:40})] }));
-    kids.push(new Paragraph({ spacing:{after:160}, children:[new TextRun({text:`光田綜合醫院 行銷企劃處　|　日期：${ev.date}　|　類型：${ev.type||'—'}　|　院區：${ev.campus||'—'}　|　主講：${ev.speaker||'—'}`,size:20,color:'5A7A6A'})] }));
-    kids.push(h1('一、執行摘要')); kids.push(p(m.summary));
-    kids.push(h1('二、核心數據'));
-    kids.push(table(['項目','數值'], m.kpis.map(k=>[k[0],k[1]]), [5000,5000]));
-    if (m.customRows.length){ kids.push(h1('三、活動專屬數據')); kids.push(table(['項目','數值'], m.customRows.map(r=>[r.label, typeof r.val==='number'?_fmt(r.val):r.val]), [5000,5000])); }
-    if (m.chans.length){ kids.push(h1('四、社群 / 曝光來源'));
-      const rows = m.chans.map(c=>[c.name||'—', _fmt(c.reach), c.engage?_fmt(c.engage):'—', c.note||'']);
-      rows.push(['合計', _fmt(m.chReach), _fmt(m.chEngage), '']);
-      kids.push(table(['管道','觸及 / 曝光','互動','備註'], rows, [3000,2200,1800,3000])); }
-    if (m.posts.length){ kids.push(h1('五、社群擴散成效（前 5 篇）'));
-      kids.push(table(['日期','貼文標題','觸及','互動'], m.posts.slice(0,5).map(po=>[po.date||'—',(po.title||'(無標題)'),_fmt(po.reach),_fmt(po.engage)]), [1800,4400,1900,1900])); }
-    if (m.media.length){ kids.push(h1('媒體曝光紀錄'));
-      kids.push(table(['日期','媒體','標題','性質'], m.media.map(md=>[md.date||'—',(md.mediaName||md.name||'—'),(md.title||'—'),(md.nature||'—')]), [1800,2400,4000,1800])); }
-    m.narrative.forEach(([t,b])=>{ kids.push(h2(t)); kids.push(p(b)); });
-    if (ev.photo_url){ kids.push(h2('活動照片')); kids.push(p(ev.photo_url)); }
+    kids.push(new Paragraph({ spacing:{after:60}, children:[new TextRun({text:`活動期間：${n.period||ev.date}　|　類型：${ev.type||'—'}　|　院區：${ev.campus||'—'}　|　主講：${ev.speaker||'—'}`,size:20,color:'5A7A6A'})] }));
+    kids.push(new Paragraph({ spacing:{after:160}, children:[new TextRun({text:`提交日期：${new Date().toLocaleDateString('zh-TW')}　|　報告撰寫：${n.author}`,size:20,color:'5A7A6A'})] }));
+    // 段落動態編號（壹為封面；有 KOL 才出現 KOL 段）
+    const _SX=['壹','貳','參','肆','伍','陸','柒','捌']; let _sx=1; const SEC=()=>_SX[_sx++];
+    let _sxu=0; const NSUB=()=>_sxu+++1; const hasKol=m.kols.length>0;
+    // 貳 活動概述
+    kids.push(h1(SEC()+'、活動概述')); kids.push(p(n.overview||'—'));
+    // 參 參與KOL受眾資料（僅有 KOL 時）
+    if (hasKol){ kids.push(h1(SEC()+'、參與KOL受眾資料'));
+      const rows=m.kols.map(k=>[k.name||'—',k.content_type||'—',k.platform||'—',_fmt(k.followers)]); rows.push(['合計（KOL）','',m.kols.length+' 位',_fmt(m.kolFans)]);
+      kids.push(table(['姓名／藝名','身分類別','平台','粉絲人數'], rows, [3000,2600,2000,2400], true)); }
+    // 肆 社群宣傳與行銷成效
+    kids.push(h1(SEC()+'、社群宣傳與行銷成效'));
+    kids.push(p(`宣傳週期：${n.promoCycle||'—'}\n宣傳形式：${n.promoForm||'—'}\n核心訊息：${n.coreMsg||'—'}\n宣傳平台：${n.promoPlatform||'—'}`));
+    kids.push(h2(NSUB()+'. 社群／曝光來源彙總'));
+    if (m.chans.length){ const rows=m.chans.map(c=>[c.name||'—',_fmt(c.reach),c.engage?_fmt(c.engage):'—',c.note||'']); rows.push(['合計',_fmt(m.chReach),_fmt(m.chEngage),'']);
+      kids.push(table(['管道','觸及 / 曝光','互動','備註'], rows, [3000,2200,1800,3000], true)); } else kids.push(p('—'));
+    [pNote('分析',n.chAnalysis), pNote('建議',n.chSuggest)].forEach(x=>x&&kids.push(x));
+    kids.push(h2(NSUB()+'. FB 官方貼文觸及與互動表現'));
+    if (m.posts.length){ const rows=m.posts.slice(0,10).map(po=>[po.date||'—',(po.title||'(無標題)'),_fmt(po.reach),_fmt(po.engage)]); rows.push(['總計','',_fmt(m.fbReach),_fmt(m.fbEngage)]);
+      kids.push(table(['日期','發文主題','總觸及數','互動(心情·留言·分享)'], rows, [1700,4200,2000,2100], true)); } else kids.push(p('—'));
+    [pNote('分析',n.fbAnalysis), pNote('建議',n.fbSuggest)].forEach(x=>x&&kids.push(x));
+    if (hasKol){ kids.push(h2(NSUB()+'. KOL 社群對外互動'));
+      kids.push(table(['日期','KOL / 主題','觀看 / 觸及','互動'], m.kols.map(k=>[k.date||'—',k.name||'—',_fmt(k.reach),_fmt(k.engage)]), [1800,4400,1900,1900]));
+      [pNote('分析',n.kolAnalysis), pNote('建議',n.kolSuggest)].forEach(x=>x&&kids.push(x)); }
+    if (m.media.length){ kids.push(h2(NSUB()+'. 媒體新聞曝光'));
+      kids.push(table(['日期','媒體','標題','性質'], m.media.map(md=>[md.date||'—',(md.mediaName||md.name||'—'),(md.title||'—'),(md.nature||'—')]), [1700,2400,4100,1800])); }
+    // 伍 活動照片記錄
+    kids.push(h1(SEC()+'、活動照片記錄')); kids.push(p(ev.photo_url ? ('照片連結：'+ev.photo_url) : '（可於匯出後插入活動照片）'));
+    // 陸 活動成效與總結建議
+    kids.push(h1(SEC()+'、活動成效與總結建議'));
+    kids.push(h2('一、問卷回饋摘要')); kids.push(p(n.survey||'—'));
+    kids.push(h2('二、活動成效總結')); kids.push(p(n.conclusion||'—'));
+    kids.push(h2('三、未來建議方向')); kids.push(p(n.future||'—'));
     kids.push(new Paragraph({ spacing:{before:300}, children:[new TextRun({text:`光田綜合醫院 行銷企劃處 視覺多媒體設計組 · 活動成果報告`,size:18,color:'90A89E'})] }));
     const doc = new Document({ sections:[{ children:kids }] });
     const blob = await Packer.toBlob(doc);
@@ -5306,162 +5366,84 @@ async function exportEventDocx(idx, audience){
   } catch(e){ showToast('Word 產生失敗：'+e.message); }
 }
 
-// 組裝報告 HTML（可編輯、可列印、可匯出）
+// 組裝報告 HTML — 架構參照 2025 GWD 成果報告（壹~陸），文字區塊可在報告直接編輯
 function _buildReportHtml(o) {
-  const { ev, idx, audience, audienceName, isDirector, posts, media, yts,
-          fbTotalReach, fbTotalEngage, mediaCount, ytViews, attendRate } = o;
+  const { ev, idx, audience } = o;
+  const m = _eventReportModel(ev, audience);
+  const submitDate = new Date().toLocaleDateString('zh-TW');
+  const chans = m.chans, chReachR = m.chReach;
 
-  const dirSummary = `本院於 ${ev.date} 舉辦「${ev.name}」，活動順利圓滿。報名 ${_fmt(ev.reg)} 人、實際出席 ${_fmt(ev.attend)} 人${attendRate!=null?`（出席率 ${attendRate}%）`:''}，滿意度 ${ev.sat || '—'} / 5。透過 FB 貼文累計觸及 ${_fmt(fbTotalReach)} 人、互動 ${_fmt(fbTotalEngage)} 次；媒體曝光 ${mediaCount} 則；YouTube 影片觀看 ${_fmt(ytViews)} 次。本次活動有效強化光田綜合醫院的品牌形象與社區連結。`;
+  // 可編輯區塊（data-key 會在匯出 Word/PPT 時一併帶出）
+  const ed = (key, val, ph, inline) => {
+    if (inline) return `<span class="rep-ed" contenteditable="true" data-key="${key}" data-ph="${ph||''}" style="outline:none;border-bottom:1px dashed #CBD5D0;min-width:80px;display:inline-block;">${(val==null?'':String(val)).replace(/\n/g,'<br>')}</span>`;
+    return `<div class="rep-ed" contenteditable="true" data-key="${key}" data-ph="${ph||''}" style="background:#fff;border:1px dashed #DDE8E3;border-radius:6px;padding:10px 12px;font-size:14px;line-height:1.7;color:#1A2820;outline:none;margin:4px 0 14px;">${(val==null?'':String(val)).replace(/\n/g,'<br>')}</div>`;
+  };
+  const tdEd = (val) => `<td contenteditable="true" style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;outline:none;background:#FCFEFD;">${val==null?'':val}</td>`;
+  const TH = (t,r) => `<th style="padding:8px;text-align:${r?'right':'left'};border:1px solid #A7F3D0;">${t}</th>`;
+  const TD = (t,r) => `<td style="padding:8px;border:1px solid #DDE8E3;${r?'text-align:right;font-family:Inter,sans-serif;':''}">${t==null?'':t}</td>`;
+  const sub = (n,t) => `<h3 style="color:#064E2C;margin:18px 0 8px;font-size:15px;">${n}. ${t}</h3>`;
+  const lbl = (t) => `<div style="font-size:12.5px;font-weight:700;color:#064E2C;margin:10px 0 4px;">📌 ${t}</div>`;
+  // 段落動態編號（壹為封面；有 KOL 才出現 KOL 段，編號自動接續不留空號）
+  const _SECS=['壹','貳','參','肆','伍','陸','柒','捌']; let _si=1; const SEC=()=>_SECS[_si++];
+  let _su=0; const NSUB=()=>++_su;
+  const hasKol = m.kols.length>0;
 
-  const mgrSummary = `${ev.date} 於${ev.campus||'院內'}執行「${ev.name}」（${ev.type||'活動'}）。主講：${ev.speaker||'—'}。報名 ${_fmt(ev.reg)} / 出席 ${_fmt(ev.attend)}${attendRate!=null?` (${attendRate}%)`:''}，滿意度 ${ev.sat||'—'}。預算 ${_fmt(ev.budget)} 元 / 實際支出 ${_fmt(ev.expense)} 元。FB 觸及 ${_fmt(fbTotalReach)} / 互動 ${_fmt(fbTotalEngage)}（共 ${posts.length} 篇相關貼文）；媒體 ${mediaCount} 則；YT 觀看 ${_fmt(ytViews)}。`;
+  // 壹 基本資訊：重點數據一覽（隨頁首）
+  const statStrip = `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
+    ${[['報名/出席',`${_fmt(ev.reg)} / ${_fmt(ev.attend)}`],['滿意度',ev.sat?`${ev.sat} / 5`:'—'],[chans.length?'曝光觸及':'FB觸及',_fmt(chans.length?chReachR:m.fbReach)],['媒體',`${m.media.length} 則`]].concat(m.kols.length?[['KOL',`${m.kols.length} 位`]]:[]).map(s=>`<span style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:14px;padding:3px 12px;font-size:12px;color:#064E2C;"><b>${s[1]}</b> ${s[0]}</span>`).join('')}
+  </div>`;
 
-  const summaryText = isDirector ? dirSummary : mgrSummary;
-
-  // KPI 卡（院長版 4 個，主管版 6 個）
-  const kpis = [
-    { label: '報名 / 出席', value: `${_fmt(ev.reg)} / ${_fmt(ev.attend)}`, sub: attendRate!=null?`出席率 ${attendRate}%`:'' },
-    { label: '滿意度', value: ev.sat ? `${ev.sat} / 5` : '—', sub: '' },
-    { label: 'FB 觸及', value: _fmt(fbTotalReach), sub: `${posts.length} 篇貼文` },
-    { label: '媒體曝光', value: `${mediaCount} 則`, sub: '' },
-  ];
-  if (!isDirector) {
-    kpis.push({ label: 'FB 互動', value: _fmt(fbTotalEngage), sub: '心情+留言+分享' });
-    kpis.push({ label: '預算 / 支出', value: `${_fmt(ev.budget)} / ${_fmt(ev.expense)}`, sub: ev.budget>0&&ev.expense>0?`執行率 ${Math.round(ev.expense/ev.budget*100)}%`:'' });
-  }
-
-  // 曝光來源（彈性管道）
-  const chans = ev.channels || [];
-  const chReachR = channelsTotal(chans);
-  if (chans.length) {
-    kpis.splice(2, 0, { label: '跨平台曝光觸及', value: _fmt(chReachR), sub: `${chans.length} 個管道` });
-  }
-  const channelsBlock = chans.length ? `
-    <h2>📣 社群 / 曝光來源</h2>
+  // 參 參與KOL受眾資料
+  const kolSection = m.kols.length ? `
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead><tr style="background:#ECFDF5;">
-        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">管道</th>
-        <th style="padding:8px;text-align:right;border:1px solid #A7F3D0;">觸及 / 曝光</th>
-        <th style="padding:8px;text-align:right;border:1px solid #A7F3D0;">互動</th>
-        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">備註</th>
-      </tr></thead>
+      <thead><tr style="background:#ECFDF5;">${TH('姓名／藝名')}${TH('身分類別')}${TH('平台')}${TH('粉絲人數',1)}</tr></thead>
       <tbody>
-        ${chans.map(c=>`<tr>
-          <td style="padding:8px;border:1px solid #DDE8E3;">${c.name||'—'}</td>
-          <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(c.reach)}</td>
-          <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${c.engage?_fmt(c.engage):'—'}</td>
-          <td style="padding:8px;border:1px solid #DDE8E3;">${c.note||''}</td>
-        </tr>`).join('')}
-        <tr style="background:#F1F8F4;font-weight:700;">
-          <td style="padding:8px;border:1px solid #DDE8E3;">合計</td>
-          <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(chReachR)}</td>
-          <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(channelsEngage(chans))}</td>
-          <td style="padding:8px;border:1px solid #DDE8E3;"></td>
-        </tr>
+        ${m.kols.map(k=>`<tr>${TD(k.name||'—')}${TD(k.content_type||'—')}${TD(k.platform||'—')}${TD(_fmt(k.followers),1)}</tr>`).join('')}
+        <tr style="background:#F1F8F4;font-weight:700;">${TD('合計（KOL）')}${TD('')}${TD(`${m.kols.length} 位`)}${TD(_fmt(m.kolFans),1)}</tr>
+      </tbody>
+    </table>` : `<p style="font-size:13px;color:#5A7A6A;">本活動無關聯 KOL 記錄。可至「KOL 成效追蹤」新增並把「關聯活動」填為本活動，或在此直接補列：</p>${ed('kolListNote','','（在此補列 KOL 名單：姓名／類別／粉絲數…）')}`;
+
+  // 肆-1 社群／曝光來源
+  const channelsTbl = chans.length ? `
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:#ECFDF5;">${TH('管道')}${TH('觸及 / 曝光',1)}${TH('互動',1)}${TH('備註')}</tr></thead>
+      <tbody>
+        ${chans.map(c=>`<tr>${TD(c.name||'—')}${TD(_fmt(c.reach),1)}${TD(c.engage?_fmt(c.engage):'—',1)}${TD(c.note||'')}</tr>`).join('')}
+        <tr style="background:#F1F8F4;font-weight:700;">${TD('合計')}${TD(_fmt(chReachR),1)}${TD(_fmt(m.chEngage),1)}${TD('')}</tr>
+      </tbody>
+    </table>` : `<p style="font-size:13px;color:#5A7A6A;">尚未填寫曝光來源（可在「編輯活動 → 社群／曝光來源」新增）。</p>`;
+
+  // 肆-2 FB 官方貼文（欄位照 2025：總觀看次數 / 總觸及數 / 互動）
+  const fbTbl = m.posts.length ? `
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:#ECFDF5;">${TH('日期')}${TH('發文主題')}${TH('總觀看次數',1)}${TH('總觸及數',1)}${TH('互動<br><small style="font-weight:400;">心情·留言·分享</small>',1)}</tr></thead>
+      <tbody>
+        ${m.posts.slice(0,10).map(p=>`<tr>${TD(p.date||'—')}${TD(p.url?`<a href="${p.url}" target="_blank" style="color:#00AAC8;text-decoration:none;">${p.title||'(無標題)'}</a>`:(p.title||'(無標題)'))}${tdEd('')}${TD(_fmt(p.reach),1)}${tdEd(_fmt(p.engage))}</tr>`).join('')}
+        <tr style="background:#F1F8F4;font-weight:700;">${TD('總計')}${TD('')}${tdEd('')}${TD(_fmt(m.fbReach),1)}${tdEd(_fmt(m.fbEngage))}</tr>
       </tbody>
     </table>
-  ` : '';
+    <p style="font-size:11.5px;color:#90A89E;margin:4px 0 0;">＊「總觀看次數」可在此表直接填入（FB 後台數據）。</p>` : `<p style="font-size:13px;color:#5A7A6A;">尚無關聯 FB 貼文。可在貼文「關聯活動」填入本活動名稱，或在報告中補列。</p>`;
 
-  // 類型專屬數據（自訂欄位）
-  const tplFields = getTemplateFields(ev.tplType || ev.type);
-  const customRows = (tplFields||[]).map(f=>({ label:f.label, val:(ev.custom && ev.custom[f.key]!=null && ev.custom[f.key]!=='') ? ev.custom[f.key] : null })).filter(r=>r.val!=null);
-  const customBlock = customRows.length ? `
-    <h2>🧩 活動專屬數據</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
-      ${customRows.map(r=>`<div style="background:#fff;border:1px solid #DDE8E3;border-left:4px solid #FFB900;border-radius:8px;padding:12px 14px;">
-        <div style="font-size:12px;color:#5A7A6A;margin-bottom:4px;">${r.label}</div>
-        <div style="font-size:18px;font-weight:700;color:#064E2C;">${typeof r.val==='number'?_fmt(r.val):r.val}</div>
-      </div>`).join('')}
-    </div>
-  ` : '';
-
-  const kpiHtml = kpis.map(k => `
-    <div style="background:#fff;border:1px solid #DDE8E3;border-left:4px solid #064E2C;border-radius:8px;padding:14px 16px;">
-      <div style="font-size:12px;color:#5A7A6A;margin-bottom:6px;">${k.label}</div>
-      <div style="font-size:22px;font-weight:700;color:#064E2C;font-family:'Inter',sans-serif;">${k.value}</div>
-      ${k.sub ? `<div style="font-size:11px;color:#90A89E;margin-top:2px;">${k.sub}</div>` : ''}
-    </div>
-  `).join('');
-
-  // FB 貼文表（取前 5 篇）
-  const postsTable = posts.length ? `
-    <h3 style="color:#064E2C;margin:24px 0 10px 0;font-size:16px;">📱 相關 Facebook 貼文（取觸及前 ${Math.min(5,posts.length)} 篇）</h3>
+  // 肆-3 KOL 對外互動
+  const kolPerfTbl = m.kols.length ? `
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead><tr style="background:#ECFDF5;">
-        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">日期</th>
-        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">貼文標題</th>
-        <th style="padding:8px;text-align:right;border:1px solid #A7F3D0;">觸及</th>
-        <th style="padding:8px;text-align:right;border:1px solid #A7F3D0;">互動</th>
-      </tr></thead>
+      <thead><tr style="background:#ECFDF5;">${TH('日期')}${TH('KOL / 主題')}${TH('觀看 / 觸及',1)}${TH('互動<br><small style="font-weight:400;">讚·留言·轉發·收藏</small>',1)}${TH('帳號觸及',1)}</tr></thead>
       <tbody>
-        ${posts.slice(0,5).map(p => `
-          <tr>
-            <td style="padding:8px;border:1px solid #DDE8E3;font-family:'Inter',sans-serif;">${p.date||'—'}</td>
-            <td style="padding:8px;border:1px solid #DDE8E3;">${p.url ? `<a href="${p.url}" target="_blank" style="color:#00AAC8;text-decoration:none;">${p.title||'(無標題)'}</a>` : (p.title||'(無標題)')}</td>
-            <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(p.reach)}</td>
-            <td style="padding:8px;border:1px solid #DDE8E3;text-align:right;font-family:'Inter',sans-serif;">${_fmt(p.engage)}</td>
-          </tr>
-        `).join('')}
+        ${m.kols.map(k=>`<tr>${TD(k.date||'—')}${TD((k.name||'—')+(k.content_type?` <small style="color:#90A89E;">${k.content_type}</small>`:''))}${TD(_fmt(k.reach),1)}${tdEd(_fmt(k.engage))}${tdEd('')}</tr>`).join('')}
       </tbody>
-    </table>
-  ` : '';
+    </table>` : `<p style="font-size:13px;color:#5A7A6A;">本活動無關聯 KOL 對外貼文數據。</p>`;
 
-  // 媒體曝光表
-  const mediaTable = media.length ? `
-    <h3 style="color:#064E2C;margin:24px 0 10px 0;font-size:16px;">📰 媒體曝光記錄</h3>
+  // 媒體（系統有則附於肆段；標題在 body 以動態編號加上）
+  const mediaTbl = m.media.length ? `
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <thead><tr style="background:#ECFDF5;">
-        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">日期</th>
-        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">媒體</th>
-        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">標題</th>
-        <th style="padding:8px;text-align:left;border:1px solid #A7F3D0;">性質</th>
-      </tr></thead>
-      <tbody>
-        ${media.map(m => `
-          <tr>
-            <td style="padding:8px;border:1px solid #DDE8E3;font-family:'Inter',sans-serif;">${m.date||'—'}</td>
-            <td style="padding:8px;border:1px solid #DDE8E3;">${m.mediaName||'—'}<br><small style="color:#90A89E;">${m.mediaType||''}</small></td>
-            <td style="padding:8px;border:1px solid #DDE8E3;">${m.url ? `<a href="${m.url}" target="_blank" style="color:#00AAC8;text-decoration:none;">${m.title||'—'}</a>` : (m.title||'—')}</td>
-            <td style="padding:8px;border:1px solid #DDE8E3;">${m.nature||'—'}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  ` : '';
+      <thead><tr style="background:#ECFDF5;">${TH('日期')}${TH('媒體')}${TH('標題')}${TH('性質')}</tr></thead>
+      <tbody>${m.media.map(md=>`<tr>${TD(md.date||'—')}${TD((md.mediaName||md.name||'—')+(md.mediaType?`<br><small style="color:#90A89E;">${md.mediaType}</small>`:''))}${TD(md.url?`<a href="${md.url}" target="_blank" style="color:#00AAC8;text-decoration:none;">${md.title||'—'}</a>`:(md.title||'—'))}${TD(md.nature||'—')}</tr>`).join('')}</tbody>
+    </table>` : '';
 
-  // YT 區塊
-  const ytBlock = yts.length ? `
-    <h3 style="color:#064E2C;margin:24px 0 10px 0;font-size:16px;">▶ YouTube 影片紀錄</h3>
-    ${yts.map(y => `
-      <div style="background:#fff;border:1px solid #DDE8E3;border-radius:8px;padding:12px 16px;margin-bottom:8px;">
-        <div style="font-weight:600;">${y.title||'活動影片'}</div>
-        <div style="color:#5A7A6A;font-size:13px;margin-top:4px;">觀看次數：<strong style="font-family:'Inter',sans-serif;">${_fmt(y.views)}</strong></div>
-        ${y.url ? `<div style="margin-top:6px;"><a href="${y.url}" target="_blank" style="color:#00AAC8;font-size:13px;">${y.url}</a></div>` : ''}
-      </div>
-    `).join('')}
-  ` : '';
-
-  // 敘述區塊（院長版簡化、主管版完整）
-  const narrativeBlocks = [];
-  if (ev.purpose)     narrativeBlocks.push(['活動目的 / 緣由', ev.purpose]);
-  if (ev.content)     narrativeBlocks.push(['活動內容摘要', ev.content]);
-  if (!isDirector) {
-    if (ev.observation) narrativeBlocks.push(['現場觀察 / 回饋', ev.observation]);
-    if (ev.improvement) narrativeBlocks.push(['改善建議 / 後續追蹤', ev.improvement]);
-  }
-  const narrativeHtml = narrativeBlocks.map(([title, body]) => `
-    <div style="margin-bottom:16px;">
-      <h3 style="color:#064E2C;margin:0 0 8px 0;font-size:15px;border-left:3px solid #6EC300;padding-left:10px;">${title}</h3>
-      <div contenteditable="true" style="background:#fff;border:1px dashed #DDE8E3;border-radius:6px;padding:12px;font-size:14px;line-height:1.7;color:#1A2820;outline:none;">${(body||'').replace(/\n/g,'<br>')}</div>
-    </div>
-  `).join('');
-
-  // 活動照片
-  const photoBlock = ev.photo_url ? `
-    <h3 style="color:#064E2C;margin:24px 0 10px 0;font-size:16px;">📷 活動照片</h3>
-    <div style="background:#fff;border:1px solid #DDE8E3;border-radius:8px;padding:14px 16px;">
-      <a href="${ev.photo_url}" target="_blank" style="color:#00AAC8;font-size:14px;word-break:break-all;">${ev.photo_url}</a>
-    </div>
-  ` : '';
+  // 伍 活動照片
+  const photoBlock = ev.photo_url
+    ? `<div style="background:#fff;border:1px solid #DDE8E3;border-radius:8px;padding:14px 16px;"><a href="${ev.photo_url}" target="_blank" style="color:#00AAC8;font-size:14px;word-break:break-all;">${ev.photo_url}</a></div>`
+    : ed('photoNote','','（貼上活動照片雲端連結，或在 Word/PPT 匯出後插入照片）');
 
   return `<!DOCTYPE html>
 <html lang="zh-TW">
@@ -5489,9 +5471,11 @@ function _buildReportHtml(o) {
   .report-meta .badge { background: #064E2C; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
   h1 { color: #064E2C; font-size: 24px; margin: 0; }
   h2 { color: #064E2C; font-size: 18px; margin: 24px 0 12px 0; border-left: 4px solid #6EC300; padding-left: 12px; }
-  .kpi-grid { display: grid; grid-template-columns: repeat(${kpis.length<=4?'4':'3'}, 1fr); gap: 12px; margin: 16px 0 24px 0; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0 24px 0; }
   .summary-box { background: #ECFDF5; border-left: 4px solid #064E2C; border-radius: 6px; padding: 16px 20px; font-size: 14px; line-height: 1.8; }
   .summary-box[contenteditable="true"]:focus { outline: 2px solid #6EC300; outline-offset: 2px; }
+  .rep-ed:empty:before { content: attr(data-ph); color: #B0BDB6; }
+  .rep-ed:focus { outline: 2px solid #6EC300; outline-offset: 2px; border-radius: 4px; }
   table { font-family: inherit; }
   .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #DDE8E3; font-size: 12px; color: #90A89E; text-align: center; }
   @media print {
@@ -5514,42 +5498,56 @@ function _buildReportHtml(o) {
     <span style="margin-left:auto;font-size:12px;color:#5A7A6A;">提示：點擊文字區塊即可直接修改</span>
   </div>
   <div class="report" id="reportRoot">
+    <!-- 壹 基本資訊 -->
     <div class="report-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;">
       <div style="flex:1;min-width:0;">
-        <div class="report-meta">
-          <span>光田綜合醫院 行銷企劃處</span>
-          <span>·</span>
-          <span>生成時間：${new Date().toLocaleString('zh-TW')}</span>
-        </div>
         <h1 contenteditable="true">${ev.name} — 活動成果報告</h1>
-        <div style="margin-top:8px;font-size:13px;color:#5A7A6A;">
-          日期：${ev.date} ｜ 類型：${ev.type||'—'} ｜ 院區：${ev.campus||'—'} ｜ 主講：${ev.speaker||'—'}
+        <div style="margin-top:8px;font-size:13px;color:#5A7A6A;line-height:1.95;">
+          活動期間：${ed('period', m.narr.period, '例：2025年6月14日 13:00–16:30', true)}　｜　類型：${ev.type||'—'}　｜　院區：${ev.campus||'—'}　｜　主講：${ev.speaker||'—'}<br>
+          提交日期：${submitDate}　｜　報告撰寫：${ed('author', m.narr.author, '撰寫單位／姓名', true)}
         </div>
+        ${statStrip}
       </div>
       <img src="${KTGH_LOGO}" alt="光田綜合醫院" style="height:46px;width:auto;flex-shrink:0;margin-top:2px;">
     </div>
 
-    <h2>一、執行摘要</h2>
-    <div class="summary-box" contenteditable="true">${summaryText}</div>
+    <h2>${SEC()}、活動概述</h2>
+    ${ed('overview', m.narr.overview, '簡述活動緣由、形式與亮點…')}
 
-    <h2>二、核心數據</h2>
-    <div class="kpi-grid">${kpiHtml}</div>
+    ${hasKol ? `<h2>${SEC()}、參與KOL受眾資料</h2>${kolSection}` : ''}
 
-    ${customBlock}
+    <h2>${SEC()}、社群宣傳與行銷成效</h2>
+    <div style="background:#F8FBFA;border:1px solid #DDE8E3;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13.5px;line-height:2.1;">
+      宣傳週期：${ed('promoCycle', m.narr.promoCycle, '例：6/12～6/28', true)}<br>
+      宣傳形式：${ed('promoForm', m.narr.promoForm, '例：官方圖文貼文、限時動態、社群轉分享、KOL曝光', true)}<br>
+      核心訊息：${ed('coreMsg', m.narr.coreMsg, '例：以【健康生活倡議】為主軸，導流至實體活動', true)}<br>
+      宣傳平台：${ed('promoPlatform', m.narr.promoPlatform, '例：Facebook、Instagram、LINE、KOL個人社群', true)}
+    </div>
+    ${sub(NSUB(),'社群／曝光來源彙總')}
+    ${channelsTbl}
+    ${lbl('分析')}${ed('chAnalysis', m.narr.chAnalysis, '針對各曝光管道的成效分析…')}
+    ${lbl('建議')}${ed('chSuggest', m.narr.chSuggest, '後續操作建議…')}
+    ${sub(NSUB(),'FB 官方貼文觸及與互動表現')}
+    ${fbTbl}
+    ${lbl('分析')}${ed('fbAnalysis', m.narr.fbAnalysis, '貼文觸及與互動分析…')}
+    ${lbl('建議')}${ed('fbSuggest', m.narr.fbSuggest, '貼文策略建議…')}
+    ${hasKol ? `${sub(NSUB(),'KOL 社群對外互動')}
+    ${kolPerfTbl}
+    ${lbl('分析')}${ed('kolAnalysis', m.narr.kolAnalysis, 'KOL 擴散成效分析…')}
+    ${lbl('建議')}${ed('kolSuggest', m.narr.kolSuggest, 'KOL 合作建議…')}` : ''}
+    ${m.media.length ? sub(NSUB(),'媒體新聞曝光') : ''}
+    ${mediaTbl}
 
-    ${channelsBlock}
-
-    ${narrativeHtml ? `<h2>三、活動敘述</h2>${narrativeHtml}` : ''}
-
-    ${postsTable ? `<h2>${narrativeHtml?'四':'三'}、社群擴散成效</h2>${postsTable}` : ''}
-
-    ${mediaTable ? `<h2>媒體曝光紀錄</h2>${mediaTable}` : ''}
-
-    ${ytBlock}
-
+    <h2>${SEC()}、活動照片記錄</h2>
     ${photoBlock}
 
-    ${!isDirector && ev.note ? `<h2>備註</h2><div contenteditable="true" style="background:#fff;border:1px dashed #DDE8E3;border-radius:6px;padding:12px;font-size:14px;line-height:1.7;">${ev.note.replace(/\n/g,'<br>')}</div>` : ''}
+    <h2>${SEC()}、活動成效與總結建議</h2>
+    <h3 style="color:#064E2C;margin:18px 0 8px;font-size:15px;">一、問卷回饋摘要</h3>
+    ${ed('survey', m.narr.survey, '問卷回收份數、平均滿意度、印象最深的環節…')}
+    <h3 style="color:#064E2C;margin:18px 0 8px;font-size:15px;">二、活動成效總結</h3>
+    ${ed('conclusion', m.narr.conclusion, '整體成效總結…')}
+    <h3 style="color:#064E2C;margin:18px 0 8px;font-size:15px;">三、未來建議方向</h3>
+    ${ed('future', m.narr.future, '未來可優化或延伸的方向…')}
 
     <div class="footer">
       光田綜合醫院 行銷企劃處 視覺多媒體設計組 · 活動成果報告
@@ -5580,14 +5578,19 @@ function _buildReportHtml(o) {
     a.click();
     URL.revokeObjectURL(url);
   }
+  function _collectOverrides() {
+    const o = {};
+    document.querySelectorAll('#reportRoot [data-key]').forEach(el => { o[el.getAttribute('data-key')] = (el.innerText||'').trim(); });
+    return o;
+  }
   function exportDocx() {
     if (window.opener && !window.opener.closed && window.opener.exportEventDocx) {
-      window.opener.exportEventDocx(${idx}, '${audience}');
+      window.opener.exportEventDocx(${idx}, '${audience}', _collectOverrides());
     } else { alert('請從主系統視窗開啟此報告，才能匯出 .docx（或改用「簡易 Word」）'); }
   }
   function exportPptx() {
     if (window.opener && !window.opener.closed && window.opener.exportEventPptx) {
-      window.opener.exportEventPptx(${idx}, '${audience}');
+      window.opener.exportEventPptx(${idx}, '${audience}', _collectOverrides());
     } else { alert('請從主系統視窗開啟此報告，才能匯出 .pptx'); }
   }
 <\/script>
