@@ -8138,9 +8138,10 @@ function renderWarRoom() {
   if (!wrap) return;
   const months = (typeof gaAvailableMonths==='function' ? gaAvailableMonths() : []);
   if (!months.length) {
-    wrap.innerHTML = '<div style="padding:60px;text-align:center;background:var(--surface);border-radius:14px;border:1px solid var(--border);">'
+    wrap.innerHTML = _warSectionQuickAccess()
+      + '<div style="padding:48px;text-align:center;background:var(--surface);border-radius:14px;border:1px solid var(--border);">'
       + '<div style="font-size:48px;margin-bottom:12px;">📡</div>'
-      + '<div style="font-size:14px;color:var(--text-muted);">尚無 GA4 資料，請先到「⚡ 快速匯入區」上傳檔案</div>'
+      + '<div style="font-size:14px;color:var(--text-muted);">尚無 GA4 資料，戰情數據區會在匯入後顯示；上方「快速登錄」隨時可用</div>'
       + '<button class="btn btn-primary" style="margin-top:14px;" onclick="switchSection(\'warroom\',\'quickimport\')">前往快速匯入</button>'
       + '</div>';
     return;
@@ -8150,7 +8151,8 @@ function renderWarRoom() {
 
   // 並排組裝
   wrap.innerHTML =
-    '<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;">'
+    _warSectionQuickAccess()
+    + '<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;">'
     + _warSectionAlerts(curYm, cur)
     + _warSectionKpiSnapshot(curYm, cur, months)
     + '</div>'
@@ -8171,8 +8173,51 @@ function renderWarRoom() {
     +   _warSectionTasks()
     +   _warSectionDataHealth()
     + '</div>'
+    + '</div>';
+}
+
+// ── ⚡ 快速登錄（戰情首頁置頂；永遠顯示，含分類卡片）──
+function _warSectionQuickAccess() {
+  const cat = (label, color, cards) =>
+    '<div style="margin-bottom:14px;">'
+    + '<div style="font-size:12.5px;font-weight:700;color:'+color+';margin-bottom:8px;display:flex;align-items:center;gap:7px;"><span style="width:4px;height:13px;background:'+color+';border-radius:2px;"></span>'+label+'</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;">'
+    + cards.map(f => _renderFeatureCard(f)).join('')
+    + '</div></div>';
+  const act = [
+    { k:'event-list',      icon:'file',      color:'#064E2C', title:'產出活動成果報告', desc:'活動列表→一鍵 PDF/Word/PPT' },
+    { k:'event-add',       icon:'clipboard', color:'#F59E0B', title:'新增活動回報',   desc:'填數據與曝光來源' },
+    { k:'event-dashboard', icon:'bar-chart', color:'#F59E0B', title:'活動成效看板',   desc:'場次、出席率、滿意度' },
+    { k:'campaign-hub',    icon:'compass',   color:'#7C3AED', title:'Campaign 成果看板', desc:'跨平台整合成效' },
+  ];
+  const soc = [
+    { k:'fb-upload',   icon:'upload',   color:'#1877F2', title:'匯入貼文數據', desc:'FB 後台 Excel / JSON' },
+    { k:'fb-overview', icon:'facebook', color:'#1877F2', title:'粉專總覽',     desc:'觸及互動 Dashboard' },
+    { k:'fb-posts',    icon:'grid',     color:'#1877F2', title:'貼文成效列表', desc:'逐篇數據' },
+    { k:'kol-list',    icon:'mic',      color:'#7C3AED', title:'KOL 成效追蹤', desc:'觸及互動成果' },
+  ];
+  const clinic = [
+    { k:'clinic-matrix',  icon:'check-list', color:'#2D6A4F', title:'門診表填入',   desc:'月度傳達矩陣' },
+    { k:'clinic-items',   icon:'folder',     color:'#2D6A4F', title:'題材列表',     desc:'題材主檔維護' },
+    { k:'media-add',      icon:'newspaper',  color:'#DC2626', title:'新增媒體記錄', desc:'新聞曝光回報' },
+    { k:'crosstag-stats', icon:'tag',        color:'#2D6A4F', title:'各管道分析',   desc:'依標籤跨管道統計' },
+  ];
+  const data = [
+    { k:'web-overview',        icon:'globe',    color:'#1E40AF', title:'官網 GA4',     desc:'流量分析儀表板' },
+    { k:'warroom-quickimport', icon:'download', color:'#1E40AF', title:'快速匯入區',   desc:'拖多檔自動辨識' },
+    { k:'__exportReport', fn:'exportReport', icon:'printer', color:'#059669', title:'匯出月報', desc:'A4 PDF 月報' },
+    { k:'settings-backup',     icon:'save',     color:'#6B7280', title:'資料備份還原', desc:'快照、回收筒' },
+  ];
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 22px;box-shadow:var(--shadow);margin-bottom:16px;">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">'
+    +   '<div style="font-size:15px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;"><span style="display:inline-flex;color:#1a8454;">'+svgIcon('zap',18)+'</span>快速登錄</div>'
+    +   '<button class="btn btn-outline" onclick="openFeatureLauncher()" style="font-size:12px;padding:6px 14px;">全部功能 ('+FEATURE_CATALOG.length+') ▶</button>'
     + '</div>'
-    + _warSectionQuickLauncher();
+    + cat('活動與成果報告', '#F59E0B', act)
+    + cat('內容與社群',     '#1877F2', soc)
+    + cat('門診表 / 跨管道', '#2D6A4F', clinic)
+    + cat('數據與報表',     '#1E40AF', data)
+    + '</div>';
 }
 
 // ── 🚀 快速功能入口（戰情首頁底部）──
