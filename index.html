@@ -1629,7 +1629,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
         <!-- 彈性曝光來源 -->
         <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;background:#F8FBFA;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
-            <div style="font-size:13px;font-weight:700;color:#064E2C;">📣 社群／曝光來源</div>
+            <div style="font-size:13px;font-weight:700;color:#064E2C;">社群／曝光來源</div>
             <div style="font-size:12px;color:var(--text-sub);">合計觸及：<strong id="ev-channels-total" style="color:#064E2C;">0</strong></div>
           </div>
           <p style="font-size:11.5px;color:var(--text-sub);margin:0 0 10px;line-height:1.5;">可自由增列不同曝光管道：官方 FB／IG、民眾 FB 打卡、LINE 社群分享、KOL 曝光、媒體報導…，系統分管道呈現並加總。</p>
@@ -1637,10 +1637,20 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           <button type="button" class="btn btn-outline" style="font-size:12px;padding:6px 14px;" onclick="addChannelRow('ev-channels')">＋ 新增曝光管道</button>
         </div>
 
+        <!-- 活動照片（上傳內嵌） -->
+        <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;background:#F8FBFA;">
+          <div style="font-size:13px;font-weight:700;color:#064E2C;margin-bottom:4px;">活動照片佐證</div>
+          <p style="font-size:11.5px;color:var(--text-sub);margin:0 0 10px;line-height:1.5;">上傳活動照片，會直接內嵌進成果報告與 Word／PPT（不會跑版）。系統自動壓縮，每張可加說明。</p>
+          <div id="ev-photos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:10px;"></div>
+          <label class="btn btn-outline" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block;">＋ 上傳照片
+            <input type="file" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload('ev-photos', this)">
+          </label>
+        </div>
+
         <!-- 類型專屬欄位（範本驅動，可自訂） -->
         <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;background:#FFFDF5;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
-            <div style="font-size:13px;font-weight:700;color:#7A5C00;">🧩 類型專屬欄位 <span id="ev-cf-typelabel" style="color:var(--text-sub);font-weight:500;"></span></div>
+            <div style="font-size:13px;font-weight:700;color:#7A5C00;">類型專屬欄位<span id="ev-cf-typelabel" style="color:var(--text-sub);font-weight:500;"></span></div>
             <button type="button" class="btn btn-outline" style="font-size:12px;padding:5px 12px;" onclick="openFieldManager('ev')">⚙ 管理欄位</button>
           </div>
           <div id="ev-custom-fields"></div>
@@ -2630,16 +2640,25 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <!-- 彈性曝光來源 -->
       <div style="grid-column:1/-1;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:6px;background:#F8FBFA;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
-          <div style="font-size:13px;font-weight:700;color:#064E2C;">📣 社群／曝光來源</div>
+          <div style="font-size:13px;font-weight:700;color:#064E2C;">社群／曝光來源</div>
           <div style="font-size:12px;color:var(--text-sub);">合計觸及：<strong id="em-channels-total" style="color:#064E2C;">0</strong></div>
         </div>
         <div id="em-channels"></div>
         <button type="button" class="btn btn-outline" style="font-size:12px;padding:6px 14px;" onclick="addChannelRow('em-channels')">＋ 新增曝光管道</button>
       </div>
+      <!-- 活動照片（上傳內嵌） -->
+      <div style="grid-column:1/-1;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:6px;background:#F8FBFA;">
+        <div style="font-size:13px;font-weight:700;color:#064E2C;margin-bottom:4px;">活動照片佐證</div>
+        <p style="font-size:11.5px;color:var(--text-sub);margin:0 0 10px;line-height:1.5;">上傳後直接內嵌進報告與 Word／PPT（不會跑版），系統自動壓縮。</p>
+        <div id="em-photos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:10px;"></div>
+        <label class="btn btn-outline" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block;">＋ 上傳照片
+          <input type="file" accept="image/*" multiple style="display:none;" onchange="handlePhotoUpload('em-photos', this)">
+        </label>
+      </div>
       <!-- 類型專屬欄位（範本驅動，可自訂） -->
       <div style="grid-column:1/-1;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:6px;background:#FFFDF5;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
-          <div style="font-size:13px;font-weight:700;color:#7A5C00;">🧩 類型專屬欄位 <span id="em-cf-typelabel" style="color:var(--text-sub);font-weight:500;"></span></div>
+          <div style="font-size:13px;font-weight:700;color:#7A5C00;">類型專屬欄位<span id="em-cf-typelabel" style="color:var(--text-sub);font-weight:500;"></span></div>
           <button type="button" class="btn btn-outline" style="font-size:12px;padding:5px 12px;" onclick="openFieldManager('em')">⚙ 管理欄位</button>
         </div>
         <div id="em-custom-fields"></div>
@@ -4589,6 +4608,50 @@ function deleteTemplateField(idx){
   showToast('已刪除欄位');
 }
 
+// ═══════════════════════════════════════════
+//  活動照片（上傳→壓縮→base64 內嵌；ev.photos=[{d,c,w,h}]）
+//  內嵌方式可隨報告匯出 PDF/Word/PPT，不會跑版
+// ═══════════════════════════════════════════
+function _compressImage(file, maxW, q){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if (w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve({ d: c.toDataURL('image/jpeg', q||0.82), w:w, h:h });
+      };
+      img.onerror = reject; img.src = reader.result;
+    };
+    reader.onerror = reject; reader.readAsDataURL(file);
+  });
+}
+function photoCardHtml(p){
+  return `<div class="ph-card" data-d="${p.d}" data-w="${p.w||0}" data-h="${p.h||0}" style="position:relative;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fff;">
+    <img src="${p.d}" style="width:100%;height:92px;object-fit:cover;display:block;">
+    <input class="ph-cap" value="${_chEsc(p.c)}" placeholder="照片說明(選填)" style="width:100%;min-width:0;border:none;border-top:1px solid var(--border);padding:5px 7px;font-size:12px;font-family:inherit;outline:none;">
+    <button type="button" onclick="this.closest('.ph-card').remove()" title="移除" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:14px;line-height:1;">×</button>
+  </div>`;
+}
+function renderPhotoCards(listId, photos){
+  const l = document.getElementById(listId); if(!l) return;
+  l.innerHTML = (photos||[]).map(photoCardHtml).join('');
+}
+async function handlePhotoUpload(listId, input){
+  const l = document.getElementById(listId); if(!l) return;
+  const files = [...input.files].filter(f => f.type && f.type.startsWith('image/'));
+  for (const f of files){ try { const p = await _compressImage(f, 1200, 0.82); l.insertAdjacentHTML('beforeend', photoCardHtml({d:p.d, c:'', w:p.w, h:p.h})); } catch(e){} }
+  input.value = '';
+  if (files.length && typeof showToast==='function') showToast(files.length + ' 張照片已加入');
+}
+function collectPhotos(listId){
+  const l = document.getElementById(listId); if(!l) return [];
+  return [...l.querySelectorAll('.ph-card')].map(c => ({ d:c.dataset.d, c:c.querySelector('.ph-cap').value.trim(), w:+c.dataset.w||0, h:+c.dataset.h||0 }));
+}
+
 function addEvent() {
   if (!requireEdit()) return;
   const name = document.getElementById('ev-name').value.trim();
@@ -4606,6 +4669,7 @@ function addEvent() {
     type:     evType,
     tplType:  evType,
     custom:   collectCustomFields('ev-custom-fields', evType),
+    photos:   collectPhotos('ev-photos'),
     campus:   document.getElementById('ev-campus').value,
     reg:      +document.getElementById('ev-reg').value      || 0,
     sample:   +document.getElementById('ev-sample').value   || 0,
@@ -4636,6 +4700,7 @@ function addEvent() {
     if (el) el.value = '';
   });
   renderChannelRows('ev-channels', []);
+  renderPhotoCards('ev-photos', []);
   refreshCustomFieldsUI('ev', '', {});
   switchSection('event','list');
 }
@@ -4990,6 +5055,7 @@ function openEventModal(idx) {
   document.getElementById('em-improvement').value  = e.improvement  || '';
   document.getElementById('em-photo-url').value    = e.photo_url    || '';
   renderChannelRows('em-channels', e.channels);
+  renderPhotoCards('em-photos', e.photos);
   refreshCustomFieldsUI('em', e.type, e.custom);
   updateCrossTagDatalist();
   openModal('eventModal');
@@ -5010,6 +5076,7 @@ function saveEventEdit() {
     type:     emType,
     tplType:  emType,
     custom:   collectCustomFields('em-custom-fields', emType),
+    photos:   collectPhotos('em-photos'),
     campus:   document.getElementById('em-campus').value,
     reg:      +document.getElementById('em-reg').value      || 0,
     sample:   +document.getElementById('em-sample').value   || 0,
@@ -5262,7 +5329,7 @@ async function exportEventPptx(idx, audience, overrides){
     const tblOpt = { x:0.6, y:1.4, w:12.1, fontSize:13, color:'1A2820', border:{type:'solid',color:'DDE8E3',pt:1}, valign:'middle' };
     const th = t => ({ text:t, options:{ bold:true, color:G, fill:{color:'ECFDF5'} } });
     const bold = (t,c)=>({text:t,options:{bold:true,fill:{color:c||'F1F8F4'}}});
-    const note = (s, a, sug, y)=>{ const t=[a?('📌 分析：'+a):'', sug?('📌 建議：'+sug):''].filter(Boolean).join('\n'); if(t) s.addText(t,{x:0.6,y:y||5.0,w:12.1,h:1.9,fontSize:12,color:SUB,lineSpacingMultiple:1.25,valign:'top'}); };
+    const note = (s, a, sug, y)=>{ const t=[a?('分析：'+a):'', sug?('建議：'+sug):''].filter(Boolean).join('\n'); if(t) s.addText(t,{x:0.6,y:y||5.0,w:12.1,h:1.9,fontSize:12,color:SUB,lineSpacingMultiple:1.25,valign:'top'}); };
     const para = (s,txt,y)=> s.addText(txt||'—',{x:0.6,y:y||1.4,w:12.1,h:5.4,fontSize:15,color:'1A2820',lineSpacingMultiple:1.35,valign:'top'});
     let s;
     const _SX=['壹','貳','參','肆','伍','陸','柒','捌']; let _sx=0; const SEC=()=>_SX[_sx++]; const hasKol=m.kols.length>0;
@@ -5298,8 +5365,19 @@ async function exportEventPptx(idx, audience, overrides){
     if (m.media.length){ s = pptx.addSlide(); head(s,SSUB()+'　媒體新聞曝光');
       const rows=[[th('日期'),th('媒體'),th('標題'),th('性質')]].concat(m.media.map(md=>[md.date||'—',(md.mediaName||md.name||'—'),(md.title||'—'),(md.nature||'—')]));
       s.addTable(rows,{...tblOpt,colW:[1.8,2.6,5.3,2.4]}); }
-    // 伍 活動照片
-    s = pptx.addSlide(); head(s,SEC()+'、活動照片記錄'); para(s, ev.photo_url ? ('照片連結：'+ev.photo_url) : '（請於此投影片插入活動照片）');
+    // 伍 活動照片（內嵌，每張投影片 2 張）
+    if ((ev.photos||[]).length){
+      const phs=ev.photos, per=2, boxW=5.6, boxH=4.6;
+      for(let i=0;i<phs.length;i+=per){
+        s=pptx.addSlide(); head(s,(i===0?SEC()+'、':'')+'活動照片記錄');
+        for(let j=0;j<per && i+j<phs.length;j++){
+          const ph=phs[i+j], cx=0.7+j*6.2;
+          const r=Math.min(boxW/(ph.w||800), boxH/(ph.h||600)), iw=(ph.w||800)*r, ih=(ph.h||600)*r;
+          try{ s.addImage({ data:ph.d, x:cx+(boxW-iw)/2, y:1.5, w:iw, h:ih }); }catch(e){}
+          if(ph.c) s.addText(ph.c,{x:cx,y:1.5+boxH+0.05,w:boxW,h:0.5,fontSize:12,color:SUB,align:'center'});
+        }
+      }
+    } else { s = pptx.addSlide(); head(s,SEC()+'、活動照片記錄'); para(s, ev.photo_url ? ('照片連結：'+ev.photo_url) : '（請於「編輯活動 → 活動照片佐證」上傳照片）'); }
     // 陸 成效與總結建議
     s = pptx.addSlide(); head(s,SEC()+'、活動成效與總結建議');
     s.addText(`一、問卷回饋摘要\n${n.survey||'—'}\n\n二、活動成效總結\n${n.conclusion||'—'}\n\n三、未來建議方向\n${n.future||'—'}`,{x:0.6,y:1.4,w:12.1,h:5.5,fontSize:14,color:'1A2820',lineSpacingMultiple:1.3,valign:'top'});
@@ -5322,7 +5400,7 @@ async function exportEventDocx(idx, audience, overrides){
     const h1 = t => new Paragraph({ spacing:{before:240,after:120}, border:{left:{style:'single',size:18,color:'6EC300',space:8}}, children:[new TextRun({text:t,bold:true,color:GREEN,size:30})] });
     const h2 = t => new Paragraph({ spacing:{before:160,after:80}, children:[new TextRun({text:t,bold:true,color:GREEN,size:24})] });
     const p  = t => new Paragraph({ spacing:{after:120,line:300}, children: String(t==null?'':t).split('\n').map((line,i)=> new TextRun({ text:line, size:24, break: i>0?1:0 })) });
-    const pNote = (label, t) => t ? new Paragraph({ spacing:{after:80}, children:[ new TextRun({text:'📌 '+label+'：',bold:true,size:21,color:GREEN}), ...String(t).split('\n').map((line,i)=>new TextRun({text:line,size:21,break:i>0?1:0})) ] }) : null;
+    const pNote = (label, t) => t ? new Paragraph({ spacing:{after:80}, children:[ new TextRun({text:label+'：',bold:true,size:22,color:GREEN}), ...String(t).split('\n').map((line,i)=>new TextRun({text:line,size:22,break:i>0?1:0})) ] }) : null;
     const cell = (t, opt)=> new TableCell({ width:{size:opt&&opt.w||2500,type:WidthType.DXA}, shading: opt&&opt.head?{fill:'ECFDF5'}:(opt&&opt.tot?{fill:'F1F8F4'}:undefined), children:[ new Paragraph({ alignment: opt&&opt.right?AlignmentType.RIGHT:AlignmentType.LEFT, children:[ new TextRun({ text:String(t==null?'':t), bold:!!(opt&&(opt.head||opt.tot)), size:20 }) ] }) ] });
     const table = (header, rows, widths, totRow)=> new Table({ width:{size:100,type:WidthType.PERCENTAGE}, rows:[
       new TableRow({ tableHeader:true, children:header.map((t,i)=>cell(t,{head:true,w:widths&&widths[i]})) }),
@@ -5359,8 +5437,18 @@ async function exportEventDocx(idx, audience, overrides){
       [pNote('分析',n.kolAnalysis), pNote('建議',n.kolSuggest)].forEach(x=>x&&kids.push(x)); }
     if (m.media.length){ kids.push(h2(NSUB()+'. 媒體新聞曝光'));
       kids.push(table(['日期','媒體','標題','性質'], m.media.map(md=>[md.date||'—',(md.mediaName||md.name||'—'),(md.title||'—'),(md.nature||'—')]), [1700,2400,4100,1800])); }
-    // 伍 活動照片記錄
-    kids.push(h1(SEC()+'、活動照片記錄')); kids.push(p(ev.photo_url ? ('照片連結：'+ev.photo_url) : '（可於匯出後插入活動照片）'));
+    // 伍 活動照片記錄（內嵌圖片，匯出 Word 不跑版）
+    kids.push(h1(SEC()+'、活動照片記錄'));
+    if ((ev.photos||[]).length){
+      ev.photos.forEach(ph=>{
+        try{
+          const mw=400; let w=ph.w||mw, h=ph.h||300; if(w>mw){ h=Math.round(h*mw/w); w=mw; }
+          kids.push(new Paragraph({ alignment:AlignmentType.CENTER, spacing:{after:ph.c?40:140}, children:[ new ImageRun({ data:_b64u8(ph.d.split(',')[1]), transformation:{width:w,height:h} }) ] }));
+          if(ph.c) kids.push(new Paragraph({ alignment:AlignmentType.CENTER, spacing:{after:140}, children:[new TextRun({text:ph.c,size:20,color:'5A7A6A'})] }));
+        }catch(e){}
+      });
+      if(ev.photo_url) kids.push(p('完整相簿：'+ev.photo_url));
+    } else kids.push(p(ev.photo_url ? ('照片連結：'+ev.photo_url) : '（可於「編輯活動 → 活動照片佐證」上傳照片）'));
     // 陸 活動成效與總結建議
     kids.push(h1(SEC()+'、活動成效與總結建議'));
     kids.push(h2('一、問卷回饋摘要')); kids.push(p(n.survey||'—'));
@@ -5390,7 +5478,7 @@ function _buildReportHtml(o) {
   const TH = (t,r) => `<th style="padding:8px;text-align:${r?'right':'left'};border:1px solid #A7F3D0;">${t}</th>`;
   const TD = (t,r) => `<td style="padding:8px;border:1px solid #DDE8E3;${r?'text-align:right;font-family:Inter,sans-serif;':''}">${t==null?'':t}</td>`;
   const sub = (n,t) => `<h3 style="color:#064E2C;margin:18px 0 8px;font-size:15px;">${n}. ${t}</h3>`;
-  const lbl = (t) => `<div style="font-size:12.5px;font-weight:700;color:#064E2C;margin:10px 0 4px;">📌 ${t}</div>`;
+  const lbl = (t) => `<div style="font-size:12.5px;font-weight:700;color:#064E2C;margin:10px 0 4px;">${t}</div>`;
   // 段落動態編號（壹為封面；有 KOL 才出現 KOL 段，編號自動接續不留空號）
   const _SECS=['壹','貳','參','肆','伍','陸','柒','捌']; let _si=0; const SEC=()=>_SECS[_si++];
   let _su=0; const NSUB=()=>++_su;
@@ -5448,10 +5536,19 @@ function _buildReportHtml(o) {
       <tbody>${m.media.map(md=>`<tr>${TD(md.date||'—')}${TD((md.mediaName||md.name||'—')+(md.mediaType?`<br><small style="color:#90A89E;">${md.mediaType}</small>`:''))}${TD(md.url?`<a href="${md.url}" target="_blank" style="color:#00AAC8;text-decoration:none;">${md.title||'—'}</a>`:(md.title||'—'))}${TD(md.nature||'—')}</tr>`).join('')}</tbody>
     </table>` : '';
 
-  // 伍 活動照片
-  const photoBlock = ev.photo_url
-    ? `<div style="background:#fff;border:1px solid #DDE8E3;border-radius:8px;padding:14px 16px;"><a href="${ev.photo_url}" target="_blank" style="color:#00AAC8;font-size:14px;word-break:break-all;">${ev.photo_url}</a></div>`
-    : ed('photoNote','','（貼上活動照片雲端連結，或在 Word/PPT 匯出後插入照片）');
+  // 伍 活動照片（內嵌圖片）
+  const photos = ev.photos || [];
+  const photoBlock = photos.length
+    ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">`
+      + photos.map(p=>`<figure style="margin:0;border:1px solid #DDE8E3;border-radius:8px;overflow:hidden;background:#fff;">
+          <img src="${p.d}" style="width:100%;display:block;">
+          ${p.c?`<figcaption style="font-size:12.5px;color:#5A7A6A;padding:8px 10px;text-align:center;">${p.c}</figcaption>`:''}
+        </figure>`).join('')
+      + `</div>`
+      + (ev.photo_url?`<div style="margin-top:10px;font-size:13px;"><a href="${ev.photo_url}" target="_blank" style="color:#00AAC8;">完整相簿連結</a></div>`:'')
+    : (ev.photo_url
+        ? `<div style="background:#fff;border:1px solid #DDE8E3;border-radius:8px;padding:14px 16px;"><a href="${ev.photo_url}" target="_blank" style="color:#00AAC8;font-size:14px;word-break:break-all;">${ev.photo_url}</a></div>`
+        : ed('photoNote','','（在「編輯活動 → 活動照片佐證」上傳照片，會內嵌到這裡與 Word/PPT）'));
 
   return `<!DOCTYPE html>
 <html lang="zh-TW">
@@ -5497,12 +5594,12 @@ function _buildReportHtml(o) {
 <body>
   <div class="report-toolbar">
     <strong style="color:#064E2C;margin-right:8px;">活動成果報告</strong>
-    <button class="btn-print" onclick="window.print()">🖨️ 列印 / 存 PDF</button>
-    <button class="btn-word" onclick="exportDocx()">📄 匯出 Word (.docx)</button>
-    <button class="btn-pptx" onclick="exportPptx()">📑 匯出 PPT (.pptx)</button>
-    <button class="btn-word2" onclick="exportWord()">📝 簡易 Word (.doc)</button>
-    <button class="btn-copy" onclick="copyAll()">📋 複製全文</button>
-    <button class="btn-edit-toggle" onclick="toggleEditAll()">✏️ 切換編輯模式</button>
+    <button class="btn-print" onclick="window.print()">列印 / 存 PDF</button>
+    <button class="btn-word" onclick="exportDocx()">匯出 Word (.docx)</button>
+    <button class="btn-pptx" onclick="exportPptx()">匯出 PPT (.pptx)</button>
+    <button class="btn-word2" onclick="exportWord()">簡易 Word (.doc)</button>
+    <button class="btn-copy" onclick="copyAll()">複製全文</button>
+    <button class="btn-edit-toggle" onclick="toggleEditAll()">切換編輯模式</button>
     <span style="margin-left:auto;font-size:12px;color:#5A7A6A;">提示：點擊文字區塊即可直接修改</span>
   </div>
   <div class="report" id="reportRoot">
@@ -5566,7 +5663,7 @@ function _buildReportHtml(o) {
     const els = root.querySelectorAll('[contenteditable]');
     const turnOn = els.length && els[0].getAttribute('contenteditable') === 'false';
     els.forEach(el => el.setAttribute('contenteditable', turnOn ? 'true' : 'false'));
-    alert(turnOn ? '✏️ 編輯模式已啟用' : '🔒 編輯模式已關閉');
+    alert(turnOn ? '編輯模式已啟用' : '編輯模式已關閉');
   }
   function copyAll() {
     const text = document.getElementById('reportRoot').innerText;
@@ -6009,33 +6106,33 @@ function openCampaignReportModal(name) {
     `【活動成果報告】${name}`,
     `${'═'.repeat(42)}`,
     ``,
-    `📅 活動日期：${ev.date}`,
-    `🏥 類型：${ev.type}　院區：${ev.campus}`,
-    ev.speaker ? `👤 主講：${ev.speaker}` : null,
+    `活動日期：${ev.date}`,
+    `類型：${ev.type}　院區：${ev.campus}`,
+    ev.speaker ? `主講：${ev.speaker}` : null,
     ``,
-    chans.length ? `📣 社群／曝光來源` : null,
+    chans.length ? `社群／曝光來源` : null,
     ...chans.map(c => `    • ${c.name}：觸及 ${(c.reach||0).toLocaleString()}${c.engage?`、互動 ${c.engage.toLocaleString()}`:''}${c.note?`（${c.note}）`:''}`),
     chans.length ? `  曝光來源合計觸及：${chReach.toLocaleString()} 人次` : null,
     chans.length ? `` : null,
-    `📱 社群媒體成效`,
+    `社群媒體成效`,
     `  FB 貼文：${linkedPosts.length} 篇`,
     ...linkedPosts.map(p => `    • ${p.date}  ${p.title.slice(0,30)}  [${p.img_type||p.type}]  觸及 ${(p.reach||0).toLocaleString()}`),
     `  FB 社群總觸及：${fbReach.toLocaleString()} 人次`,
     reelsPosts.length ? `  Reels 短影音：${reelsPosts.length} 支，觸及 ${reelsReach.toLocaleString()} 次` : null,
     ``,
-    `📰 媒體新聞曝光`,
+    `媒體新聞曝光`,
     `  報導篇數：${linkedMedia.length} 篇`,
     ...linkedMedia.map(m => `    • ${m.date}  ${m.name}  ${(m.title||'').slice(0,24)}  觸及 ${(m.reach||0).toLocaleString()}`),
     `  媒體總觸及：${mediaReach.toLocaleString()} 人次`,
     ``,
-    `🎯 活動數據`,
+    `活動數據`,
     `  報名人數：${ev.reg||0} 人`,
     `  實際出席：${ev.attend||0} 人（出席率 ${attendRate}）`,
     ev.sat ? `  滿意度：${ev.sat} / 5` : null,
     ``,
-    `📊 整合成效`,
+    `整合成效`,
     `  跨平台合計觸及：${totalReach.toLocaleString()} 人次`,
-    ev.note ? `\n📝 備註\n  ${ev.note}` : null,
+    ev.note ? `\n備註\n  ${ev.note}` : null,
   ].filter(l => l !== null).join('\n');
 
   document.getElementById('crModalTitle').textContent = `成果報告 ─ ${name}`;
@@ -8137,7 +8234,6 @@ function renderWarRoom() {
   if (!months.length) {
     wrap.innerHTML = _warSectionOnboard() + _warSectionQuickAccess()
       + '<div style="padding:48px;text-align:center;background:var(--surface);border-radius:14px;border:1px solid var(--border);">'
-      + '<div style="font-size:48px;margin-bottom:12px;">📡</div>'
       + '<div style="font-size:14px;color:var(--text-muted);">尚無 GA4 資料，戰情數據區會在匯入後顯示；上方「快速登錄」隨時可用</div>'
       + '<button class="btn btn-primary" style="margin-top:14px;" onclick="switchSection(\'warroom\',\'quickimport\')">前往快速匯入</button>'
       + '</div>';
@@ -8228,7 +8324,7 @@ function _warSectionOnboard() {
     + '</div>';
   return '<div style="background:linear-gradient(135deg,#064E2C,#1a8454);border-radius:14px;padding:18px 22px;margin-bottom:16px;box-shadow:var(--shadow);">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:14px;">'
-    +   '<div style="font-size:15px;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px;">👋 新手指引 ─ 3 步上手</div>'
+    +   '<div style="font-size:15px;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px;">新手指引 ─ 3 步上手</div>'
     +   '<button onclick="dismissOnboard()" style="background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;">知道了，不再顯示</button>'
     + '</div>'
     + '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px;">'
@@ -8238,9 +8334,9 @@ function _warSectionOnboard() {
     + '</div>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap;">'
     +   (hasDemo
-        ? '<button class="btn" onclick="switchSection(\'event\',\'list\')" style="background:#fff;color:#064E2C;font-weight:700;font-size:13px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">▶ 看 GWD 範例活動</button>'
+        ? '<button class="btn" onclick="switchSection(\'event\',\'list\')" style="background:#fff;color:#064E2C;font-weight:700;font-size:13px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">看 GWD 範例活動</button>'
           + '<button onclick="removeDemoData()" style="background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:inherit;">移除範例資料</button>'
-        : '<button class="btn" onclick="loadDemoData()" style="background:#FFB900;color:#1A2820;font-weight:700;font-size:13px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">🌱 載入 GWD 範例看看</button>')
+        : '<button class="btn" onclick="loadDemoData()" style="background:#FFB900;color:#1A2820;font-weight:700;font-size:13px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">載入 GWD 範例看看</button>')
     + '</div>'
     + '</div>';
 }
