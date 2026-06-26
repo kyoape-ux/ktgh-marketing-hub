@@ -8138,7 +8138,7 @@ function renderWarRoom() {
   if (!wrap) return;
   const months = (typeof gaAvailableMonths==='function' ? gaAvailableMonths() : []);
   if (!months.length) {
-    wrap.innerHTML = _warSectionQuickAccess()
+    wrap.innerHTML = _warSectionOnboard() + _warSectionQuickAccess()
       + '<div style="padding:48px;text-align:center;background:var(--surface);border-radius:14px;border:1px solid var(--border);">'
       + '<div style="font-size:48px;margin-bottom:12px;">📡</div>'
       + '<div style="font-size:14px;color:var(--text-muted);">尚無 GA4 資料，戰情數據區會在匯入後顯示；上方「快速登錄」隨時可用</div>'
@@ -8151,7 +8151,8 @@ function renderWarRoom() {
 
   // 並排組裝
   wrap.innerHTML =
-    _warSectionQuickAccess()
+    _warSectionOnboard()
+    + _warSectionQuickAccess()
     + '<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:16px;">'
     + _warSectionAlerts(curYm, cur)
     + _warSectionKpiSnapshot(curYm, cur, months)
@@ -8172,6 +8173,80 @@ function renderWarRoom() {
     + '<div style="display:grid;grid-template-rows:1fr 1fr;gap:16px;">'
     +   _warSectionTasks()
     +   _warSectionDataHealth()
+    + '</div>'
+    + '</div>';
+}
+
+// ── 🌱 範例資料（GWD）：一鍵載入 / 移除，皆標記 demo:true ──
+const DEMO_CAMPAIGN = '【範例】GWD 世界健康日在光田';
+function _hasDemoData(){ return (store.events||[]).some(e=>e.demo) || (store.kols||[]).some(k=>k.demo); }
+function loadDemoData(){
+  if(!requireEdit()) return;
+  if(_hasDemoData()){ showToast('範例資料已存在'); switchSection('event','list'); return; }
+  store.events = store.events || []; store.kols = store.kols || []; store.media = store.media || []; store.posts = store.posts || [];
+  store.events.push({ demo:true, date:'2025-06-14', name:DEMO_CAMPAIGN, type:'KOL公益活動', tplType:'KOL公益活動', campus:'向上院區',
+    reg:90, sample:82, attend:82, sat:4.9, speaker:'盧詠瑜',
+    purpose:'結合運動、香氛、繪畫互動與靜心瑜伽，帶領參與者在動靜之間覺察身心、放鬆情緒。',
+    content:'戶外瑜伽＋聲音療癒、互畫對方＋冥想、InBody 檢測、精油調香體驗。',
+    observation:'沉浸式體驗與互動設計獲肯定，戶外瑜伽與聲音療癒最受青睞。',
+    improvement:'未來貼文加強情緒引導與自我連結；KOL 貼文加上主辦單位標註與導流連結。',
+    photo_url:'https://drive.google.com/（範例相簿連結）',
+    custom:{ kol_count:41, kol_fans:15000, family_count:41, survey_count:17, survey_avg:'4.9' },
+    channels:[
+      {name:'官方FB貼文',reach:12999,engage:1276,note:'4 篇：預告/紀錄/懶人包×2'},
+      {name:'官方IG限動/Reels',reach:2793,engage:33,note:'非粉絲逾 7 成'},
+      {name:'民眾FB打卡',reach:800,engage:0,note:'現場打卡'},
+      {name:'LINE社群分享',reach:1200,engage:0},
+      {name:'KOL曝光',reach:9314,engage:287,note:'10 則 KOL'},
+    ],
+    tags:['GWD','KOL公益'] });
+  store.kols.push(
+    { demo:true, date:'2025-06-18', name:'DevonDine', platform:'Instagram', content_type:'Reels', followers:20000, reach:5778, engage:112, campaign:DEMO_CAMPAIGN, url:'', note:'自然曝光' },
+    { demo:true, date:'2025-06-14', name:'Joy Lee',  platform:'Instagram', content_type:'Reels', followers:42000, reach:3536, engage:178, campaign:DEMO_CAMPAIGN, url:'', note:'國家級運動網紅' });
+  store.posts.push(
+    { demo:true, date:'2025-06-12', title:'#抽獎活動預告', type:'相片', img_type:'社群圖文', cat:'活動/講座', reach:3136, engage:178, click:0, month:'2025-06', phase:'前期預告', campaign:DEMO_CAMPAIGN, url:'' },
+    { demo:true, date:'2025-06-14', title:'GWD 活動當天記錄', type:'相片', img_type:'實拍照片', cat:'活動/講座', reach:5555, engage:286, click:0, month:'2025-06', phase:'活動當日', campaign:DEMO_CAMPAIGN, url:'' });
+  store.media.push({ demo:true, date:'2025-06-20', name:'商業周刊／良醫健康網', type:'網路媒體', section:'健康', title:'光田 GWD 公益活動報導', nature:'正面報導', reach:50000, url:'', note:'', campaign:DEMO_CAMPAIGN, tags:['GWD'] });
+  saveStore();
+  showToast('已載入 GWD 範例資料，到「活動列表」按〈產生成果報告〉看看！');
+  switchSection('event','list');
+}
+function removeDemoData(){
+  if(!requireEdit()) return;
+  ['events','kols','media','posts'].forEach(k=>{ if(Array.isArray(store[k])) store[k] = store[k].filter(x=>!x.demo); });
+  saveStore();
+  showToast('已移除範例資料');
+  if (document.getElementById('sec-warroom-dashboard').classList.contains('active')) renderWarRoom();
+  else switchSection('warroom','dashboard');
+}
+function dismissOnboard(){ try{ localStorage.setItem('ktgh_onboarded','1'); }catch(e){} renderWarRoom(); }
+function reopenOnboard(){ try{ localStorage.removeItem('ktgh_onboarded'); }catch(e){} switchSection('warroom','dashboard'); renderWarRoom(); }
+
+// ── 👋 新手指引橫幅（戰情首頁最上方；可關閉）──
+function _warSectionOnboard() {
+  let done=false; try{ done = localStorage.getItem('ktgh_onboarded')==='1'; }catch(e){}
+  if (done) return '';
+  const hasDemo = _hasDemoData();
+  const step = (n,title,desc) =>
+    '<div style="flex:1;min-width:150px;display:flex;gap:10px;align-items:flex-start;">'
+    + '<div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#fff;color:#064E2C;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px;">'+n+'</div>'
+    + '<div><div style="font-weight:700;font-size:13.5px;color:#fff;">'+title+'</div><div style="font-size:11.5px;color:rgba(255,255,255,.85);line-height:1.5;margin-top:2px;">'+desc+'</div></div>'
+    + '</div>';
+  return '<div style="background:linear-gradient(135deg,#064E2C,#1a8454);border-radius:14px;padding:18px 22px;margin-bottom:16px;box-shadow:var(--shadow);">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:14px;">'
+    +   '<div style="font-size:15px;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px;">👋 新手指引 ─ 3 步上手</div>'
+    +   '<button onclick="dismissOnboard()" style="background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;">知道了，不再顯示</button>'
+    + '</div>'
+    + '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:16px;">'
+    +   step('1','看這裡','這頁「快速登錄」就是入口，要做什麼點對應卡片。')
+    +   step('2','填這裡','「新增活動回報」填活動數據與曝光來源；「匯入貼文數據」貼 FB 後台 Excel。')
+    +   step('3','產出','活動列表按〈產生成果報告〉一鍵出 PDF/Word/PPT；或「匯出月報」。')
+    + '</div>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+    +   (hasDemo
+        ? '<button class="btn" onclick="switchSection(\'event\',\'list\')" style="background:#fff;color:#064E2C;font-weight:700;font-size:13px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">▶ 看 GWD 範例活動</button>'
+          + '<button onclick="removeDemoData()" style="background:rgba(255,255,255,.18);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:inherit;">移除範例資料</button>'
+        : '<button class="btn" onclick="loadDemoData()" style="background:#FFB900;color:#1A2820;font-weight:700;font-size:13px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">🌱 載入 GWD 範例看看</button>')
     + '</div>'
     + '</div>';
 }
