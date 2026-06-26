@@ -915,7 +915,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <a class="nav-item" onclick="switchSection('campaign','hub')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Campaign 成果看板
     </a>
-    <a class="nav-item" onclick="switchSection('kol','list')">
+    <a class="nav-item" style="display:none" onclick="switchSection('kol','list')"><!-- 暫時隱藏 KOL，要用再開 -->
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> KOL 成效追蹤
     </a>
     </div></div>
@@ -3698,7 +3698,6 @@ const FEATURE_CATALOG = [
   { k:'line-overview',   cat:'數據', icon:'message',   color:'#00B900', title:'LINE@',       desc:'好友、觸及、點擊', stat: () => (store.linePosts||[]).filter(x=>!x.deleted_at).length+' 則' },
   { k:'video-list',      cat:'數據', icon:'video',     color:'#F97316', title:'YT/IG 影片',  desc:'觀看互動追蹤', stat: () => (store.videoItems||[]).filter(x=>!x.deleted_at).length+' 支' },
   { k:'web-seoArticles', cat:'數據', icon:'search',    color:'#1E40AF', title:'SEO 文章',     desc:'排名與搜尋量', stat: () => (store.seoArticles||[]).filter(x=>!x.deleted_at).length+' 篇' },
-  { k:'kol-list',        cat:'數據', icon:'mic',       color:'#7C3AED', title:'KOL 合作',     desc:'觸及互動成果', stat: () => (store.kols||[]).filter(x=>!x.deleted_at).length+' 案' },
   // 進階分析
   { k:'fb-analysis',  cat:'進階', icon:'bar-chart',   color:'#1877F2', title:'組合分析',     desc:'貼文交叉矩陣' },
   { k:'fb-ab',        cat:'進階', icon:'flask',       color:'#1877F2', title:'A/B 分析',     desc:'貼文對照測試' },
@@ -8200,9 +8199,6 @@ function loadDemoData(){
       {name:'KOL曝光',reach:9314,engage:287,note:'10 則 KOL'},
     ],
     tags:['GWD','KOL公益'] });
-  store.kols.push(
-    { demo:true, date:'2025-06-18', name:'DevonDine', platform:'Instagram', content_type:'Reels', followers:20000, reach:5778, engage:112, campaign:DEMO_CAMPAIGN, url:'', note:'自然曝光' },
-    { demo:true, date:'2025-06-14', name:'Joy Lee',  platform:'Instagram', content_type:'Reels', followers:42000, reach:3536, engage:178, campaign:DEMO_CAMPAIGN, url:'', note:'國家級運動網紅' });
   store.posts.push(
     { demo:true, date:'2025-06-12', title:'#抽獎活動預告', type:'相片', img_type:'社群圖文', cat:'活動/講座', reach:3136, engage:178, click:0, month:'2025-06', phase:'前期預告', campaign:DEMO_CAMPAIGN, url:'' },
     { demo:true, date:'2025-06-14', title:'GWD 活動當天記錄', type:'相片', img_type:'實拍照片', cat:'活動/講座', reach:5555, engage:286, click:0, month:'2025-06', phase:'活動當日', campaign:DEMO_CAMPAIGN, url:'' });
@@ -8269,7 +8265,7 @@ function _warSectionQuickAccess() {
     { k:'fb-upload',   icon:'upload',   color:'#1877F2', title:'匯入貼文數據', desc:'FB 後台 Excel / JSON' },
     { k:'fb-overview', icon:'facebook', color:'#1877F2', title:'粉專總覽',     desc:'觸及互動 Dashboard' },
     { k:'fb-posts',    icon:'grid',     color:'#1877F2', title:'貼文成效列表', desc:'逐篇數據' },
-    { k:'kol-list',    icon:'mic',      color:'#7C3AED', title:'KOL 成效追蹤', desc:'觸及互動成果' },
+    { k:'fb-calendar', icon:'calendar', color:'#1877F2', title:'內容日曆',     desc:'發文時間軸' },
   ];
   const clinic = [
     { k:'clinic-matrix',  icon:'check-list', color:'#2D6A4F', title:'門診表填入',   desc:'月度傳達矩陣' },
