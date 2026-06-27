@@ -949,6 +949,9 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <a class="nav-item" onclick="switchSection('utm','builder')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> UTM 連結產生器
     </a>
+    <a class="nav-item" onclick="switchSection('utm','stats')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> UTM 成效回收
+    </a>
     </div></div>
     <div class="nav-group" data-key="clinic">
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>門診表資料庫</span><span class="chevron">▼</span></div>
@@ -1956,6 +1959,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <!-- ══ CAMPAIGN HUB ══ -->
     <!-- ══ UTM 連結產生器 ══ -->
     <div class="section" id="sec-utm-builder"><div id="utmContent"></div></div>
+    <!-- ══ UTM 成效回收 ══ -->
+    <div class="section" id="sec-utm-stats"><div id="utmStatsContent"></div></div>
 
     <div class="section" id="sec-campaign-hub">
       <div id="campaignListView">
@@ -3926,6 +3931,7 @@ function switchSection(module, sub) {
     'event-dashboard':  ['活動成效看板',      '活動場次、出席率、滿意度分析'],
     'campaign-hub':     ['Campaign 成果看板', '跨平台活動整合成效追蹤'],
     'utm-builder':      ['UTM 連結產生器',    '產生帶 UTM 參數的追蹤連結與 QR，回收 GA4 成效'],
+    'utm-stats':        ['UTM 成效回收',      '匯入 GA4 來源/媒介/活動，對回活動看各管道流量轉換'],
     'kol-list':         ['KOL 成效追蹤',      'KOL / 網紅合作觸及與互動'],
     'kol-add':          ['新增 KOL 記錄',     '填寫 KOL 合作成效資料'],
     'clinic-matrix':    ['月度傳達矩陣',      '門診表每月題材 × 傳達管道布署追蹤'],
@@ -3959,6 +3965,7 @@ function switchSection(module, sub) {
   if (key === 'media-list')     renderMedia();
   if (key === 'campaign-hub')  renderCampaignHub();
   if (key === 'utm-builder')   renderUtm();
+  if (key === 'utm-stats')     renderUtmStats();
   if (key === 'kol-list')      renderKols();
   if (key === 'kol-add')       updateCampaignDatalist();
   if (key === 'fb-calendar')   renderCalendar();
@@ -13317,6 +13324,106 @@ function utmSaveBatch(){
   if(!store.utmLinks) store.utmLinks=[];
   store.utmLinks.unshift(...window.__utmBatch);
   saveStore(); utmRenderSaved(); showToast(window.__utmBatch.length+' 條連結已儲存');
+}
+
+// ═══════════════════════════════════════════
+//  UTM 成效回收分析（Phase 2）
+//  匯入 GA4「活動 / 來源·媒介 / 工作階段·使用者·轉換」→ 對回活動
+//  store.utmStats = [{campaign, source, medium, sessions, users, conv}]
+// ═══════════════════════════════════════════
+function _utmMatchActivity(campaign){
+  const c=(campaign||'').trim().toLowerCase(); if(!c) return null;
+  const evs = (typeof activeEvents==='function'?activeEvents():[]);
+  const hit = evs.find(e => { const sl=_slug(e.name); return (sl && sl===c) || (e.name||'').toLowerCase()===c; });
+  return hit ? hit.name : null;
+}
+function utmStatsParse(){
+  if(!requireEdit()) return;
+  const ta=document.getElementById('utm-stats-in'); const raw=(ta?ta.value:'').trim();
+  if(!raw){ showToast('請先貼上 GA4 資料'); return; }
+  if(!store.utmStats) store.utmStats=[];
+  let added=0;
+  raw.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).forEach(line=>{
+    const cells=line.split(/\t|,/).map(c=>c.trim());
+    if(cells.length<3) return;
+    if(/活動|campaign|來源|source|工作階段|session|媒介/i.test(line) && isNaN(parseInt((cells[cells.length-1]||'').replace(/[^0-9]/g,''),10))) return; // header
+    const num=v=>{ const n=parseInt((v||'').replace(/[^0-9]/g,''),10); return isNaN(n)?0:n; };
+    const campaign=cells[0]; if(!campaign) return;
+    let source='', medium='', mi=1;
+    if(cells[1] && cells[1].indexOf('/')>=0){ const sm=cells[1].split('/'); source=sm[0].trim(); medium=(sm[1]||'').trim(); mi=2; }
+    else { source=cells[1]||''; medium=cells[2]||''; mi=3; }
+    store.utmStats.push({ campaign, source, medium, sessions:num(cells[mi]), users:num(cells[mi+1]), conv:num(cells[mi+2]) });
+    added++;
+  });
+  saveStore(); if(ta) ta.value=''; renderUtmStats(); showToast(added+' 列已匯入');
+}
+function utmStatsAdd(){
+  if(!requireEdit()) return;
+  const c=_utmVal('us-campaign'); if(!c){ showToast('請填活動代碼'); return; }
+  if(!store.utmStats) store.utmStats=[];
+  store.utmStats.push({ campaign:c, source:_utmVal('us-source'), medium:_utmVal('us-medium'), sessions:+_utmVal('us-sessions')||0, users:+_utmVal('us-users')||0, conv:+_utmVal('us-conv')||0 });
+  saveStore(); ['us-campaign','us-source','us-medium','us-sessions','us-users','us-conv'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  renderUtmStats(); showToast('已新增一列');
+}
+function utmStatsDel(i){ if(!requireEdit()) return; (store.utmStats||[]).splice(i,1); saveStore(); renderUtmStats(); }
+function utmStatsClear(){ if(!requireEdit()) return; if(!confirm('確定清空所有回收資料？')) return; store.utmStats=[]; saveStore(); renderUtmStats(); }
+function renderUtmStats(){
+  const el=document.getElementById('utmStatsContent'); if(!el) return;
+  const stats=store.utmStats||[];
+  const totalS=stats.reduce((s,r)=>s+(r.sessions||0),0), totalC=stats.reduce((s,r)=>s+(r.conv||0),0);
+  const byCamp={}; stats.forEach((r,i)=>{ r._i=i; (byCamp[r.campaign]=byCamp[r.campaign]||[]).push(r); });
+  const fmt=n=>(n||0).toLocaleString();
+  const analysis = Object.keys(byCamp).length ? Object.keys(byCamp).map(camp=>{
+    const rows=byCamp[camp]; const act=_utmMatchActivity(camp);
+    const ts=rows.reduce((s,r)=>s+(r.sessions||0),0), tu=rows.reduce((s,r)=>s+(r.users||0),0), tc=rows.reduce((s,r)=>s+(r.conv||0),0);
+    const cvr=ts? (tc/ts*100).toFixed(1)+'%':'—';
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+        <div style="font-size:14px;font-weight:700;color:#064E2C;">活動代碼：${camp} ${act?`<span style="color:var(--text-sub);font-weight:500;">→ ${act}</span>`:'<span style="color:var(--warn);font-weight:500;font-size:12px;">（未對應到活動）</span>'}</div>
+        <div style="font-size:12px;color:var(--text-sub);">工作階段 <b style="color:#064E2C;">${fmt(ts)}</b> ｜ 使用者 <b>${fmt(tu)}</b> ｜ 轉換 <b style="color:#064E2C;">${fmt(tc)}</b> ｜ 轉換率 <b>${cvr}</b></div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>來源</th><th>形式</th><th style="text-align:right;">工作階段</th><th style="text-align:right;">使用者</th><th style="text-align:right;">轉換</th><th></th></tr></thead><tbody>
+        ${rows.map(r=>`<tr><td>${r.source||'—'}</td><td>${r.medium||'—'}</td><td class="text-mono" style="text-align:right;">${fmt(r.sessions)}</td><td class="text-mono" style="text-align:right;">${fmt(r.users)}</td><td class="text-mono" style="text-align:right;">${fmt(r.conv)}</td><td style="text-align:right;"><button class="btn btn-outline" style="font-size:11px;padding:2px 8px;" data-perm="edit" onclick="utmStatsDel(${r._i})">刪</button></td></tr>`).join('')}
+      </tbody></table></div>
+    </div>`;
+  }).join('') : '<p style="font-size:13px;color:var(--text-muted);">尚無回收資料。請從 GA4 匯出「會話廣告活動 × 來源/媒介」報表，貼到上方匯入。</p>';
+  el.innerHTML = `
+    <div style="margin-bottom:18px;">
+      <div style="font-size:11px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;">UTM 成效回收</div>
+      <h3 style="font-size:18px;font-weight:800;">UTM 成效回收分析</h3>
+      <p style="font-size:12.5px;color:var(--text-sub);margin:4px 0 0;line-height:1.6;">把 UTM 連結帶進來的流量接回活動。從 GA4 匯出「會話廣告活動 ×（會話來源/媒介）」加上工作階段、使用者、關鍵事件，貼到下方即可。活動代碼需與產生連結時的 utm_campaign 一致才會自動對應。</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid #064E2C;border-radius:8px;padding:12px 14px;"><div style="font-size:12px;color:var(--text-sub);">總工作階段</div><div style="font-size:22px;font-weight:800;color:#064E2C;">${fmt(totalS)}</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid #064E2C;border-radius:8px;padding:12px 14px;"><div style="font-size:12px;color:var(--text-sub);">總轉換</div><div style="font-size:22px;font-weight:800;color:#064E2C;">${fmt(totalC)}</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid #064E2C;border-radius:8px;padding:12px 14px;"><div style="font-size:12px;color:var(--text-sub);">平均轉換率</div><div style="font-size:22px;font-weight:800;color:#064E2C;">${totalS?(totalC/totalS*100).toFixed(1)+'%':'—'}</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid #064E2C;border-radius:8px;padding:12px 14px;"><div style="font-size:12px;color:var(--text-sub);">活動數</div><div style="font-size:22px;font-weight:800;color:#064E2C;">${Object.keys(byCamp).length}</div></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+      <div style="font-size:14px;font-weight:800;margin-bottom:8px;">匯入 GA4 回收資料</div>
+      <p style="font-size:12px;color:var(--text-sub);margin:0 0 8px;">每行一筆，欄位以逗號或 Tab 分隔：<b>活動代碼, 來源/媒介, 工作階段, 使用者, 轉換</b>（例：<code>gwd, facebook / post, 320, 210, 18</code>）。也可用「來源, 形式」分兩欄。</p>
+      <textarea id="utm-stats-in" rows="4" style="width:100%;font-family:monospace;font-size:12px;border:1px solid var(--border);border-radius:6px;padding:8px;" placeholder="gwd, facebook / post, 320, 210, 18&#10;gwd, line / community, 140, 120, 9"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+        <button class="btn btn-primary" data-perm="edit" onclick="utmStatsParse()">匯入</button>
+        <button class="btn btn-outline" data-perm="edit" onclick="utmStatsClear()">清空全部</button>
+      </div>
+      <div style="border-top:1px dashed var(--border);margin-top:14px;padding-top:12px;">
+        <div style="font-size:12.5px;font-weight:700;color:#064E2C;margin-bottom:8px;">或手動新增一列</div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr) auto;gap:8px;align-items:end;">
+          <div class="form-group" style="margin:0;"><label style="font-size:11px;">活動代碼</label><input id="us-campaign" placeholder="gwd"></div>
+          <div class="form-group" style="margin:0;"><label style="font-size:11px;">來源</label><input id="us-source" list="utm-src-list" placeholder="facebook"></div>
+          <div class="form-group" style="margin:0;"><label style="font-size:11px;">形式</label><input id="us-medium" list="utm-med-list" placeholder="post"></div>
+          <div class="form-group" style="margin:0;"><label style="font-size:11px;">工作階段</label><input id="us-sessions" type="number" placeholder="0"></div>
+          <div class="form-group" style="margin:0;"><label style="font-size:11px;">使用者</label><input id="us-users" type="number" placeholder="0"></div>
+          <div class="form-group" style="margin:0;"><label style="font-size:11px;">轉換</label><input id="us-conv" type="number" placeholder="0"></div>
+          <button class="btn btn-outline" data-perm="edit" onclick="utmStatsAdd()" style="white-space:nowrap;">新增</button>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">
+      <div style="font-size:14px;font-weight:800;margin-bottom:12px;">各活動回收成效</div>
+      ${analysis}
+    </div>`;
 }
 
 // 自動以「檔案最後更新時間（部署時間）」標記版次，不必每次手動改
