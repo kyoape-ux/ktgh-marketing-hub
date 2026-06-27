@@ -943,6 +943,13 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> OKR 目標設定
     </a>
     </div></div>
+    <div class="nav-group" data-key="utm">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>行銷工具</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
+    <a class="nav-item" onclick="switchSection('utm','builder')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> UTM 連結產生器
+    </a>
+    </div></div>
     <div class="nav-group" data-key="clinic">
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>門診表資料庫</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
@@ -1947,6 +1954,9 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     </div>
 
     <!-- ══ CAMPAIGN HUB ══ -->
+    <!-- ══ UTM 連結產生器 ══ -->
+    <div class="section" id="sec-utm-builder"><div id="utmContent"></div></div>
+
     <div class="section" id="sec-campaign-hub">
       <div id="campaignListView">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -3915,6 +3925,7 @@ function switchSection(module, sub) {
     'settings-backup':  ['資料備份還原',      '本機自動快照與軟刪除回收筒'],
     'event-dashboard':  ['活動成效看板',      '活動場次、出席率、滿意度分析'],
     'campaign-hub':     ['Campaign 成果看板', '跨平台活動整合成效追蹤'],
+    'utm-builder':      ['UTM 連結產生器',    '產生帶 UTM 參數的追蹤連結與 QR，回收 GA4 成效'],
     'kol-list':         ['KOL 成效追蹤',      'KOL / 網紅合作觸及與互動'],
     'kol-add':          ['新增 KOL 記錄',     '填寫 KOL 合作成效資料'],
     'clinic-matrix':    ['月度傳達矩陣',      '門診表每月題材 × 傳達管道布署追蹤'],
@@ -3947,6 +3958,7 @@ function switchSection(module, sub) {
   if (key === 'event-dashboard') renderEventDashboard();
   if (key === 'media-list')     renderMedia();
   if (key === 'campaign-hub')  renderCampaignHub();
+  if (key === 'utm-builder')   renderUtm();
   if (key === 'kol-list')      renderKols();
   if (key === 'kol-add')       updateCampaignDatalist();
   if (key === 'fb-calendar')   renderCalendar();
@@ -13153,6 +13165,159 @@ function applyPermissions() {
 //  INIT
 // ═══════════════════════════════════════════
 const PUSH_FLAG = 'ktgh_pushed_v5';
+
+// ═══════════════════════════════════════════
+//  UTM 連結產生器（Phase 1）
+//  store.utmConfig（命名規範清單）、store.utmLinks（已存連結）
+// ═══════════════════════════════════════════
+const UTM_DEFAULTS = {
+  base: 'https://www.ktgh.com.tw/',
+  sources: ['facebook','instagram','line','youtube','kol','poster','edm'],
+  mediums: ['post','story','reels','social','community','qrcode','cpc'],
+  contents: ['teaser','recap','live','kv','album'],
+};
+function _utmCfg(){ if(!store.utmConfig) store.utmConfig = JSON.parse(JSON.stringify(UTM_DEFAULTS)); return store.utmConfig; }
+function _utmVal(id){ const e=document.getElementById(id); return e?e.value.trim():''; }
+function _slug(s){ return (s||'').toString().trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+function buildUtmUrl(target, c, s, m, content){
+  try{
+    const u = new URL(target);
+    if(s) u.searchParams.set('utm_source', s);
+    if(m) u.searchParams.set('utm_medium', m);
+    if(c) u.searchParams.set('utm_campaign', c);
+    if(content) u.searchParams.set('utm_content', content);
+    return u.toString();
+  }catch(e){ return ''; }
+}
+function _chanToUtm(name){
+  const n = name||'';
+  if(/限動|story/i.test(n)) return {source:'instagram', medium:'story'};
+  if(/reels/i.test(n))      return {source:'instagram', medium:'reels'};
+  if(/IG|instagram/i.test(n)) return {source:'instagram', medium:'post'};
+  if(/打卡/.test(n))         return {source:'facebook', medium:'checkin'};
+  if(/官方FB|facebook|FB/i.test(n)) return {source:'facebook', medium:'post'};
+  if(/LINE/i.test(n))        return {source:'line', medium:/社群|community/i.test(n)?'community':'social'};
+  if(/KOL/i.test(n))         return {source:'kol', medium:'kol'};
+  if(/YouTube|YT/i.test(n))  return {source:'youtube', medium:'social'};
+  if(/媒體|報導/.test(n))    return {source:'media', medium:'pr'};
+  return {source:'other', medium:'social'};
+}
+function renderUtm(){
+  const el = document.getElementById('utmContent'); if(!el) return;
+  const cfg = _utmCfg();
+  const evs = (typeof activeEvents==='function'?activeEvents():[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const dl = arr => arr.map(v=>`<option value="${v}">`).join('');
+  const evOpts = evs.map(e=>`<option value="${(e.name||'').replace(/"/g,'&quot;')}">${e.name}</option>`).join('');
+  el.innerHTML = `
+    <datalist id="utm-src-list">${dl(cfg.sources)}</datalist>
+    <datalist id="utm-med-list">${dl(cfg.mediums)}</datalist>
+    <datalist id="utm-con-list">${dl(cfg.contents)}</datalist>
+    <div style="margin-bottom:18px;">
+      <div style="font-size:11px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;">行銷追蹤連結</div>
+      <h3 style="font-size:18px;font-weight:800;">UTM 連結產生器</h3>
+      <p style="font-size:12.5px;color:var(--text-sub);margin:4px 0 0;line-height:1.6;">產生帶 UTM 參數的追蹤連結，貼到各平台後，GA4 就能精準分辨流量來自哪場活動、哪個管道。命名統一最重要，建議用下方清單。</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">
+        <div class="form-group" style="margin-bottom:12px;"><label>目標網址（要導去的頁面）</label><input id="utm-target" value="${cfg.base}" oninput="utmUpdate()" placeholder="https://..."></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>活動（自動帶入 utm_campaign）</label>
+          <select id="utm-event" onchange="utmPickEvent()"><option value="">— 不指定 / 自訂 —</option>${evOpts}</select></div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group"><label>活動代碼 utm_campaign</label><input id="utm-campaign" oninput="this.dataset.auto='0';utmUpdate()" placeholder="gwd2025"></div>
+          <div class="form-group"><label>來源 utm_source</label><input id="utm-source" list="utm-src-list" oninput="utmUpdate()" placeholder="facebook"></div>
+          <div class="form-group"><label>形式 utm_medium</label><input id="utm-medium" list="utm-med-list" oninput="utmUpdate()" placeholder="post"></div>
+          <div class="form-group"><label>素材 utm_content（選填）</label><input id="utm-content" list="utm-con-list" oninput="utmUpdate()" placeholder="teaser"></div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px;"><label>產生的追蹤連結</label><textarea id="utm-out" rows="3" readonly style="width:100%;font-family:monospace;font-size:12px;background:#F8FBFA;border:1px solid var(--border);border-radius:6px;padding:8px;"></textarea></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="utmCopy()">複製連結</button><button class="btn btn-outline" data-perm="edit" onclick="utmSave()">儲存此連結</button></div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;text-align:center;">
+        <div style="font-size:13px;font-weight:700;color:#064E2C;margin-bottom:12px;">QR Code（海報／現場掃描）</div>
+        <div id="utm-qr" style="display:inline-block;min-height:160px;"></div>
+        <div style="margin-top:12px;"><button class="btn btn-outline" onclick="utmDownloadQR()">下載 QR</button></div>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-top:20px;">
+      <div style="font-size:14px;font-weight:800;margin-bottom:4px;">批次產生（依活動的曝光管道）</div>
+      <p style="font-size:12px;color:var(--text-sub);margin:0 0 10px;">選一場活動，依它「社群／曝光來源」的每個管道，一次生出對應的追蹤連結。</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <select id="utm-batch-event" style="min-width:220px;">${evOpts}</select>
+        <button class="btn btn-outline" onclick="utmBatch()">產生各管道連結</button>
+      </div>
+      <div id="utm-batch-out" style="margin-top:12px;"></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-top:20px;">
+      <div style="font-size:14px;font-weight:800;margin-bottom:10px;">已儲存連結</div>
+      <div id="utm-saved"></div>
+    </div>`;
+  utmUpdate();
+  utmRenderSaved();
+}
+function utmPickEvent(){
+  const v = document.getElementById('utm-event').value;
+  if(v){ const c=document.getElementById('utm-campaign'); if(!c.value || c.dataset.auto!=='0'){ c.value=_slug(v)||v; c.dataset.auto='1'; } }
+  utmUpdate();
+}
+function utmUpdate(){
+  const url = buildUtmUrl(_utmVal('utm-target'),_utmVal('utm-campaign'),_utmVal('utm-source'),_utmVal('utm-medium'),_utmVal('utm-content'));
+  const out = document.getElementById('utm-out'); if(out) out.value = url || '目標網址格式不正確（需含 https://）';
+  utmRenderQR(url);
+}
+function utmRenderQR(url){
+  const box = document.getElementById('utm-qr'); if(!box) return;
+  if(!url || url.indexOf('http')!==0){ box.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:60px 8px;">填好欄位後顯示 QR</div>'; return; }
+  _loadScript('https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js').then(()=>{
+    box.innerHTML=''; try{ new QRCode(box,{text:url,width:160,height:160,correctLevel:QRCode.CorrectLevel.M}); }catch(e){ box.innerHTML='<img width="160" height="160" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(url)+'">'; }
+  }).catch(()=>{ box.innerHTML='<img width="160" height="160" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(url)+'">'; });
+}
+function utmDownloadQR(){
+  const box=document.getElementById('utm-qr'); if(!box) return;
+  const cv=box.querySelector('canvas'); const img=box.querySelector('img');
+  const a=document.createElement('a'); a.download='utm-qr.png';
+  if(cv){ a.href=cv.toDataURL('image/png'); a.click(); }
+  else if(img){ a.href=img.src; a.target='_blank'; a.click(); }
+  else showToast('尚未產生 QR');
+}
+function utmCopy(){ utmCopyText(_utmVal('utm-out')); }
+function utmCopyText(t){ if(!t) return; navigator.clipboard.writeText(t).then(()=>showToast('已複製連結')).catch(()=>showToast('複製失敗')); }
+function utmSave(){
+  if(!requireEdit()) return;
+  const url=_utmVal('utm-out'); if(url.indexOf('http')!==0){ showToast('連結無效'); return; }
+  if(!store.utmLinks) store.utmLinks=[];
+  store.utmLinks.unshift({ campaign:_utmVal('utm-campaign'), source:_utmVal('utm-source'), medium:_utmVal('utm-medium'), content:_utmVal('utm-content'), target:_utmVal('utm-target'), url:url, createdAt:new Date().toISOString() });
+  saveStore(); utmRenderSaved(); showToast('已儲存連結');
+}
+function utmRenderSaved(){
+  const box=document.getElementById('utm-saved'); if(!box) return;
+  const list=store.utmLinks||[];
+  if(!list.length){ box.innerHTML='<p style="font-size:13px;color:var(--text-muted);">尚無已儲存連結。</p>'; return; }
+  box.innerHTML='<div class="table-wrap"><table><thead><tr><th>活動</th><th>來源 / 形式</th><th>連結</th><th></th></tr></thead><tbody>'
+    + list.map((l,i)=>`<tr><td style="font-weight:600;">${l.campaign||'—'}</td><td>${l.source||''} / ${l.medium||''}</td><td style="max-width:300px;"><span style="font-family:monospace;font-size:11px;word-break:break-all;color:var(--text-sub);">${l.url}</span></td><td style="white-space:nowrap;"><button class="btn btn-outline" style="font-size:11px;padding:3px 8px;" onclick="utmCopyText(this.dataset.u)" data-u="${(l.url||'').replace(/"/g,'&quot;')}">複製</button> <button class="btn btn-outline" style="font-size:11px;padding:3px 8px;" data-perm="edit" onclick="utmDelete(${i})">刪除</button></td></tr>`).join('')
+    + '</tbody></table></div>';
+}
+function utmDelete(i){ if(!requireEdit()) return; (store.utmLinks||[]).splice(i,1); saveStore(); utmRenderSaved(); }
+function utmBatch(){
+  const name=document.getElementById('utm-batch-event').value;
+  const ev=(typeof activeEvents==='function'?activeEvents():[]).find(e=>e.name===name);
+  const out=document.getElementById('utm-batch-out'); if(!out) return;
+  if(!ev){ out.innerHTML=''; return; }
+  const camp=_slug(ev.name)||ev.name;
+  const base=_utmVal('utm-target')||_utmCfg().base;
+  const chans=ev.channels||[];
+  if(!chans.length){ out.innerHTML='<p style="font-size:13px;color:var(--text-muted);">此活動尚無「社群／曝光來源」，請先到編輯活動新增管道。</p>'; window.__utmBatch=[]; return; }
+  const rows=chans.map(c=>{ const map=_chanToUtm(c.name); return { name:c.name, campaign:camp, source:map.source, medium:map.medium, content:_slug(c.name), target:base, url:buildUtmUrl(base,camp,map.source,map.medium,_slug(c.name)), createdAt:new Date().toISOString() }; });
+  window.__utmBatch=rows;
+  out.innerHTML='<div class="table-wrap"><table><thead><tr><th>管道</th><th>連結</th><th></th></tr></thead><tbody>'
+    + rows.map(r=>`<tr><td style="font-weight:600;">${r.name}</td><td style="max-width:340px;"><span style="font-family:monospace;font-size:11px;word-break:break-all;color:var(--text-sub);">${r.url}</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:3px 8px;" onclick="utmCopyText(this.dataset.u)" data-u="${(r.url||'').replace(/"/g,'&quot;')}">複製</button></td></tr>`).join('')
+    + '</tbody></table></div><div style="margin-top:10px;"><button class="btn btn-outline" data-perm="edit" onclick="utmSaveBatch()">全部儲存到清單</button></div>';
+}
+function utmSaveBatch(){
+  if(!requireEdit()) return;
+  if(!window.__utmBatch || !window.__utmBatch.length){ showToast('沒有可儲存的連結'); return; }
+  if(!store.utmLinks) store.utmLinks=[];
+  store.utmLinks.unshift(...window.__utmBatch);
+  saveStore(); utmRenderSaved(); showToast(window.__utmBatch.length+' 條連結已儲存');
+}
 
 // 自動以「檔案最後更新時間（部署時間）」標記版次，不必每次手動改
 function _stampVersion() {
