@@ -1697,6 +1697,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
               <label style="font-size:12px;font-weight:600;color:var(--text-sub);">跨管道標籤（逗號分隔）</label>
               <input type="text" id="ev-tags" list="crossTagDatalist" placeholder="例：GWD全球健康日, 健康講座">
             </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label style="font-size:12px;font-weight:600;color:var(--text-sub);">活動代碼 utm_campaign（綁定 UTM 導流成效；英數小寫，例：gwd2026）</label>
+              <input type="text" id="ev-utmcampaign" placeholder="gwd2026">
+            </div>
           </div>
         </div>
 
@@ -2651,6 +2655,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <div class="form-group" style="grid-column:1/-1">
         <label>跨傳達管道標籤（可多選，逗號分隔）</label>
         <input type="text" id="em-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>活動代碼 utm_campaign（綁定 UTM 導流成效；英數小寫，例：gwd2026）</label>
+        <input type="text" id="em-utmcampaign" placeholder="gwd2026">
       </div>
       <!-- 彈性曝光來源 -->
       <div style="grid-column:1/-1;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:6px;background:#F8FBFA;">
@@ -4689,6 +4697,7 @@ function addEvent() {
     tplType:  evType,
     custom:   collectCustomFields('ev-custom-fields', evType),
     photos:   collectPhotos('ev-photos'),
+    utmCampaign: (document.getElementById('ev-utmcampaign')?.value||'').trim(),
     campus:   document.getElementById('ev-campus').value,
     reg:      +document.getElementById('ev-reg').value      || 0,
     sample:   +document.getElementById('ev-sample').value   || 0,
@@ -4714,7 +4723,7 @@ function addEvent() {
   _gasWrite('addEvent', store.events[store.events.length - 1]);
   showToast('活動記錄已儲存');
   ['ev-name','ev-date','ev-reg','ev-sample','ev-attend','ev-reach','ev-sat','ev-speaker','ev-note','ev-budget','ev-expense','ev-yt-url','ev-yt-views',
-   'ev-purpose','ev-content','ev-observation','ev-improvement','ev-photo-url','ev-tags'].forEach(id => {
+   'ev-purpose','ev-content','ev-observation','ev-improvement','ev-photo-url','ev-tags','ev-utmcampaign'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -5075,6 +5084,7 @@ function openEventModal(idx) {
   document.getElementById('em-photo-url').value    = e.photo_url    || '';
   renderChannelRows('em-channels', e.channels);
   renderPhotoCards('em-photos', e.photos);
+  document.getElementById('em-utmcampaign').value = e.utmCampaign || '';
   refreshCustomFieldsUI('em', e.type, e.custom);
   updateCrossTagDatalist();
   openModal('eventModal');
@@ -5096,6 +5106,7 @@ function saveEventEdit() {
     tplType:  emType,
     custom:   collectCustomFields('em-custom-fields', emType),
     photos:   collectPhotos('em-photos'),
+    utmCampaign: (document.getElementById('em-utmcampaign')?.value||'').trim(),
     campus:   document.getElementById('em-campus').value,
     reg:      +document.getElementById('em-reg').value      || 0,
     sample:   +document.getElementById('em-sample').value   || 0,
@@ -5331,7 +5342,12 @@ function _eventReportModel(ev, audience, overrides){
     conclusion: N('conclusion', summary),
     future:   N('future', ev.improvement || ''),
   };
-  return { ev, isDirector, audienceName:isDirector?'院長版':'主管版', posts, media, yts, kols, fbReach, fbEngage, ytViews, kolFans, chans, chReach, chEngage:channelsEngage(chans), attendRate, customRows, summary, kpis, narr };
+  // ── UTM 導流回收（依活動代碼比對 store.utmStats）──
+  const evCampaign = ((ev.utmCampaign||'').trim().toLowerCase()) || _slug(ev.name);
+  const utmRows = evCampaign ? (store.utmStats||[]).filter(r => (r.campaign||'').trim().toLowerCase()===evCampaign) : [];
+  const utmSessions = utmRows.reduce((s,r)=>s+(r.sessions||0),0);
+  const utmConv = utmRows.reduce((s,r)=>s+(r.conv||0),0);
+  return { ev, isDirector, audienceName:isDirector?'院長版':'主管版', posts, media, yts, kols, fbReach, fbEngage, ytViews, kolFans, chans, chReach, chEngage:channelsEngage(chans), attendRate, customRows, summary, kpis, narr, evCampaign, utmRows, utmSessions, utmConv };
 }
 
 // ───── 匯出 PPT (.pptx) ── 架構：壹~陸 ─────
@@ -5384,6 +5400,10 @@ async function exportEventPptx(idx, audience, overrides){
     if (m.media.length){ s = pptx.addSlide(); head(s,SSUB()+'　媒體新聞曝光');
       const rows=[[th('日期'),th('媒體'),th('標題'),th('性質')]].concat(m.media.map(md=>[md.date||'—',(md.mediaName||md.name||'—'),(md.title||'—'),(md.nature||'—')]));
       s.addTable(rows,{...tblOpt,colW:[1.8,2.6,5.3,2.4]}); }
+    if (m.utmRows && m.utmRows.length){ s = pptx.addSlide(); head(s,SSUB()+'　官網導流與掛號（GA4 回收）');
+      const rows=[[th('來源'),th('媒介'),th('工作階段'),th('掛號/轉換'),th('轉換率')]].concat(m.utmRows.map(r=>[r.source||'—',r.medium||'—',_fmt(r.sessions),_fmt(r.conv),r.sessions?(r.conv/r.sessions*100).toFixed(1)+'%':'—']));
+      rows.push([bold('合計'),bold(''),bold(_fmt(m.utmSessions)),bold(_fmt(m.utmConv)),bold(m.utmSessions?(m.utmConv/m.utmSessions*100).toFixed(1)+'%':'—')]);
+      s.addTable(rows,{...tblOpt,colW:[2.6,2.6,2.3,2.3,2.3]}); }
     // 伍 活動照片（內嵌，每張投影片 2 張）
     if ((ev.photos||[]).length){
       const phs=ev.photos, per=2, boxW=5.6, boxH=4.6;
@@ -5456,6 +5476,10 @@ async function exportEventDocx(idx, audience, overrides){
       [pNote('分析',n.kolAnalysis), pNote('建議',n.kolSuggest)].forEach(x=>x&&kids.push(x)); }
     if (m.media.length){ kids.push(h2(NSUB()+'. 媒體新聞曝光'));
       kids.push(table(['日期','媒體','標題','性質'], m.media.map(md=>[md.date||'—',(md.mediaName||md.name||'—'),(md.title||'—'),(md.nature||'—')]), [1700,2400,4100,1800])); }
+    if (m.utmRows && m.utmRows.length){ kids.push(h2(NSUB()+'. 官網導流與掛號（GA4 回收）'));
+      const ur=m.utmRows.map(r=>[r.source||'—', r.medium||'—', _fmt(r.sessions), _fmt(r.conv), r.sessions?(r.conv/r.sessions*100).toFixed(1)+'%':'—']);
+      ur.push(['合計','',_fmt(m.utmSessions),_fmt(m.utmConv), m.utmSessions?(m.utmConv/m.utmSessions*100).toFixed(1)+'%':'—']);
+      kids.push(table(['來源','媒介','工作階段','掛號/轉換','轉換率'], ur, [2000,2000,2000,2000,2000], true)); }
     // 伍 活動照片記錄（兩張並排有框表格，內嵌圖片，匯出 Word 不跑版）
     kids.push(h1(SEC()+'、活動照片記錄'));
     if ((ev.photos||[]).length){
@@ -5563,6 +5587,17 @@ function _buildReportHtml(o) {
       <thead><tr style="background:#ECFDF5;">${TH('日期')}${TH('媒體')}${TH('標題')}${TH('性質')}</tr></thead>
       <tbody>${m.media.map(md=>`<tr>${TD(md.date||'—')}${TD((md.mediaName||md.name||'—')+(md.mediaType?`<br><small style="color:#90A89E;">${md.mediaType}</small>`:''))}${TD(md.url?`<a href="${md.url}" target="_blank" style="color:#00AAC8;text-decoration:none;">${md.title||'—'}</a>`:(md.title||'—'))}${TD(md.nature||'—')}</tr>`).join('')}</tbody>
     </table>` : '';
+
+  // 肆 官網導流與掛號（GA4 UTM 回收，依活動代碼比對）
+  const utmTable = (m.utmRows && m.utmRows.length) ? `
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:#ECFDF5;">${TH('來源')}${TH('媒介')}${TH('工作階段',1)}${TH('掛號 / 轉換',1)}${TH('轉換率',1)}</tr></thead>
+      <tbody>
+        ${m.utmRows.map(r=>`<tr>${TD(r.source||'—')}${TD(r.medium||'—')}${TD(_fmt(r.sessions),1)}${TD(_fmt(r.conv),1)}${TD(r.sessions?(r.conv/r.sessions*100).toFixed(1)+'%':'—',1)}</tr>`).join('')}
+        <tr style="background:#F1F8F4;font-weight:700;">${TD('合計')}${TD('')}${TD(_fmt(m.utmSessions),1)}${TD(_fmt(m.utmConv),1)}${TD(m.utmSessions?(m.utmConv/m.utmSessions*100).toFixed(1)+'%':'—',1)}</tr>
+      </tbody>
+    </table>
+    <p style="font-size:11.5px;color:#90A89E;margin:4px 0 0;">＊GA4 依活動代碼「${m.evCampaign||'—'}」比對；於「行銷工具 → UTM 成效回收」匯入資料。FB／YouTube／IG 等只要連結帶 UTM 都會列在這。</p>` : '';
 
   // 伍 活動照片（內嵌圖片，兩張並排有框表格，參照 2025 報告）
   const photos = ev.photos || [];
@@ -5672,6 +5707,7 @@ function _buildReportHtml(o) {
     ${lbl('建議')}${ed('kolSuggest', m.narr.kolSuggest, 'KOL 合作建議…')}` : ''}
     ${m.media.length ? sub(NSUB(),'媒體新聞曝光') : ''}
     ${mediaTbl}
+    ${utmTable ? sub(NSUB(),'官網導流與掛號（GA4 回收）')+utmTable : ''}
 
     <h2>${SEC()}、活動照片記錄</h2>
     ${photoBlock}
@@ -13262,7 +13298,7 @@ function renderUtm(){
 }
 function utmPickEvent(){
   const v = document.getElementById('utm-event').value;
-  if(v){ const c=document.getElementById('utm-campaign'); if(!c.value || c.dataset.auto!=='0'){ c.value=_slug(v)||v; c.dataset.auto='1'; } }
+  if(v){ const ev=(typeof activeEvents==='function'?activeEvents():[]).find(e=>e.name===v); const code=(ev&&ev.utmCampaign)?ev.utmCampaign:(_slug(v)||v); const c=document.getElementById('utm-campaign'); if(!c.value || c.dataset.auto!=='0'){ c.value=code; c.dataset.auto='1'; } }
   utmUpdate();
 }
 function utmUpdate(){
@@ -13308,7 +13344,7 @@ function utmBatch(){
   const ev=(typeof activeEvents==='function'?activeEvents():[]).find(e=>e.name===name);
   const out=document.getElementById('utm-batch-out'); if(!out) return;
   if(!ev){ out.innerHTML=''; return; }
-  const camp=_slug(ev.name)||ev.name;
+  const camp=_evCampaign(ev)||ev.name;
   const base=_utmVal('utm-target')||_utmCfg().base;
   const chans=ev.channels||[];
   if(!chans.length){ out.innerHTML='<p style="font-size:13px;color:var(--text-muted);">此活動尚無「社群／曝光來源」，請先到編輯活動新增管道。</p>'; window.__utmBatch=[]; return; }
@@ -13331,10 +13367,11 @@ function utmSaveBatch(){
 //  匯入 GA4「活動 / 來源·媒介 / 工作階段·使用者·轉換」→ 對回活動
 //  store.utmStats = [{campaign, source, medium, sessions, users, conv}]
 // ═══════════════════════════════════════════
+function _evCampaign(e){ return ((e.utmCampaign||'').trim().toLowerCase()) || _slug(e.name); }
 function _utmMatchActivity(campaign){
   const c=(campaign||'').trim().toLowerCase(); if(!c) return null;
   const evs = (typeof activeEvents==='function'?activeEvents():[]);
-  const hit = evs.find(e => { const sl=_slug(e.name); return (sl && sl===c) || (e.name||'').toLowerCase()===c; });
+  const hit = evs.find(e => { const code=(e.utmCampaign||'').trim().toLowerCase(); const sl=_slug(e.name); return (code&&code===c) || (sl&&sl===c) || (e.name||'').toLowerCase()===c; });
   return hit ? hit.name : null;
 }
 function utmStatsParse(){
