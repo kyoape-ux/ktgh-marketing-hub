@@ -5437,16 +5437,25 @@ async function exportEventDocx(idx, audience, overrides){
       [pNote('分析',n.kolAnalysis), pNote('建議',n.kolSuggest)].forEach(x=>x&&kids.push(x)); }
     if (m.media.length){ kids.push(h2(NSUB()+'. 媒體新聞曝光'));
       kids.push(table(['日期','媒體','標題','性質'], m.media.map(md=>[md.date||'—',(md.mediaName||md.name||'—'),(md.title||'—'),(md.nature||'—')]), [1700,2400,4100,1800])); }
-    // 伍 活動照片記錄（內嵌圖片，匯出 Word 不跑版）
+    // 伍 活動照片記錄（兩張並排有框表格，內嵌圖片，匯出 Word 不跑版）
     kids.push(h1(SEC()+'、活動照片記錄'));
     if ((ev.photos||[]).length){
-      ev.photos.forEach(ph=>{
-        try{
-          const mw=400; let w=ph.w||mw, h=ph.h||300; if(w>mw){ h=Math.round(h*mw/w); w=mw; }
-          kids.push(new Paragraph({ alignment:AlignmentType.CENTER, spacing:{after:ph.c?40:140}, children:[ new ImageRun({ data:_b64u8(ph.d.split(',')[1]), transformation:{width:w,height:h} }) ] }));
-          if(ph.c) kids.push(new Paragraph({ alignment:AlignmentType.CENTER, spacing:{after:140}, children:[new TextRun({text:ph.c,size:20,color:'5A7A6A'})] }));
-        }catch(e){}
-      });
+      const phs=ev.photos;
+      const imgRun=ph=>{ const mw=280; let w=ph.w||mw, h=ph.h||196; if(w>mw){ h=Math.round(h*mw/w); w=mw; } return new ImageRun({ data:_b64u8(ph.d.split(',')[1]), transformation:{width:w,height:h} }); };
+      const pcell=children=>new TableCell({ width:{size:50,type:WidthType.PERCENTAGE}, margins:{top:60,bottom:60,left:60,right:60}, children:children });
+      const prows=[];
+      for(let i=0;i<phs.length;i+=2){
+        const a=phs[i], b=phs[i+1];
+        prows.push(new TableRow({ children:[
+          pcell([ new Paragraph({ alignment:AlignmentType.CENTER, children:[ imgRun(a) ] }) ]),
+          pcell([ new Paragraph({ alignment:AlignmentType.CENTER, children: b?[ imgRun(b) ]:[] }) ]),
+        ] }));
+        prows.push(new TableRow({ children:[
+          pcell([ new Paragraph({ alignment:AlignmentType.CENTER, children:[ new TextRun({text:a.c||'',size:20}) ] }) ]),
+          pcell([ new Paragraph({ alignment:AlignmentType.CENTER, children:[ new TextRun({text:b?(b.c||''):'',size:20}) ] }) ]),
+        ] }));
+      }
+      kids.push(new Table({ width:{size:100,type:WidthType.PERCENTAGE}, rows:prows }));
       if(ev.photo_url) kids.push(p('完整相簿：'+ev.photo_url));
     } else kids.push(p(ev.photo_url ? ('照片連結：'+ev.photo_url) : '（可於「編輯活動 → 活動照片佐證」上傳照片）'));
     // 陸 活動成效與總結建議
@@ -5536,15 +5545,17 @@ function _buildReportHtml(o) {
       <tbody>${m.media.map(md=>`<tr>${TD(md.date||'—')}${TD((md.mediaName||md.name||'—')+(md.mediaType?`<br><small style="color:#90A89E;">${md.mediaType}</small>`:''))}${TD(md.url?`<a href="${md.url}" target="_blank" style="color:#00AAC8;text-decoration:none;">${md.title||'—'}</a>`:(md.title||'—'))}${TD(md.nature||'—')}</tr>`).join('')}</tbody>
     </table>` : '';
 
-  // 伍 活動照片（內嵌圖片）
+  // 伍 活動照片（內嵌圖片，兩張並排有框表格，參照 2025 報告）
   const photos = ev.photos || [];
+  let _photoRows = '';
+  for (let i=0;i<photos.length;i+=2){
+    const a=photos[i], b=photos[i+1];
+    const imgCell = ph => `<td style="border:1px solid #C9D6CF;padding:6px;width:50%;text-align:center;vertical-align:middle;">${ph?`<img src="${ph.d}" style="width:100%;display:block;">`:''}</td>`;
+    const capCell = ph => `<td style="border:1px solid #C9D6CF;padding:8px;text-align:center;font-size:13px;color:#1A2820;">${ph?(ph.c||''):''}</td>`;
+    _photoRows += `<tr>${imgCell(a)}${imgCell(b)}</tr><tr>${capCell(a)}${capCell(b)}</tr>`;
+  }
   const photoBlock = photos.length
-    ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">`
-      + photos.map(p=>`<figure style="margin:0;border:1px solid #DDE8E3;border-radius:8px;overflow:hidden;background:#fff;">
-          <img src="${p.d}" style="width:100%;display:block;">
-          ${p.c?`<figcaption style="font-size:12.5px;color:#5A7A6A;padding:8px 10px;text-align:center;">${p.c}</figcaption>`:''}
-        </figure>`).join('')
-      + `</div>`
+    ? `<table style="width:100%;border-collapse:collapse;table-layout:fixed;">${_photoRows}</table>`
       + (ev.photo_url?`<div style="margin-top:10px;font-size:13px;"><a href="${ev.photo_url}" target="_blank" style="color:#00AAC8;">完整相簿連結</a></div>`:'')
     : (ev.photo_url
         ? `<div style="background:#fff;border:1px solid #DDE8E3;border-radius:8px;padding:14px 16px;"><a href="${ev.photo_url}" target="_blank" style="color:#00AAC8;font-size:14px;word-break:break-all;">${ev.photo_url}</a></div>`
