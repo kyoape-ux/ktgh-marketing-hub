@@ -864,10 +864,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
   <nav>
     <div class="nav-section">核心</div>
     <div class="nav-group" data-key="warroom">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>🎯 戰情中心</span><span class="chevron">▼</span></div>
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>總覽</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
     <a class="nav-item active" onclick="switchSection('warroom','dashboard')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> 戰情首頁
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> 總覽首頁
     </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('warroom','quickimport')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span> 快速匯入區
@@ -1045,7 +1045,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 
   <div class="content">
 
-    <!-- ══ 🎯 戰情首頁 ══ -->
+    <!-- ══ 總覽首頁 ══ -->
     <div class="section active" id="sec-warroom-dashboard">
       <div id="warRoomContent">
         <!-- 由 renderWarRoom 動態產生 -->
@@ -1056,7 +1056,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <!-- ══ OKR 目標設定 ══ -->
     <div class="section" id="sec-warroom-okr">
       <div style="background:#EFF6FF;border:1px solid #BFDBFE;padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A;">
-        <b>OKR 目標管理</b>：設定本月、本季、本年度的關鍵指標目標，戰情首頁會自動顯示達成率進度條（綠 ≥80% / 黃 60–80% / 紅 &lt;60%）。
+        <b>OKR 目標管理</b>：設定本月、本季、本年度的關鍵指標目標，總覽首頁會自動顯示達成率進度條（綠 ≥80% / 黃 60–80% / 紅 &lt;60%）。
       </div>
       <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
         <button class="btn btn-primary" data-perm="edit" onclick="openOkrModal(-1)">+ 新增 OKR 目標</button>
@@ -1070,7 +1070,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
         <h2 style="font-size:18px;font-weight:900;margin-bottom:8px;color:#1E3A8A;">⚡ 一站式快速匯入</h2>
         <p style="font-size:13px;color:#1E40AF;margin-bottom:14px;line-height:1.7;">
           將 <b>所有月度 .xlsx 檔案一次拖入</b>，系統會自動辨識（GA4 / GSC / SEO 文章 / 影片 / LINE / 競品）並寫入對應資料庫。
-          匯入完成後可一鍵跳到「戰情首頁」立即查看分析結果。
+          匯入完成後可一鍵跳到「總覽首頁」立即查看分析結果。
         </p>
       </div>
 
@@ -3706,7 +3706,7 @@ function getBuiltinMedia() {
 // ═══════════════════════════════════════════
 const FEATURE_CATALOG = [
   // 戰情
-  { k:'warroom-dashboard',   cat:'戰情', icon:'zap',    color:'#1a8454', title:'戰情首頁',     desc:'KPI、警報、達成度' },
+  { k:'warroom-dashboard',   cat:'戰情', icon:'zap',    color:'#1a8454', title:'總覽首頁',     desc:'KPI、警報、達成度' },
   { k:'warroom-okr',         cat:'戰情', icon:'target', color:'#DC2626', title:'OKR 目標',     desc:'設定本月關鍵指標' },
   { k:'warroom-quickimport', cat:'匯入', icon:'upload', color:'#1E40AF', title:'快速匯入區',   desc:'拖多檔自動辨識' },
   // 數據分析
@@ -3794,7 +3794,7 @@ function openFeatureLauncher() {
   const catOrder = ['戰情','數據','進階','匯入','報表','系統'];
   const catIcon = { '戰情':'target', '數據':'bar-chart', '進階':'brain', '匯入':'upload', '報表':'file', '系統':'settings' };
   const catColor = { '戰情':'#1a8454', '數據':'#1877F2', '進階':'#7C3AED', '匯入':'#1E40AF', '報表':'#059669', '系統':'#6B7280' };
-  const catName = { '戰情':'戰情中心', '數據':'數據分析', '進階':'進階分析', '匯入':'資料匯入', '報表':'報表 & 同步', '系統':'系統' };
+  const catName = { '戰情':'總覽', '數據':'數據分析', '進階':'進階分析', '匯入':'資料匯入', '報表':'報表 & 同步', '系統':'系統' };
   const catLabels = {};
   catOrder.forEach(c => {
     catLabels[c] = '<span style="display:inline-flex;align-items:center;gap:6px;color:'+catColor[c]+';"><span style="display:inline-flex;align-items:center;">'+svgIcon(catIcon[c], 14)+'</span>'+catName[c]+'</span>';
@@ -3931,7 +3931,7 @@ function switchSection(module, sub) {
     'crosstag-library': ['共用標籤建立',        '管理跨傳達管道共用的標籤'],
     'video-list':       ['影片總覽 (YT / IG)',   'YouTube / Instagram 影片成效追蹤'],
     'video-import':     ['匯入 YT / IG 資料',     '從影片管理系統批次匯入 JSON / CSV'],
-    'warroom-dashboard':['🎯 戰情首頁',           '一頁掌握全部 KPI、警報、目標達成度與行動建議'],
+    'warroom-dashboard':['總覽首頁',           '一頁掌握全部 KPI、警報、目標達成度與行動建議'],
     'warroom-okr':      ['OKR 目標設定',          '本月/本季/年度關鍵指標目標管理'],
     'warroom-quickimport':['⚡ 快速匯入區',       '拖拽多個 .xlsx 自動辨識並寫入對應資料庫'],
   };
@@ -5603,15 +5603,17 @@ function _buildReportHtml(o) {
     <span style="margin-left:auto;font-size:12px;color:#5A7A6A;">提示：點擊文字區塊即可直接修改</span>
   </div>
   <div class="report" id="reportRoot">
-    <!-- 壹 基本資訊（置中封面，參照 2025 報告） -->
-    <div class="report-header" style="text-align:center;">
-      <img src="${KTGH_LOGO}" alt="光田綜合醫院" style="height:34px;width:auto;display:block;margin:0 auto 14px;">
-      <h1 contenteditable="true" style="text-align:center;">${ev.name} — 活動成果報告</h1>
-      <div style="margin-top:10px;font-size:14px;color:#5A7A6A;line-height:2.1;">
-        活動期間：${ed('period', m.narr.period, '例：2025年6月14日 13:00–16:30', true)}　｜　類型：${ev.type||'—'}　｜　院區：${ev.campus||'—'}　｜　主講：${ev.speaker||'—'}<br>
-        提交日期：${submitDate}　｜　報告撰寫：${ed('author', m.narr.author, '撰寫單位／姓名', true)}
+    <!-- 壹 基本資訊（置中封面，寬鬆版） -->
+    <div class="report-header" style="text-align:center;border-bottom:1px solid #E5ECE8;padding-bottom:24px;margin-bottom:30px;">
+      <img src="${KTGH_LOGO}" alt="光田綜合醫院" style="height:40px;width:auto;display:block;margin:6px auto 20px;">
+      <h1 contenteditable="true" style="text-align:center;font-size:30px;line-height:1.5;margin:0;">${ev.name}<br><span style="letter-spacing:6px;">活動成果報告</span></h1>
+      <div style="width:64px;height:3px;background:#6EC300;border-radius:2px;margin:20px auto 24px;"></div>
+      <div style="font-size:15px;color:#5A7A6A;">
+        <div style="margin:12px 0;">活動期間：${ed('period', m.narr.period, '例：2025年6月14日 13:00–16:30', true)}</div>
+        <div style="margin:12px 0;">類型：${ev.type||'—'}　｜　院區：${ev.campus||'—'}　｜　主講：${ev.speaker||'—'}</div>
+        <div style="margin:12px 0;">提交日期：${submitDate}　｜　報告撰寫：${ed('author', m.narr.author, '撰寫單位／姓名', true)}</div>
       </div>
-      ${statStrip}
+      <div style="margin-top:22px;">${statStrip}</div>
     </div>
 
     <h2>${SEC()}、活動概述</h2>
@@ -8183,7 +8185,7 @@ function clearGscKeywords() {
 }
 
 // ═══════════════════════════════════════════
-// 🎯 戰情中心 — 戰情首頁 / OKR / 快速匯入
+// 總覽 — 總覽首頁 / OKR / 快速匯入
 // ═══════════════════════════════════════════
 
 // ── 小工具 ──
@@ -8225,7 +8227,7 @@ function _warCard(title, body, opts) {
 }
 
 // ═══════════════════════════════════════════
-// 戰情首頁 主渲染
+// 總覽首頁 主渲染
 // ═══════════════════════════════════════════
 function renderWarRoom() {
   const wrap = document.getElementById('warRoomContent');
@@ -8234,7 +8236,7 @@ function renderWarRoom() {
   if (!months.length) {
     wrap.innerHTML = _warSectionOnboard() + _warSectionQuickAccess()
       + '<div style="padding:48px;text-align:center;background:var(--surface);border-radius:14px;border:1px solid var(--border);">'
-      + '<div style="font-size:14px;color:var(--text-muted);">尚無 GA4 資料，戰情數據區會在匯入後顯示；上方「快速登錄」隨時可用</div>'
+      + '<div style="font-size:14px;color:var(--text-muted);">尚無 GA4 資料，總覽數據區會在匯入後顯示；上方「快速登錄」隨時可用</div>'
       + '<button class="btn btn-primary" style="margin-top:14px;" onclick="switchSection(\'warroom\',\'quickimport\')">前往快速匯入</button>'
       + '</div>';
     return;
@@ -8312,7 +8314,7 @@ function removeDemoData(){
 function dismissOnboard(){ try{ localStorage.setItem('ktgh_onboarded','1'); }catch(e){} renderWarRoom(); }
 function reopenOnboard(){ try{ localStorage.removeItem('ktgh_onboarded'); }catch(e){} switchSection('warroom','dashboard'); renderWarRoom(); }
 
-// ── 👋 新手指引橫幅（戰情首頁最上方；可關閉）──
+// ── 👋 新手指引橫幅（總覽首頁最上方；可關閉）──
 function _warSectionOnboard() {
   let done=false; try{ done = localStorage.getItem('ktgh_onboarded')==='1'; }catch(e){}
   if (done) return '';
@@ -8341,7 +8343,7 @@ function _warSectionOnboard() {
     + '</div>';
 }
 
-// ── ⚡ 快速登錄（戰情首頁置頂；永遠顯示，含分類卡片）──
+// ── ⚡ 快速登錄（總覽首頁置頂；永遠顯示，含分類卡片）──
 function _warSectionQuickAccess() {
   const cat = (label, color, cards) =>
     '<div style="margin-bottom:14px;">'
@@ -8385,7 +8387,7 @@ function _warSectionQuickAccess() {
     + '</div>';
 }
 
-// ── 🚀 快速功能入口（戰情首頁底部）──
+// ── 🚀 快速功能入口（總覽首頁底部）──
 function _warSectionQuickLauncher() {
   // 從 FEATURE_CATALOG 挑出每類常用的 4 個（含使用頻率 weight）
   const usage = _featureUsage();
@@ -8429,19 +8431,19 @@ function _warSectionQuickLauncher() {
 function _warSectionAlerts(curYm, cur) {
   const alerts = computeAlerts(curYm, cur);
   if (!alerts.length) {
-    return _warCard('🟢 系統健康狀態',
+    return _warCard('系統健康狀態',
       '<div style="padding:12px;color:#16A34A;font-size:13px;">✓ 目前無嚴重警報，各管道運作正常</div>');
   }
   const html = alerts.map(a => {
     const colorMap = { red:'#DC2626', amber:'#F59E0B' };
-    const labelMap = { red:'🔴 嚴重', amber:'🟡 警示' };
+    const labelMap = { red:'嚴重', amber:'警示' };
     return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:'+colorMap[a.level]+'10;border-left:4px solid '+colorMap[a.level]+';border-radius:6px;margin-bottom:6px;font-size:12.5px;">'
       + '<span style="font-weight:700;color:'+colorMap[a.level]+';white-space:nowrap;">'+labelMap[a.level]+'</span>'
       + '<span style="flex:1;">'+a.msg+'</span>'
       + (a.action ? '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="'+a.action+'">'+a.actionLabel+' ▶</button>' : '')
       + '</div>';
   }).join('');
-  return _warCard('🚨 危機警報 ('+alerts.length+')', html);
+  return _warCard('危機警報 ('+alerts.length+')', html);
 }
 
 function computeAlerts(curYm, cur) {
@@ -8574,7 +8576,7 @@ function _warShowMonthlyMissing() {
   ).join('');
   const html = '<div class="modal-overlay open" id="missingModal">'
     + '<div class="modal-box" style="max-width:600px;">'
-    + '<h3>📋 '+result.label+' 資料缺漏清單（'+result.items.length+' 項）</h3>'
+    + '<h3>'+result.label+' 資料缺漏清單（'+result.items.length+' 項）</h3>'
     + '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#92400E;">每月 10 號後自動列出當期應補齊但尚未到位的資料，依負責小組分派</div>'
     + '<table style="width:100%;font-size:12px;border-collapse:collapse;">'
     +   '<thead><tr style="background:#F9FAFB;"><th style="padding:7px 10px;text-align:left;">平台</th><th style="padding:7px 10px;text-align:left;">門檻</th><th style="padding:7px 10px;text-align:left;">負責</th><th style="padding:7px 10px;">操作</th></tr></thead>'
@@ -8658,14 +8660,14 @@ function _warSectionKpiSnapshot(curYm, cur, months) {
     + card('科別預約', regCur.toLocaleString(), pct(regCur,regPrev), pct(regCur,regYoy), regSpark, '#EC4899')
     + card('轉換率', (convCur*100).toFixed(2)+'%', convPrev?(convCur-convPrev)*100:null, null, convSpark, '#F59E0B')
     + '</div>';
-  return _warCard('📊 ' + curYm + ' 重點 KPI（MoM / YoY 對比 + 7 月趨勢）', body);
+  return _warCard('' + curYm + ' 重點 KPI（MoM / YoY 對比 + 7 月趨勢）', body);
 }
 
 // ── ③ OKR 進度 ──
 function _warSectionOkr(curYm) {
   const okrs = (store.okr||[]).filter(o => !o.deleted_at && (o.period === curYm || o.period === curYm.slice(0,4) || o.period === 'all'));
   if (!okrs.length) {
-    return _warCard('🎯 本月 OKR 達成度',
+    return _warCard('本月 OKR 達成度',
       '<div style="padding:14px;color:var(--text-muted);font-size:12px;">尚未設定 OKR 目標。<a href="#" onclick="switchSection(\'warroom\',\'okr\');return false;" style="color:#1E40AF;text-decoration:underline;">立即設定 →</a></div>',
       { action: '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="switchSection(\'warroom\',\'okr\')">管理 OKR</button>' });
   }
@@ -8679,7 +8681,7 @@ function _warSectionOkr(curYm) {
       + _progressBar(current, +o.target||0, o.color||'#1E40AF')
       + '</div>';
   }).join('');
-  return _warCard('🎯 本月 OKR 達成度',
+  return _warCard('本月 OKR 達成度',
     body,
     { action: '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="switchSection(\'warroom\',\'okr\')">管理</button>' });
 }
@@ -8723,7 +8725,7 @@ function _warSectionWeekEvents() {
     .concat(videos.map(v => ({ date:v.date, type:v.platform||'影片', title:v.title||'未命名影片' })))
     .sort((a,b) => (a.date||'').localeCompare(b.date||''));
   if (!items.length) {
-    return _warCard('📅 本週行銷活動',
+    return _warCard('本週行銷活動',
       '<div style="padding:14px;color:var(--text-muted);font-size:12px;">本週無排定活動。</div>');
   }
   const body = items.map(i => {
@@ -8735,7 +8737,7 @@ function _warSectionWeekEvents() {
       + '<div style="flex:1;">'+i.title+'</div>'
       + '</div>';
   }).join('');
-  return _warCard('📅 本週行銷活動 ('+items.length+')',
+  return _warCard('本週行銷活動 ('+items.length+')',
     body,
     { action: '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="switchSection(\'fb\',\'calendar\')">內容日曆 →</button>' });
 }
@@ -8750,10 +8752,10 @@ function _warSectionChannels() {
 
   const channels = [
     { icon:'📘', name:'FB 粉專', items: (store.posts||[]).filter(p=>!p.deleted_at), dateField:'date', valueField:'reach' },
-    { icon:'🎬', name:'YT/IG', items: (store.videoItems||[]).filter(v=>!v.deleted_at), dateField:'date', valueField:'views' },
-    { icon:'📰', name:'新聞媒體', items: (store.media||[]).filter(m=>!m.deleted_at), dateField:'date', valueField:'reach' },
+    { icon:'', name:'YT/IG', items: (store.videoItems||[]).filter(v=>!v.deleted_at), dateField:'date', valueField:'views' },
+    { icon:'', name:'新聞媒體', items: (store.media||[]).filter(m=>!m.deleted_at), dateField:'date', valueField:'reach' },
     { icon:'🎤', name:'活動', items: (store.events||[]).filter(e=>!e.deleted_at), dateField:'date', valueField:'attend' },
-    { icon:'💬', name:'LINE', items: (store.linePosts||[]).filter(l=>!l.deleted_at), dateField:'date', valueField:'reach' },
+    { icon:'', name:'LINE', items: (store.linePosts||[]).filter(l=>!l.deleted_at), dateField:'date', valueField:'reach' },
     { icon:'🔍', name:'SEO 文章', items: (store.seoArticles||[]).filter(a=>!a.deleted_at), dateField:'date', valueField:'searchVolume' },
     { icon:'🎙', name:'KOL', items: (store.kols||[]).filter(k=>!k.deleted_at), dateField:'date', valueField:'reach' },
   ];
@@ -8770,14 +8772,14 @@ function _warSectionChannels() {
       const color = mom===null ? '#888' : mom>0 ? '#16A34A' : mom<0 ? '#DC2626' : '#888';
       const arrow = mom===null ? '—' : mom>0 ? '↑' : mom<0 ? '↓' : '→';
       return '<tr style="border-top:1px solid #F1F5F9;">'
-        + '<td style="padding:7px 10px;font-weight:600;">'+c.icon+' '+c.name+'</td>'
+        + '<td style="padding:7px 10px;font-weight:600;">'+(c.icon?c.icon+' ':'')+c.name+'</td>'
         + '<td style="padding:7px 10px;text-align:right;">'+recent.length+'</td>'
         + '<td style="padding:7px 10px;text-align:right;font-family:Inter,sans-serif;">'+recentVal.toLocaleString()+'</td>'
         + '<td style="padding:7px 10px;text-align:right;color:'+color+';font-weight:700;font-size:11px;">'+arrow+' '+(mom===null?'—':Math.abs(mom).toFixed(0)+'%')+'</td>'
         + '</tr>';
     }).join('')
     + '</tbody></table>';
-  return _warCard('📡 各管道近 30 天表現',
+  return _warCard('各管道近 30 天表現',
     body,
     { action: '<button class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="switchSection(\'crosstag\',\'stats\')">完整看板 →</button>' });
 }
@@ -8795,7 +8797,7 @@ function _warSectionInsights(curYm, cur, months) {
     if (p && Math.abs((c-p)/p) > 0.15) {
       const grow = c > p;
       tips.push({
-        icon: grow ? '📈' : '📉',
+        icon: '',
         text: grow
           ? curYm + ' 活躍使用者較上月成長 '+Math.round((c-p)/p*100)+'%，建議乘勢加碼 FB / YT 投放'
           : curYm + ' 活躍使用者較上月下滑 '+Math.round((p-c)/p*100)+'%，建議檢視內容策略與標題吸引度',
@@ -8819,7 +8821,7 @@ function _warSectionInsights(curYm, cur, months) {
   if (cur.deptReg && cur.deptReg.length) {
     const top = cur.deptReg[0];
     tips.push({
-      icon: '🎯',
+      icon: '',
       text: '本月預約 Top 1 科別「'+top.dept+'」共 '+(+top.count).toLocaleString()+' 人次，可優先在此科別加強 SEO 文章與衛教影片',
       action: 'switchSection(\'web\',\'seoArticles\')',
       actionLabel: '新增 SEO'
@@ -8831,7 +8833,7 @@ function _warSectionInsights(curYm, cur, months) {
     const lineCtr = recentLine.reduce((s,l) => s+((+l.click||0)/(+l.reach||1)), 0)/recentLine.length;
     if (lineCtr > 0.1) {
       tips.push({
-        icon: '💬',
+        icon: '',
         text: 'LINE 平均點擊率 '+(lineCtr*100).toFixed(1)+'%，明顯優於 FB 觸及，建議重要訊息優先用 LINE 廣播',
         action: 'switchSection(\'line\',\'posts\')',
         actionLabel: 'LINE 列表'
@@ -8868,7 +8870,7 @@ function _warSectionSeoRadar() {
     .slice(0, 6);
 
   if (!opportunities.length) {
-    return _warCard('🎯 SEO 機會雷達',
+    return _warCard('SEO 機會雷達',
       '<div style="padding:14px;color:var(--text-muted);font-size:12px;">所有高搜尋量關鍵字都已涵蓋。</div>');
   }
   const body = '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">高月搜尋量 × (未寫文章 或 排名 &gt;10)</div>'
@@ -8881,7 +8883,7 @@ function _warSectionSeoRadar() {
         + '<button class="btn btn-outline" style="font-size:10.5px;padding:2px 6px;" onclick="_warOpenSeoArticleWithKeyword(\''+(k.keyword||'').replace(/\\'/g,"\\\\'")+'\')">寫文 →</button>'
         + '</div>';
     }).join('');
-  return _warCard('🎯 SEO 機會雷達', body);
+  return _warCard('SEO 機會雷達', body);
 }
 
 function _warOpenSeoArticleWithKeyword(keyword) {
@@ -8912,7 +8914,7 @@ function _warSectionHighlights() {
   if (mediaTop) items.push({ rank:3, title:mediaTop.title||mediaTop.name||'未命名報導', metric:'觸及 '+(+mediaTop.reach||0).toLocaleString(), type:'媒體' });
 
   if (!items.length) {
-    return _warCard('🏆 本月 Top 3 亮點',
+    return _warCard('本月 Top 3 亮點',
       '<div style="padding:14px;color:var(--text-muted);font-size:12px;">本月尚無資料。</div>');
   }
   const body = items.map(i => {
@@ -8923,14 +8925,14 @@ function _warSectionHighlights() {
       + '<span style="background:#F1F5F9;color:#475569;padding:2px 8px;border-radius:4px;font-size:10.5px;font-weight:600;">'+i.type+'</span>'
       + '</div>';
   }).join('');
-  return _warCard('🏆 本月 Top 3 亮點', body);
+  return _warCard('本月 Top 3 亮點', body);
 }
 
 // ── ⑨ 待辦 ──
 function _warSectionTasks() {
   const tasks = (store.tasks||[]).filter(t => !t.done && !t.deleted_at);
   if (!tasks.length) {
-    return _warCard('📋 待辦',
+    return _warCard('待辦',
       '<div style="padding:8px;color:var(--text-muted);font-size:11.5px;">無待辦事項</div>',
       { action: '<button class="btn btn-outline" data-perm="edit" style="font-size:11px;padding:3px 8px;" onclick="openTaskModal(-1)">+</button>' });
   }
@@ -8942,7 +8944,7 @@ function _warSectionTasks() {
       + (t.due ? '<span style="color:#888;font-size:10px;">'+t.due+'</span>' : '')
       + '</label>';
   }).join('');
-  return _warCard('📋 待辦 ('+tasks.length+')',
+  return _warCard('待辦 ('+tasks.length+')',
     body,
     { action: '<button class="btn btn-outline" data-perm="edit" style="font-size:11px;padding:3px 8px;" onclick="openTaskModal(-1)">+</button>' });
 }
@@ -9197,7 +9199,7 @@ async function handleQuickImportFiles(files) {
           + '</div>'
         ).join('')
       + '<div style="margin-top:14px;text-align:center;">'
-      + '<button class="btn btn-primary" onclick="switchSection(\'warroom\',\'dashboard\');renderWarRoom();">📊 跳到戰情首頁查看分析</button>'
+      + '<button class="btn btn-primary" onclick="switchSection(\'warroom\',\'dashboard\');renderWarRoom();">跳到總覽首頁查看分析</button>'
       + '</div>'
       + '</div>';
   }
@@ -13152,7 +13154,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSettingsUI();
   restoreNavState();
   updateCrossTagDatalist();
-  // 預設首頁是「戰情首頁」(sec-warroom-dashboard.active)，需要主動 render 一次
+  // 預設首頁是「總覽首頁」(sec-warroom-dashboard.active)，需要主動 render 一次
   if (typeof renderWarRoom === 'function') renderWarRoom();
   if (config.gasUrl) {
     setSyncStatus('正在同步…', 'var(--brand)');
