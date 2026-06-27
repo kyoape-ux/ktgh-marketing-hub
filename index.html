@@ -1019,7 +1019,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     </div></div>
   </nav>
   <div class="sidebar-footer">
-    <div class="version">v2.0 · 更新 2026-06-26 20:32</div>
+    <div class="version">v2.0 · 更新 2026-06-27 19:49</div>
   </div>
 </aside>
 
@@ -13154,7 +13154,21 @@ function applyPermissions() {
 // ═══════════════════════════════════════════
 const PUSH_FLAG = 'ktgh_pushed_v5';
 
+// 自動以「檔案最後更新時間（部署時間）」標記版次，不必每次手動改
+function _stampVersion() {
+  try {
+    fetch(location.pathname, { method:'HEAD', cache:'no-store' }).then(r => {
+      const lm = r.headers.get('last-modified'); if (!lm) return;
+      const d = new Date(lm); if (isNaN(d)) return;
+      const z = n => String(n).padStart(2,'0');
+      const el = document.querySelector('.sidebar-footer .version');
+      if (el) el.textContent = `v2.0 · 更新 ${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
+    }).catch(()=>{});
+  } catch(e){}
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  _stampVersion();
   // Check if already logged in this session
   if (getRole()) {
     document.getElementById('loginOverlay').style.display = 'none';
