@@ -8420,8 +8420,8 @@ function _warSectionQuickAccess() {
   const cat = (label, color, cards) =>
     '<div style="margin-bottom:14px;">'
     + '<div style="font-size:12.5px;font-weight:700;color:'+color+';margin-bottom:8px;display:flex;align-items:center;gap:7px;"><span style="width:4px;height:13px;background:'+color+';border-radius:2px;"></span>'+label+'</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:8px;">'
-    + cards.map(f => _renderFeatureCard(f, {compact:true})).join('')
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;">'
+    + cards.map(f => _renderFeatureCard(f)).join('')
     + '</div></div>';
   const fb = [
     { k:'fb-upload',   icon:'upload',   color:'#1877F2', title:'匯入貼文數據', desc:'FB 後台 Excel / JSON' },
