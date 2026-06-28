@@ -13245,6 +13245,35 @@ function _chanToUtm(name){
   if(/媒體|報導/.test(n))    return {source:'media', medium:'pr'};
   return {source:'other', medium:'social'};
 }
+function _utmGuideHtml(){
+  const step=(n,t,d,hi)=>`<div style="display:flex;gap:11px;align-items:flex-start;border:1px solid ${hi?'#5DCAA5':'#DDE8E3'};background:${hi?'#E1F5EE':'#fff'};border-radius:8px;padding:10px 13px;">
+    <div style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:${hi?'#0F6E56':'#064E2C'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;">${n}</div>
+    <div><div style="font-size:13.5px;font-weight:700;color:${hi?'#04342C':'#1A2820'};">${t}</div><div style="font-size:12.5px;color:${hi?'#0F6E56':'#5A7A6A'};margin-top:2px;line-height:1.6;">${d}</div></div></div>`;
+  const tr=(a,b,c)=>`<tr><td style="padding:7px 10px;border:1px solid #DDE8E3;">${a}</td><td style="padding:7px 10px;border:1px solid #DDE8E3;font-family:monospace;">${b}</td><td style="padding:7px 10px;border:1px solid #DDE8E3;font-family:monospace;">${c}</td></tr>`;
+  return `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+      <div style="border:1px solid #DDE8E3;border-radius:8px;padding:12px 14px;background:#fff;"><div style="font-weight:700;color:#064E2C;font-size:13.5px;">lihiStatus 負責</div><div style="font-size:12.5px;color:#5A7A6A;margin-top:4px;">縮網址、一頁多連結(bio)、自訂連結名稱、連結點擊數</div></div>
+      <div style="border:1px solid #DDE8E3;border-radius:8px;padding:12px 14px;background:#fff;"><div style="font-weight:700;color:#064E2C;font-size:13.5px;">本系統 負責</div><div style="font-size:12.5px;color:#5A7A6A;margin-top:4px;">UTM 標籤、綁活動代碼、官網掛號成效、自動成果報告</div></div>
+    </div>
+    <div style="font-weight:700;color:#064E2C;margin:4px 0 8px;">操作流程</div>
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      ${step(1,'活動填「活動代碼」','新增/編輯活動 → 填英數小寫，例 gwd2026（這是綁定的鑰匙）')}
+      ${step(2,'UTM 產生器做連結','選活動 → 填目標(掛號頁)、來源、形式 → 產生帶 UTM 長網址')}
+      ${step(3,'搭配 lihiStatus：縮短＋自訂名稱','把長網址貼進 lihiStatus 縮短並自訂名稱（例 lihistatus.com/gwd2026），UTM 會原封帶著走',true)}
+      ${step(4,'投放','FB 貼文內、YouTube 影片說明欄、IG 限動連結 / bio')}
+      ${step(5,'GA4 匯出','GA4 → 流量開發 → 會話廣告活動 × 來源/媒介 + 工作階段/掛號')}
+      ${step(6,'回收匯入','UTM 成效回收 → 貼上（活動代碼, 來源/媒介, 工作階段, 使用者, 轉換）')}
+      ${step(7,'看成果','活動列表 → 產生成果報告 → 「官網導流與掛號」自動帶出各平台掛號')}
+    </div>
+    <div style="font-weight:700;color:#064E2C;margin:14px 0 6px;">各平台 UTM 設定對照</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;color:#1A2820;">
+      <thead><tr style="background:#EAF3DE;"><th style="text-align:left;padding:7px 10px;border:1px solid #C0DD97;color:#27500A;">投放位置</th><th style="text-align:left;padding:7px 10px;border:1px solid #C0DD97;color:#27500A;">utm_source</th><th style="text-align:left;padding:7px 10px;border:1px solid #C0DD97;color:#27500A;">utm_medium</th></tr></thead>
+      <tbody>${tr('FB 貼文','facebook','post')}${tr('YouTube 說明欄','youtube','video')}${tr('IG 限動連結','instagram','story')}${tr('IG bio（lihiStatus 頁）','instagram','bio')}</tbody>
+    </table>
+    <div style="border:1px solid #F5C84A;background:#FFF7E0;border-radius:8px;padding:11px 14px;margin-top:14px;font-size:13px;color:#1A2820;line-height:1.7;">
+      <b style="color:#7A5C00;">鐵則：</b>活動代碼在 <span style="font-family:monospace;">①活動欄位</span>、<span style="font-family:monospace;">②UTM 連結</span>、<span style="font-family:monospace;">③GA4 匯入</span> 三處要完全一致（同樣 gwd2026），系統才會自動串起來灌進報告。
+    </div>`;
+}
 function renderUtm(){
   const el = document.getElementById('utmContent'); if(!el) return;
   const cfg = _utmCfg();
@@ -13260,6 +13289,10 @@ function renderUtm(){
       <h3 style="font-size:18px;font-weight:800;">UTM 連結產生器</h3>
       <p style="font-size:12.5px;color:var(--text-sub);margin:4px 0 0;line-height:1.6;">產生帶 UTM 參數的追蹤連結，貼到各平台後，GA4 就能精準分辨流量來自哪場活動、哪個管道。命名統一最重要，建議用下方清單。</p>
     </div>
+    <details style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;">
+      <summary style="cursor:pointer;font-size:14px;font-weight:800;color:#064E2C;">操作說明（含 lihiStatus 搭配）— 點開</summary>
+      <div style="padding-top:14px;">${_utmGuideHtml()}</div>
+    </details>
     <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start;">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;">
         <div class="form-group" style="margin-bottom:12px;"><label>目標網址（要導去的頁面）</label><input id="utm-target" value="${cfg.base}" oninput="utmUpdate()" placeholder="https://..."></div>
