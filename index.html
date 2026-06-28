@@ -8415,59 +8415,43 @@ function _warSectionQuickAccess() {
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;">'
     + cards.map(f => _renderFeatureCard(f)).join('')
     + '</div></div>';
+  const fb = [
+    { k:'fb-upload',   icon:'upload',   color:'#1877F2', title:'匯入貼文數據', desc:'FB 後台 Excel / JSON' },
+    { k:'fb-overview', icon:'facebook', color:'#1877F2', title:'粉專總覽',     desc:'觸及互動 Dashboard' },
+    { k:'fb-posts',    icon:'grid',     color:'#1877F2', title:'貼文成效列表', desc:'逐篇數據' },
+  ];
   const act = [
     { k:'event-list',      icon:'file',      color:'#064E2C', title:'產出活動成果報告', desc:'活動列表→一鍵 PDF/Word/PPT' },
     { k:'event-add',       icon:'clipboard', color:'#F59E0B', title:'新增活動回報',   desc:'填數據與曝光來源' },
     { k:'event-dashboard', icon:'bar-chart', color:'#F59E0B', title:'活動成效看板',   desc:'場次、出席率、滿意度' },
-    { k:'campaign-hub',    icon:'compass',   color:'#7C3AED', title:'Campaign 成果看板', desc:'跨平台整合成效' },
   ];
-  const soc = [
-    { k:'fb-upload',   icon:'upload',   color:'#1877F2', title:'匯入貼文數據', desc:'FB 後台 Excel / JSON' },
-    { k:'fb-overview', icon:'facebook', color:'#1877F2', title:'粉專總覽',     desc:'觸及互動 Dashboard' },
-    { k:'fb-posts',    icon:'grid',     color:'#1877F2', title:'貼文成效列表', desc:'逐篇數據' },
-    { k:'fb-calendar', icon:'calendar', color:'#1877F2', title:'內容日曆',     desc:'發文時間軸' },
+  const clinic = [
+    { k:'clinic-matrix', icon:'check-list', color:'#2D6A4F', title:'門診表填入', desc:'月度傳達矩陣' },
+    { k:'clinic-items',  icon:'folder',     color:'#2D6A4F', title:'題材列表',   desc:'題材主檔維護' },
   ];
-  const fbadv = [
-    { k:'fb-analysis', icon:'bar-chart',    color:'#7C3AED', title:'組合分析',   desc:'貼文交叉矩陣' },
-    { k:'fb-ab',       icon:'flask',        color:'#7C3AED', title:'A/B 分析',   desc:'貼文對照測試' },
-    { k:'fb-predict',  icon:'trending-up',  color:'#7C3AED', title:'貼文預測',   desc:'觸及預測' },
-    { k:'fb-sop',      icon:'sliders',      color:'#7C3AED', title:'SOP 模板',   desc:'建議標題格式' },
+  const utm = [
+    { k:'utm-builder', icon:'megaphone', color:'#C04B1E', title:'UTM 連結產生器', desc:'帶 UTM 追蹤連結＋QR' },
+    { k:'utm-stats',   icon:'bar-chart', color:'#C04B1E', title:'UTM 成效回收',   desc:'GA4 對回活動掛號' },
   ];
-  const mc = [
-    { k:'media-list',    icon:'newspaper',  color:'#DC2626', title:'新聞媒體曝光', desc:'媒體露出追蹤' },
-    { k:'media-add',     icon:'newspaper',  color:'#DC2626', title:'新增媒體記錄', desc:'新聞曝光回報' },
-    { k:'clinic-matrix', icon:'check-list', color:'#2D6A4F', title:'門診表填入',   desc:'月度傳達矩陣' },
-    { k:'clinic-items',  icon:'folder',     color:'#2D6A4F', title:'題材列表',     desc:'題材主檔維護' },
-    { k:'clinic-tags',   icon:'tag',        color:'#2D6A4F', title:'標籤管理',     desc:'題材標籤字典' },
-    { k:'clinic-stats',  icon:'chart-pie',  color:'#2D6A4F', title:'標籤統計分析', desc:'依標籤撈成果' },
+  const web = [
+    { k:'web-overview', icon:'globe',    color:'#1E40AF', title:'官網 GA4',       desc:'流量分析儀表板' },
+    { k:'web-import',   icon:'download', color:'#1E40AF', title:'匯入 GA4 / GSC', desc:'.xlsx 自動解析' },
   ];
-  const mk = [
-    { k:'utm-builder',      icon:'megaphone', color:'#C04B1E', title:'UTM 連結產生器', desc:'帶 UTM 追蹤連結＋QR' },
-    { k:'utm-stats',        icon:'bar-chart', color:'#C04B1E', title:'UTM 成效回收',   desc:'GA4 對回活動掛號' },
-    { k:'crosstag-stats',   icon:'tag',       color:'#2D6A4F', title:'各管道分析',     desc:'依標籤跨管道統計' },
-    { k:'crosstag-library', icon:'folder',    color:'#2D6A4F', title:'共用標籤建立',   desc:'跨管道標籤字典' },
-  ];
-  const data = [
-    { k:'web-overview',        icon:'globe',    color:'#1E40AF', title:'官網 GA4',       desc:'流量分析儀表板' },
-    { k:'web-seoArticles',     icon:'search',   color:'#1E40AF', title:'SEO 文章',       desc:'排名與搜尋量' },
-    { k:'web-import',          icon:'download', color:'#1E40AF', title:'匯入 GA4 / GSC', desc:'.xlsx 自動解析' },
-    { k:'warroom-quickimport', icon:'upload',   color:'#1E40AF', title:'快速匯入區',     desc:'拖多檔自動辨識' },
-    { k:'__exportReport', fn:'exportReport', icon:'printer', color:'#059669', title:'匯出月報', desc:'A4 PDF 月報' },
-    { k:'warroom-okr',         icon:'target',   color:'#DC2626', title:'OKR 目標',       desc:'本月關鍵指標' },
-    { k:'settings-backup',     icon:'save',     color:'#6B7280', title:'資料備份還原',   desc:'快照、回收筒' },
-    { k:'settings-main',       icon:'settings', color:'#6B7280', title:'設定',           desc:'同步、權限、目標' },
+  const media = [
+    { k:'media-list', icon:'newspaper', color:'#DC2626', title:'新聞媒體曝光', desc:'媒體露出追蹤' },
+    { k:'media-add',  icon:'newspaper', color:'#DC2626', title:'新增媒體記錄', desc:'新聞曝光回報' },
   ];
   return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 22px;box-shadow:var(--shadow);margin-bottom:16px;">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;">'
     +   '<div style="font-size:15px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;"><span style="display:inline-flex;color:#1a8454;">'+svgIcon('zap',18)+'</span>快速登錄</div>'
     +   '<button class="btn btn-outline" onclick="openFeatureLauncher()" style="font-size:12px;padding:6px 14px;">全部功能 ('+FEATURE_CATALOG.length+') ▶</button>'
     + '</div>'
-    + cat('活動與成果報告', '#F59E0B', act)
-    + cat('內容與社群',     '#1877F2', soc)
-    + cat('粉專進階分析',   '#7C3AED', fbadv)
-    + cat('媒體與門診',     '#2D6A4F', mc)
-    + cat('行銷工具 / 跨管道', '#C04B1E', mk)
-    + cat('官網 / 數據 / 系統', '#1E40AF', data)
+    + cat('粉專',     '#1877F2', fb)
+    + cat('活動',     '#F59E0B', act)
+    + cat('門診表',   '#2D6A4F', clinic)
+    + cat('UTM',      '#C04B1E', utm)
+    + cat('官網 GA',  '#1E40AF', web)
+    + cat('媒體',     '#DC2626', media)
     + '</div>';
 }
 
