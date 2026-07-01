@@ -3292,14 +3292,23 @@ async function syncFromGAS() {
       if (p.month) p.month = normalizeDate(p.month).slice(0,7);
       if (!p.month && p.date) p.month = p.date.slice(0,7);
     });
+    // 合併：保留本機獨有、GAS 未儲存的欄位（曝光來源 channels、自訂欄位 custom、
+    // 照片 photos、成果報告文字 purpose/content/observation/improvement、活動代碼 utmCampaign 等）
+    // 否則每次同步都會被雲端的基本欄位整包覆蓋而遺失。以 日期|名稱 為鍵合併，雲端基本欄位覆蓋、本機獨有欄位保留。
+    let mergedEvents = events;
+    if (Array.isArray(events) && events.length) {
+      const _locEv = {};
+      (store.events||[]).forEach(e => { _locEv[(e.date||'')+'|'+(e.name||'')] = e; });
+      mergedEvents = events.map(ce => { const le = _locEv[(ce.date||'')+'|'+(ce.name||'')]; return le ? Object.assign({}, le, ce) : ce; });
+    }
     // 同步邏輯：GAS 為真實資料的唯一來源，不與 demo 內建資料合併
     // （合併會因 GAS 回傳 ISO 日期被時區轉換差 1 天，導致同一筆貼文重複出現）
     store.posts  = Array.isArray(posts)  && posts.length  ? posts  : getBuiltinPosts();
-    store.events = Array.isArray(events) && events.length ? events : getBuiltinEvents();
+    store.events = Array.isArray(mergedEvents) && mergedEvents.length ? mergedEvents : getBuiltinEvents();
     store.media  = Array.isArray(media)  && media.length  ? media  : getBuiltinMedia();
     store.kols   = Array.isArray(kols)   && kols.length   ? kols   : getBuiltinKols();
-    // 同一份資料內若有完全相同的 date+title 才去重（防止 GAS 端資料本身重複）
-    const dedup = (arr, keyFn) => { const seen = new Set(); return arr.filter(x => { const k = keyFn(x); if (seen.has(k)) return false; seen.add(k); return true; }); };
+    // 同一份資料內若有完全相同的 date+title 才去重（防止 GAS 端資料本身重複）；保留「最後一筆」以讓編輯後推送的版本勝出
+    const dedup = (arr, keyFn) => { const m = new Map(); arr.forEach(x => m.set(keyFn(x), x)); return [...m.values()]; };
     store.posts  = dedup(store.posts,  p => (p.date||'')+'|'+(p.title||''));
     store.events = dedup(store.events, e => (e.date||'')+'|'+(e.name||''));
     store.media  = dedup(store.media,  m => (m.date||'')+'|'+(m.name||''));
@@ -5136,6 +5145,9 @@ function saveEventEdit() {
   };
   ensureTagsExist(store.events[idx].tags);
   saveStore();
+  // 推回雲端（僅基本欄位；照片/曝光來源/自訂欄位等大型或 Sheets 未儲存欄位不送，避免寫入失敗）
+  const _ev = store.events[idx];
+  _gasWrite('addEvent', { date:_ev.date, name:_ev.name, type:_ev.type, campus:_ev.campus, reg:_ev.reg, sample:_ev.sample, attend:_ev.attend, reach:_ev.reach, sat:_ev.sat, speaker:_ev.speaker, note:_ev.note, budget:_ev.budget, expense:_ev.expense, yt_url:_ev.yt_url, yt_views:_ev.yt_views });
   closeModal('eventModal');
   renderEvents();
   showToast('活動已更新');
