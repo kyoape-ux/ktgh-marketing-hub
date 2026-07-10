@@ -735,7 +735,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           <p>管理每月門診表相關的行銷題材與跨傳達管道宣傳紀錄：</p>
           <ul>
             <li><b>門診表題材庫</b> — 新增/編輯每月門診題材、負責醫師、上線日期</li>
-            <li><b>月度傳達矩陣</b> — 一眼看出題材在哪些傳達管道（FB / LINE / 官網 / 影片等）有曝光</li>
+            <li><b>主題統計</b> — 依主題（非常光田 / 治癌攻略 / 醫新聞等）統計年度各主題項目數，並列出題材與負責人</li>
             <li><b>門診統計</b> — 產出 KPI 數據與成效報表，可一鍵輸出 A4 推廣報告</li>
           </ul>
           <div class="guide-tip">門診題材可直接關聯跨傳達管道標籤，方便在「各傳達管道分析」中整合所有管道成效。</div>
@@ -956,7 +956,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>門診表資料庫</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('clinic','matrix')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span> 月度傳達矩陣
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span> 主題統計
     </a>
     <a class="nav-item" onclick="switchSection('clinic','items')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> 題材列表
@@ -2022,7 +2022,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       </div>
     </div>
 
-    <!-- ══ 門診表 — 月度傳達矩陣 ══ -->
+    <!-- ══ 門診表 — 主題統計 ══ -->
     <div class="section" id="sec-clinic-matrix">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <label style="font-size:12px;font-weight:600;color:var(--text-sub);">月份：</label>
@@ -2032,13 +2032,13 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
         <button class="btn btn-outline" data-perm="edit" onclick="loadClinic115()" style="font-size:12.5px;">載入 115 年度題材規劃</button>
         <div style="flex:1;"></div>
         <button class="btn btn-primary" data-perm="edit" onclick="clinicAddItem()" style="font-size:12.5px;">+ 新增題材</button>
-        <button class="btn btn-outline" onclick="clinicPrintMatrix()" style="font-size:12.5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> 列印本月矩陣</button>
+        <button class="btn btn-outline" onclick="clinicPrintMatrix()" style="font-size:12.5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> 列印主題統計</button>
       </div>
       <div style="background:var(--surface);border-radius:12px;padding:16px;border:1px solid var(--border);box-shadow:var(--shadow);overflow-x:auto;">
         <div id="clinicMatrixWrap"></div>
       </div>
       <div style="margin-top:12px;background:#ECFDF5;border-left:4px solid var(--brand);padding:12px 16px;border-radius:6px;font-size:12px;color:var(--text-sub);line-height:1.7;">
-        <b>使用說明</b>：這張矩陣對應紙本「門診表傳達管道」表。每列是題材、每欄是傳達管道，點擊儲存格切換 ✓/✗。點擊題材名稱可編輯詳細資料與標籤。
+        <b>使用說明</b>：上方為年度各主題（非常光田 / 治癌攻略 / 醫新聞…）的項目數統計，下方為題材列表（主題 / 內容 / 負責人）。月份可切「全年」或單月。點擊「內容」可編輯題材，於編輯視窗設定主題分類與負責人。
       </div>
     </div>
 
@@ -3761,7 +3761,7 @@ const FEATURE_CATALOG = [
   { k:'crosstag-library', cat:'進階', icon:'folder',    color:'#2D6A4F', title:'標籤建立',   desc:'共用標籤字典' },
   { k:'utm-builder',  cat:'進階', icon:'megaphone',  color:'#C04B1E', title:'UTM 連結產生器', desc:'帶 UTM 追蹤連結＋QR' },
   { k:'utm-stats',    cat:'進階', icon:'bar-chart',  color:'#C04B1E', title:'UTM 成效回收',   desc:'GA4 對回活動掛號' },
-  { k:'clinic-matrix', cat:'進階', icon:'check-list',  color:'#2D6A4F', title:'月度傳達矩陣', desc:'門診表跨管道追蹤' },
+  { k:'clinic-matrix', cat:'進階', icon:'check-list',  color:'#2D6A4F', title:'主題統計', desc:'門診表年度主題項目統計' },
   { k:'clinic-stats',  cat:'進階', icon:'chart-pie',   color:'#2D6A4F', title:'門診標籤統計', desc:'依標籤撈歷年成果' },
   // 匯入
   { k:'fb-upload',     cat:'匯入', icon:'upload',  color:'#1E40AF', title:'匯入貼文',  desc:'Excel/JSON 批次' },
@@ -3960,7 +3960,7 @@ function switchSection(module, sub) {
     'utm-stats':        ['UTM 成效回收',      '匯入 GA4 來源/媒介/活動，對回活動看各管道流量轉換'],
     'kol-list':         ['KOL 成效追蹤',      'KOL / 網紅合作觸及與互動'],
     'kol-add':          ['新增 KOL 記錄',     '填寫 KOL 合作成效資料'],
-    'clinic-matrix':    ['月度傳達矩陣',      '門診表每月題材 × 傳達管道布署追蹤'],
+    'clinic-matrix':    ['主題統計',      '依主題統計年度項目數，並列出題材與負責人'],
     'clinic-items':     ['題材列表',          '所有門診表題材主檔（可依標籤篩選）'],
     'clinic-tags':      ['標籤管理',          '題材標籤字典維護'],
     'clinic-stats':     ['標籤統計分析',      '依標籤撈出歷年宣傳成果與傳達管道涵蓋率'],
@@ -6605,8 +6605,13 @@ function clinicMonths() {
 }
 function clinicCurrentMonth() {
   const sel = document.getElementById('clinicMatrixMonth');
-  return (sel && sel.value) || clinicMonths()[0] || new Date().toISOString().slice(0,7);
+  const v = sel && sel.value;
+  if (v && v !== 'ALL') return v;
+  return clinicMonths()[0] || new Date().toISOString().slice(0,7);
 }
+// 門診表主題分類（供規劃表 datalist / 統計）
+const CLINIC_THEMES = ['封面','非常光田','治癌攻略','醫新聞','活動看板','就醫須知','門診時間表','到院交通'];
+function clinicThemeOf(it){ let t = (it && (it.theme || (it.src==='115plan' && it.tags && it.tags.length ? it.tags[0] : ''))) || '(未分類)'; if (t === '封面/非常光田') t = '封面'; return t; }
 
 function renderClinicMatrix() {
   const sel = document.getElementById('clinicMatrixMonth');
@@ -6614,51 +6619,51 @@ function renderClinicMatrix() {
   const months = clinicMonths();
   if (!months.length) months.push(new Date().toISOString().slice(0,7));
   const prev = sel.value;
-  sel.innerHTML = months.map(m => `<option value="${m}">${m}</option>`).join('');
-  if (prev && months.includes(prev)) sel.value = prev;
-  const month = sel.value;
-  const items = activeMediaItems().filter(x => x.month === month).sort((a,b) => (a.page_no||'').localeCompare(b.page_no||''));
+  sel.innerHTML = '<option value="ALL">全年（全部月份）</option>' + months.map(m => `<option value="${m}">${m}</option>`).join('');
+  if (prev && (prev === 'ALL' || months.includes(prev))) sel.value = prev; else sel.value = 'ALL';
+  const scope = sel.value;
+  const all = activeMediaItems();
+  const items = (scope === 'ALL' ? all : all.filter(x => x.month === scope))
+    .slice().sort((a,b) => (a.month||'').localeCompare(b.month||'') || (a.page_no||'').localeCompare(b.page_no||''));
   const wrap = document.getElementById('clinicMatrixWrap');
   if (!items.length) {
-    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:13px;">本月尚無題材，請點「+ 新增題材」或「<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> 複製上月」</div>';
+    wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:13px;">尚無題材，請點「+ 新增題材」或「載入 115 年度題材規劃」</div>';
     return;
   }
-  // Group channels by group
-  const groups = {};
-  MEDIA_CHANNELS.forEach(c => { if (!groups[c.group]) groups[c.group] = []; groups[c.group].push(c); });
-  let html = '<table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:1400px;">';
-  // Header group row
-  html += '<thead><tr><th rowspan="2" style="background:#1a8454;color:#fff;padding:8px;border:1px solid #1a8454;min-width:60px;">頁碼</th><th rowspan="2" style="background:#1a8454;color:#fff;padding:8px;border:1px solid #1a8454;min-width:160px;">主題</th><th rowspan="2" style="background:#1a8454;color:#fff;padding:8px;border:1px solid #1a8454;min-width:60px;">負責人</th>';
-  Object.keys(groups).forEach(g => {
-    html += `<th colspan="${groups[g].length}" style="background:#1B4332;color:#fff;padding:6px;border:1px solid #1a8454;font-size:11px;">${g}</th>`;
+  // ── 年度主題統計（各主題項目數）──
+  const counts = {};
+  items.forEach(it => { const t = clinicThemeOf(it); counts[t] = (counts[t]||0) + 1; });
+  const sorted = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+  const maxC = Math.max.apply(null, Object.values(counts));
+  let stat = '<div style="margin-bottom:20px;">';
+  stat += `<div style="font-weight:800;color:#1B4332;margin-bottom:10px;font-size:13.5px;">主題統計（${scope==='ALL'?'全年':scope}）· 共 <span style="color:#1a8454;">${items.length}</span> 項 · ${sorted.length} 個主題</div>`;
+  stat += '<table style="border-collapse:collapse;font-size:12.5px;width:100%;max-width:600px;">';
+  sorted.forEach(t => {
+    const c = counts[t]; const pct = Math.round(c / maxC * 100);
+    stat += `<tr>`
+      + `<td style="padding:4px 10px 4px 0;white-space:nowrap;font-weight:600;color:#1B4332;width:130px;text-align:right;">${t}</td>`
+      + `<td style="padding:4px 0;width:100%;"><div style="background:#EDF4F0;border-radius:5px;"><div style="width:${pct}%;min-width:2px;background:linear-gradient(to right,#1a8454,#3cba92);height:17px;border-radius:5px;"></div></div></td>`
+      + `<td style="padding:4px 0 4px 10px;text-align:right;font-weight:800;color:#1a8454;width:38px;">${c}</td>`
+      + `</tr>`;
   });
-  html += '<th rowspan="2" style="background:#1a8454;color:#fff;padding:8px;border:1px solid #1a8454;min-width:60px;">操作</th></tr><tr>';
-  Object.keys(groups).forEach(g => {
-    groups[g].forEach(c => {
-      html += `<th style="background:#40916C;color:#fff;padding:6px 4px;border:1px solid #1a8454;font-size:10px;font-weight:600;min-width:38px;" title="${c.label}｜${c.owner}｜${c.spec}">${c.label.replace('海報 ','')}<br><span style="font-weight:400;opacity:0.8;font-size:9px;">(${c.owner})</span></th>`;
-    });
-  });
-  html += '</tr></thead><tbody>';
-  items.forEach((it, i) => {
+  stat += '</table></div>';
+  // ── 題材列表（主題 / 內容 / 負責人）──
+  let html = '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+  html += '<thead><tr>' + ['月份','頁碼','主題','內容','負責人','操作'].map(h =>
+    `<th style="background:#1a8454;color:#fff;padding:7px 8px;border:1px solid #1a8454;text-align:left;white-space:nowrap;">${h}</th>`).join('') + '</tr></thead><tbody>';
+  items.forEach(it => {
     const idx = store.mediaItems.indexOf(it);
-    html += `<tr><td style="padding:6px;border:1px solid #D4E5DB;text-align:center;font-weight:700;color:#1a8454;">${it.page_no||''}</td>`;
-    html += `<td style="padding:6px;border:1px solid #D4E5DB;"><a href="javascript:clinicEditItem(${idx})" style="color:#1a8454;text-decoration:none;font-weight:600;">${it.title||'(未命名)'}</a>`;
-    if (it.tags && it.tags.length) {
-      html += '<div style="margin-top:3px;">' + it.tags.slice(0,4).map(t => `<span style="display:inline-block;padding:1px 6px;background:#E8F0EC;color:#1a8454;border-radius:8px;font-size:9px;margin-right:3px;">${t}</span>`).join('') + '</div>';
-    }
-    html += '</td>';
-    html += `<td style="padding:6px;border:1px solid #D4E5DB;text-align:center;">${it.content_owner||''}</td>`;
-    Object.keys(groups).forEach(g => {
-      groups[g].forEach(c => {
-        const checked = it.channels && it.channels[c.key];
-        html += `<td onclick="clinicToggleChannel(${idx},'${c.key}')" style="padding:0;border:1px solid #D4E5DB;text-align:center;cursor:pointer;background:${checked?'#D4E5DB':'#fff'};font-size:14px;color:${checked?'#1a8454':'#ddd'};font-weight:900;" title="點擊切換">${checked?'✓':'·'}</td>`;
-      });
-    });
-    html += `<td style="padding:4px;border:1px solid #D4E5DB;text-align:center;white-space:nowrap;"><button class="action-btn edit" onclick="clinicEditItem(${idx})" style="font-size:10px;padding:3px 6px;">編輯</button><button class="action-btn del" onclick="clinicDeleteItem(${idx})" data-perm="edit" style="font-size:10px;padding:3px 6px;margin-left:2px;">刪</button></td>`;
-    html += '</tr>';
+    html += `<tr>`
+      + `<td style="padding:6px 8px;border:1px solid #D4E5DB;white-space:nowrap;color:#555;">${it.month||''}</td>`
+      + `<td style="padding:6px 8px;border:1px solid #D4E5DB;text-align:center;font-weight:700;color:#1a8454;white-space:nowrap;">${it.page_no||''}</td>`
+      + `<td style="padding:6px 8px;border:1px solid #D4E5DB;white-space:nowrap;"><span style="display:inline-block;padding:1px 9px;background:#E8F0EC;color:#1a8454;border-radius:10px;font-size:11px;font-weight:600;">${clinicThemeOf(it)}</span></td>`
+      + `<td style="padding:6px 8px;border:1px solid #D4E5DB;"><a href="javascript:clinicEditItem(${idx})" style="color:#1B4332;text-decoration:none;font-weight:600;">${it.title||'(未命名)'}</a></td>`
+      + `<td style="padding:6px 8px;border:1px solid #D4E5DB;white-space:nowrap;">${it.content_owner||''}</td>`
+      + `<td style="padding:4px 6px;border:1px solid #D4E5DB;text-align:center;white-space:nowrap;"><button class="action-btn edit" onclick="clinicEditItem(${idx})" style="font-size:10px;padding:3px 6px;">編輯</button><button class="action-btn del" onclick="clinicDeleteItem(${idx})" data-perm="edit" style="font-size:10px;padding:3px 6px;margin-left:2px;">刪</button></td>`
+      + `</tr>`;
   });
   html += '</tbody></table>';
-  wrap.innerHTML = html;
+  wrap.innerHTML = stat + html;
   applyPermissions();
 }
 
@@ -6712,7 +6717,7 @@ function clinicAddItem() {
   const month = clinicCurrentMonth();
   const item = {
     id: 'mi_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-    month, page_no: '', title: '', content_owner: '',
+    month, page_no: '', theme: '', title: '', content_owner: '',
     department: '', tags: [], nature: [], target_audience: '',
     doctors: [], media_source: '', media_url: '',
     note: '', channels: {},
@@ -6727,7 +6732,7 @@ function clinicAddItem() {
 // 每列 [月份, 頁碼, 題材, 科別, 文稿負責, 主題]
 const CLINIC_115_DATA = [
   // 2026-01
-  ['2026-01','P1-2','腦心血管急重症醫療處置能力（急診、神經科、心臟科）','急診/神經科/心臟科','俊佑、宜靜','封面/非常光田'],
+  ['2026-01','P1-2','腦心血管急重症醫療處置能力（急診、神經科、心臟科）','急診/神經科/心臟科','俊佑、宜靜','封面'],
   ['2026-01','P3','專科整合、預防與檢查 #腦中風 #心梗 #關鍵治療時間 #腦齡檢查','神經科/心臟科','俊佑、宜靜','非常光田'],
   ['2026-01','P4','#腦中風 / 嚴寶勝、林毓慧','神經內科','惠淇','醫新聞'],
   ['2026-01','P5','#心梗 / 劉崢偉','心臟內科','惠淇','醫新聞'],
@@ -6816,8 +6821,8 @@ function loadClinic115(){
   if(_hasClinic115()){ showToast('115 年度題材已載入'); switchSection('clinic','items'); return; }
   if(!store.mediaItems) store.mediaItems=[];
   CLINIC_115_DATA.forEach(function(r,i){
-    store.mediaItems.push({ id:'mi115_'+i, src:'115plan', month:r[0], page_no:r[1], title:r[2], department:r[3]||'', content_owner:r[4]||'',
-      tags: r[5]? [r[5]] : [], nature:[], target_audience:'', doctors:[], media_source:'', media_url:'', note:'', channels:{}, created_at:'2026-06-22T00:00:00.000Z' });
+    store.mediaItems.push({ id:'mi115_'+i, src:'115plan', month:r[0], page_no:r[1], theme:r[5]||'', title:r[2], department:r[3]||'', content_owner:r[4]||'',
+      tags:[], nature:[], target_audience:'', doctors:[], media_source:'', media_url:'', note:'', channels:{}, created_at:'2026-06-22T00:00:00.000Z' });
   });
   saveStore();
   showToast(CLINIC_115_DATA.length+' 筆 115 年度題材已載入');
@@ -6852,17 +6857,8 @@ function clinicEditItem(idx) {
   const tagOpts = (store.mediaTags||[]).map(t => `<option value="${t.name}" ${it.tags && it.tags.includes(t.name)?'selected':''}>${t.name}</option>`).join('');
   const natureOpts = ITEM_NATURES.map(n => `<label style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;font-size:12px;"><input type="checkbox" ${it.nature && it.nature.includes(n)?'checked':''} value="${n}"> ${n}</label>`).join('');
   const ownerOpts = CONTENT_OWNERS.map(o => `<option value="${o}" ${it.content_owner===o?'selected':''}>${o}</option>`).join('');
-  const channelGroups = {};
-  MEDIA_CHANNELS.forEach(c => { if (!channelGroups[c.group]) channelGroups[c.group] = []; channelGroups[c.group].push(c); });
-  let chHtml = '';
-  Object.keys(channelGroups).forEach(g => {
-    chHtml += `<div style="margin-bottom:8px;"><div style="font-size:11px;font-weight:700;color:#1a8454;margin-bottom:4px;">${g}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">`;
-    channelGroups[g].forEach(c => {
-      const checked = it.channels && it.channels[c.key];
-      chHtml += `<label style="display:inline-flex;align-items:center;gap:3px;padding:4px 8px;background:${checked?'#D4E5DB':'#F5F5F5'};border-radius:6px;font-size:11px;cursor:pointer;"><input type="checkbox" class="cedit-ch" data-key="${c.key}" ${checked?'checked':''}> ${c.label} <span style="color:#888;font-size:9px;">(${c.owner})</span></label>`;
-    });
-    chHtml += '</div></div>';
-  });
+  const themeListOpts = CLINIC_THEMES.map(t => `<option value="${t}">`).join('');
+  const curTheme = it.theme || (it.src==='115plan' && it.tags && it.tags.length ? it.tags[0] : '');
   const html = `
     <div id="clinicEditOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
       <div style="background:#fff;border-radius:14px;padding:28px;max-width:780px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
@@ -6870,10 +6866,11 @@ function clinicEditItem(idx) {
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
           <div class="form-group"><label>月份 *</label><input id="ce-month" type="month" value="${it.month||''}"></div>
           <div class="form-group"><label>頁碼</label><input id="ce-page" type="text" value="${it.page_no||''}" placeholder="P1 / P3上 / p32(1) / 通光"></div>
-          <div class="form-group"><label>內容負責人</label><select id="ce-owner"><option value="">--</option>${ownerOpts}</select></div>
+          <div class="form-group"><label>主題（分類）</label><input id="ce-theme" list="ce-theme-list" type="text" value="${curTheme.replace(/"/g,'&quot;')}" placeholder="非常光田 / 治癌攻略 / 醫新聞…"><datalist id="ce-theme-list">${themeListOpts}</datalist></div>
         </div>
-        <div class="form-group" style="margin-bottom:12px;"><label>主題 *</label><input id="ce-title" type="text" value="${(it.title||'').replace(/"/g,'&quot;')}" placeholder="例：春日換膚計畫 / 肺部健檢專案"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="form-group" style="margin-bottom:12px;"><label>內容 *</label><input id="ce-title" type="text" value="${(it.title||'').replace(/"/g,'&quot;')}" placeholder="題材內容，例：#攝護腺癌 / 鄭嘉瑋"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group"><label>負責人</label><select id="ce-owner"><option value="">--</option>${ownerOpts}</select></div>
           <div class="form-group"><label>主責科別</label><input id="ce-dept" type="text" value="${(it.department||'').replace(/"/g,'&quot;')}"></div>
           <div class="form-group"><label>目標族群</label><select id="ce-target"><option value="">--</option>${['女性','親子','男性','中高齡'].map(x=>`<option value="${x}" ${it.target_audience===x?'selected':''}>${x}</option>`).join('')}</select></div>
         </div>
@@ -6885,7 +6882,6 @@ function clinicEditItem(idx) {
         </div>
         <div class="form-group" style="margin-bottom:12px;"><label>媒體連結 / 檔案 URL</label><input id="ce-url" type="url" value="${(it.media_url||'').replace(/"/g,'&quot;')}" placeholder="https://..."></div>
         <div class="form-group" style="margin-bottom:12px;"><label>備註</label><textarea id="ce-note" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;">${it.note||''}</textarea></div>
-        <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:var(--text-sub);display:block;margin-bottom:6px;">傳達管道布署</label><div style="background:#FAFBFA;border:1px solid var(--border);border-radius:8px;padding:12px;">${chHtml}</div></div>
         <div style="display:flex;justify-content:flex-end;gap:8px;"><button class="btn btn-outline" onclick="closeClinicEdit()">取消</button><button class="btn btn-primary" onclick="clinicSaveItem(${idx})">儲存</button></div>
       </div>
     </div>`;
@@ -6905,6 +6901,7 @@ function clinicSaveItem(idx) {
   if (!it) return;
   it.month   = document.getElementById('ce-month').value;
   it.page_no = document.getElementById('ce-page').value.trim();
+  it.theme   = document.getElementById('ce-theme').value.trim();
   it.title   = document.getElementById('ce-title').value.trim();
   it.content_owner = document.getElementById('ce-owner').value;
   it.department = document.getElementById('ce-dept').value.trim();
@@ -6915,8 +6912,6 @@ function clinicSaveItem(idx) {
   it.media_source = document.getElementById('ce-media').value.trim();
   it.media_url = document.getElementById('ce-url').value.trim();
   it.note = document.getElementById('ce-note').value;
-  it.channels = {};
-  document.querySelectorAll('.cedit-ch:checked').forEach(cb => { it.channels[cb.dataset.key] = true; });
   it.updated_at = new Date().toISOString();
   saveStore();
   closeClinicEdit();
@@ -7051,25 +7046,26 @@ function renderClinicStats() {
 
 // —— 列印本月矩陣 ——
 function clinicPrintMatrix() {
-  const month = clinicCurrentMonth();
-  const items = activeMediaItems().filter(x => x.month === month).sort((a,b) => (a.page_no||'').localeCompare(b.page_no||''));
-  if (!items.length) { showToast('本月無題材可列印'); return; }
-  const w = window.open('', '_blank', 'width=1400,height=900');
-  const groups = {};
-  MEDIA_CHANNELS.forEach(c => { if (!groups[c.group]) groups[c.group] = []; groups[c.group].push(c); });
-  let html = `<html><head><meta charset="UTF-8"><title>${month} 門診表傳達管道</title><style>body{font-family:'Noto Sans TC',sans-serif;padding:20px;}h1{font-size:18px;text-align:center;margin-bottom:16px;}table{width:100%;border-collapse:collapse;font-size:10px;}th,td{border:1px solid #666;padding:4px;}th{background:#eee;}td.c{text-align:center;font-size:14px;font-weight:900;}@media print{@page{size:A3 landscape;}}</style></head><body>`;
-  html += `<h1>${month.replace('-','年')}月 門診表傳達管道</h1>`;
-  html += '<table><thead><tr><th rowspan="2">頁碼</th><th rowspan="2">主題</th><th rowspan="2">負責人</th>';
-  Object.keys(groups).forEach(g => { html += `<th colspan="${groups[g].length}">${g}</th>`; });
-  html += '</tr><tr>';
-  Object.keys(groups).forEach(g => groups[g].forEach(c => { html += `<th>${c.label.replace('海報 ','')}<br><small>(${c.owner})</small></th>`; }));
-  html += '</tr></thead><tbody>';
-  items.forEach(it => {
-    html += `<tr><td>${it.page_no||''}</td><td>${it.title||''}</td><td>${it.content_owner||''}</td>`;
-    Object.keys(groups).forEach(g => groups[g].forEach(c => { html += `<td class="c">${it.channels&&it.channels[c.key]?'✓':''}</td>`; }));
-    html += '</tr>';
-  });
-  html += '</tbody></table><div style="margin-top:30px;text-align:center;font-size:11px;color:#888;">光田綜合醫院 行銷組 ｜ 由行銷整合分析中心自動產出</div>';
+  const sel = document.getElementById('clinicMatrixMonth');
+  const scope = (sel && sel.value) || 'ALL';
+  const all = activeMediaItems();
+  const items = (scope === 'ALL' ? all : all.filter(x => x.month === scope))
+    .slice().sort((a,b) => (a.month||'').localeCompare(b.month||'') || (a.page_no||'').localeCompare(b.page_no||''));
+  if (!items.length) { showToast('無題材可列印'); return; }
+  const label = scope === 'ALL' ? '全年' : scope;
+  const counts = {};
+  items.forEach(it => { const t = clinicThemeOf(it); counts[t] = (counts[t]||0) + 1; });
+  const sorted = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+  const w = window.open('', '_blank', 'width=1000,height=900');
+  let html = `<html><head><meta charset="UTF-8"><title>${label} 門診表主題統計</title><style>body{font-family:'Noto Sans TC',sans-serif;padding:24px;}h1{font-size:19px;text-align:center;margin-bottom:6px;}h2{font-size:14px;margin:20px 0 8px;color:#1B4332;}table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px;}th,td{border:1px solid #888;padding:5px 8px;}th{background:#1a8454;color:#fff;text-align:left;}@media print{@page{size:A4 portrait;margin:14mm;}}</style></head><body>`;
+  html += `<h1>門診表主題統計（${label}）</h1><div style="text-align:center;color:#666;font-size:12px;">共 ${items.length} 項 · ${sorted.length} 個主題</div>`;
+  html += '<h2>各主題項目數</h2><table><thead><tr><th>主題</th><th style="width:80px;text-align:right;">項目數</th></tr></thead><tbody>';
+  sorted.forEach(t => { html += `<tr><td>${t}</td><td style="text-align:right;font-weight:700;">${counts[t]}</td></tr>`; });
+  html += '</tbody></table>';
+  html += '<h2>題材列表</h2><table><thead><tr><th>月份</th><th>頁碼</th><th>主題</th><th>內容</th><th>負責人</th></tr></thead><tbody>';
+  items.forEach(it => { html += `<tr><td>${it.month||''}</td><td>${it.page_no||''}</td><td>${clinicThemeOf(it)}</td><td>${it.title||''}</td><td>${it.content_owner||''}</td></tr>`; });
+  html += '</tbody></table>';
+  html += '<div style="margin-top:24px;text-align:center;font-size:11px;color:#888;">光田綜合醫院 行銷組 ｜ 由行銷整合分析中心自動產出</div>';
   html += '<script>setTimeout(function(){window.print();},300);<\/script></body></html>';
   w.document.write(html);
   w.document.close();
@@ -8560,7 +8556,7 @@ function _warSectionQuickAccess() {
     { k:'fb-calendar', icon:'calendar', color:'#1877F2', title:'內容日曆',     desc:'發文時間軸' },
   ];
   const clinic = [
-    { k:'clinic-matrix',  icon:'check-list', color:'#2D6A4F', title:'門診表填入',   desc:'月度傳達矩陣' },
+    { k:'clinic-matrix',  icon:'check-list', color:'#2D6A4F', title:'門診表主題',   desc:'年度主題項目統計' },
     { k:'clinic-items',   icon:'folder',     color:'#2D6A4F', title:'題材列表',     desc:'題材主檔維護' },
     { k:'media-add',      icon:'newspaper',  color:'#DC2626', title:'新增媒體記錄', desc:'新聞曝光回報' },
     { k:'crosstag-stats', icon:'tag',        color:'#2D6A4F', title:'各管道分析',   desc:'依標籤跨管道統計' },
