@@ -4,8 +4,8 @@
     {
       "name": "local",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8765", "-d", "/Users/mac/Desktop/行銷成效整合工具/ktgh-marketing-hub"],
-      "port": 8765
+      "runtimeArgs": ["-m", "http.server", "8799", "-d", "/tmp/ktgh-preview"],
+      "port": 8799
     }
   ]
 }

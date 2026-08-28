@@ -1,9 +1,5 @@
 /**
- * 光田醫院行銷分析系統 — Google Apps Script 後端 v4
- *
- * v4 重點：Drive JSON (state) 成為唯一主資料來源；
- *          saveState 會自動把基本欄位「單向鏡像」到 Sheets 供檢視；
- *          新增 stateMeta（衝突偵測用）與自動輪替備份。
+ * 光田醫院行銷分析系統 — Google Apps Script 後端 v3
  *
  * 部署方式：
  *   1. 開啟 Google 試算表 → 擴充功能 → Apps Script
@@ -26,10 +22,7 @@ const SPREADSHEET_ID = '1MtKTbrcoxP7-YVUB0rILdYrM3vOh_O0JXqEWNdJFrKI'; // 光田
 // ── 欄位定義（與前台完全對應）──────────────────────────
 const SCHEMAS = {
   'processed_posts': ['date','title','type','img_type','cat','reach','click','engage','month','url','phase','campaign'],
-  // ★ 前 12 欄順序不可更動（既有試算表已有資料）；新欄位一律往後追加
-  'events':  ['date','name','type','campus','reg','attend','reach','sat','speaker','note','budget','expense',
-              'sample','yt_url','yt_views','utmCampaign','tags','channels',
-              'purpose','content','observation','improvement','photo_count'],
+  'events':  ['date','name','type','campus','reg','attend','reach','sat','speaker','note','budget','expense'],
   'media':   ['date','name','type','section','title','nature','reach','url','note','campaign'],
   'kols':    ['date','name','platform','followers','content_type','reach','engage','campaign','url','note'],
 };
@@ -88,7 +81,6 @@ function doGet(e) {
       case 'initSheets':    return jsonResponse(initSheets());
       // 完整資料雲端同步（儲存於 Google Drive JSON 檔）
       case 'loadState':     return jsonResponse(loadState());
-      case 'stateMeta':     return jsonResponse(stateMeta());
       case 'saveState':     return jsonResponse(saveState(e));
       // 資料缺漏催收 email
       case 'emailMissing':  return jsonResponse(emailMissing(e));
@@ -155,146 +147,17 @@ function loadState() {
 }
 
 function saveState(e) {
-  var contents = (e && e.postData && e.postData.contents)
-              || (e && e.parameter && e.parameter.data)
-              || '';
-  if (!contents) throw new Error('缺少 POST body（需用 POST 推送 JSON）');
-
-  // ── 寫入前把關：解析得動、而且看起來真的是 state，才允許覆蓋 ──
-  var state;
-  try { state = JSON.parse(contents); }
-  catch (err) { throw new Error('JSON 解析失敗，已放棄寫入：' + err.message); }
-  if (!state || typeof state !== 'object' || !Array.isArray(state.posts) || !Array.isArray(state.events)) {
-    throw new Error('資料格式不符（需含 posts / events 陣列），已放棄寫入');
+  if (!e || !e.postData || !e.postData.contents) {
+    throw new Error('缺少 POST body（需用 POST 推送 JSON）');
   }
-
-  var folder = _getOrCreateStateFolder();
-  var file   = _getStateFile();
-
-  _rotateBackup(folder, file);
-
-  if (file) file.setContent(contents);
-  else      folder.createFile(STATE_FILE_NAME, contents, 'application/json');
-
-  // ── 單向鏡像到 Sheets（唯讀檢視用；在 Sheets 上改不會回流）──
-  var mirrored;
-  try { mirrored = _mirrorToSheets(state); }
-  catch (err) { mirrored = { error: err.message }; }
-
-  return {
-    savedAt:  new Date().toISOString(),
-    bytes:    contents.length,
-    rev:      state._meta ? state._meta.pushedAt : null,
-    mirrored: mirrored
-  };
-}
-
-// 只回傳輕量資訊，給前端做「雲端有沒有被別人改過」的衝突偵測
-function stateMeta() {
-  var file = _getStateFile();
-  if (!file) return { exists: false };
-  var rev = null, counts = null, version = null;
-  try {
-    var s = JSON.parse(file.getBlob().getDataAsString('UTF-8'));
-    if (s && s._meta) { rev = s._meta.pushedAt || null; version = s._meta.version || null; }
-    counts = {
-      posts:  (s.posts  || []).length,
-      events: (s.events || []).length,
-      media:  (s.media  || []).length,
-      kols:   (s.kols   || []).length
-    };
-  } catch (err) {}
-  return {
-    exists:    true,
-    rev:       rev,
-    version:   version,
-    counts:    counts,
-    size:      file.getSize(),
-    updatedAt: file.getLastUpdated().toISOString()
-  };
-}
-
-// 每小時最多留一份備份，只保留最近 10 份
-function _rotateBackup(folder, file) {
-  if (!file) return;
-  try {
-    var props = PropertiesService.getScriptProperties();
-    var last  = Number(props.getProperty('lastBackupMs') || 0);
-    var now   = Date.now();
-    if (now - last < 3600 * 1000) return;
-
-    var stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd-HHmm');
-    folder.createFile('backup-' + stamp + '-' + STATE_FILE_NAME,
-                      file.getBlob().getDataAsString('UTF-8'), 'application/json');
-    props.setProperty('lastBackupMs', String(now));
-
-    var it = folder.getFiles(), backups = [];
-    while (it.hasNext()) {
-      var f = it.next();
-      if (f.getName().indexOf('backup-') === 0) backups.push(f);
-    }
-    backups.sort(function (a, b) { return b.getName().localeCompare(a.getName()); });
-    backups.slice(10).forEach(function (f) { f.setTrashed(true); });
-  } catch (err) {
-    // 備份失敗不能擋住正常存檔
+  const folder = _getOrCreateStateFolder();
+  const file = _getStateFile();
+  if (file) {
+    file.setContent(e.postData.contents);
+  } else {
+    folder.createFile(STATE_FILE_NAME, e.postData.contents, 'application/json');
   }
-}
-
-// state 陣列 → Sheets 儲存格（巢狀資料壓成人看得懂的字串）
-function _stateCell(row, header) {
-  if (header === 'photo_count') return (row.photos || []).length;
-  if (header === 'channels') {
-    return (row.channels || [])
-      .map(function (c) { return (c.name || '') + ':' + (c.reach || 0); })
-      .join(' / ');
-  }
-  if (header === 'tags') return (row.tags || []).join('、');
-
-  var v = row[header];
-  if (v === undefined || v === null) return '';
-  if (typeof v === 'object') return JSON.stringify(v);
-  // 避免以 = + - @ 開頭的文字被當成公式
-  if (typeof v === 'string' && /^[=+\-@]/.test(v)) return "'" + v;
-  return v;
-}
-
-function _mirrorToSheets(state) {
-  var ss  = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var out = {};
-  var pairs = [['processed_posts','posts'], ['events','events'], ['media','media'], ['kols','kols']];
-
-  pairs.forEach(function (pair) {
-    var sheetName = pair[0], stateKey = pair[1];
-    var headers = SCHEMAS[sheetName];
-    var arr = (state[stateKey] || []).filter(function (r) { return r && !r.deleted_at; });
-
-    var sheet = ss.getSheetByName(sheetName);
-    if (!sheet) sheet = ss.insertSheet(sheetName);
-
-    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    sheet.getRange(1, 1, 1, headers.length)
-         .setBackground('#006341').setFontColor('#ffffff').setFontWeight('bold');
-    sheet.setFrozenRows(1);
-
-    var lastRow = sheet.getLastRow(), lastCol = sheet.getLastColumn();
-    if (lastRow > 1) sheet.getRange(2, 1, lastRow - 1, Math.max(lastCol, headers.length)).clearContent();
-
-    if (arr.length) {
-      var rows = arr.map(function (r) {
-        return headers.map(function (h) { return _stateCell(r, h); });
-      });
-      sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
-    }
-    out[sheetName] = arr.length;
-  });
-
-  // 明示這是鏡像，避免同事在上面編輯
-  try {
-    var note = ss.getSheetByName('events');
-    if (note) note.getRange(1, 1).setNote('此工作表為系統自動產生的唯讀鏡像。\n在這裡修改不會回流到系統，請回網頁編輯。');
-  } catch (err) {}
-
-  return out;
+  return { savedAt: new Date().toISOString(), bytes: e.postData.contents.length };
 }
 
 // ═══════════════════════════════════════════════════════

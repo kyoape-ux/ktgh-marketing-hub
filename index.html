@@ -1034,6 +1034,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 
 <!-- MAIN -->
 <main class="main">
+  <div id="cloudBanner" style="display:none;background:#FBE9EA;border:1px solid #E5A7AD;color:#8C2028;border-radius:10px;padding:10px 14px;margin:0 0 12px;font-size:13px;line-height:1.6;"></div>
   <div class="topbar">
     <div>
       <div class="topbar-title" id="topbarTitle">總覽 Dashboard</div>
@@ -1044,7 +1045,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <span id="syncStatus" style="font-size:11.5px;color:var(--text-muted);padding:0 4px;"></span>
       <button class="btn btn-outline" onclick="openFeatureLauncher()" title="所有功能總覽" style="border-radius:20px;padding:6px 14px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> 全部功能</button>
       <a href="https://docs.google.com/spreadsheets/d/1MtKTbrcoxP7-YVUB0rILdYrM3vOh_O0JXqEWNdJFrKI/edit" target="_blank" class="btn btn-sheets" title="開啟 Google Sheets 資料庫" style="text-decoration:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg> Google Sheets</a>
-      <button class="btn btn-sync" data-perm="edit" onclick="syncFromGAS()" title="從 Google Sheets 同步資料"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> 同步</button>
+      <button class="btn btn-sync" data-perm="edit" onclick="syncFromGAS()" title="從 Google Sheets 補進新資料（只新增，不會覆蓋或刪除）"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> 從 Sheets 補資料</button>
       <button class="btn btn-export" onclick="exportReport()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 匯出月報</button>
       <button class="btn btn-import" data-perm="edit" onclick="document.getElementById('fileInput').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 匯入數據</button>
       <input type="file" id="fileInput" accept=".xlsx,.csv" onchange="handleFileUpload(this)">
@@ -3040,8 +3041,33 @@ function activeLinePosts()  { return (store.linePosts  || []).filter(x => !x.del
 function activeSeoKeywords(){ return (store.seoKeywords|| []).filter(x => !x.deleted_at); }
 function activeVideoItems() { return (store.videoItems || []).filter(x => !x.deleted_at); }
 
-function saveStore() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e) {}
+let _quotaWarned = false;
+
+// localStorage 只是快取，而且不存照片：base64 會把 5MB 額度塞爆，
+// 一旦爆掉，之後「每一次」存檔都會靜默失敗。照片以雲端 state 為準。
+function _localCacheCopy() {
+  const c = {};
+  Object.keys(store).forEach(k => { c[k] = store[k]; });
+  if (Array.isArray(store.events)) {
+    c.events = store.events.map(e =>
+      (e && Array.isArray(e.photos) && e.photos.length)
+        ? Object.assign({}, e, { photos: [], _photoCount: e.photos.length })
+        : e);
+  }
+  return c;
+}
+
+function saveStore(opts) {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(_localCacheCopy()));
+  } catch(err) {
+    console.error('[saveStore] 本機快取寫入失敗', err);
+    if (!_quotaWarned) {
+      _quotaWarned = true;
+      if (typeof showToast === 'function') showToast('本機暫存空間已滿，資料改以雲端為準（雲端存檔不受影響）');
+    }
+  }
+  if (!opts || !opts.localOnly) scheduleCloudSave();
 }
 
 // ═══════════════════════════════════════════
@@ -3067,7 +3093,9 @@ function takeSnapshot(reason) {
     role: getRole() || 'unknown',
     data: {
       posts:  store.posts  || [],
-      events: store.events || [],
+      // 快照不留照片：base64 會讓 localStorage 立刻爆掉
+      events: (store.events || []).map(e =>
+        (e && Array.isArray(e.photos) && e.photos.length) ? Object.assign({}, e, { photos: [] }) : e),
       media:  store.media  || [],
       kols:   store.kols   || [],
     },
@@ -3240,6 +3268,273 @@ function setSyncStatus(msg, color) {
   if (el) { el.textContent = msg; el.style.color = color || 'var(--text-muted)'; }
 }
 
+// ═══════════════════════════════════════════════════════════
+//  雲端主資料層 (state_v2)
+//  Drive 上的 JSON 是唯一真實來源；Google Sheets 降為唯讀鏡像。
+//
+//  四條規則，缺一不可：
+//   1. 開頁一定先從雲端載入；載不到就進唯讀，絕不讓本機蓋掉雲端
+//   2. 任何 saveStore() 都會排程一次雲端存檔（1.5 秒防抖）
+//   3. 存檔前比對 rev；雲端被別人改過就停下來問，不悶頭覆蓋
+//   4. 存完回讀確認 — iframe POST 讀不到回應，不確認就等於不知道成功沒有
+// ═══════════════════════════════════════════════════════════
+const STATE_VERSION = 'state_v2';
+const _cloud = { ready:false, rev:null, error:null, saving:false, dirty:false, timer:null };
+
+function _hhmm() { return new Date().toLocaleTimeString('zh-TW', { hour:'2-digit', minute:'2-digit' }); }
+
+function setCloudStatus(msg, kind, btnLabel) {
+  const colors = { ok:'var(--brand)', busy:'#1D4ED8', warn:'#B45309', bad:'#C0313D' };
+  setSyncStatus(msg, colors[kind] || 'var(--text-muted)');
+  const b = document.getElementById('cloudBanner');
+  if (!b) return;
+  if (kind === 'bad') {
+    b.style.display = 'block';
+    b.innerHTML = '<b>目前為唯讀</b>　' + msg +
+      ' <button class="btn btn-outline" style="padding:2px 12px;font-size:12px;margin-left:10px;" onclick="cloudBoot()">' +
+      (btnLabel || '重試') + '</button>';
+  } else {
+    b.style.display = 'none';
+  }
+}
+
+function rerenderAll() {
+  ['renderOverview','renderPostsList','renderEvents','renderMedia','renderKols','renderWarRoom']
+    .forEach(fn => { try { if (typeof window[fn] === 'function') window[fn](); } catch(e) { console.warn(fn, e); } });
+}
+
+// 本機優先的聯集：本機那筆欄位比較完整，雲端/Sheets 只補「本機沒有的」
+function _unionBy(localArr, remoteArr, keyFn) {
+  const out  = Array.isArray(localArr) ? localArr.slice() : [];
+  const seen = new Set(out.map(keyFn));
+  (remoteArr || []).forEach(r => {
+    const k = keyFn(r);
+    if (!seen.has(k)) { seen.add(k); out.push(r); }
+  });
+  return out;
+}
+
+// Sheets 讀回來的列要修：ISO 日期、舊版欄位偏移、預算時間戳、鏡像欄位是文字
+function _normalizeSheetRows(posts, events, media, kols) {
+  const normalizeDate = d => d ? String(d).slice(0,10) : '';
+  const looksLikeDate = v => /^\d{4}-\d{2}-\d{2}/.test(String(v||''));
+
+  if (Array.isArray(posts)) posts.forEach(p => {
+    if (!p.date && looksLikeDate(p.title)) {   // 舊版 GAS 欄位偏移
+      p.date = p.title; p.title = p.type; p.type = p.img_type; p.img_type = '';
+    }
+  });
+  [posts, events, media, kols].forEach(arr => {
+    if (Array.isArray(arr)) arr.forEach(r => {
+      if (r.date) r.date = normalizeDate(r.date);
+      if (r.phase && looksLikeDate(r.phase)) r.phase = '';
+    });
+  });
+  if (Array.isArray(posts)) posts.forEach(p => {
+    if (p.month) p.month = normalizeDate(p.month).slice(0,7);
+    if (!p.month && p.date) p.month = p.date.slice(0,7);
+  });
+  if (Array.isArray(events)) events.forEach(e => {
+    // 舊版 GAS 把 created_at 時間戳寫進了 budget 欄
+    if (e.budget  > 1000000) e.budget  = 0;
+    if (e.expense > 1000000) e.expense = 0;
+    // 鏡像欄位在 Sheets 是給人看的文字，不能當結構資料用
+    if (typeof e.channels === 'string') e.channels = [];
+    if (typeof e.tags === 'string') {
+      e.tags = e.tags ? e.tags.split(/[、,;，；]/).map(x => x.trim()).filter(Boolean) : [];
+    }
+    delete e.photo_count;
+  });
+}
+
+// 取雲端輕量狀態。舊版 GAS 沒有 stateMeta action，就退回讀整包推導，
+// 這樣「先上前端、後更新後端」或反過來都不會出錯。
+async function _stateMeta() {
+  try {
+    return await gasGet('stateMeta');
+  } catch(e) {
+    try {
+      const full = await gasGet('loadState');
+      if (!full) return { exists:false, _fallback:true };
+      return {
+        exists:  true,
+        rev:     full._meta ? full._meta.pushedAt : null,
+        version: full._meta ? full._meta.version  : null,
+        counts: {
+          posts:  (full.posts  || []).length,
+          events: (full.events || []).length,
+          media:  (full.media  || []).length,
+          kols:   (full.kols   || []).length,
+        },
+        _fallback: true,
+      };
+    } catch(e2) { return null; }
+  }
+}
+
+function _buildFullState() {
+  const state = {};
+  Object.keys(store).forEach(k => { if (k !== '_meta') state[k] = store[k]; });
+  state._meta = {
+    pushedAt:   new Date().toISOString(),
+    pushedFrom: navigator.userAgent.slice(0, 100),
+    pushedBy:   getRole() || 'unknown',
+    version:    STATE_VERSION,
+  };
+  return state;
+}
+
+function applyCloudState(remote) {
+  Object.keys(remote).forEach(k => {
+    if (k === '_meta') return;
+    if (remote[k] !== undefined && remote[k] !== null) store[k] = remote[k];
+  });
+  if (!Array.isArray(store.mediaTags) || !store.mediaTags.length) store.mediaTags = getDefaultMediaTags();
+  ['posts','events','media','kols'].forEach(k => { if (!Array.isArray(store[k])) store[k] = []; });
+  sanitizeDates(store);
+  saveStore({ localOnly: true });
+}
+
+async function cloudBoot() {
+  if (!config.gasUrl) { setCloudStatus('尚未設定雲端位址', 'bad'); return; }
+  _cloud.ready = false;
+  setCloudStatus('載入雲端資料…', 'busy');
+  try {
+    const remote = await gasGet('loadState');
+    if (remote && remote._meta && remote._meta.version === STATE_VERSION) {
+      applyCloudState(remote);
+      _cloud.rev   = remote._meta.pushedAt;
+      _cloud.ready = true;
+      _cloud.error = null;
+      setCloudStatus('雲端已同步 ' + _hhmm(), 'ok');
+      rerenderAll();
+      return;
+    }
+    await migrateToCloud();
+  } catch(e) {
+    _cloud.error = e.message;
+    setCloudStatus('雲端載入失敗：' + e.message, 'bad');
+  }
+}
+
+// 一次性搬遷：把「本機現有資料 ＋ Sheets 現有資料」灌成雲端主檔
+async function migrateToCloud() {
+  if (!isAdmin()) {
+    setCloudStatus('雲端尚未建立主資料檔，需由組長登入執行一次性搬遷', 'bad');
+    return;
+  }
+  const n = k => (store[k] || []).length;
+  const ok = confirm(
+    '雲端尚未建立完整主資料檔。\n\n' +
+    '將以「本機現有資料 ＋ Google Sheets 現有資料」建立雲端主檔：\n' +
+    '・貼文 ' + n('posts')  + ' 篇\n' +
+    '・活動 ' + n('events') + ' 場\n' +
+    '・媒體 ' + n('media')  + ' 則\n' +
+    '・KOL  ' + n('kols')   + ' 筆\n\n' +
+    '這是一次性動作。完成後所有變更都會自動存進雲端，成果報告欄位與照片也才存得住。\n\n要開始嗎？');
+  if (!ok) { setCloudStatus('雲端尚未建立主資料檔，搬遷完成前無法編輯', 'bad', '開始搬遷'); return; }
+
+  takeSnapshot('雲端搬遷前');
+  setCloudStatus('搬遷中：讀取 Google Sheets…', 'busy');
+  const [posts, events, media, kols] = await Promise.all([
+    gasGet('getPosts').catch(() => []),
+    gasGet('getEvents').catch(() => []),
+    gasGet('getMedia').catch(() => []),
+    gasGet('getKols').catch(() => []),
+  ]);
+  _normalizeSheetRows(posts, events, media, kols);
+  store.posts  = _unionBy(store.posts,  posts,  r => (r.date||'') + '|' + (r.title||''));
+  store.events = _unionBy(store.events, events, r => (r.date||'') + '|' + (r.name||''));
+  store.media  = _unionBy(store.media,  media,  r => (r.date||'') + '|' + (r.name||''));
+  store.kols   = _unionBy(store.kols,   kols,   r => (r.date||'') + '|' + (r.name||''));
+  sanitizeDates(store);
+  saveStore({ localOnly: true });
+
+  _cloud.ready = true;   // 開放寫入
+  _cloud.rev   = null;   // 首次寫入不做衝突比對
+  setCloudStatus('搬遷中：寫入雲端…', 'busy');
+  const saved = await runCloudSave(true);
+  if (saved) {
+    showToast('雲端主資料檔建立完成，之後所有變更都會自動存雲端');
+    rerenderAll();
+  }
+}
+
+function scheduleCloudSave() {
+  if (!_cloud.ready) return;
+  _cloud.dirty = true;
+  setCloudStatus('有變更待存…', 'warn');
+  clearTimeout(_cloud.timer);
+  _cloud.timer = setTimeout(() => { runCloudSave(false); }, 1500);
+}
+
+async function runCloudSave(force) {
+  if (!_cloud.ready) return false;
+  if (_cloud.saving) { _cloud.dirty = true; return false; }
+  _cloud.saving = true;
+  _cloud.dirty  = false;
+  try {
+    setCloudStatus('儲存到雲端…', 'busy');
+    const meta = await _stateMeta();
+
+    // (a) 別人改過了 → 停下來問
+    if (!force && meta && meta.exists && meta.rev && _cloud.rev && meta.rev !== _cloud.rev) {
+      _cloud.saving = false;
+      setCloudStatus('雲端已被其他人更新，這次變更尚未存檔', 'bad');
+      const when = new Date(meta.rev).toLocaleString('zh-TW');
+      const reload = confirm(
+        '雲端資料在 ' + when + ' 被其他人更新過。\n\n' +
+        '確定 = 重新載入雲端版本（放棄你這次的修改）\n' +
+        '取消 = 以你的版本覆蓋雲端（會先自動建立還原點）');
+      if (reload) { await cloudBoot(); return false; }
+      takeSnapshot('覆蓋雲端前');
+      return await runCloudSave(true);
+    }
+
+    // (b) 筆數驟減 → 多半是資料出事了，先攔下來
+    if (!force && meta && meta.counts) {
+      const shrunk = ['posts','events','media','kols'].filter(k =>
+        meta.counts[k] > 5 &&
+        (store[k] || []).filter(x => !x.deleted_at).length < meta.counts[k] * 0.7);
+      if (shrunk.length) {
+        _cloud.saving = false;
+        setCloudStatus('資料筆數異常減少，已暫停存檔', 'bad');
+        const go = confirm(
+          '偵測到本機的「' + shrunk.join('、') + '」比雲端少了三成以上。\n\n' +
+          '這通常代表資料出了問題。\n\n仍要以本機覆蓋雲端嗎？（會先自動建立還原點）');
+        if (!go) return false;
+        takeSnapshot('覆蓋雲端前（筆數驟減）');
+        return await runCloudSave(true);
+      }
+    }
+
+    const state = _buildFullState();
+    await gasPost('saveState', state);
+
+    // (c) 回讀確認
+    const after = await _stateMeta();
+    _cloud.saving = false;
+    if (after && after.rev === state._meta.pushedAt) {
+      _cloud.rev = after.rev;
+      setCloudStatus('已存雲端 ' + _hhmm(), 'ok');
+      if (_cloud.dirty) scheduleCloudSave();
+      return true;
+    }
+    setCloudStatus('存檔未獲確認，請稍後按「從 Sheets 補資料」旁的狀態重試', 'bad');
+    return false;
+
+  } catch(e) {
+    _cloud.saving = false;
+    setCloudStatus('雲端存檔失敗：' + e.message, 'bad');
+    return false;
+  }
+}
+
+// 還有沒存完的變更就別讓人關掉分頁
+window.addEventListener('beforeunload', (e) => {
+  if (_cloud.dirty || _cloud.saving) { e.preventDefault(); e.returnValue = ''; }
+});
+
 async function gasGet(action, params = {}) {
   if (!config.gasUrl) throw new Error('GAS URL 未設定');
   const url = new URL(config.gasUrl);
@@ -3253,114 +3548,67 @@ async function gasGet(action, params = {}) {
   return json.data;
 }
 
+// 從 Google Sheets「補」資料 — 只新增雲端沒有的，永遠不刪除、不覆蓋既有欄位。
+// （v4 之前這裡是 store.posts = 雲端資料，本機新增的貼文就是被這一行抹掉的）
 async function syncFromGAS() {
   if (!config.gasUrl) { switchSection('settings','main'); showToast('請先填入 Google Sheets Web App URL'); return; }
-  setSyncStatus('同步中…', 'var(--brand)');
-  // 同步前先自動快照本機當下狀態，萬一 GAS 回傳異常可還原
-  takeSnapshot('GAS 同步前');
+  if (!_cloud.ready)  { showToast('雲端資料尚未載入完成，請稍候'); return; }
+  setCloudStatus('讀取 Google Sheets…', 'busy');
   try {
     const [posts, events, media, kols] = await Promise.all([
-      gasGet('getPosts'),
-      gasGet('getEvents'),
-      gasGet('getMedia'),
+      gasGet('getPosts').catch(() => []),
+      gasGet('getEvents').catch(() => []),
+      gasGet('getMedia').catch(() => []),
       gasGet('getKols').catch(() => []),
     ]);
-    // 正規化 Sheets 回傳的日期（ISO→yyyy-MM-dd）及補齊 month
-    function normalizeDate(d) { return d ? String(d).slice(0,10) : ''; }
-    function looksLikeDate(v) { return /^\d{4}-\d{2}-\d{2}/.test(String(v||'')); }
-    // 修正 GAS 欄位偏移：若 date 為空且 title 看起來像日期，前3欄向左平移
-    if (Array.isArray(posts)) posts.forEach(p => {
-      if (!p.date && looksLikeDate(p.title)) {
-        p.date     = p.title;   // ISO date string
-        p.title    = p.type;    // actual title text
-        p.type     = p.img_type; // "相片"/"影片"
-        p.img_type = '';         // original value lost in shift
-      }
-    });
-    [posts, events, media, kols].forEach(arr => {
-      if (Array.isArray(arr)) arr.forEach(r => {
-        if (r.date) r.date = normalizeDate(r.date);
-        if (r.phase && looksLikeDate(r.phase)) r.phase = '';  // phase 不應是日期戳記
-      });
-    });
-    // 修正 GAS 預算欄位的時間戳 Bug：budget/expense > 1000000 為時間戳，應清零
-    if (Array.isArray(events)) events.forEach(e => {
-      if (e.budget > 1000000) e.budget = 0;
-      if (e.expense > 1000000) e.expense = 0;
-    });
-    if (Array.isArray(posts)) posts.forEach(p => {
-      if (p.month) p.month = normalizeDate(p.month).slice(0,7);
-      if (!p.month && p.date) p.month = p.date.slice(0,7);
-    });
-    // 合併：保留本機獨有、GAS 未儲存的欄位（曝光來源 channels、自訂欄位 custom、
-    // 照片 photos、成果報告文字 purpose/content/observation/improvement、活動代碼 utmCampaign 等）
-    // 否則每次同步都會被雲端的基本欄位整包覆蓋而遺失。以 日期|名稱 為鍵合併，雲端基本欄位覆蓋、本機獨有欄位保留。
-    let mergedEvents = events;
-    if (Array.isArray(events) && events.length) {
-      const _locEv = {};
-      (store.events||[]).forEach(e => { _locEv[(e.date||'')+'|'+(e.name||'')] = e; });
-      mergedEvents = events.map(ce => { const le = _locEv[(ce.date||'')+'|'+(ce.name||'')]; return le ? Object.assign({}, le, ce) : ce; });
-      // 保留「只在本機、雲端還沒有」的活動（推送失敗/尚未同步時不被同步刪掉）；以名稱不在雲端為準，避免時區日期差造成重複
-      const _cloudNames = new Set(mergedEvents.map(e => (e.name||'').trim()));
-      (store.events||[]).forEach(le => { if (!_cloudNames.has((le.name||'').trim())) mergedEvents = mergedEvents.concat([le]); });
+    _normalizeSheetRows(posts, events, media, kols);
+
+    const before = ['posts','events','media','kols'].map(k => (store[k]||[]).length);
+    store.posts  = _unionBy(store.posts,  posts,  r => (r.date||'') + '|' + (r.title||''));
+    store.events = _unionBy(store.events, events, r => (r.date||'') + '|' + (r.name||''));
+    store.media  = _unionBy(store.media,  media,  r => (r.date||'') + '|' + (r.name||''));
+    store.kols   = _unionBy(store.kols,   kols,   r => (r.date||'') + '|' + (r.name||''));
+    const added = ['posts','events','media','kols']
+      .reduce((sum, k, i) => sum + ((store[k]||[]).length - before[i]), 0);
+
+    if (added > 0) {
+      saveStore();
+      rerenderAll();
+      showToast('從 Sheets 補進 ' + added + ' 筆新資料');
+    } else {
+      setCloudStatus('已存雲端 ' + _hhmm(), 'ok');
+      showToast('Sheets 沒有新資料');
     }
-    // 同步邏輯：GAS 為真實資料的唯一來源，不與 demo 內建資料合併
-    // （合併會因 GAS 回傳 ISO 日期被時區轉換差 1 天，導致同一筆貼文重複出現）
-    store.posts  = Array.isArray(posts)  && posts.length  ? posts  : getBuiltinPosts();
-    store.events = Array.isArray(mergedEvents) && mergedEvents.length ? mergedEvents : getBuiltinEvents();
-    store.media  = Array.isArray(media)  && media.length  ? media  : getBuiltinMedia();
-    store.kols   = Array.isArray(kols)   && kols.length   ? kols   : getBuiltinKols();
-    // 同一份資料內若有完全相同的 date+title 才去重（防止 GAS 端資料本身重複）；保留「最後一筆」以讓編輯後推送的版本勝出
-    const dedup = (arr, keyFn) => { const m = new Map(); arr.forEach(x => m.set(keyFn(x), x)); return [...m.values()]; };
-    store.posts  = dedup(store.posts,  p => (p.date||'')+'|'+(p.title||''));
-    store.events = dedup(store.events, e => (e.date||'')+'|'+(e.name||''));
-    store.media  = dedup(store.media,  m => (m.date||'')+'|'+(m.name||''));
-    store.kols   = dedup(store.kols,   k => (k.date||'')+'|'+(k.name||''));
-    saveStore();
-    renderOverview();
-    renderPostsList();
-    renderEvents();
-    renderMedia();
-    renderKols();
-    const t = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
-    setSyncStatus('已同步 ' + t, 'var(--brand)');
-    showToast('Sheets 資料同步完成');
   } catch(e) {
-    setSyncStatus('同步失敗 ✕', 'var(--warn)');
-    console.error('[GAS sync error]', e);
-    showToast('同步失敗：' + e.message);
+    setCloudStatus('讀取 Sheets 失敗：' + e.message, 'bad');
+    showToast('讀取失敗：' + e.message);
   }
 }
 
+// v4 起改推 Drive JSON。舊版把整包資料塞進網址（GET），
+// 28 篇貼文就超過 Google 的 8KB 上限，必定失敗且錯誤被吃掉。
 async function pushAllToGAS() {
   if (!config.gasUrl) { showToast('請先設定 GAS URL'); return; }
-  if (!isAdmin()) { showToast('僅組長可執行「推送全部資料到 Sheets」'); return; }
-  // 二次確認：大量寫入會覆蓋 Sheets，需輸入確認字串
-  const confirmWord = '推送覆蓋';
-  const msg = `警告：此動作會將本機全部資料推送到 Google Sheets，可能覆蓋 Sheets 端既有資料。\n\n本機目前：\n・貼文 ${activePosts().length} 篇\n・活動 ${activeEvents().length} 場\n・媒體 ${activeMedia().length} 則\n・KOL  ${activeKols().length} 筆\n\n請輸入「${confirmWord}」以繼續：`;
-  const input = prompt(msg);
-  if (input !== confirmWord) { showToast('已取消推送'); return; }
+  if (!isAdmin())     { showToast('僅組長可執行「推送全部資料到雲端」'); return; }
   const statusEl = document.getElementById('pushStatus');
+  const msg = '將以本機資料覆蓋雲端主檔：\n'
+    + '・貼文 ' + activePosts().length + ' 篇\n'
+    + '・活動 ' + activeEvents().length + ' 場\n'
+    + '・媒體 ' + activeMedia().length + ' 則\n'
+    + '・KOL  ' + activeKols().length + ' 筆\n\n會先自動建立還原點。確定？';
+  if (!confirm(msg)) { showToast('已取消推送'); return; }
+  takeSnapshot('推送到雲端前');
   if (statusEl) statusEl.textContent = '推送中…';
-  // 推送前先自動快照本機狀態
-  takeSnapshot('推送到 Sheets 前');
-  try {
-    await gasGet('importPosts',   { data: store.posts   });
-    await gasGet('bulkAddEvents', { data: store.events  });
-    await gasGet('bulkAddMedia',  { data: store.media   });
-    await gasGet('bulkAddKols',   { data: store.kols    });
-    if (statusEl) statusEl.textContent = '推送完成 ' + new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
-    showToast('本機資料已推送至 Google Sheets');
-  } catch(e) {
-    if (statusEl) statusEl.textContent = '推送失敗：' + e.message;
-    showToast('推送失敗：' + e.message);
-  }
+  const ok = await runCloudSave(true);
+  if (statusEl) statusEl.textContent = ok ? ('推送完成 ' + _hhmm()) : '推送失敗，請看右上角狀態';
+  showToast(ok ? '本機資料已推送至雲端' : '推送失敗');
 }
 
-async function _gasWrite(action, data) {
-  if (!config.gasUrl) return;
-  try { await gasGet(action, { data }); } catch(e) { console.warn('GAS write failed:', e.message); }
-}
+// v4 起停用：舊寫法把資料塞進網址（GET），中文編碼後膨脹 9 倍，
+// 28 篇貼文即超過 Google 的 8KB 上限而失敗——而且錯誤被 catch 吃掉，畫面照樣顯示成功。
+// 現在所有寫入統一由 saveStore() → runCloudSave() 推送 Drive JSON。
+// 保留空函式，讓既有呼叫點不必逐一刪除。
+async function _gasWrite(action, data) { /* no-op */ }
 
 // ═══════════════════════════════════════════
 // 完整資料雲端同步（含所有新增資料類型）
@@ -3417,34 +3665,6 @@ function gasPost(action, body) {
 }
 
 // 取得完整 state 物件（涵蓋所有資料類型）
-function _buildFullState() {
-  return {
-    posts: store.posts || [],
-    events: store.events || [],
-    media: store.media || [],
-    kols: store.kols || [],
-    mediaItems: store.mediaItems || [],
-    mediaTags: store.mediaTags || [],
-    mediaDoctors: store.mediaDoctors || [],
-    linePosts: store.linePosts || [],
-    seoArticles: store.seoArticles || [],
-    videoItems: store.videoItems || [],
-    gaMonthly: store.gaMonthly || {},
-    gscKeywords: store.gscKeywords || [],
-    okr: store.okr || [],
-    tasks: store.tasks || [],
-    seoKeywords: store.seoKeywords || [],
-    webMetrics: store.webMetrics || [],
-    lineMetrics: store.lineMetrics || [],
-    searchMetrics: store.searchMetrics || [],
-    _meta: {
-      pushedAt: new Date().toISOString(),
-      pushedFrom: navigator.userAgent.slice(0, 100),
-      version: 'state_v1',
-    },
-  };
-}
-
 function _setFullStateStatus(msg, color) {
   const el = document.getElementById('fullStateSyncStatus');
   if (el) { el.innerHTML = msg; el.style.color = color || '#1E40AF'; }
@@ -4949,27 +5169,37 @@ function closeImportModal() {
   });
 }
 
-function confirmImport() {
+async function confirmImport() {
   if (!requireEdit()) return;
   const imported = _pendingPosts.slice();
-  // 二次確認：明確告知將新增的筆數
-  const confirmWord = '確認匯入';
-  const input = prompt(`即將新增 ${imported.length} 篇貼文到資料庫。\n此動作會同步寫入 Google Sheets。\n\n請輸入「${confirmWord}」以繼續：`);
-  if (input !== confirmWord) {
+  if (!imported.length) { showToast('沒有可匯入的貼文'); return; }
+
+  // v4 起不再要求手打「確認匯入」——輸入法打錯就被靜默取消，
+  // 而且匯入前本來就會自動建立還原點，二次防護是多餘的。
+  if (!confirm('確定將 ' + imported.length + ' 篇貼文加入資料庫？\n\n（會自動建立還原點，可從「資料備份」復原）')) {
     showToast('已取消匯入');
     return;
   }
-  // 匯入前自動快照（保險）
-  takeSnapshot(`匯入 ${imported.length} 筆前`);
+
+  takeSnapshot('匯入 ' + imported.length + ' 筆前');
   store.posts = store.posts.concat(imported);
   saveStore();
-  _gasWrite('importPosts', imported);
   closeImportModal();
   renderOverview();
   renderPostsList();
-  showToast(`已匯入 ${imported.length} 篇貼文（已建立還原點）`);
+
+  const box = (bg, bd, text) =>
+    '<div style="background:' + bg + ';border-radius:12px;padding:16px 20px;border:1px solid ' + bd +
+    ';font-size:13.5px;font-weight:600;">' + text + '</div>';
   const resultEl = document.getElementById('uploadResult');
-  if (resultEl) resultEl.innerHTML = `<div style="background:var(--accent);border-radius:12px;padding:16px 20px;border:1px solid var(--border);font-size:13.5px;color:var(--brand);font-weight:600;">✓ 成功匯入 ${_pendingPosts.length} 篇貼文</div>`;
+  if (resultEl) resultEl.innerHTML = box('var(--accent)', 'var(--border)', '已加入 ' + imported.length + ' 篇，正在寫入雲端…');
+  showToast('已加入 ' + imported.length + ' 篇，正在寫入雲端…');
+
+  const ok = await runCloudSave(false);
+  if (resultEl) resultEl.innerHTML = ok
+    ? box('var(--accent)', 'var(--border)', '✓ 已匯入 ' + imported.length + ' 篇並存入雲端')
+    : box('#FBE9EA', '#E5A7AD', '已存到本機，但雲端存檔尚未完成 — 請看右上角狀態，先別關閉分頁');
+  if (ok) showToast('已匯入 ' + imported.length + ' 篇並存入雲端');
 }
 
 function handleFileDrop(e) {
@@ -13320,9 +13550,14 @@ function closePwModal() {
 }
 
 function requireEdit(action) {
-  if (canEdit()) return true;
-  showToast('唯讀模式，無法執行此操作');
-  return false;
+  if (!canEdit()) { showToast('唯讀模式，無法執行此操作'); return false; }
+  // 雲端沒載入就放行的話，載入完成會蓋掉剛打的東西；
+  // 更糟的是本機那份不完整的資料可能反過來覆蓋雲端。
+  if (!_cloud.ready) {
+    showToast('雲端資料尚未載入完成，暫時無法編輯（避免蓋掉雲端資料）');
+    return false;
+  }
+  return true;
 }
 
 function applyPermissions() {
@@ -13665,17 +13900,10 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCrossTagDatalist();
   // 預設首頁是「總覽首頁」(sec-warroom-dashboard.active)，需要主動 render 一次
   if (typeof renderWarRoom === 'function') renderWarRoom();
-  if (config.gasUrl) {
-    setSyncStatus('正在同步…', 'var(--brand)');
-    if (!localStorage.getItem(PUSH_FLAG)) {
-      pushAllToGAS()
-        .then(() => { localStorage.setItem(PUSH_FLAG, '1'); })
-        .catch(() => {})
-        .finally(() => syncFromGAS());
-    } else {
-      syncFromGAS();
-    }
-  }
+  // v4：開頁一律先從雲端 Drive JSON 載入。
+  // 舊版自動跑 syncFromGAS()，而那個函式會用 Sheets 整包覆蓋本機——
+  // 匯入的貼文、成果報告文字、活動照片就是這樣每次重整都不見的。
+  cloudBoot();
 });
 </script>
 </body>
