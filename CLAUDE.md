@@ -65,6 +65,20 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 
 詳見 `docs/DEPLOY-v4.md`。
 
+## 導覽與資料狀態
+
+- `NAV_GATES` + `applyNavVisibility()`：沒資料的管道自動從側欄收起，有資料自動出現；
+  側欄底部有「顯示全部項目」可強制展開。新增管道時在 `NAV_GATES` 加一行即可。
+- 門診表原本有自己的「標籤管理／標籤統計分析」，但寫的是**同一個 `store.mediaTags`**，
+  只是兩個介面。已在 `switchSection()` 導向跨管道那套，側欄項目移除。
+- `dataStatusBar(items, checks)`：在列表上方顯示各欄位完整度，避免「有列表 = 資料齊全」的誤會。
+
+> ★ 內建資料**都是真的**，不是示範資料，不可清除：
+> `BUILTIN_GA_MONTHLY`（2025 起實際 GA4 數字）、
+> `BUILTIN_SEO_ARTICLES`（50 篇真實 ktgh.com.tw 文章，43 篇有排名）、
+> `BUILTIN_GSC_KEYWORDS`（21 個真實關鍵字，10 個有搜尋量）。
+> `sa_seed_` 這種 id 前綴只是種子命名，不代表是假資料。
+
 ## 跨管道標籤
 
 標籤庫 `store.mediaTags`（186 個詞、11 類）為所有管道共用，各管道資料的 `tags` 存**標籤名稱**
@@ -103,6 +117,8 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 - [x] 跨管道標籤：關鍵字自動補標籤、批次上標籤、匯入帶標籤、關鍵字反查、標籤管理報表
 - [x] 檔期主檔 + 主管簡報（自動判讀→一鍵 PPT）
 - [ ] P1 匯入改造：欄位對應彈窗 + Metricool preset + 互動數拆細
+- [x] 架構精簡第一步：側欄依資料自動顯示、兩套標籤系統合併、誤導性空狀態修正
+- [ ] 架構精簡第二步：5 個匯入合併成匯入中心、Campaign 看板併入檔期管理、13 群組收成 4 組
 - [ ] 標籤待補：LINE 貼文表單改掉 6 個 prompt；KOL 納入跨管道統計
 - [ ] P2 AI 大腦：`ktgh-hub-ai` Worker（沿用影音企劃中心的 `chat()` 轉接器，Gemini 免費層）
 
