@@ -69,6 +69,9 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 
 - `NAV_GATES` + `applyNavVisibility()`：沒資料的管道自動從側欄收起，有資料自動出現；
   側欄底部有「顯示全部項目」可強制展開。新增管道時在 `NAV_GATES` 加一行即可。
+- `NAV_MERGED`：已併入別頁的入口，功能還在但不佔側欄一列，值是給 tooltip 的說明。
+  目前有 7 項（4 個匯入、Campaign 看板、活動成效看板、總覽 Dashboard）。
+  **合併時務必在原功能所屬頁面加一顆進入按鈕**，否則等於把功能藏起來。
 - 門診表原本有自己的「標籤管理／標籤統計分析」，但寫的是**同一個 `store.mediaTags`**，
   只是兩個介面。已在 `switchSection()` 導向跨管道那套，側欄項目移除。
 - `dataStatusBar(items, checks)`：在列表上方顯示各欄位完整度，避免「有列表 = 資料齊全」的誤會。
@@ -118,7 +121,9 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 - [x] 檔期主檔 + 主管簡報（自動判讀→一鍵 PPT）
 - [ ] P1 匯入改造：欄位對應彈窗 + Metricool preset + 互動數拆細
 - [x] 架構精簡第一步：側欄依資料自動顯示、兩套標籤系統合併、誤導性空狀態修正
-- [ ] 架構精簡第二步：5 個匯入合併成匯入中心、Campaign 看板併入檔期管理、13 群組收成 4 組
+- [x] 架構精簡第二步：匯入中心、Campaign 看板／活動成效看板／總覽 Dashboard 併入所屬列表頁
+- [ ] 架構精簡第三步：13 群組收成「登錄／看成效／交報告／設定」4 組
+- [ ] 待決定：組合分析、內容日曆、A/B 分析、貼文預測、SOP 模板 是否收起（資料量撐不起來）
 - [ ] 標籤待補：LINE 貼文表單改掉 6 個 prompt；KOL 納入跨管道統計
 - [ ] P2 AI 大腦：`ktgh-hub-ai` Worker（沿用影音企劃中心的 `chat()` 轉接器，Gemini 免費層）
 

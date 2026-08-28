@@ -869,7 +869,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> 總覽首頁
     </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('warroom','quickimport')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span> 快速匯入區
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span> 匯入中心
     </a>
     </div></div>
     <div class="nav-group" data-key="fb">
@@ -920,7 +920,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <a class="nav-item" onclick="switchSection('campaign','hub')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Campaign 成果看板
     </a>
-    <a class="nav-item" style="display:none" onclick="switchSection('kol','list')"><!-- 暫時隱藏 KOL，要用再開 -->
+    <a class="nav-item" onclick="switchSection('kol','list')"><!-- 顯示與否由 NAV_GATES 依資料量決定 -->
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> KOL 成效追蹤
     </a>
     </div></div>
@@ -1077,12 +1077,35 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
 
     <!-- ══ ⚡ 快速匯入區 ══ -->
     <div class="section" id="sec-warroom-quickimport">
-      <div style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);border-radius:14px;padding:24px;border:1px solid #93C5FD;margin-bottom:20px;">
-        <h2 style="font-size:18px;font-weight:900;margin-bottom:8px;color:#1E3A8A;">⚡ 一站式快速匯入</h2>
-        <p style="font-size:13px;color:#1E40AF;margin-bottom:14px;line-height:1.7;">
-          將 <b>所有月度 .xlsx 檔案一次拖入</b>，系統會自動辨識（GA4 / GSC / SEO 文章 / 影片 / LINE / 競品）並寫入對應資料庫。
-          匯入完成後可一鍵跳到「總覽首頁」立即查看分析結果。
+      <div style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);border-radius:14px;padding:22px 24px;border:1px solid #93C5FD;margin-bottom:18px;">
+        <h2 style="font-size:18px;font-weight:900;margin-bottom:8px;color:#1E3A8A;">匯入中心</h2>
+        <p style="font-size:13px;color:#1E40AF;margin:0;line-height:1.7;">
+          所有資料的匯入都從這裡進來。<b>下方拖曳區可以一次丟入多個 .xlsx</b>，系統自動辨識 GA4 / GSC / SEO 文章 / 影片。
+          FB 貼文與 LINE 有各自的格式，請用下面對應的按鈕。
         </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:18px;">
+        <button class="btn" data-perm="edit" onclick="document.getElementById('fileInput').click()"
+          style="text-align:left;padding:16px 18px;background:var(--surface);border:1.5px solid var(--border);border-left:4px solid #1877F2;border-radius:12px;cursor:pointer;font-family:inherit;">
+          <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:3px;">FB 粉專貼文</div>
+          <div style="font-size:11.5px;color:var(--text-muted);line-height:1.5;">Meta 或 Metricool 匯出的 .xlsx / .csv<br>匯入時會自動比對建議標籤</div>
+        </button>
+        <button class="btn" data-perm="edit" onclick="document.getElementById('quickImportInput').click()"
+          style="text-align:left;padding:16px 18px;background:var(--surface);border:1.5px solid var(--border);border-left:4px solid #1E40AF;border-radius:12px;cursor:pointer;font-family:inherit;">
+          <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:3px;">GA4 ／ GSC ／ SEO 文章</div>
+          <div style="font-size:11.5px;color:var(--text-muted);line-height:1.5;">月度 .xlsx，可多檔一起丟<br>依檔名與工作表自動辨識</div>
+        </button>
+        <button class="btn" data-perm="edit" onclick="switchSection('line','import')"
+          style="text-align:left;padding:16px 18px;background:var(--surface);border:1.5px solid var(--border);border-left:4px solid #00B900;border-radius:12px;cursor:pointer;font-family:inherit;">
+          <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:3px;">LINE 官方帳號</div>
+          <div style="font-size:11.5px;color:var(--text-muted);line-height:1.5;">推播成效數據</div>
+        </button>
+        <button class="btn" data-perm="edit" onclick="switchSection('video','import')"
+          style="text-align:left;padding:16px 18px;background:var(--surface);border:1.5px solid var(--border);border-left:4px solid #FF0000;border-radius:12px;cursor:pointer;font-family:inherit;">
+          <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:3px;">YouTube ／ Instagram</div>
+          <div style="font-size:11.5px;color:var(--text-muted);line-height:1.5;">影片成效 JSON / CSV</div>
+        </button>
       </div>
 
       <div id="quickImportDrop" style="border:3px dashed #93C5FD;border-radius:14px;padding:60px 20px;text-align:center;background:#F9FBFF;margin-bottom:18px;transition:all .15s;cursor:pointer;">
@@ -1255,6 +1278,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
             <select id="postsTagFilter" onchange="renderPostsList()" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;"><option value="">所有標籤</option></select>
             <span id="postCount" style="font-size:12px;color:var(--text-muted)"></span>
             <button class="btn btn-outline" data-perm="edit" onclick="batchTagFiltered('posts', () => _postsFilteredRows)" title="為目前篩選出的貼文一次加上標籤" style="font-size:12px;padding:6px 10px;">批次加標籤</button>
+            <button class="btn btn-outline" onclick="switchSection('fb','overview')" title="觸及趨勢、類型分布等粉專整體分析" style="font-size:12px;padding:6px 10px;">粉專分析</button>
             <button class="btn" onclick="openChannelReport('fb')" style="background:#1877F2;color:#fff;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 產生報表</button>
             <button class="btn btn-primary" data-perm="edit" onclick="openPostModal(-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增貼文</button>
           </div>
@@ -1549,6 +1573,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           <span id="evCountLabel" style="font-size:12px;color:var(--text-muted);margin-left:auto;"></span>
           <button class="btn btn-outline" onclick="clearEvFilters()" style="height:32px;font-size:12px;padding:0 10px;">清除篩選</button>
           <button class="btn btn-outline" data-perm="edit" onclick="batchTagFiltered('events', () => _evFilteredRows)" title="為目前篩選出的活動一次加上標籤" style="height:32px;font-size:12px;padding:0 10px;">批次加標籤</button>
+          <button class="btn btn-outline" onclick="switchSection('event','dashboard')" title="出席率、滿意度、類型分布等整體分析" style="height:32px;font-size:12px;padding:0 10px;">成效分析</button>
           <button class="btn" onclick="openChannelReport('event')" style="height:32px;font-size:12px;padding:0 10px;background:#F59E0B;color:#fff;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 產生報表</button>
         </div>
         <div class="table-wrap">
@@ -4109,7 +4134,7 @@ const FEATURE_CATALOG = [
   // 戰情
   { k:'warroom-dashboard',   cat:'戰情', icon:'zap',    color:'#1a8454', title:'總覽首頁',     desc:'KPI、警報、達成度' },
   { k:'warroom-okr',         cat:'戰情', icon:'target', color:'#DC2626', title:'OKR 目標',     desc:'設定本月關鍵指標' },
-  { k:'warroom-quickimport', cat:'匯入', icon:'upload', color:'#1E40AF', title:'快速匯入區',   desc:'拖多檔自動辨識' },
+  { k:'warroom-quickimport', cat:'匯入', icon:'upload', color:'#1E40AF', title:'匯入中心',     desc:'所有資料的匯入入口' },
   // 數據分析
   { k:'fb-overview',     cat:'數據', icon:'facebook',  color:'#1877F2', title:'FB 粉專',     desc:'觸及互動分析', stat: () => (store.posts||[]).filter(x=>!x.deleted_at).length+' 篇' },
   { k:'event-list',      cat:'數據', icon:'tent',      color:'#F59E0B', title:'活動講座',     desc:'出席率、滿意度', stat: () => (store.events||[]).filter(x=>!x.deleted_at).length+' 場' },
@@ -4361,7 +4386,7 @@ function switchSection(module, sub) {
     'video-import':     ['匯入 YT / IG 資料',     '從影片管理系統批次匯入 JSON / CSV'],
     'warroom-dashboard':['總覽首頁',           '一頁掌握全部 KPI、警報、目標達成度與行動建議'],
     'warroom-okr':      ['OKR 目標設定',          '本月/本季/年度關鍵指標目標管理'],
-    'warroom-quickimport':['⚡ 快速匯入區',       '拖拽多個 .xlsx 自動辨識並寫入對應資料庫'],
+    'warroom-quickimport':['匯入中心',            '所有資料的匯入入口 — FB 貼文 / GA4 / GSC / SEO / LINE / 影片'],
   };
   const key = `${module}-${sub}`;
   if (titles[key]) {
@@ -11584,11 +11609,18 @@ function renderCampaignMaster() {
           + '<td class="text-mono">' + s.kols + '</td>'
           + '<td class="text-mono highlight">' + (s.reach ? s.reach.toLocaleString() : '—') + '</td>'
           + '<td style="white-space:nowrap;">'
+          +   '<button class="action-btn" onclick="openCampaignResult(\''+String(c.name).replace(/\\/g,"\\\\").replace(/'/g,"\\'")+'\')" style="background:#064E2C;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;">成果</button> '
           +   '<button class="action-btn edit" onclick="openCampaignModal('+idx+')">編輯</button> '
           +   '<button class="action-btn del" onclick="deleteCampaign('+idx+')">刪除</button></td>'
           + '</tr>';
       }).join('')
     + '</tbody></table></div></div>';
+}
+
+// Campaign 成果看板已併入檔期管理：從檔期列表直接開該檔期的成果明細
+function openCampaignResult(name) {
+  switchSection('campaign', 'hub');
+  try { renderCampaignDetail(name); } catch(e) { console.error(e); showToast('找不到這個檔期的成果資料'); }
 }
 
 function openCampaignModal(idx) {
@@ -15392,8 +15424,20 @@ const NAV_GATES = {
   'line-import':   () => (store.linePosts  || []).filter(x=>!x.deleted_at).length,
   'video-list':    () => (store.videoItems || []).filter(x=>!x.deleted_at).length,
   'video-import':  () => (store.videoItems || []).filter(x=>!x.deleted_at).length,
+  'kol-list':      () => (store.kols       || []).filter(x=>!x.deleted_at).length,
   'warroom-okr':   () => (store.okr        || []).length,
   'utm-stats':     () => 0,   // 需串接 GA4 才有數字，目前一定是空的
+};
+// 已合併到別頁的入口：功能還在，但不該再佔側欄一列
+// （改由該功能所屬頁面的按鈕進入，或從「顯示全部項目」展開）
+const NAV_MERGED = {
+  'fb-upload':        '已併入「匯入中心」',
+  'web-import':       '已併入「匯入中心」',
+  'line-import':      '已併入「匯入中心」',
+  'video-import':     '已併入「匯入中心」',
+  'campaign-hub':     '已併入「檔期管理」的成果按鈕',
+  'event-dashboard':  '已併入「活動/講座列表」的成效分析按鈕',
+  'fb-overview':      '已併入「貼文成效列表」的粉專分析按鈕',
 };
 let _navShowAll = false;
 
@@ -15419,7 +15463,14 @@ function applyNavVisibility() {
   document.querySelectorAll('.nav-item').forEach(a => {
     const m = (a.getAttribute('onclick') || '').match(/switchSection\('([^']+)','([^']+)'\)/);
     if (!m) return;
-    const gate = NAV_GATES[m[1] + '-' + m[2]];
+    const key = m[1] + '-' + m[2];
+    if (NAV_MERGED[key]) {
+      a.style.display = _navShowAll ? '' : 'none';
+      a.title = NAV_MERGED[key];
+      if (!_navShowAll) hidden++;
+      return;
+    }
+    const gate = NAV_GATES[key];
     if (!gate) return;
     let n = 0; try { n = gate(); } catch(e) {}
     const show = n > 0 || _navShowAll;
