@@ -862,72 +862,90 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <h2><span class="dot"></span>行銷整合分析中心</h2>
   </div>
   <nav>
-    <div class="nav-group" data-key="warroom">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>總覽</span><span class="chevron">▼</span></div>
+    <div class="nav-group" data-key="entry">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>登錄</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
-    <a class="nav-item active" onclick="switchSection('warroom','dashboard')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> 總覽首頁
-    </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('warroom','quickimport')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span> 匯入中心
     </a>
-    </div></div>
-    <div class="nav-group" data-key="fb">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>粉專追蹤</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('fb','overview')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 總覽 Dashboard
-    </a>
-    <a class="nav-item" onclick="switchSection('fb','upload')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入貼文數據
-    </a>
-    <a class="nav-item" onclick="switchSection('fb','posts')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> 貼文成效列表
-    </a>
-    </div></div>
-    <div class="nav-group" data-key="event">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>活動追蹤</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('event','dashboard')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 成效分析看板
-    </a>
-    <a class="nav-item" onclick="switchSection('event','list')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> 活動/講座列表
-    </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('event','add')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> 新增活動回報
-    </a>
-    </div></div>
-    <div class="nav-group" data-key="media">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>媒體追蹤</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('media','list')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></span> 新聞媒體曝光
     </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('media','add')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></span> 新增媒體記錄
     </a>
     </div></div>
-    <div class="nav-group" data-key="campaign">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>成效整合</span><span class="chevron">▼</span></div>
+    <div class="nav-group" data-key="perf">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>看成效</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('campaign','master')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v5H4z"/><path d="M4 13h7v7H4z"/><path d="M15 13h5v7h-5z"/></svg></span> 檔期管理
+    <a class="nav-item" onclick="switchSection('warroom','dashboard')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span> 總覽首頁
     </a>
-    <a class="nav-item" onclick="switchSection('exec','report')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M6 12l3-3 2 2 4-4"/></svg></span> 主管簡報
+    <a class="nav-item" onclick="switchSection('crosstag','stats')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> 跨管道查詢
     </a>
-    <a class="nav-item" onclick="switchSection('campaign','hub')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Campaign 成果看板
+    <a class="nav-item" onclick="switchSection('fb','posts')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> 貼文成效列表
+    </a>
+    <a class="nav-item" onclick="switchSection('event','list')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> 活動/講座列表
+    </a>
+    <a class="nav-item" onclick="switchSection('media','list')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></span> 新聞媒體曝光
+    </a>
+    <a class="nav-item" onclick="switchSection('clinic','items')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> 題材列表
+    </a>
+    <a class="nav-item" onclick="switchSection('clinic','matrix')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span> 主題統計
     </a>
     <a class="nav-item" onclick="switchSection('kol','list')"><!-- 顯示與否由 NAV_GATES 依資料量決定 -->
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> KOL 成效追蹤
     </a>
+    <a class="nav-item" onclick="switchSection('web','overview')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> 官網儀表板
+    </a>
+    <a class="nav-item" onclick="switchSection('web','seoArticles')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> SEO 文章列表
+    </a>
+    <a class="nav-item" onclick="switchSection('line','overview')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> LINE 儀表板
+    </a>
+    <a class="nav-item" onclick="switchSection('line','posts')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> LINE 貼文列表
+    </a>
+    <a class="nav-item" onclick="switchSection('video','list')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span> 影片列表
+    </a>
     </div></div>
-
-    <div class="nav-section">進階 / 其他</div>
-    <div class="nav-group" data-key="fbadv">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>粉專進階分析</span><span class="chevron">▼</span></div>
+    <div class="nav-group" data-key="report">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>交報告</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
+    <a class="nav-item" onclick="switchSection('exec','report')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M6 12l3-3 2 2 4-4"/></svg></span> 主管簡報
+    </a>
+    <a class="nav-item" onclick="switchSection('campaign','master')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v5H4z"/><path d="M4 13h7v7H4z"/><path d="M15 13h5v7h-5z"/></svg></span> 檔期管理
+    </a>
+    </div></div>
+    <div class="nav-group" data-key="config">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>設定</span><span class="chevron">▼</span></div>
+    <div class="nav-group-body">
+    <a class="nav-item" onclick="switchSection('crosstag','library')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="12" width="18" height="4" rx="1"/><line x1="3" y1="20" x2="21" y2="20"/></svg></span> 標籤庫管理
+    </a>
+    <a class="nav-item" onclick="switchSection('utm','builder')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> UTM 連結產生器
+    </a>
+    <a class="nav-item" onclick="switchSection('settings','backup')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></span> 資料備份還原
+    </a>
+    <a class="nav-item" onclick="switchSection('settings','main')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> 設定 / Google Sheets
+    </a>
+    </div></div>
+    <div class="nav-group collapsed" data-key="adv">
+    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>進階 / 其他</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
     <a class="nav-item" onclick="switchSection('fb','analysis')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span> 組合分析
@@ -947,85 +965,32 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <a class="nav-item" data-perm="edit" onclick="switchSection('warroom','okr')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span> OKR 目標設定
     </a>
-    </div></div>
-    <div class="nav-group" data-key="utm">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>行銷工具</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('utm','builder')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span> UTM 連結產生器
-    </a>
     <a class="nav-item" onclick="switchSection('utm','stats')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> UTM 成效回收
     </a>
-    </div></div>
-    <div class="nav-group" data-key="clinic">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>門診表資料庫</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('clinic','matrix')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span> 主題統計
+    <a class="nav-item" onclick="switchSection('fb','overview')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 總覽 Dashboard
     </a>
-    <a class="nav-item" onclick="switchSection('clinic','items')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> 題材列表
+    <a class="nav-item" onclick="switchSection('fb','upload')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入貼文數據
     </a>
-    </div></div>
-    <div class="nav-group" data-key="web">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>官網 GA4 / SEO</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('web','overview')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span> 官網儀表板
+    <a class="nav-item" onclick="switchSection('event','dashboard')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> 成效分析看板
     </a>
-    <a class="nav-item" onclick="switchSection('web','seoArticles')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> SEO 文章列表
+    <a class="nav-item" onclick="switchSection('campaign','hub')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Campaign 成果看板
     </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('web','import')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 GA4 / GSC 數據
     </a>
-    </div></div>
-    <div class="nav-group" data-key="line" style="display:none"><!-- 暫時隱藏：無資料，要用再開 -->
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>LINE@ 官方帳號</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('line','overview')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> LINE 儀表板
-    </a>
-    <a class="nav-item" onclick="switchSection('line','posts')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> LINE 貼文列表
-    </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('line','import')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 LINE 數據
-    </a>
-    </div></div>
-    <div class="nav-group" data-key="video" style="display:none"><!-- 暫時隱藏：無資料，要用再開 -->
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>影片總覽 (YT / IG)</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('video','list')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span> 影片列表
     </a>
     <a class="nav-item" data-perm="edit" onclick="switchSection('video','import')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> 匯入 YT / IG 資料
     </a>
     </div></div>
-    <div class="nav-group" data-key="crosstag">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>各傳達管道匯總</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('crosstag','stats')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> 跨管道查詢
-    </a>
-    <a class="nav-item" onclick="switchSection('crosstag','library')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="12" width="18" height="4" rx="1"/><line x1="3" y1="20" x2="21" y2="20"/></svg></span> 標籤庫管理
-    </a>
-    </div></div>
-
-    <div class="nav-section">系統</div>
-    <div class="nav-group" data-key="settings">
-    <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>系統</span><span class="chevron">▼</span></div>
-    <div class="nav-group-body">
-    <a class="nav-item" onclick="switchSection('settings','backup')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></span> 資料備份還原
-    </a>
-    <a class="nav-item" onclick="switchSection('settings','main')">
-      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> 設定 / Google Sheets
-    </a>
-    </div></div>
+  
   </nav>
   <div class="sidebar-footer">
     <button id="navShowAllBtn" onclick="toggleNavShowAll()" style="display:none;width:100%;background:none;border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.72);border-radius:6px;padding:5px 8px;font-size:11px;font-family:inherit;cursor:pointer;margin-bottom:8px;">顯示全部項目</button>
@@ -8995,12 +8960,16 @@ function _warSectionOnboard() {
 
 // ── ⚡ 快速登錄（總覽首頁置頂；永遠顯示，含分類卡片）──
 function _warSectionQuickAccess() {
-  const cat = (label, color, cards) =>
-    '<div style="margin-bottom:14px;">'
-    + '<div style="font-size:12.5px;font-weight:700;color:'+color+';margin-bottom:8px;display:flex;align-items:center;gap:7px;"><span style="width:4px;height:13px;background:'+color+';border-radius:2px;"></span>'+label+'</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;">'
-    + cards.map(f => _renderFeatureCard(f)).join('')
-    + '</div></div>';
+  const cat = (label, color, cards) => {
+    // 側欄已收起的進階項目就不要在首頁大推，否則會自相矛盾
+    const visible = cards.filter(f => !(typeof NAV_ADVANCED !== 'undefined' && NAV_ADVANCED[f.k]));
+    if (!visible.length) return '';
+    return '<div style="margin-bottom:14px;">'
+      + '<div style="font-size:12.5px;font-weight:700;color:'+color+';margin-bottom:8px;display:flex;align-items:center;gap:7px;"><span style="width:4px;height:13px;background:'+color+';border-radius:2px;"></span>'+label+'</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;">'
+      + visible.map(f => _renderFeatureCard(f)).join('')
+      + '</div></div>';
+  };
   const act = [
     { k:'event-list',      icon:'file',      color:'#064E2C', title:'產出活動成果報告', desc:'活動列表→一鍵 PDF/Word/PPT' },
     { k:'event-add',       icon:'clipboard', color:'#F59E0B', title:'新增活動回報',   desc:'填數據與曝光來源' },
@@ -15430,6 +15399,15 @@ const NAV_GATES = {
 };
 // 已合併到別頁的入口：功能還在，但不該再佔側欄一列
 // （改由該功能所屬頁面的按鈕進入，或從「顯示全部項目」展開）
+// 資料量撐不起來、或本來就不是功能的頁面：預設收起，可從「顯示全部項目」展開
+const NAV_ADVANCED = {
+  'fb-predict':  '52 筆樣本、變異係數 0.85，預測區間大到會誤導',
+  'fb-ab':       '需要照實驗設計發文才有意義，目前沒有這個流程',
+  'fb-analysis': '交叉矩陣多數格子只有 1–2 筆，看不出差異',
+  'fb-calendar': '與實際在用的 Google 日曆重複',
+  'fb-sop':      '靜態說明文字；將改寫進「粉專月報」的執行 SOP 一節',
+};
+
 const NAV_MERGED = {
   'fb-upload':        '已併入「匯入中心」',
   'web-import':       '已併入「匯入中心」',
@@ -15464,6 +15442,12 @@ function applyNavVisibility() {
     const m = (a.getAttribute('onclick') || '').match(/switchSection\('([^']+)','([^']+)'\)/);
     if (!m) return;
     const key = m[1] + '-' + m[2];
+    if (NAV_ADVANCED[key]) {
+      a.style.display = _navShowAll ? '' : 'none';
+      a.title = NAV_ADVANCED[key];
+      if (!_navShowAll) hidden++;
+      return;
+    }
     if (NAV_MERGED[key]) {
       a.style.display = _navShowAll ? '' : 'none';
       a.title = NAV_MERGED[key];
