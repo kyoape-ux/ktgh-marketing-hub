@@ -65,10 +65,24 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 
 詳見 `docs/DEPLOY-v4.md`。
 
+## 跨管道標籤
+
+標籤庫 `store.mediaTags`（186 個詞、11 類）為所有管道共用，各管道資料的 `tags` 存**標籤名稱**
+（門診表 `mediaItems` 例外，可能存 ID，比對時兩種都要認）。
+
+- `suggestTags(text)`：用標籤庫＋`TAG_ALIASES` 做關鍵字比對。儀器類別名要**收緊**，
+  放寬會互相誤標（例：「機械手臂」同時中達文西與 MAKO）。
+- `openAutoTagModal()`：掃描全管道 → 預覽 → 一鍵套用，只新增不移除。
+- `batchTagFiltered(chKey, getRows)`：以「目前列表篩選結果」為選取範圍批次上標籤。
+- `quickTagRow(chKey, idx)` / `tagCellHtml()`：列表內直接改標籤。
+- 跨管道統計支援**關鍵字模式**（同時比對標籤與標題），沒上標籤的資料也搜得到。
+
 ## 待辦
 
 - [x] P0 止血：Drive JSON 主資料流、容量偵測、停用 GET 寫入（v4）
+- [x] 跨管道標籤：關鍵字自動補標籤、批次上標籤、匯入帶標籤、關鍵字反查、標籤管理報表
 - [ ] P1 匯入改造：欄位對應彈窗 + Metricool preset + 互動數拆細
+- [ ] 標籤待補：LINE 貼文表單改掉 6 個 prompt；KOL 納入跨管道統計
 - [ ] P2 AI 大腦：`ktgh-hub-ai` Worker（沿用影音企劃中心的 `chat()` 轉接器，Gemini 免費層）
 
 ## 不要動的部分
