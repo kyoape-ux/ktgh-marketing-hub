@@ -5285,7 +5285,15 @@ function handleFileUpload(input) {
       });
 
       if (!parsed.length && !skipped.length) {
-        showToast('未找到可解析的貼文資料，請確認欄位名稱');
+        // 這個解析器只認 FB 中文後台的欄名（標題／發佈時間／觸及人數…）。
+        // Metricool 或英文版匯出會全部對不上，這時改走「智慧欄位對應」而不是直接報錯。
+        showToast('欄位名稱不是 FB 中文後台格式，改用欄位對應…');
+        try {
+          const ws2 = wb.Sheets[wb.SheetNames[0]];
+          const raw = XLSX.utils.sheet_to_json(ws2, { defval:'', raw:false });
+          if (raw.length && _analyzeRowsAndOpenMappingModal(raw, (file && file.name) || 'import.csv', 'xlsx')) return;
+        } catch(e2) { console.error(e2); }
+        showToast('未找到可解析的貼文資料，請確認檔案內容');
         return;
       }
 
@@ -9846,21 +9854,36 @@ async function handleQuickImportFiles(files) {
 const SMART_FIELD_DICT = {
   // 通用
   date:        ['date','日期','發布日期','上線日','上線日期','刊登日','publish_date','publishdate','published_at','刊登','日期(yyyy-mm)','日期(yyyy/mm)','日期(yyyy-mm-dd)','發稿日','日'],
-  title:       ['title','標題','影片標題','名稱','主題','影片名稱','影片名','video_title','name','文章標題','貼文標題','報導標題','活動名稱','題目'],
+  title:       ['title','標題','影片標題','名稱','主題','影片名稱','影片名','video_title','name','文章標題','貼文標題','報導標題','活動名稱','題目',
+                'content','貼文內容','內容','message','說明','caption'],
   dept:        ['dept','科別','department','部門','負責科別','所屬科別','專科','科'],
   keyword:     ['keyword','關鍵字','search_keyword','搜尋字','keyword_list','關鍵詞','主要關鍵字'],
-  url:         ['url','連結','網址','link','external_url','分享連結','原文連結','影片連結','文章連結','發布連結'],
+  url:         ['url','連結','網址','link','external_url','分享連結','原文連結','影片連結','文章連結','發布連結',
+                'postlink','post link','permalink','永久連結','reel link','post url'],
   tags:        ['tags','標籤','category','類別','類型','topic','tag','標籤(逗號)','分類'],
   note:        ['note','備註','description','說明','remarks','memo','補充'],
   // 影片相關
   platform:    ['platform','平台','channel','管道','發布平台','社群平台'],
-  views:       ['views','觀看','觀看數','view_count','play_count','播放數','播放次數','播放','觀看次數','觸及','reach','曝光'],
-  engage:      ['engage','互動','互動數','engagement','engagement_count','interaction','engage_count','按讚+留言+分享'],
+  // ★ 這裡原本包含 '觸及','reach','曝光'，導致 Reach 欄位被判成影片的觀看數，
+  //   整份 FB 貼文檔就被推向「影片」類型。觸及屬於 reach，不屬於 views。
+  views:       ['views','觀看','觀看數','view_count','play_count','播放數','播放次數','播放','觀看次數',
+                'video views','videoviews','plays'],
+  // ★ 'engagement' 已移除：Metricool 的 Engagement 欄是互動「率」(%)，不是次數。
+  //   對應成次數會讓月子中心那種貼文的互動變成 26.61（實際是 710）。
+  engage:      ['engage','互動','互動數','engagement_count','interaction','engage_count','按讚+留言+分享',
+                '心情、留言和分享次數','心情留言分享'],
+  engage_rate: ['engagement','互動率','engagement rate','engagementrate','互動率%'],
   duration:    ['duration','時長','影片長度','length','video_length','秒數'],
   // FB 相關
-  reach:       ['reach','觸及','觸及人數','觸及數','fb_reach','觸及率分母'],
-  click:       ['click','點擊','點擊數','點擊次數','click_count','clicks','click_through'],
+  reach:       ['reach','觸及','觸及人數','觸及數','fb_reach','觸及率分母','reach (organic)','organic reach','觸及率分母'],
+  click:       ['click','點擊','點擊數','點擊次數','click_count','clicks','click_through',
+                '總點擊次數','link clicks','linkclicks','post clicks','其他點擊次數'],
   engage_fb:   ['engage','互動','心情+留言+分享','心情留言分享','engagement'],
+  likes:       ['likes','讚','按讚','按讚數','心情','reactions','reaction','心情數'],
+  comments:    ['comments','留言','留言數','comment','留言次數'],
+  shares:      ['shares','分享','分享數','share','分享次數','shared','shares - total'],
+  impressions: ['impressions','曝光','曝光數','曝光次數','views (impressions)'],
+  spend:       ['spent','spend','花費','廣告花費','投放金額','ad_spend','cost'],
   cat:         ['cat','分類','category','內容類型','內容分類','貼文類型','文章類型'],
   // 活動
   reg:         ['reg','報名','報名人數','registration','sign_up','報名數','預約人數'],
@@ -9975,10 +9998,26 @@ function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
       autoMap[col] = { systemField: null };
     }
   });
+  // 一個系統欄位只能對應一個來源欄位，先出現的贏。
+  // Metricool 有 Reactions 與 Reactions - like/love/wow…（明細）、Clicks 與 Link/Other Clicks，
+  // 全部對到同一個欄位的話，後面的會把前面的正確值蓋掉。
+  const claimed = {};
+  const IGNORE_COL = /^(post ?id|page ?id|id|thumbnail|thumbnail url|image|profile ?visits|followers)$/i;
+  inputCols.forEach(col => {
+    const m = autoMap[col];
+    if (!m || !m.systemField) return;
+    if (IGNORE_COL.test(String(col).trim())) { autoMap[col] = { systemField: null }; return; }
+    if (claimed[m.systemField]) { autoMap[col] = { systemField: null, dupOf: claimed[m.systemField] }; return; }
+    claimed[m.systemField] = col;
+  });
+
   // 平台偵測 → 強烈傾向 video
   if (platformDetected.size >= 1) candidates[0].score += platformDetected.size * 2;
   // 檔名輔助
-  if (/影片|video|yt|ig/i.test(filename)) candidates[0].score += 5;
+  // Metricool 匯出的檔名很規律，優先用它判型（比欄位猜測可靠得多）
+  if (/^facebook-posts/i.test(filename))                    candidates[1].score += 20;
+  if (/^(facebook-reels|instagram-|youtube-|tiktok-)/i.test(filename)) candidates[0].score += 20;
+  if (/影片|video|reels|youtube/i.test(filename)) candidates[0].score += 5;
   if (/event|活動|講座/i.test(filename)) candidates[2].score += 5;
   if (/media|媒體|新聞|報導/i.test(filename)) candidates[3].score += 5;
   if (/seo|文章/i.test(filename)) candidates[4].score += 5;
@@ -9996,12 +10035,13 @@ function _openImportMappingModal(ctx) {
   const { rows, filename, inputCols, autoMap, candidates, best, platformDetected } = ctx;
   // 儲存到 window 供後續引用
   window._importCtx = ctx;
+  setTimeout(() => { try { _renderImportQualityNote(); } catch(e) { console.warn(e); } }, 30);
   const targetTypeOpts = candidates.map(c => '<option value="'+c.type+'"'+(c.type===best.type?' selected':'')+'>'+c.label+' (匹配分數 '+c.score+')</option>').join('');
 
   // 對 video 類型，systemFields 是 'date,title,tags,note'，加上平台特殊
   const sysFieldOpts = {
     video: ['date','title','platform','views','engage','duration','tags','url','note'],
-    fb:    ['date','title','cat','reach','click','engage','tags','url','note'],
+    fb:    ['date','title','cat','reach','click','engage','likes','comments','shares','impressions','engage_rate','spend','tags','url','note'],
     event: ['date','title','type','campus','reg','attend','speaker','sat','reach','budget','expense','tags','note'],
     media: ['date','mediaName','mediaType','section','title','nature','reach','url','tags','note'],
     seo:   ['date','dept','title','keyword','rank','searchVolume','prevRank','prevSearchVolume','url','tags','note'],
@@ -10009,6 +10049,22 @@ function _openImportMappingModal(ctx) {
   const sysFields = sysFieldOpts[best.type] || sysFieldOpts.video;
 
   // 每個輸入欄位給選單
+  // 選單顯示中文，不然同事看到 date / reach / engage 根本不知道是什麼
+  const FIELD_LABEL = {
+    date:'發佈日期', title:'標題／內容', cat:'內容分類', type:'類型',
+    reach:'觸及人數', impressions:'曝光次數', click:'總點擊次數', spend:'廣告花費',
+    engage_rate:'互動率 %（不是次數）',
+    engage:'互動數（心情+留言+分享）', likes:'心情／按讚數', comments:'留言數', shares:'分享數',
+    views:'觀看次數', platform:'平台', duration:'影片長度',
+    tags:'跨管道標籤', url:'連結', note:'備註',
+    mediaName:'媒體名稱', mediaType:'媒體類型', section:'版面', nature:'報導性質',
+    reg:'報名人數', attend:'出席人數', speaker:'講者', campus:'院區', sat:'滿意度',
+    budget:'預算', expense:'實際支出',
+    dept:'科別', keyword:'關鍵字', rank:'排名', searchVolume:'月搜尋量',
+    prevRank:'上月排名', prevSearchVolume:'上月搜尋量',
+  };
+  const fLabel = f => FIELD_LABEL[f] ? (FIELD_LABEL[f] + '（' + f + '）') : f;
+
   const mappingRows = inputCols.map((col, i) => {
     const am = autoMap[col] || {};
     let selectedVal = '__ignore__';
@@ -10017,7 +10073,7 @@ function _openImportMappingModal(ctx) {
     const opts = ['<option value="__ignore__"'+(selectedVal==='__ignore__'?' selected':'')+'>（略過）</option>'];
     // 系統欄位選項
     sysFields.forEach(f => {
-      opts.push('<option value="'+f+'"'+(selectedVal===f?' selected':'')+'>'+f+'</option>');
+      opts.push('<option value="'+f+'"'+(selectedVal===f?' selected':'')+'>'+fLabel(f)+'</option>');
     });
     // 平台特殊選項（適用 video）
     if (best.type === 'video') {
@@ -10029,9 +10085,11 @@ function _openImportMappingModal(ctx) {
       });
     }
     const sampleVal = String((rows[0]||{})[col] || '').slice(0, 28);
-    const matchBadge = am.platform || am.systemField
+    const matchBadge = (am.platform || am.systemField)
       ? '<span style="background:#D1FAE5;color:#065F46;padding:1px 6px;border-radius:3px;font-size:10px;">自動匹配</span>'
-      : '<span style="background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:3px;font-size:10px;">需確認</span>';
+      : (am.dupOf
+        ? '<span title="'+am.dupOf+' 已經對應到同一個欄位，這欄是明細或重複，略過即可" style="background:#E5E7EB;color:#4B5563;padding:1px 6px;border-radius:3px;font-size:10px;">重複，可略過</span>'
+        : '<span style="background:#FEF3C7;color:#92400E;padding:1px 6px;border-radius:3px;font-size:10px;">需確認</span>');
     return '<tr>'
       + '<td style="padding:6px 10px;font-weight:600;">'+col+'</td>'
       + '<td style="padding:6px 10px;color:#888;font-size:11px;">'+sampleVal+'</td>'
@@ -10046,6 +10104,7 @@ function _openImportMappingModal(ctx) {
     + '<div style="background:#EFF6FF;border-left:3px solid #1E40AF;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A;line-height:1.7;">'
     +   '<b>偵測到：</b>'+filename+' 共 '+rows.length+' 筆資料、'+inputCols.length+' 個欄位<br>'
     +   '<b>系統判斷類型：</b>'+best.label+'（匹配分數最高）'
+    +   '<span id="impQualityNote"></span>'
     +   (platformDetected.size ? '<br><b>偵測到平台：</b>' + [...platformDetected].join('、') : '')
     + '</div>'
     + '<div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">'
@@ -10173,14 +10232,30 @@ function _applyMapping(silent) {
       });
     } else if (type === 'fb') {
       const obj = { tags: [] };
+      const NUM = ['reach','click','engage','likes','comments','shares','impressions','spend','engage_rate'];
       ctx.inputCols.forEach(col => {
         const m = mapping[col]; if (!m || !m.systemField) return;
         const v = row[col];
-        if (['reach','click','engage'].includes(m.systemField)) obj[m.systemField] = parseFloat(v)||0;
+        if (NUM.includes(m.systemField)) {
+          obj[m.systemField] = parseFloat(String(v==null?'':v).replace(/[,\s]/g,'')) || 0;
+        }
         else if (m.systemField === 'tags') obj.tags = String(v||'').split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
         else obj[m.systemField] = String(v||'').trim();
       });
+      // Metricool 把互動拆成 Reactions / Comments / Shares 三欄，系統的 engage 是三者相加。
+      // 有拆細欄位時一律以相加為準——來源檔的 Engagement 欄是率不是次數，不能用。
+      const sum = (obj.likes||0) + (obj.comments||0) + (obj.shares||0);
+      if (sum > 0) obj.engage = sum;
+
+      // ★ 絕對不要拿曝光冒充觸及。
+      //   Metricool 這份檔 2026-06 之前的觸及全是 0，只有曝光；
+      //   若互相替代，那些貼文會憑空變成觸及最高的，整份分析就歪了。
+      if (!obj.reach && obj.impressions) obj.reach_missing = true;
       if (obj.date) obj.date = _normDate(obj.date);
+      // 貼文內容常常很長，標題只留前 60 字（與手動新增一致）
+      if (obj.title) obj.title = obj.title.replace(/\s+/g,' ').trim().slice(0, 60);
+      if (!obj.cat && obj.title && typeof autoTag === 'function') obj.cat = autoTag(obj.title);
+      if (!obj.tags.length && obj.title && typeof suggestTags === 'function') obj.tags = suggestTags(obj.title);
       if (obj.date && obj.title) results.push(obj);
     } else if (type === 'event' || type === 'media' || type === 'seo') {
       const obj = { tags: [] };
@@ -10203,13 +10278,72 @@ function _applyMapping(silent) {
 
 function _normDate(d) {
   if (!d) return '';
-  const s = String(d).trim().replace(/\./g,'-').replace(/\//g,'-');
-  const m = s.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?/);
+  if (d instanceof Date && !isNaN(d)) {
+    const z = n => String(n).padStart(2,'0');
+    return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
+  }
+  const raw = String(d).trim();
+  const s = raw.replace(/\./g,'-').replace(/\//g,'-');
+
+  // yyyy-m-d
+  let m = s.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?/);
   if (m) return m[1]+'-'+String(m[2]).padStart(2,'0')+(m[3]?'-'+String(m[3]).padStart(2,'0'):'-01');
+
+  // ★ m-d-yy 或 m-d-yyyy（Metricool 匯出是 8/27/26 這種，原本會原樣存進去，日期就壞了）
+  m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{2}|\d{4})\b/);
+  if (m) {
+    let y = m[3].length === 2 ? (2000 + parseInt(m[3],10)) : parseInt(m[3],10);
+    return y+'-'+String(m[1]).padStart(2,'0')+'-'+String(m[2]).padStart(2,'0');
+  }
+
+  // 最後才交給 Date 解析（含 ISO 時間戳）
+  const dt = new Date(raw);
+  if (!isNaN(dt)) {
+    const z = n => String(n).padStart(2,'0');
+    return dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate());
+  }
   return s;
 }
 
 // 確認匯入 — 寫入 store
+// 匯入前先把「這批資料有什麼問題」講清楚，不要等匯進去才發現分析怪怪的
+function _renderImportQualityNote() {
+  const el = document.getElementById('impQualityNote');
+  if (!el) return;
+  const type = document.getElementById('impTargetType')?.value;
+  if (type !== 'fb') { el.innerHTML = ''; return; }
+  let recs = [];
+  try { recs = _applyMapping(true); } catch(e) { return; }
+  if (!recs.length) { el.innerHTML = ''; return; }
+
+  const warn = [];
+  const noReach = recs.filter(r => !r.reach).length;
+  if (noReach) {
+    const byMonth = {};
+    recs.forEach(r => {
+      const m = (r.date||'').slice(0,7); if (!m) return;
+      byMonth[m] = byMonth[m] || { t:0, h:0 };
+      byMonth[m].t++; if (r.reach) byMonth[m].h++;
+    });
+    const empty = Object.entries(byMonth).filter(([,v]) => v.h === 0).map(([m]) => m).sort();
+    warn.push('<b>' + noReach + ' 筆（' + Math.round(noReach/recs.length*100) + '%）沒有觸及數字</b>，只有曝光。'
+      + (empty.length ? '完全沒有觸及的月份：' + empty.join('、') + '。' : '')
+      + '<br><span style="font-weight:400;">系統不會拿曝光冒充觸及，這些貼文在觸及相關分析裡會被排除，但點擊與互動仍可用。</span>');
+  }
+  // 與現有資料重複
+  const existing = new Set((store.posts||[]).filter(p=>!p.deleted_at).map(p => p.date));
+  const dupDates = new Set(recs.filter(r => existing.has(r.date)).map(r => r.date));
+  if (dupDates.size) {
+    warn.push('有 <b>' + dupDates.size + ' 個日期</b>系統裡已經有貼文了。'
+      + '<br><span style="font-weight:400;">比對鍵是「日期＋標題」，這份檔的標題取自貼文內容前 60 字，'
+      + '和你原本手打的標題不一樣，所以會變成新增而不是更新——匯入後同一天可能出現兩筆。</span>');
+  }
+  el.innerHTML = warn.length
+    ? '<div style="margin-top:10px;background:#FFF6DC;border:1px solid #E5C97A;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:#6B4E00;">'
+      + '<b>匯入前請先看這個</b><br>' + warn.map(w => '・' + w).join('<br>') + '</div>'
+    : '<div style="margin-top:10px;font-size:12px;color:#065F46;">資料檢查通過，沒有發現品質問題。</div>';
+}
+
 function _confirmMappingImport() {
   if (!requireEdit()) return;
   const ctx = window._importCtx; if (!ctx) return;
@@ -10232,13 +10366,41 @@ function _confirmMappingImport() {
     });
   } else if (type === 'fb') {
     if (!store.posts) store.posts = [];
+    const key10 = t => String(t||'').replace(/\s+/g,'').slice(0,10);
+    // 同一天匯入檔裡有幾篇——只有雙方當天都只有一篇時，才敢用「同一天」當配對依據，
+    // 否則會把既有那篇跟不相干的另一篇配在一起。
+    const srcPerDay = {};
+    records.forEach(r => { srcPerDay[r.date] = (srcPerDay[r.date]||0) + 1; });
     records.forEach(r => {
       r.updated_at = new Date().toISOString();
       r.month = (r.date||'').slice(0,7);
       ensureTagsExist(r.tags||[]);
-      const existing = store.posts.find(p => !p.deleted_at && p.date===r.date && p.title===r.title);
-      if (existing) { Object.assign(existing, r); updated++; }
-      else { r.created_at = r.updated_at; store.posts.push(r); added++; }
+
+      const sameDay = store.posts.filter(p => !p.deleted_at && p.date === r.date);
+      let existing = sameDay.find(p => p.title === r.title)
+                  || sameDay.find(p => key10(p.title) && key10(p.title) === key10(r.title))
+                  || ((sameDay.length === 1 && srcPerDay[r.date] === 1) ? sameDay[0] : null);
+
+      if (existing) {
+        // 只補上來源檔比較完整的欄位，不要蓋掉人工整理過的標題／分類／標籤
+        const keepTitle = existing.title, keepCat = existing.cat;
+        const keepTags  = (existing.tags||[]).slice();
+        Object.assign(existing, r);
+        if (keepTitle) existing.title = keepTitle;
+        if (keepCat)   existing.cat   = keepCat;
+        if (keepTags.length) {
+          const merged = keepTags.slice();
+          (r.tags||[]).forEach(t => { if (!merged.includes(t)) merged.push(t); });
+          existing.tags = merged;
+        }
+        // 來源檔沒有觸及時，不要把既有的觸及清成 0
+        if (!r.reach && existing.reach) { delete existing.reach_missing; }
+        updated++;
+      } else {
+        r.created_at = r.updated_at;
+        store.posts.push(r);
+        added++;
+      }
     });
   } else if (type === 'event') {
     if (!store.events) store.events = [];
