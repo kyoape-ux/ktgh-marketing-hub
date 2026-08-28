@@ -2006,7 +2006,11 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           <option value="year">年報</option>
         </select>
         <select id="execPeriod" onchange="renderExecReport()" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:150px;"></select>
-        <button class="btn" onclick="exportExecPptx()" style="background:linear-gradient(to right,#1a8454,#3cba92);color:#fff;margin-left:auto;">
+        <button class="btn btn-outline" onclick="openExecPreview()" style="margin-left:auto;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          預覽簡報
+        </button>
+        <button class="btn" onclick="exportExecPptx()" style="background:linear-gradient(to right,#1a8454,#3cba92);color:#fff;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
           匯出會議簡報 PPT
         </button>
@@ -2835,6 +2839,21 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('promptModal')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- DECK PREVIEW MODAL -->
+<div class="modal-overlay" id="deckPreviewModal">
+  <div class="modal-box" style="max-width:1080px;width:95%;">
+    <h3 id="deckPreviewTitle">簡報預覽</h3>
+    <div style="font-size:12px;color:var(--text-sub);margin:-10px 0 14px;">
+      這裡看到的版面就是匯出後的版面（16:9，13.33 × 7.5 吋）——預覽與 PPTX 讀的是同一份投影片模型。
+    </div>
+    <div id="deckPreviewBody" style="max-height:64vh;overflow-y:auto;padding-right:6px;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('deckPreviewModal')">關閉</button>
+      <button class="btn btn-primary" onclick="exportExecPptx()">匯出 PPT</button>
     </div>
   </div>
 </div>
@@ -5781,6 +5800,9 @@ async function exportEventPptx(idx, audience, overrides){
     const n = m.narr;
     const G='064E2C', L='6EC300', SUB='5A7A6A', MUT='90A89E';
     const pptx = new PptxGenJS();
+    // ★ 這行原本沒有，導致版面用預設的 10 × 5.625 吋，
+    //   但內容都是照 13.33 吋排的，右側與下方全部溢出畫布（跑版）
+    pptx.layout = 'LAYOUT_WIDE';
     const head = (s, title)=>{ s.background={color:'FFFFFF'}; s.addText(title,{x:0.6,y:0.35,w:10.8,h:0.7,fontSize:24,bold:true,color:G}); s.addShape(pptx.ShapeType.rect,{x:0.62,y:1.02,w:1.3,h:0.07,fill:{color:L}}); try{s.addImage({data:KTGH_LOGO,x:10.95,y:0.4,w:1.75,h:0.30});}catch(e){} };
     const tblOpt = { x:0.6, y:1.4, w:12.1, fontSize:13, color:'1A2820', border:{type:'solid',color:'DDE8E3',pt:1}, valign:'middle' };
     const th = t => ({ text:t, options:{ bold:true, color:G, fill:{color:'ECFDF5'} } });
@@ -12099,154 +12121,311 @@ function renderExecReport() {
   }, 30);
 }
 
+// ═══════════════════════════════════════════════════════════
+//  投影片模型 → 預覽 ＆ PPTX
+//  同一份模型同時餵給「視窗預覽」與「匯出 PPTX」，
+//  所以預覽看到什麼就是匯出什麼，不會再出現預覽與實際不一致。
+//
+//  版面固定 13.333 × 7.5 吋（LAYOUT_WIDE）。
+//  ★ 一定要設 pptx.layout —— 預設是 10 × 5.625，
+//    內容照 13.33 吋排就會整個溢出畫布，也就是原本跑版的原因。
+// ═══════════════════════════════════════════════════════════
+const DECK_W = 13.333, DECK_H = 7.5;
+const DECK_C = { G:'064E2C', L:'6EC300', SUB:'5A7A6A', MUT:'90A89E', INK:'1A2820',
+                 WARN:'8A6800', CRIT:'C0313D', BG:'F3F9F6', TH:'ECFDF5', LINE:'DDE8E3' };
+
+function buildExecDeck(f) {
+  const num = n => (n||0).toLocaleString();
+  const slides = [];
+  const SX = ['壹','貳','參','肆','伍','陸','柒','捌','玖']; let sx = 0;
+  const SEC = t => SX[sx++] + '、' + t;
+
+  slides.push({ type:'cover', title:'行銷成效報告', big:f.period.label,
+    sub:'各管道合計 ' + num(f.totals.n) + ' 則　·　合計觸及 ' + num(f.totals.reach),
+    foot:'光田綜合醫院　行銷企劃組' });
+
+  const vol = f.volume.filter(v => v.n || v.prevN);
+  slides.push({ type:'table', title:SEC('本期總覽'),
+    headers:['傳達管道','本期','上期','增減','本期觸及'],
+    colW:[3.9,1.9,1.9,1.9,2.5],
+    rows: vol.map(v => [v.label, String(v.n), String(v.prevN), (v.dN>0?'+':'')+v.dN, v.reach?num(v.reach):'—'])
+      .concat([[ '合計', String(f.totals.n), String(f.totals.prevN),
+                 (f.totals.n-f.totals.prevN>0?'+':'')+(f.totals.n-f.totals.prevN), num(f.totals.reach) ]]),
+    lastRowBold:true });
+
+  const confirmed = f.findings.filter(x => x.level === 'confirmed');
+  slides.push({ type:'findings', title:SEC('重點發現'),
+    items: confirmed.slice(0,4).map((x,i) => ({ n:i+1, title:x.title, text:x.text, meta:x.evidence })),
+    empty:'本期尚無達統計顯著的發現。\n\n這代表目前樣本不足以區分差異與隨機波動，並非沒有變化。' });
+
+  const others = f.findings.filter(x => x.level !== 'confirmed');
+  if (others.length) {
+    slides.push({ type:'notes', title:SEC('觀察中與現況說明'),
+      items: others.slice(0,5).map(x => ({
+        tag: x.level==='observed' ? '［觀察中］' : x.level==='caveat' ? '［資料限制］' : '［現況］',
+        color: x.level==='observed' ? DECK_C.WARN : x.level==='caveat' ? DECK_C.CRIT : DECK_C.SUB,
+        title: x.title, text: x.text + (x.evidence ? '（'+x.evidence+'）' : '') })) });
+  }
+
+  if (f.posts.byCat.length) {
+    slides.push({ type:'table', title:SEC('內容類型成效'),
+      headers:['類型','篇數','中位觸及','平均觸及'], colW:[4.6,2.2,2.7,2.5],
+      rows: f.posts.byCat.map(c => [c.cat, String(c.n), num(Math.round(c.median)), num(Math.round(c.mean))]),
+      footnote:'一律以中位數判讀。平均數會被單篇爆款拉高，不適合作為決策依據。' });
+  }
+
+  if (f.events.n) {
+    slides.push({ type:'table', title:SEC('活動辦理'),
+      headers:['活動名稱','日期','類型','報名','出席','滿意度'], colW:[4.3,1.9,1.9,1.3,1.3,1.3],
+      rows: f.events.list.slice(0,10).map(e => [String(e.name||'').slice(0,24), e.date||'—', e.type||'—',
+        String(e.reg||'—'), String(e.attend||'—'), e.sat?e.sat.toFixed(1):'—']),
+      footnote:'本期 ' + f.events.n + ' 場'
+        + (f.events.attendRate!=null ? '，出席率 '+Math.round(f.events.attendRate*100)+'%' : '')
+        + (f.events.satN ? '，滿意度中位數 '+f.events.medianSat.toFixed(1)+'（'+f.events.satN+' 場有填）' : '') });
+  }
+
+  if (f.campaigns && f.campaigns.length) {
+    slides.push({ type:'table', title:SEC('檔期成果'),
+      headers:['檔期','FB 貼文','媒體','KOL','合計觸及'], colW:[5.0,1.9,1.7,1.6,1.8],
+      rows: f.campaigns.slice(0,10).map(c => [String(c.name).slice(0,24), String(c.posts), String(c.media), String(c.kols), num(c.reach)]) });
+  }
+
+  slides.push({ type:'findings', title:SEC('建議走向'), accent:DECK_C.L,
+    items: f.recommendations.slice(0,4).map((r,i) => ({ n:i+1, title:r.text, text:'依據：'+r.rationale, meta:r.verify })),
+    empty:'本期尚無建議。' });
+
+  slides.push({ type:'appendix', title:SEC('附錄：判讀方式與資料品質'),
+    blocks:[
+      { h:'判讀方式', p:'一律以中位數比較，避免單篇爆款拉偏平均。組間差異以置換檢定（5,000 次）計算 p 值，p < 0.05 才列為「已驗證」，否則一律標示「觀察中」，不寫成結論。' },
+      { h:'本報告的限制', p:'單期對單期的增減屬描述性比較，不代表趨勢。所有差異皆為相關性，非因果；若要確認因果需另行設計 A/B 測試。建議事項為待驗證假設，應於下期回檢。' },
+    ],
+    headers:['欄位','完整度','可用性'], colW:[3.4,3.6,5.2],
+    rows: f.quality.map(q => {
+      const pc = q.pct==null ? null : Math.round(q.pct*100);
+      return [q.field, (pc==null?'—':pc+'%')+'（'+q.filled+'/'+q.total+'）',
+              pc==null?'本期無資料':pc>=90?'可用於分析':pc>=50?'僅供參考':'不足以支撐結論'];
+    }) });
+
+  return slides;
+}
+
+// ── 預覽（HTML）──────────────────────────────────────────
+// 以 100px = 1 吋 繪製，再用 transform 縮放，位置與 PPTX 完全一致
+function renderDeckPreview(deck, mountId) {
+  const W = DECK_W*100, H = DECK_H*100;
+  const el = document.getElementById(mountId);
+  if (!el) return;
+  const px = v => (v*100);
+  const pt = v => (v*100/72);            // 1pt = 1/72 吋
+
+  const frame = inner =>
+    '<div style="position:relative;width:'+W+'px;height:'+H+'px;background:#fff;'
+    + 'font-family:\'Noto Sans TC\',\'PingFang TC\',sans-serif;overflow:hidden;">' + inner + '</div>';
+
+  const headHtml = title =>
+    '<div style="position:absolute;left:'+px(0.6)+'px;top:'+px(0.35)+'px;width:'+px(10.8)+'px;'
+    + 'font-size:'+pt(24)+'px;font-weight:700;color:#'+DECK_C.G+';">'+_tgEsc(title)+'</div>'
+    + '<div style="position:absolute;left:'+px(0.62)+'px;top:'+px(1.02)+'px;width:'+px(1.3)+'px;height:'+px(0.07)+'px;background:#'+DECK_C.L+';"></div>'
+    + '<img src="'+KTGH_LOGO+'" style="position:absolute;left:'+px(10.95)+'px;top:'+px(0.4)+'px;width:'+px(1.75)+'px;height:'+px(0.30)+'px;">';
+
+  const tableHtml = (headers, rows, colW, y, lastBold, fs) => {
+    fs = fs || 13;
+    let h = '<table style="position:absolute;left:'+px(0.6)+'px;top:'+px(y||1.4)+'px;width:'+px(12.1)+'px;'
+      + 'border-collapse:collapse;font-size:'+pt(fs)+'px;table-layout:fixed;">';
+    if (colW) h += '<colgroup>' + colW.map(w=>'<col style="width:'+px(w)+'px">').join('') + '</colgroup>';
+    h += '<tr>' + headers.map(t =>
+      '<td style="border:1px solid #'+DECK_C.LINE+';background:#'+DECK_C.TH+';color:#'+DECK_C.G
+      + ';font-weight:700;padding:'+px(0.06)+'px '+px(0.09)+'px;">'+_tgEsc(t)+'</td>').join('') + '</tr>';
+    rows.forEach((r,ri) => {
+      const bold = lastBold && ri === rows.length-1;
+      h += '<tr>' + r.map(c =>
+        '<td style="border:1px solid #'+DECK_C.LINE+';color:#'+DECK_C.INK+';padding:'+px(0.06)+'px '+px(0.09)+'px;'
+        + (bold ? 'font-weight:700;background:#F1F8F4;' : '')
+        + 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_tgEsc(c)+'</td>').join('') + '</tr>';
+    });
+    return h + '</table>';
+  };
+
+  const html = deck.map((sl, idx) => {
+    let inner = '';
+    if (sl.type === 'cover') {
+      inner = '<div style="position:absolute;inset:0;background:#'+DECK_C.BG+';"></div>'
+        + '<img src="'+KTGH_LOGO+'" style="position:absolute;left:'+px(5.37)+'px;top:'+px(0.9)+'px;width:'+px(2.6)+'px;height:'+px(0.446)+'px;">'
+        + '<div style="position:absolute;left:0;top:'+px(2.3)+'px;width:'+W+'px;text-align:center;font-size:'+pt(18)+'px;color:#'+DECK_C.SUB+';">'+_tgEsc(sl.title)+'</div>'
+        + '<div style="position:absolute;left:0;top:'+px(2.9)+'px;width:'+W+'px;text-align:center;font-size:'+pt(44)+'px;font-weight:700;color:#'+DECK_C.G+';">'+_tgEsc(sl.big)+'</div>'
+        + '<div style="position:absolute;left:0;top:'+px(4.3)+'px;width:'+W+'px;text-align:center;font-size:'+pt(16)+'px;color:#'+DECK_C.SUB+';">'+_tgEsc(sl.sub)+'</div>'
+        + '<div style="position:absolute;left:0;top:'+px(6.6)+'px;width:'+W+'px;text-align:center;font-size:'+pt(12)+'px;color:#'+DECK_C.MUT+';">'+_tgEsc(sl.foot)+'</div>';
+    } else if (sl.type === 'table') {
+      inner = headHtml(sl.title) + tableHtml(sl.headers, sl.rows, sl.colW, 1.4, sl.lastRowBold);
+      if (sl.footnote) inner += '<div style="position:absolute;left:'+px(0.6)+'px;top:'+px(6.6)+'px;width:'+px(12.1)+'px;font-size:'+pt(11)+'px;color:#'+DECK_C.MUT+';">'+_tgEsc(sl.footnote)+'</div>';
+    } else if (sl.type === 'findings') {
+      inner = headHtml(sl.title);
+      if (sl.items.length) {
+        let y = 1.5;
+        sl.items.forEach(it => {
+          inner += '<div style="position:absolute;left:'+px(0.6)+'px;top:'+px(y)+'px;width:'+px(0.07)+'px;height:'+px(1.15)+'px;background:#'+(sl.accent||DECK_C.G)+';"></div>'
+            + '<div style="position:absolute;left:'+px(0.85)+'px;top:'+px(y)+'px;width:'+px(11.8)+'px;font-size:'+pt(16)+'px;font-weight:700;color:#'+DECK_C.G+';">'+it.n+'. '+_tgEsc(it.title)+'</div>'
+            + '<div style="position:absolute;left:'+px(0.85)+'px;top:'+px(y+0.40)+'px;width:'+px(11.8)+'px;font-size:'+pt(13)+'px;color:#'+DECK_C.INK+';line-height:1.35;">'+_tgEsc(it.text)+'</div>'
+            + (it.meta ? '<div style="position:absolute;left:'+px(0.85)+'px;top:'+px(y+0.86)+'px;width:'+px(11.8)+'px;font-size:'+pt(11)+'px;color:#'+DECK_C.MUT+';">'+_tgEsc(it.meta)+'</div>' : '');
+          y += 1.4;
+        });
+      } else {
+        inner += '<div style="position:absolute;left:'+px(0.6)+'px;top:'+px(1.6)+'px;width:'+px(12.1)+'px;font-size:'+pt(15)+'px;color:#'+DECK_C.SUB+';line-height:1.5;white-space:pre-line;">'+_tgEsc(sl.empty)+'</div>';
+      }
+    } else if (sl.type === 'notes') {
+      inner = headHtml(sl.title);
+      let y = 1.5;
+      sl.items.forEach(it => {
+        inner += '<div style="position:absolute;left:'+px(0.6)+'px;top:'+px(y)+'px;width:'+px(12.1)+'px;font-size:'+pt(14)+'px;font-weight:700;color:#'+it.color+';">'+_tgEsc(it.tag+' '+it.title)+'</div>'
+          + '<div style="position:absolute;left:'+px(0.6)+'px;top:'+px(y+0.36)+'px;width:'+px(12.1)+'px;font-size:'+pt(12)+'px;color:#'+DECK_C.INK+';line-height:1.35;">'+_tgEsc(it.text)+'</div>';
+        y += 1.05;
+      });
+    } else if (sl.type === 'appendix') {
+      inner = headHtml(sl.title);
+      let y = 1.45;
+      sl.blocks.forEach(b => {
+        inner += '<div style="position:absolute;left:'+px(0.6)+'px;top:'+px(y)+'px;width:'+px(12.1)+'px;font-size:'+pt(14)+'px;font-weight:700;color:#'+DECK_C.G+';">'+_tgEsc(b.h)+'</div>'
+          + '<div style="position:absolute;left:'+px(0.6)+'px;top:'+px(y+0.32)+'px;width:'+px(12.1)+'px;font-size:'+pt(12)+'px;color:#'+DECK_C.INK+';line-height:1.4;">'+_tgEsc(b.p)+'</div>';
+        y += 1.25;
+      });
+      inner += tableHtml(sl.headers, sl.rows, sl.colW, 4.2, false, 11);
+    }
+    return '<div style="margin-bottom:22px;">'
+      + '<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;font-weight:600;">第 '+(idx+1)+' 頁 / 共 '+deck.length+' 頁</div>'
+      + '<div class="deck-scale" style="width:100%;overflow:hidden;border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);">'
+      +   '<div class="deck-frame" style="transform-origin:top left;">' + frame(inner) + '</div>'
+      + '</div></div>';
+  }).join('');
+
+  el.innerHTML = html;
+  _fitDeckPreview(el);
+}
+
+// 依容器寬度縮放到剛好，維持 16:9。
+// 彈窗剛開啟時可能還沒完成版面計算（clientWidth = 0），要等一格再量，
+// 否則會縮放成 0 而整片空白。
+function _fitDeckPreview(el, tries) {
+  const W = DECK_W*100, H = DECK_H*100;
+  const boxes = [...el.querySelectorAll('.deck-scale')];
+  if (!boxes.length) return;
+  const width = boxes[0].clientWidth;
+  if (!width) {
+    if ((tries || 0) < 20) requestAnimationFrame(() => _fitDeckPreview(el, (tries||0) + 1));
+    return;
+  }
+  boxes.forEach(box => {
+    const s = (box.clientWidth || width) / W;
+    const fr = box.querySelector('.deck-frame');
+    fr.style.transform = 'scale(' + s + ')';
+    box.style.height = (H * s) + 'px';
+  });
+  // 之後容器寬度再變（視窗縮放、側欄開合）也自動跟上
+  if (!el._deckRO && typeof ResizeObserver !== 'undefined') {
+    el._deckRO = new ResizeObserver(() => _fitDeckPreview(el));
+    el._deckRO.observe(el);
+  }
+}
+
+// ── 匯出 PPTX（吃同一份模型）──────────────────────────────
+async function deckToPptx(deck, fileName) {
+  await _loadScript(_CDN_PPTX);
+  const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE';          // ★ 13.333 × 7.5；不設會變 10 × 5.625 而整個跑版
+  const C = DECK_C;
+  const th = t => ({ text:t, options:{ bold:true, color:C.G, fill:{ color:C.TH } } });
+  const tblOpt = { x:0.6, y:1.4, w:12.1, fontSize:13, color:C.INK,
+                   border:{ type:'solid', color:C.LINE, pt:1 }, valign:'middle' };
+  const head = (s, title) => {
+    s.background = { color:'FFFFFF' };
+    s.addText(title, { x:0.6, y:0.35, w:10.8, h:0.7, fontSize:24, bold:true, color:C.G });
+    s.addShape(pptx.ShapeType.rect, { x:0.62, y:1.02, w:1.3, h:0.07, fill:{ color:C.L } });
+    try { s.addImage({ data:KTGH_LOGO, x:10.95, y:0.4, w:1.75, h:0.30 }); } catch(e){}
+  };
+
+  deck.forEach(sl => {
+    const s = pptx.addSlide();
+    if (sl.type === 'cover') {
+      s.background = { color:C.BG };
+      try { s.addImage({ data:KTGH_LOGO, x:5.37, y:0.9, w:2.6, h:0.446 }); } catch(e){}
+      s.addText(sl.title, { x:0.5, y:2.3, w:12.33, h:0.5, fontSize:18, color:C.SUB, align:'center' });
+      s.addText(sl.big,   { x:0.5, y:2.9, w:12.33, h:1.2, fontSize:44, bold:true, color:C.G, align:'center' });
+      s.addText(sl.sub,   { x:0.5, y:4.3, w:12.33, h:0.5, fontSize:16, color:C.SUB, align:'center' });
+      s.addText(sl.foot,  { x:0.5, y:6.6, w:12.33, h:0.4, fontSize:12, color:C.MUT, align:'center' });
+      return;
+    }
+    head(s, sl.title);
+    if (sl.type === 'table') {
+      const rows = [sl.headers.map(th)].concat(sl.rows.map((r, ri) =>
+        (sl.lastRowBold && ri === sl.rows.length-1)
+          ? r.map(c => ({ text:c, options:{ bold:true, fill:{ color:'F1F8F4' } } }))
+          : r));
+      s.addTable(rows, { ...tblOpt, colW:sl.colW });
+      if (sl.footnote) s.addText(sl.footnote, { x:0.6, y:6.6, w:12.1, h:0.4, fontSize:11, color:C.MUT });
+    } else if (sl.type === 'findings') {
+      if (sl.items.length) {
+        let y = 1.5;
+        sl.items.forEach(it => {
+          s.addShape(pptx.ShapeType.rect, { x:0.6, y:y, w:0.07, h:1.15, fill:{ color:sl.accent || C.G } });
+          s.addText(it.n + '. ' + it.title, { x:0.85, y:y, w:11.8, h:0.4, fontSize:16, bold:true, color:C.G, valign:'top' });
+          s.addText(it.text, { x:0.85, y:y+0.40, w:11.8, h:0.46, fontSize:13, color:C.INK, valign:'top' });
+          if (it.meta) s.addText(it.meta, { x:0.85, y:y+0.86, w:11.8, h:0.28, fontSize:11, color:C.MUT, valign:'top' });
+          y += 1.4;
+        });
+      } else {
+        s.addText(sl.empty, { x:0.6, y:1.6, w:12.1, h:2, fontSize:15, color:C.SUB, lineSpacingMultiple:1.4, valign:'top' });
+      }
+    } else if (sl.type === 'notes') {
+      let y = 1.5;
+      sl.items.forEach(it => {
+        s.addText(it.tag + ' ' + it.title, { x:0.6, y:y, w:12.1, h:0.36, fontSize:14, bold:true, color:it.color, valign:'top' });
+        s.addText(it.text, { x:0.6, y:y+0.36, w:12.1, h:0.55, fontSize:12, color:C.INK, valign:'top' });
+        y += 1.05;
+      });
+    } else if (sl.type === 'appendix') {
+      let y = 1.45;
+      sl.blocks.forEach(b => {
+        s.addText(b.h, { x:0.6, y:y, w:12.1, h:0.32, fontSize:14, bold:true, color:C.G, valign:'top' });
+        s.addText(b.p, { x:0.6, y:y+0.32, w:12.1, h:0.85, fontSize:12, color:C.INK, lineSpacingMultiple:1.25, valign:'top' });
+        y += 1.25;
+      });
+      s.addTable([sl.headers.map(th)].concat(sl.rows),
+        { ...tblOpt, y:4.2, colW:sl.colW, fontSize:11 });
+    }
+  });
+  await pptx.writeFile({ fileName });
+  return fileName;
+}
+
+// ── 對外：預覽與匯出 ─────────────────────────────────────
+let _execDeck = null;
+
+function openExecPreview() {
+  if (!_execFacts) { showToast('請先選擇期間產生報告內容'); return; }
+  _execDeck = buildExecDeck(_execFacts);
+  document.getElementById('deckPreviewTitle').textContent =
+    '簡報預覽 — ' + _execFacts.period.label + '（共 ' + _execDeck.length + ' 頁）';
+  openModal('deckPreviewModal');
+  setTimeout(() => renderDeckPreview(_execDeck, 'deckPreviewBody'), 20);
+}
+
 async function exportExecPptx() {
-  if (!_execFacts) { showToast('請先產生報告內容'); return; }
-  const f = _execFacts;
+  if (!_execFacts) { showToast('請先選擇期間產生報告內容'); return; }
+  const deck = _execDeck || buildExecDeck(_execFacts);
+  const fname = '光田行銷成效報告_' + _execFacts.period.label.replace(/\s/g,'') + '.pptx';
   showToast('簡報產生中…');
-  try { await _loadScript(_CDN_PPTX); } catch(e) { showToast('PPT 函式庫載入失敗，請確認網路'); return; }
   try {
-    const G='064E2C', L='6EC300', SUB='5A7A6A', MUT='90A89E', INK='1A2820';
-    const pptx = new PptxGenJS();
-    const num = n => (n||0).toLocaleString();
-    const head = (s, title) => {
-      s.background = { color:'FFFFFF' };
-      s.addText(title, { x:0.6, y:0.35, w:10.8, h:0.7, fontSize:24, bold:true, color:G });
-      s.addShape(pptx.ShapeType.rect, { x:0.62, y:1.02, w:1.3, h:0.07, fill:{ color:L } });
-      try { s.addImage({ data:KTGH_LOGO, x:10.95, y:0.4, w:1.75, h:0.30 }); } catch(e){}
-    };
-    const th = t => ({ text:t, options:{ bold:true, color:G, fill:{ color:'ECFDF5' } } });
-    const tblOpt = { x:0.6, y:1.4, w:12.1, fontSize:13, color:INK,
-                     border:{ type:'solid', color:'DDE8E3', pt:1 }, valign:'middle' };
-    const SX = ['壹','貳','參','肆','伍','陸','柒','捌','玖']; let sx = 0;
-    const SEC = () => SX[sx++];
-    let s;
-
-    // 封面
-    s = pptx.addSlide(); s.background = { color:'F3F9F6' };
-    try { s.addImage({ data:KTGH_LOGO, x:5.37, y:0.9, w:2.6, h:0.446 }); } catch(e){}
-    s.addText('行銷成效報告', { x:0.5, y:2.3, w:12.33, h:0.5, fontSize:18, color:SUB, align:'center' });
-    s.addText(f.period.label, { x:0.5, y:2.9, w:12.33, h:1.2, fontSize:44, bold:true, color:G, align:'center' });
-    s.addText('各管道合計 ' + num(f.totals.n) + ' 則　·　合計觸及 ' + num(f.totals.reach),
-      { x:0.5, y:4.3, w:12.33, h:0.5, fontSize:16, color:SUB, align:'center' });
-    s.addText('光田綜合醫院　行銷企劃組', { x:0.5, y:6.6, w:12.33, h:0.4, fontSize:12, color:MUT, align:'center' });
-
-    // 本期總覽
-    s = pptx.addSlide(); head(s, SEC() + '、本期總覽');
-    const volRows = [[th('傳達管道'), th('本期'), th('上期'), th('增減'), th('本期觸及')]].concat(
-      f.volume.filter(v => v.n || v.prevN).map(v =>
-        [v.label, String(v.n), String(v.prevN), (v.dN > 0 ? '+' : '') + v.dN, v.reach ? num(v.reach) : '—']));
-    volRows.push([{ text:'合計', options:{ bold:true, fill:{color:'F1F8F4'} } },
-                  { text:String(f.totals.n), options:{ bold:true, fill:{color:'F1F8F4'} } },
-                  { text:String(f.totals.prevN), options:{ bold:true, fill:{color:'F1F8F4'} } },
-                  { text:(f.totals.n - f.totals.prevN > 0 ? '+' : '') + (f.totals.n - f.totals.prevN), options:{ bold:true, fill:{color:'F1F8F4'} } },
-                  { text:num(f.totals.reach), options:{ bold:true, fill:{color:'F1F8F4'} } }]);
-    s.addTable(volRows, { ...tblOpt, colW:[3.5,1.8,1.8,1.8,3.2] });
-
-    // 重點發現
-    const confirmed = f.findings.filter(x => x.level === 'confirmed');
-    const others    = f.findings.filter(x => x.level !== 'confirmed');
-    s = pptx.addSlide(); head(s, SEC() + '、重點發現');
-    if (confirmed.length) {
-      let y = 1.5;
-      confirmed.slice(0, 4).forEach((x, i) => {
-        s.addShape(pptx.ShapeType.rect, { x:0.6, y:y, w:0.07, h:1.05, fill:{ color:G } });
-        s.addText((i+1) + '. ' + x.title, { x:0.85, y:y, w:11.8, h:0.38, fontSize:16, bold:true, color:G, valign:'top' });
-        s.addText(x.text, { x:0.85, y:y+0.38, w:11.8, h:0.44, fontSize:13, color:INK, valign:'top' });
-        if (x.evidence) s.addText(x.evidence, { x:0.85, y:y+0.80, w:11.8, h:0.25, fontSize:11, color:MUT, valign:'top' });
-        y += 1.3;
-      });
-    } else {
-      s.addText('本期尚無達統計顯著的發現。\n\n這代表目前樣本不足以區分差異與隨機波動，並非沒有變化。',
-        { x:0.6, y:1.6, w:12.1, h:2, fontSize:15, color:SUB, lineSpacingMultiple:1.4, valign:'top' });
-    }
-
-    // 觀察中 / 現況
-    if (others.length) {
-      s = pptx.addSlide(); head(s, SEC() + '、觀察中與現況說明');
-      let y = 1.5;
-      others.slice(0, 5).forEach(x => {
-        const tag = x.level === 'observed' ? '［觀察中］' : x.level === 'caveat' ? '［資料限制］' : '［現況］';
-        const col = x.level === 'observed' ? '8A6800' : x.level === 'caveat' ? 'C0313D' : SUB;
-        s.addText(tag + ' ' + x.title, { x:0.6, y:y, w:12.1, h:0.34, fontSize:14, bold:true, color:col, valign:'top' });
-        s.addText(x.text + (x.evidence ? '（' + x.evidence + '）' : ''),
-          { x:0.6, y:y+0.34, w:12.1, h:0.52, fontSize:12, color:INK, valign:'top' });
-        y += 1.02;
-      });
-    }
-
-    // 內容類型成效
-    if (f.posts.byCat.length) {
-      s = pptx.addSlide(); head(s, SEC() + '、內容類型成效');
-      const rows = [[th('類型'), th('篇數'), th('中位觸及'), th('平均觸及')]].concat(
-        f.posts.byCat.map(c => [c.cat, String(c.n), num(Math.round(c.median)), num(Math.round(c.mean))]));
-      s.addTable(rows, { ...tblOpt, colW:[4.6,2.0,2.8,2.7] });
-      s.addText('一律以中位數判讀。平均數會被單篇爆款拉高，不適合作為決策依據。',
-        { x:0.6, y:6.5, w:12.1, h:0.4, fontSize:11, color:MUT });
-    }
-
-    // 活動
-    if (f.events.n) {
-      s = pptx.addSlide(); head(s, SEC() + '、活動辦理');
-      const rows = [[th('活動名稱'), th('日期'), th('類型'), th('報名'), th('出席'), th('滿意度')]].concat(
-        f.events.list.slice(0, 10).map(e =>
-          [String(e.name||'').slice(0,26), e.date||'—', e.type||'—',
-           String(e.reg||'—'), String(e.attend||'—'), e.sat ? e.sat.toFixed(1) : '—']));
-      s.addTable(rows, { ...tblOpt, colW:[4.3,1.9,1.9,1.3,1.3,1.4] });
-      const line = '本期 ' + f.events.n + ' 場' +
-        (f.events.attendRate != null ? '，出席率 ' + Math.round(f.events.attendRate*100) + '%' : '') +
-        (f.events.satN ? '，滿意度中位數 ' + f.events.medianSat.toFixed(1) + '（' + f.events.satN + ' 場有填）' : '');
-      s.addText(line, { x:0.6, y:6.5, w:12.1, h:0.4, fontSize:12, color:SUB });
-    }
-
-    // 檔期成果
-    if (f.campaigns && f.campaigns.length) {
-      s = pptx.addSlide(); head(s, SEC() + '、檔期成果');
-      const rows = [[th('檔期'), th('FB 貼文'), th('媒體'), th('KOL'), th('合計觸及')]].concat(
-        f.campaigns.slice(0, 10).map(c =>
-          [String(c.name).slice(0,26), String(c.posts), String(c.media), String(c.kols), num(c.reach)]));
-      s.addTable(rows, { ...tblOpt, colW:[5.0,1.9,1.7,1.6,1.9] });
-    }
-
-    // 建議走向
-    s = pptx.addSlide(); head(s, SEC() + '、建議走向');
-    if (f.recommendations.length) {
-      let y = 1.5;
-      f.recommendations.slice(0, 4).forEach((r, i) => {
-        s.addShape(pptx.ShapeType.rect, { x:0.6, y:y, w:0.07, h:1.15, fill:{ color:L } });
-        s.addText((i+1) + '. ' + r.text, { x:0.85, y:y, w:11.8, h:0.4, fontSize:16, bold:true, color:G, valign:'top' });
-        s.addText('依據：' + r.rationale, { x:0.85, y:y+0.40, w:11.8, h:0.42, fontSize:12, color:INK, valign:'top' });
-        s.addText(r.verify, { x:0.85, y:y+0.82, w:11.8, h:0.3, fontSize:11, color:MUT, valign:'top' });
-        y += 1.4;
-      });
-    }
-
-    // 附錄：判讀方式與資料品質
-    s = pptx.addSlide(); head(s, SEC() + '、附錄：判讀方式與資料品質');
-    s.addText([
-      { text:'判讀方式\n', options:{ bold:true, fontSize:14, color:G } },
-      { text:'一律以中位數比較，避免單篇爆款拉偏平均。組間差異以置換檢定（5,000 次）計算 p 值，'
-           + 'p < 0.05 才列為「已驗證」，否則一律標示「觀察中」，不寫成結論。\n\n', options:{ fontSize:12, color:INK } },
-      { text:'本報告的限制\n', options:{ bold:true, fontSize:14, color:G } },
-      { text:'單期對單期的增減屬描述性比較，不代表趨勢。所有差異皆為相關性，非因果；'
-           + '若要確認因果需另行設計 A/B 測試。建議事項為待驗證假設，應於下期回檢。\n', options:{ fontSize:12, color:INK } },
-    ], { x:0.6, y:1.4, w:12.1, h:2.6, lineSpacingMultiple:1.3, valign:'top' });
-
-    const qRows = [[th('欄位'), th('完整度'), th('可用性')]].concat(
-      f.quality.map(q => {
-        const p = q.pct == null ? null : Math.round(q.pct*100);
-        return [q.field, (p==null?'—':p+'%') + '（'+q.filled+'/'+q.total+'）',
-                p==null?'本期無資料':p>=90?'可用於分析':p>=50?'僅供參考':'不足以支撐結論'];
-      }));
-    s.addTable(qRows, { ...tblOpt, y:4.2, colW:[3.2,3.4,5.5], fontSize:11 });
-
-    const fname = '光田行銷成效報告_' + f.period.label.replace(/\s/g,'') + '.pptx';
-    await pptx.writeFile({ fileName: fname });
+    await deckToPptx(deck, fname);
     showToast('簡報已下載：' + fname);
   } catch(e) {
     console.error(e);
     showToast('簡報產生失敗：' + e.message);
   }
 }
+
+window.addEventListener('resize', () => {
+  const el = document.getElementById('deckPreviewBody');
+  if (el && el.children.length) _fitDeckPreview(el);
+});
 
 // ═══════════════════════════════════════════════════════════
 //  跨管道標籤模組

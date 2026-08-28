@@ -90,7 +90,12 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 - `p < 0.05` 才標 `confirmed`，否則降級成 `observed`，**永遠不寫成結論**
 - 之後接 AI 時，**AI 只讀事實表，不得自己算任何數字**——否則會生出不存在的數字
 
-`exportExecPptx()` 只讀事實表產生簡報，沿用 `KTGH_LOGO` 與既有 PPT 樣式。
+**投影片模型** `buildExecDeck(facts)` 產生一份模型，`renderDeckPreview()` 與 `deckToPptx()`
+讀同一份，所以預覽看到什麼就是匯出什麼。
+
+> ★ 新增任何 PPT 匯出都**必須設 `pptx.layout = 'LAYOUT_WIDE'`**。
+> PptxGenJS 預設是 10 × 5.625 吋，但這裡所有座標都是照 13.333 × 7.5 吋排的，
+> 沒設就會整個溢出畫布。這正是先前主管簡報與活動成果報告跑版的原因。
 
 ## 待辦
 
