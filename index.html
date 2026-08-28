@@ -911,6 +911,12 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <div class="nav-group" data-key="campaign">
     <div class="nav-group-header" onclick="toggleNavGroup(this)"><span>成效整合</span><span class="chevron">▼</span></div>
     <div class="nav-group-body">
+    <a class="nav-item" onclick="switchSection('campaign','master')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v5H4z"/><path d="M4 13h7v7H4z"/><path d="M15 13h5v7h-5z"/></svg></span> 檔期管理
+    </a>
+    <a class="nav-item" onclick="switchSection('exec','report')">
+      <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M6 12l3-3 2 2 4-4"/></svg></span> 主管簡報
+    </a>
     <a class="nav-item" onclick="switchSection('campaign','hub')">
       <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Campaign 成果看板
     </a>
@@ -1700,6 +1706,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
               <label style="font-size:12px;font-weight:600;color:var(--text-sub);">跨管道標籤（逗號分隔）</label>
               <input type="text" id="ev-tags" list="crossTagDatalist" placeholder="例：GWD全球健康日, 健康講座">
             </div>
+            <div class="form-group" style="margin-top:10px;">
+              <label>所屬檔期（選填，選了會自動帶入檔期標籤）</label>
+              <span id="ev-campaign-wrap"></span>
+            </div>
             <div class="form-group" style="grid-column:1/-1;">
               <label style="font-size:12px;font-weight:600;color:var(--text-sub);">活動代碼 utm_campaign（綁定 UTM 導流成效；英數小寫，例：gwd2026）</label>
               <input type="text" id="ev-utmcampaign" placeholder="gwd2026">
@@ -1798,8 +1808,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           <textarea id="md-note" rows="2" placeholder="其他補充說明..."></textarea>
         </div>
         <div class="form-group" style="margin-bottom:16px;">
-          <label>關聯活動 Campaign（選填）</label>
-          <input type="text" id="md-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
+          <label>所屬檔期（選填）</label>
+          <span id="md-campaign-wrap"></span>
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label>跨傳達管道標籤（可多選，逗號分隔）</label>
@@ -1875,8 +1885,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
             <input type="number" id="kl-engage" placeholder="0">
           </div>
           <div class="form-group">
-            <label>關聯活動 Campaign</label>
-            <input type="text" id="kl-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
+            <label>所屬檔期（選填）</label>
+            <span id="kl-campaign-wrap"></span>
           </div>
           <div class="form-group">
             <label>貼文連結 URL</label>
@@ -1968,6 +1978,41 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <div class="section" id="sec-utm-builder"><div id="utmContent"></div></div>
     <!-- ══ UTM 成效回收 ══ -->
     <div class="section" id="sec-utm-stats"><div id="utmStatsContent"></div></div>
+
+    <div class="section" id="sec-campaign-master">
+      <div style="background:#EEF7F2;border-left:4px solid #1a8454;padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:12.5px;line-height:1.7;color:#1B4332;">
+        <b>為什麼要先建檔期</b>：一個主題常常橫跨 FB、活動、新聞、LINE、門診表好幾個管道。
+        檔期<b>只建立一次</b>（名稱／期間／負責人／標籤／預算），之後各管道登錄時只要下拉選檔期，
+        <b>標籤會自動帶入</b>，不必每次重打。主管簡報的「檔期成果」也才彙總得出來。
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+        <button class="btn btn-primary" data-perm="edit" onclick="openCampaignModal(-1)">＋ 新增檔期</button>
+        <button class="btn btn-outline" data-perm="edit" onclick="seedCampaignsFromEvents()">從既有活動建立</button>
+        <span style="font-size:12px;color:var(--text-muted);">已經有活動記錄的話，用這個一次匯入，不用手動重建。</span>
+      </div>
+      <div id="campaignMasterList"></div>
+    </div>
+
+    <div class="section" id="sec-exec-report">
+      <div style="background:#EEF7F2;border-left:4px solid #1a8454;padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:12.5px;line-height:1.7;color:#1B4332;">
+        <b>這一頁的用途</b>：選好期間，系統自動判讀出可以直接上報的結論，再一鍵匯出成會議簡報 PPT。<br>
+        數字全部由程式計算，每個結論都附樣本數與 p 值。<b>只有達到統計顯著的才會寫成「已驗證」</b>，其餘一律標示「觀察中」——寧可少講，不要講錯。
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">期間：</label>
+        <select id="execKind" onchange="renderExecReport()" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;">
+          <option value="month">月報</option>
+          <option value="quarter">季報</option>
+          <option value="year">年報</option>
+        </select>
+        <select id="execPeriod" onchange="renderExecReport()" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:150px;"></select>
+        <button class="btn" onclick="exportExecPptx()" style="background:linear-gradient(to right,#1a8454,#3cba92);color:#fff;margin-left:auto;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          匯出會議簡報 PPT
+        </button>
+      </div>
+      <div id="execReportBody"></div>
+    </div>
 
     <div class="section" id="sec-campaign-hub">
       <div id="campaignListView">
@@ -2577,8 +2622,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       </select>
     </div>
     <div class="form-group" style="margin-top:4px;">
-      <label>關聯活動 Campaign（選填）</label>
-      <input type="text" id="pm-campaign" list="campaignDatalist" placeholder="輸入或選擇活動名稱">
+      <label>所屬檔期（選填）</label>
+      <span id="pm-campaign-wrap"></span>
     </div>
     <div class="form-group" style="margin-top:4px;">
       <label>跨傳達管道標籤（可多選，用逗號分隔；例：LDCT, 達文西）</label>
@@ -2666,6 +2711,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <div class="form-group" style="grid-column:1/-1">
         <label>跨傳達管道標籤（可多選，逗號分隔）</label>
         <input type="text" id="em-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
+      </div>
+      <div class="form-group">
+        <label>所屬檔期（選填）</label>
+        <span id="em-campaign-wrap"></span>
       </div>
       <div class="form-group" style="grid-column:1/-1">
         <label>活動代碼 utm_campaign（綁定 UTM 導流成效；英數小寫，例：gwd2026）</label>
@@ -2786,6 +2835,45 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('promptModal')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAMPAIGN MASTER MODAL -->
+<div class="modal-overlay" id="campaignMasterModal">
+  <div class="modal-box" style="max-width:620px;">
+    <h3 id="cmModalTitle">新增檔期</h3>
+    <input type="hidden" id="cm-idx">
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>檔期名稱 *</label>
+      <input type="text" id="cm-name" placeholder="例：2026 世界糖尿病日系列">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div class="form-group"><label>開始日期</label><input type="date" id="cm-start"></div>
+      <div class="form-group"><label>結束日期</label><input type="date" id="cm-end"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div class="form-group"><label>負責人</label><input type="text" id="cm-owner" placeholder="例：宜靜"></div>
+      <div class="form-group"><label>預算（元）</label><input type="number" id="cm-budget" placeholder="0"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>檔期目標</label>
+      <input type="text" id="cm-goal" placeholder="例：提升糖尿病衛教觸及、帶動門診諮詢">
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>檔期標籤 <small style="color:var(--text-muted);font-weight:400;">（歸屬此檔期的資料會自動帶入這些標籤）</small></label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="cm-tags" list="crossTagDatalist" placeholder="例：糖尿病, 衛教" style="flex:1;">
+        <button type="button" class="btn btn-outline" onclick="pickCampaignTags()" style="white-space:nowrap;">從標籤庫選</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>備註</label>
+      <input type="text" id="cm-note" placeholder="選填">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('campaignMasterModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveCampaign()">儲存</button>
     </div>
   </div>
 </div>
@@ -3037,6 +3125,7 @@ function loadStore() {
       if (!d.gscKeywords)  d.gscKeywords  = [];
       if (!d.okr)          d.okr          = [];
       if (!d.tasks)        d.tasks        = [];
+      if (!d.campaigns)    d.campaigns    = [];
       // 首次載入或舊版 seed 時，自動帶入最新內建光田資料（2025/7–2026/3）
       // v2 seed 修正：新增 siteTraffic 工作階段/科別預約/轉換率 資料
       const SEED_VERSION = 'v3';
@@ -3068,7 +3157,7 @@ function loadStore() {
     seoArticles: (Array.isArray(window.BUILTIN_SEO_ARTICLES) ? JSON.parse(JSON.stringify(window.BUILTIN_SEO_ARTICLES)) : []),
     gaMonthly:   (window.BUILTIN_GA_MONTHLY ? JSON.parse(JSON.stringify(window.BUILTIN_GA_MONTHLY)) : {}),
     gscKeywords: (Array.isArray(window.BUILTIN_GSC_KEYWORDS) ? JSON.parse(JSON.stringify(window.BUILTIN_GSC_KEYWORDS)) : []),
-    okr: [], tasks: []
+    okr: [], tasks: [], campaigns: []
   });
 }
 
@@ -4187,7 +4276,20 @@ function switchSection(module, sub) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const sec = document.getElementById(`sec-${module}-${sub}`);
   if (sec) sec.classList.add('active');
+  if (module === 'media' && sub === 'add') {
+    _mountCampaignSelect('md-campaign-wrap', 'md-campaign', document.getElementById('md-campaign')?.value, 'md-tags');
+  }
+  if (module === 'kol' && sub === 'add') {
+    _mountCampaignSelect('kl-campaign-wrap', 'kl-campaign', document.getElementById('kl-campaign')?.value, null);
+  }
+  if (module === 'campaign' && sub === 'master') {
+    try { renderCampaignMaster(); } catch(e) { console.error(e); }
+  }
+  if (module === 'exec' && sub === 'report') {
+    try { renderExecReport(); } catch(e) { console.error(e); }
+  }
   if (module === 'event' && sub === 'add') {
+    _mountCampaignSelect('ev-campaign-wrap', 'ev-campaign', document.getElementById('ev-campaign')?.value, 'ev-tags');
     const chList = document.getElementById('ev-channels');
     if (chList && !chList.querySelector('.ch-row')) addChannelRow('ev-channels');
     const cfBox = document.getElementById('ev-custom-fields');
@@ -4216,6 +4318,8 @@ function switchSection(module, sub) {
     'settings-main':    ['設定',             'Google Sheets 串接與資料管理'],
     'settings-backup':  ['資料備份還原',      '本機自動快照與軟刪除回收筒'],
     'event-dashboard':  ['活動成效看板',      '活動場次、出席率、滿意度分析'],
+    'exec-report':      ['主管簡報',             '自動判讀＋一鍵匯出會議 PPT'],
+    'campaign-master':  ['檔期管理',             '建立一次，各管道登錄時直接選用'],
     'campaign-hub':     ['Campaign 成果看板', '跨平台活動整合成效追蹤'],
     'utm-builder':      ['UTM 連結產生器',    '產生帶 UTM 參數的追蹤連結與 QR，回收 GA4 成效'],
     'utm-stats':        ['UTM 成效回收',      '匯入 GA4 來源/媒介/活動，對回活動看各管道流量轉換'],
@@ -4988,6 +5092,7 @@ function addEvent() {
     custom:   collectCustomFields('ev-custom-fields', evType),
     photos:   collectPhotos('ev-photos'),
     utmCampaign: (document.getElementById('ev-utmcampaign')?.value||'').trim(),
+    campaign: document.getElementById('ev-campaign')?.value || '',
     campus:   document.getElementById('ev-campus').value,
     reg:      +document.getElementById('ev-reg').value      || 0,
     sample:   +document.getElementById('ev-sample').value   || 0,
@@ -5284,6 +5389,13 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 // ═══════════════════════════════════════════
 //  POST CRUD
 // ═══════════════════════════════════════════
+function _mountCampaignSelect(wrapId, selId, value, tagsInputId) {
+  const w = document.getElementById(wrapId);
+  if (!w) return;
+  const oc = tagsInputId ? "inheritCampaignTags('" + selId + "','" + tagsInputId + "')" : '';
+  w.innerHTML = campaignSelectHtml(selId, value || '', oc);
+}
+
 function openPostModal(idx) {
   const isNew = idx === -1;
   document.getElementById('postModalTitle').textContent = isNew ? '新增貼文' : '編輯貼文';
@@ -5299,7 +5411,7 @@ function openPostModal(idx) {
   const defaultImgType = p.img_type || (p.type === '影片' ? '一般影片' : '社群圖文');
   document.getElementById('pm-imgtype').value  = defaultImgType;
   document.getElementById('pm-phase').value    = p.phase    || '一般貼文';
-  document.getElementById('pm-campaign').value = p.campaign || '';
+  _mountCampaignSelect('pm-campaign-wrap', 'pm-campaign', p.campaign, 'pm-tags');
   document.getElementById('pm-tags').value     = (p.tags || []).join(', ');
   updateCampaignDatalist();
   updateCrossTagDatalist();
@@ -5380,6 +5492,7 @@ function openEventModal(idx) {
   document.getElementById('em-yt-url').value    = e.yt_url   || '';
   document.getElementById('em-note').value      = e.note     || '';
   document.getElementById('em-tags').value      = (e.tags || []).join(', ');
+  _mountCampaignSelect('em-campaign-wrap', 'em-campaign', e.campaign, 'em-tags');
   // Stage A 新增 5 欄
   document.getElementById('em-purpose').value      = e.purpose      || '';
   document.getElementById('em-content').value      = e.content      || '';
@@ -5425,6 +5538,7 @@ function saveEventEdit() {
     yt_url:   document.getElementById('em-yt-url').value,
     yt_views: +document.getElementById('em-yt-views').value || 0,
     tags:     parseTagInput('em-tags'),
+    campaign: document.getElementById('em-campaign')?.value || '',
     // Stage A 新增 5 欄
     purpose:     document.getElementById('em-purpose').value     || '',
     content:     document.getElementById('em-content').value     || '',
@@ -6574,7 +6688,7 @@ function addKol() {
   saveStore();
   _gasWrite('addKol', store.kols[store.kols.length - 1]);
   showToast('KOL 記錄已儲存');
-  ['kl-name','kl-date','kl-followers','kl-reach','kl-engage','kl-campaign','kl-url','kl-note'].forEach(id => {
+  ['kl-name','kl-date','kl-followers','kl-reach','kl-engage','kl-url','kl-note'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -11345,6 +11459,794 @@ function deleteLinePost(idx) {
   renderLinePostsList();
 }
 
+
+
+
+// ═══════════════════════════════════════════════════════════
+//  檔期（Campaign）主檔
+//  目的是消除多工：檔期只建立一次（名稱／期間／負責人／標籤／預算），
+//  之後各管道登錄時用下拉選，標籤自動繼承，不必逐一重打。
+//  各筆資料沿用既有的 campaign 欄位（存檔期名稱），
+//  所以既有的 Campaign 成果看板不必改就能直接吃到資料。
+// ═══════════════════════════════════════════════════════════
+
+function activeCampaigns() { return (store.campaigns || []).filter(c => c && !c.deleted_at); }
+
+function campaignByName(name) {
+  if (!name) return null;
+  return activeCampaigns().find(c => c.name === name) || null;
+}
+
+// 共用的「所屬檔期」下拉
+function campaignSelectHtml(id, value, onchange) {
+  const list = activeCampaigns().sort((a, b) => String(b.start||'').localeCompare(String(a.start||'')));
+  const opts = ['<option value="">（未歸檔期）</option>'].concat(
+    list.map(c => '<option value="' + _tgEsc(c.name) + '"' + (c.name === value ? ' selected' : '') + '>'
+      + _tgEsc(c.name) + (c.start ? '（' + c.start.slice(0,7) + '）' : '') + '</option>')
+  );
+  // 舊資料的檔期名稱可能不在主檔裡，補上以免被清掉
+  if (value && !list.some(c => c.name === value)) {
+    opts.push('<option value="' + _tgEsc(value) + '" selected>' + _tgEsc(value) + '（舊資料）</option>');
+  }
+  return '<select id="' + id + '"' + (onchange ? ' onchange="' + onchange + '"' : '') + '>' + opts.join('') + '</select>';
+}
+
+// 選了檔期就把檔期的標籤帶進該筆資料的標籤欄（只補、不覆蓋）
+function inheritCampaignTags(campaignSelectId, tagsInputId) {
+  const sel = document.getElementById(campaignSelectId);
+  const inp = document.getElementById(tagsInputId);
+  if (!sel || !inp) return;
+  const c = campaignByName(sel.value);
+  if (!c || !(c.tags || []).length) return;
+  const cur = inp.value.split(/[,，;；]/).map(s => s.trim()).filter(Boolean);
+  let added = 0;
+  c.tags.forEach(t => { if (!cur.includes(t)) { cur.push(t); added++; } });
+  inp.value = cur.join(', ');
+  if (added) showToast('已自動帶入檔期標籤 ' + added + ' 個');
+}
+
+// ── 檔期列表 ──────────────────────────────────────────────
+function renderCampaignMaster() {
+  const wrap = document.getElementById('campaignMasterList');
+  if (!wrap) return;
+  const list = activeCampaigns().sort((a, b) => String(b.start||'').localeCompare(String(a.start||'')));
+  if (!list.length) {
+    wrap.innerHTML = '<div class="empty" style="padding:50px;text-align:center;color:var(--text-muted);font-size:13px;">'
+      + '尚未建立檔期。<br><br>檔期建立一次之後，各管道登錄時用下拉選就好，標籤也會自動帶入——'
+      + '這是減少重複填寫的關鍵。<br><br>已經有活動記錄的話，可以按上方「從既有活動建立」一次匯入。</div>';
+    return;
+  }
+  const sums = {};
+  campaignSummaries().forEach(s => { sums[s.name] = s; });
+
+  wrap.innerHTML = '<div class="table-card"><div class="table-wrap"><table>'
+    + '<thead><tr><th>檔期名稱</th><th>期間</th><th>負責人</th><th>標籤</th>'
+    + '<th>FB</th><th>媒體</th><th>KOL</th><th>合計觸及</th><th>操作</th></tr></thead><tbody>'
+    + list.map((c, i) => {
+        const idx = store.campaigns.indexOf(c);
+        const s = sums[c.name] || { posts:0, media:0, kols:0, reach:0 };
+        const tags = (c.tags||[]).map(t => {
+          const tg = (store.mediaTags||[]).find(x => x.name === t);
+          const col = (tg && tg.color) || '#1a8454';
+          return '<span style="display:inline-block;padding:1px 6px;background:'+col+'1A;color:'+col
+               + ';border:1px solid '+col+'44;border-radius:9px;font-size:10.5px;margin:1px 2px 1px 0;">'+_tgEsc(t)+'</span>';
+        }).join('') || '<span style="color:var(--text-muted);">—</span>';
+        return '<tr>'
+          + '<td style="font-weight:600;">' + _tgEsc(c.name) + (c.goal ? '<br><small style="font-weight:400;color:var(--text-muted);">'+_tgEsc(c.goal)+'</small>' : '') + '</td>'
+          + '<td class="text-mono" style="white-space:nowrap;">' + (c.start||'—') + (c.end ? '<br>~ '+c.end : '') + '</td>'
+          + '<td>' + (_tgEsc(c.owner) || '—') + '</td>'
+          + '<td style="max-width:180px;">' + tags + '</td>'
+          + '<td class="text-mono">' + s.posts + '</td>'
+          + '<td class="text-mono">' + s.media + '</td>'
+          + '<td class="text-mono">' + s.kols + '</td>'
+          + '<td class="text-mono highlight">' + (s.reach ? s.reach.toLocaleString() : '—') + '</td>'
+          + '<td style="white-space:nowrap;">'
+          +   '<button class="action-btn edit" onclick="openCampaignModal('+idx+')">編輯</button> '
+          +   '<button class="action-btn del" onclick="deleteCampaign('+idx+')">刪除</button></td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table></div></div>';
+}
+
+function openCampaignModal(idx) {
+  if (!requireEdit()) return;
+  const isNew = idx === -1;
+  const c = isNew ? {} : store.campaigns[idx];
+  document.getElementById('cmModalTitle').textContent = isNew ? '新增檔期' : '編輯檔期';
+  document.getElementById('cm-idx').value    = idx;
+  document.getElementById('cm-name').value   = c.name   || '';
+  document.getElementById('cm-start').value  = c.start  || '';
+  document.getElementById('cm-end').value    = c.end    || '';
+  document.getElementById('cm-owner').value  = c.owner  || '';
+  document.getElementById('cm-goal').value   = c.goal   || '';
+  document.getElementById('cm-budget').value = c.budget || '';
+  document.getElementById('cm-tags').value   = (c.tags || []).join(', ');
+  document.getElementById('cm-note').value   = c.note   || '';
+  openModal('campaignMasterModal');
+}
+
+function pickCampaignTags() {
+  const inp = document.getElementById('cm-tags');
+  openTagPicker({
+    title: '選擇檔期標籤',
+    subtitle: '這些標籤之後會自動帶到歸屬此檔期的每一筆資料',
+    preselected: inp.value.split(/[,，;；]/).map(s => s.trim()).filter(Boolean),
+    onApply: (tags) => { inp.value = tags.join(', '); }
+  });
+}
+
+function saveCampaign() {
+  if (!requireEdit()) return;
+  const name = document.getElementById('cm-name').value.trim();
+  if (!name) { showToast('請填寫檔期名稱'); return; }
+  const idx = +document.getElementById('cm-idx').value;
+  const tags = document.getElementById('cm-tags').value.split(/[,，;；]/).map(s => s.trim()).filter(Boolean);
+  if (!Array.isArray(store.campaigns)) store.campaigns = [];
+
+  const dup = activeCampaigns().find((c, i) => c.name === name && store.campaigns.indexOf(c) !== idx);
+  if (dup) { showToast('已有同名檔期'); return; }
+
+  const obj = {
+    id: (idx >= 0 && store.campaigns[idx] && store.campaigns[idx].id) || ('cp_' + Date.now()),
+    name,
+    start:  document.getElementById('cm-start').value,
+    end:    document.getElementById('cm-end').value,
+    owner:  document.getElementById('cm-owner').value.trim(),
+    goal:   document.getElementById('cm-goal').value.trim(),
+    budget: +document.getElementById('cm-budget').value || 0,
+    tags, note: document.getElementById('cm-note').value.trim(),
+    updated_at: new Date().toISOString(),
+  };
+  if (idx >= 0) {
+    const old = store.campaigns[idx];
+    // 改名時把既有資料的歸屬一起帶過去，不然關聯會斷掉
+    if (old && old.name && old.name !== name) {
+      ['posts','media','kols','events','linePosts','seoArticles','videoItems'].forEach(k =>
+        (store[k]||[]).forEach(r => { if (r && r.campaign === old.name) r.campaign = name; }));
+    }
+    store.campaigns[idx] = { ...old, ...obj };
+  } else {
+    obj.created_at = new Date().toISOString();
+    store.campaigns.push(obj);
+  }
+  ensureTagsExist(tags);
+  saveStore();
+  closeModal('campaignMasterModal');
+  renderCampaignMaster();
+  showToast(idx >= 0 ? '檔期已更新' : '檔期已建立');
+}
+
+function deleteCampaign(idx) {
+  if (!requireEdit()) return;
+  const c = store.campaigns[idx];
+  if (!c) return;
+  const s = campaignSummaries().find(x => x.name === c.name);
+  const linked = s ? s.total : 0;
+  if (!confirm('確定刪除檔期「' + c.name + '」？\n\n'
+    + (linked ? '目前有 ' + linked + ' 筆資料歸在這個檔期，刪除後那些資料會變成「未歸檔期」（資料本身不會被刪）。\n\n' : '')
+    + '（採軟刪除，可從「資料備份」還原）')) return;
+  c.deleted_at = new Date().toISOString();
+  saveStore();
+  renderCampaignMaster();
+  showToast('檔期已刪除');
+}
+
+// 一次把既有活動轉成檔期，省得手動重建
+function seedCampaignsFromEvents() {
+  if (!requireEdit()) return;
+  const evs = activeEvents();
+  if (!evs.length) { showToast('目前沒有活動記錄'); return; }
+  if (!Array.isArray(store.campaigns)) store.campaigns = [];
+  const exist = new Set(activeCampaigns().map(c => c.name));
+  const add = evs.filter(e => e.name && !exist.has(e.name));
+  if (!add.length) { showToast('所有活動都已經有對應檔期了'); return; }
+  if (!confirm('將把 ' + add.length + ' 場活動建立成檔期（同名的會略過）。\n\n'
+    + '建立後，登錄貼文／媒體／KOL 時就能直接下拉選這些檔期。要繼續嗎？')) return;
+
+  takeSnapshot('從活動建立檔期前');
+  add.forEach(e => {
+    store.campaigns.push({
+      id: 'cp_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      name: e.name, start: e.date || '', end: e.date || '',
+      owner: e.speaker || '', goal: '', budget: +e.budget || 0,
+      tags: Array.isArray(e.tags) ? e.tags.slice() : [],
+      note: '（由活動記錄自動建立）',
+      created_at: new Date().toISOString(),
+    });
+    if (!e.campaign) e.campaign = e.name;   // 活動自己也歸到這個檔期
+  });
+  saveStore();
+  renderCampaignMaster();
+  showToast('已建立 ' + add.length + ' 個檔期');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  判讀引擎
+//  原則：所有數字都在這裡用程式算完，且每個比較都附 n 與 p 值。
+//  達不到顯著的一律降級成「觀察到」，永遠不寫成結論。
+//  （之後接 AI 時，AI 只讀這裡產出的事實表，不得自己算任何數字）
+// ═══════════════════════════════════════════════════════════
+
+function _median(a) {
+  if (!a.length) return 0;
+  const s = [...a].sort((x, y) => x - y), m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function _mean(a) { return a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0; }
+function _quantile(a, q) {
+  if (!a.length) return 0;
+  const s = [...a].sort((x, y) => x - y);
+  const pos = (s.length - 1) * q, base = Math.floor(pos), rest = pos - base;
+  return s[base + 1] !== undefined ? s[base] + rest * (s[base + 1] - s[base]) : s[base];
+}
+
+// 置換檢定：樣本小又偏態（爆款會把平均拉歪），不適合 t 檢定
+function _permTestMedian(a, b, iters) {
+  iters = iters || 5000;
+  if (a.length < 2 || b.length < 2) return { p: null, reason: '樣本不足' };
+  const obs = Math.abs(_median(a) - _median(b));
+  const pool = a.concat(b), n = a.length;
+  let hit = 0;
+  for (let i = 0; i < iters; i++) {
+    for (let j = pool.length - 1; j > 0; j--) {          // Fisher-Yates
+      const k = (Math.random() * (j + 1)) | 0;
+      const t = pool[j]; pool[j] = pool[k]; pool[k] = t;
+    }
+    if (Math.abs(_median(pool.slice(0, n)) - _median(pool.slice(n))) >= obs) hit++;
+  }
+  return { p: hit / iters, reason: null };
+}
+
+// 破碎的分類法收攏成大類，樣本才夠比
+const CAT_MERGE = {
+  '品牌/節慶':'品牌', '品牌/公益':'品牌', '品牌/里程碑':'品牌', '公益類':'品牌',
+  '衛教/技術':'衛教', '衛教/衛生':'衛教', '衛教類':'衛教',
+  '案例類':'案例', '地位建立':'地位', '活動/講座':'活動', '招募類':'招募',
+};
+function bigCat(cat) { return CAT_MERGE[cat] || cat || '未分類'; }
+
+function _periodRange(kind, ym) {
+  // ym 形如 '2026-07'
+  const [y, m] = ym.split('-').map(Number);
+  if (kind === 'month') {
+    const prev = m === 1 ? (y - 1) + '-12' : y + '-' + String(m - 1).padStart(2, '0');
+    return { label: y + ' 年 ' + m + ' 月', from: ym + '-01', to: ym + '-31',
+             prevLabel: prev.replace('-', ' 年 ') + ' 月', prevFrom: prev + '-01', prevTo: prev + '-31' };
+  }
+  if (kind === 'quarter') {
+    const q = Math.floor((m - 1) / 3) + 1, s = (q - 1) * 3 + 1;
+    const pq = q === 1 ? 4 : q - 1, py = q === 1 ? y - 1 : y, ps = (pq - 1) * 3 + 1;
+    const pad = n => String(n).padStart(2, '0');
+    return { label: y + ' 年 Q' + q, from: y + '-' + pad(s) + '-01', to: y + '-' + pad(s + 2) + '-31',
+             prevLabel: py + ' 年 Q' + pq, prevFrom: py + '-' + pad(ps) + '-01', prevTo: py + '-' + pad(ps + 2) + '-31' };
+  }
+  return { label: y + ' 年', from: y + '-01-01', to: y + '-12-31',
+           prevLabel: (y - 1) + ' 年', prevFrom: (y - 1) + '-01-01', prevTo: (y - 1) + '-12-31' };
+}
+
+function _inRange(d, from, to) { const s = String(d || '').slice(0, 10); return !!s && s >= from && s <= to; }
+
+// ── 事實表 ────────────────────────────────────────────────
+function buildInsightFacts(kind, ym) {
+  const P = _periodRange(kind || 'month', ym);
+  const pick = (arr, dateOf, from, to) => (arr || []).filter(r => r && !r.deleted_at && _inRange(dateOf(r), from, to));
+
+  const chans = [
+    { key:'posts',       label:'FB 粉專貼文', d:r=>r.date,  reach:r=>+r.reach||0 },
+    { key:'events',      label:'活動 / 講座',  d:r=>r.date,  reach:r=>+r.reach||0 },
+    { key:'media',       label:'新聞媒體曝光', d:r=>r.date,  reach:r=>+r.reach||0 },
+    { key:'kols',        label:'KOL 合作',    d:r=>r.date,  reach:r=>+r.reach||0 },
+    { key:'linePosts',   label:'LINE 推播',   d:r=>r.date,  reach:r=>+r.reach||0 },
+    { key:'seoArticles', label:'SEO 文章',    d:r=>r.date,  reach:r=>0 },
+    { key:'videoItems',  label:'YT / IG 影片', d:r=>r.date,  reach:r=>+r.views||0 },
+    { key:'mediaItems',  label:'門診表題材',   d:r=>r.month, reach:r=>0 },
+  ];
+
+  const volume = chans.map(c => {
+    const cur = pick(store[c.key], c.d, P.from, P.to);
+    const prv = pick(store[c.key], c.d, P.prevFrom, P.prevTo);
+    const cr = cur.reduce((s, r) => s + c.reach(r), 0);
+    const pr = prv.reduce((s, r) => s + c.reach(r), 0);
+    return { key:c.key, label:c.label, n:cur.length, reach:cr, prevN:prv.length, prevReach:pr,
+             dN: cur.length - prv.length, dReach: cr - pr,
+             pctN: prv.length ? (cur.length - prv.length) / prv.length : null,
+             pctReach: pr ? (cr - pr) / pr : null };
+  });
+
+  // ── FB 貼文細部 ──
+  const posts = pick(store.posts, r => r.date, P.from, P.to);
+  const reaches = posts.map(p => +p.reach || 0).filter(x => x > 0);
+  const ers = posts.filter(p => +p.reach).map(p => (+p.engage || 0) / (+p.reach));
+
+  const byCat = {};
+  posts.forEach(p => { const c = bigCat(p.cat); (byCat[c] = byCat[c] || []).push(+p.reach || 0); });
+  const catRows = Object.entries(byCat)
+    .map(([cat, v]) => ({ cat, n: v.length, median: _median(v), mean: _mean(v) }))
+    .sort((a, b) => b.median - a.median);
+
+  // 兩兩比較：只比樣本 >= 3 的組，並標記顯著性
+  const comparisons = [];
+  const cmpCats = catRows.filter(r => r.n >= 3);
+  for (let i = 0; i < cmpCats.length; i++) {
+    for (let j = i + 1; j < cmpCats.length; j++) {
+      const A = cmpCats[i], B = cmpCats[j];
+      const t = _permTestMedian(byCat[A.cat], byCat[B.cat]);
+      comparisons.push({
+        a:A.cat, b:B.cat, nA:A.n, nB:B.n, medA:A.median, medB:B.median,
+        ratio: B.median ? A.median / B.median : null,
+        p: t.p, significant: t.p !== null && t.p < 0.05, reason: t.reason,
+      });
+    }
+  }
+  comparisons.sort((x, y) => (x.p == null ? 1 : x.p) - (y.p == null ? 1 : y.p));
+
+  const sortedPosts = [...posts].sort((a, b) => (+b.reach || 0) - (+a.reach || 0));
+
+  // ── 活動 ──
+  const events = pick(store.events, r => r.date, P.from, P.to);
+  const evReg = events.reduce((s, e) => s + (+e.reg || 0), 0);
+  const evAtt = events.reduce((s, e) => s + (+e.attend || 0), 0);
+  const sats = events.map(e => +e.sat || 0).filter(x => x > 0);
+
+  // ── 檔期成果 ──
+  const campaigns = campaignSummaries(P.from, P.to);
+
+  // ── 資料品質 ──
+  const need = [
+    { f:'img_type', label:'圖片風格' }, { f:'phase', label:'貼文階段' },
+    { f:'campaign', label:'所屬檔期' }, { f:'url', label:'貼文連結' },
+    { f:'tags', label:'跨管道標籤' },
+  ];
+  const quality = need.map(x => {
+    const filled = posts.filter(p => {
+      const v = p[x.f];
+      return Array.isArray(v) ? v.length > 0 : (v !== undefined && v !== null && v !== '');
+    }).length;
+    return { field:x.label, filled, total:posts.length, pct: posts.length ? filled / posts.length : null };
+  });
+  const evQuality = [
+    { field:'活動支出', filled: events.filter(e => +e.expense > 0).length, total: events.length },
+    { field:'活動曝光', filled: events.filter(e => +e.reach > 0).length, total: events.length },
+    { field:'滿意度',   filled: sats.length, total: events.length },
+  ].map(x => ({ ...x, pct: x.total ? x.filled / x.total : null }));
+
+  const facts = {
+    period: P,
+    volume,
+    totals: {
+      n: volume.reduce((s, v) => s + v.n, 0),
+      prevN: volume.reduce((s, v) => s + v.prevN, 0),
+      reach: volume.reduce((s, v) => s + v.reach, 0),
+      prevReach: volume.reduce((s, v) => s + v.prevReach, 0),
+    },
+    posts: {
+      n: posts.length,
+      medianReach: _median(reaches), meanReach: _mean(reaches),
+      q1: _quantile(reaches, .25), q3: _quantile(reaches, .75),
+      medianER: _median(ers), 
+      byCat: catRows, comparisons,
+      top: sortedPosts.slice(0, 5).map(p => ({ title:p.title, date:p.date, cat:bigCat(p.cat), reach:+p.reach||0, engage:+p.engage||0 })),
+      bottom: sortedPosts.slice(-3).reverse().map(p => ({ title:p.title, date:p.date, cat:bigCat(p.cat), reach:+p.reach||0 })),
+    },
+    events: {
+      n: events.length, reg: evReg, attend: evAtt,
+      attendRate: evReg ? evAtt / evReg : null,
+      medianSat: _median(sats), satN: sats.length,
+      list: events.map(e => ({ name:e.name, date:e.date, type:e.type, campus:e.campus,
+                               reg:+e.reg||0, attend:+e.attend||0, sat:+e.sat||0 })),
+    },
+    campaigns,
+    quality: quality.concat(evQuality),
+  };
+  facts.findings = deriveFindings(facts);
+  facts.recommendations = deriveRecommendations(facts);
+  return facts;
+}
+
+// ── 自動判讀：規則式，不用 AI，數字全部來自事實表 ──────────
+function deriveFindings(f) {
+  const out = [];
+  const pct = v => (v == null ? '—' : (v >= 0 ? '+' : '') + Math.round(v * 100) + '%');
+
+  // 1. 量能變化（描述性，不做顯著性宣稱）
+  if (f.totals.prevN > 0) {
+    const d = (f.totals.n - f.totals.prevN) / f.totals.prevN;
+    out.push({
+      level: 'descriptive',
+      title: '整體產出量',
+      text: '本期各管道合計 ' + f.totals.n + ' 則，較上期 ' + f.totals.prevN + ' 則 ' + pct(d) + '。',
+      note: '單期對單期的比較屬描述性，不代表趨勢。',
+    });
+  }
+
+  // 2. 內容類型差異（只有顯著才寫成結論）
+  const sig = f.posts.comparisons.filter(c => c.significant);
+  sig.slice(0, 3).forEach(c => {
+    out.push({
+      level: 'confirmed',
+      title: c.a + ' 的觸及顯著高於 ' + c.b,
+      text: c.a + ' 中位觸及 ' + Math.round(c.medA).toLocaleString() + '，' + c.b + ' 為 ' +
+            Math.round(c.medB).toLocaleString() + '，差距 ' + (c.ratio ? c.ratio.toFixed(1) : '—') + ' 倍。',
+      evidence: 'n=' + c.nA + ' vs ' + c.nB + '，p=' + c.p.toFixed(4),
+    });
+  });
+  const nonSig = f.posts.comparisons.filter(c => !c.significant && c.p != null && c.ratio && c.ratio >= 1.3);
+  nonSig.slice(0, 2).forEach(c => {
+    out.push({
+      level: 'observed',
+      title: c.a + ' 看起來高於 ' + c.b + '，但尚未確認',
+      text: '中位觸及相差 ' + c.ratio.toFixed(1) + ' 倍，但以目前樣本無法排除是隨機波動。',
+      evidence: 'n=' + c.nA + ' vs ' + c.nB + '，p=' + c.p.toFixed(4) + '（未達 0.05）',
+    });
+  });
+
+  // 3. 投入與產出是否錯配
+  if (f.posts.n >= 8 && f.posts.byCat.length >= 2) {
+    const most = [...f.posts.byCat].sort((a, b) => b.n - a.n)[0];
+    const best = f.posts.byCat[0];   // 已依中位數排序
+    if (most.cat !== best.cat && most.n / f.posts.n >= 0.35) {
+      out.push({
+        level: 'confirmed',
+        title: '產能集中在成效較低的類型',
+        text: '「' + most.cat + '」佔本期貼文 ' + Math.round(most.n / f.posts.n * 100) + '%（' + most.n + '／' + f.posts.n +
+              '），中位觸及 ' + Math.round(most.median).toLocaleString() + '；而中位觸及最高的是「' + best.cat +
+              '」' + Math.round(best.median).toLocaleString() + '。',
+        evidence: '依中位數排序，避免爆款拉偏平均',
+      });
+    }
+  }
+
+  // 4. 爆款
+  if (f.posts.top.length && f.posts.medianReach) {
+    const t = f.posts.top[0];
+    if (t.reach >= f.posts.medianReach * 3) {
+      out.push({
+        level: 'descriptive',
+        title: '本期最高觸及貼文',
+        text: '「' + String(t.title || '').slice(0, 28) + '」觸及 ' + t.reach.toLocaleString() +
+              '，是中位數的 ' + (t.reach / f.posts.medianReach).toFixed(1) + ' 倍。',
+        note: '爆款會拉高平均，本報告一律以中位數為準。',
+      });
+    }
+  }
+
+  // 5. 活動
+  if (f.events.n) {
+    const parts = ['本期辦理 ' + f.events.n + ' 場活動'];
+    if (f.events.attendRate != null) parts.push('報名 ' + f.events.reg + ' 人、出席 ' + f.events.attend +
+      ' 人（出席率 ' + Math.round(f.events.attendRate * 100) + '%）');
+    if (f.events.satN) parts.push('滿意度中位數 ' + f.events.medianSat.toFixed(1) + '（' + f.events.satN + ' 場有填）');
+    out.push({ level:'descriptive', title:'活動辦理概況', text: parts.join('，') + '。' });
+  }
+
+  // 6. 資料品質警語（必要時才出現）
+  const weak = f.quality.filter(q => q.pct != null && q.pct < 0.5 && q.total > 0);
+  if (weak.length) {
+    out.push({
+      level: 'caveat',
+      title: '以下欄位完整度不足，相關問題本期無法回答',
+      text: weak.map(q => q.field + ' ' + Math.round(q.pct * 100) + '%（' + q.filled + '／' + q.total + '）').join('、') + '。',
+    });
+  }
+  return out;
+}
+
+function deriveRecommendations(f) {
+  const out = [];
+  const sig = f.posts.comparisons.filter(c => c.significant);
+  if (sig.length) {
+    const c = sig[0];
+    out.push({
+      text: '下期提高「' + c.a + '」的產出比重，並相應降低「' + c.b + '」。',
+      rationale: c.a + ' 的中位觸及為 ' + c.b + ' 的 ' + (c.ratio ? c.ratio.toFixed(1) : '—') + ' 倍（p=' + c.p.toFixed(4) + '）。',
+      verify: '下期回檢：若 ' + c.a + ' 比重提高後整體中位觸及未上升，則此假設不成立。',
+    });
+  }
+  const weakCampaign = f.quality.find(q => q.field === '所屬檔期' && q.pct != null && q.pct < 0.5);
+  if (weakCampaign) {
+    out.push({
+      text: '登錄貼文時務必選填「所屬檔期」。',
+      rationale: '本期僅 ' + Math.round(weakCampaign.pct * 100) + '% 的貼文有歸檔期，導致無法計算單一檔期的整體成效。',
+      verify: '下期回檢：檔期填寫率是否達 90%。',
+    });
+  }
+  const weakExpense = f.quality.find(q => q.field === '活動支出' && q.pct != null && q.pct < 0.5);
+  if (weakExpense && f.events.n) {
+    out.push({
+      text: '活動結束後補填實際支出。',
+      rationale: '本期 ' + f.events.n + ' 場活動僅 ' + weakExpense.filled + ' 場有支出資料，無法計算每位出席者成本。',
+      verify: '下期回檢：支出填寫率是否達 90%。',
+    });
+  }
+  if (!sig.length && f.posts.n) {
+    out.push({
+      text: '本期尚無達統計顯著的內容類型差異，建議維持現行配比並持續累積樣本。',
+      rationale: '目前各類型樣本數偏低，差異無法與隨機波動區分。',
+      verify: '累積至每類 20 篇以上後重新檢定。',
+    });
+  }
+  return out;
+}
+
+// 檔期成果彙總（相容舊的 campaign 名稱字串）
+function campaignSummaries(from, to) {
+  const list = (store.campaigns || []).filter(c => !c.deleted_at);
+  const legacy = new Set();
+  ['posts','media','kols'].forEach(k => (store[k]||[]).forEach(r => { if (r && r.campaign) legacy.add(r.campaign); }));
+  const names = list.length ? list.map(c => c.name) : [...legacy];
+  return names.map(name => {
+    const hit = (arr, dateOf) => (arr || []).filter(r =>
+      r && !r.deleted_at && (r.campaignName === name || r.campaign === name) &&
+      (!from || _inRange(dateOf(r), from, to)));
+    const posts = hit(store.posts, r => r.date);
+    const media = hit(store.media, r => r.date);
+    const kols  = hit(store.kols,  r => r.date);
+    const ev = (store.events || []).find(e => e && !e.deleted_at && e.name === name);
+    return {
+      name,
+      posts: posts.length, media: media.length, kols: kols.length,
+      reach: posts.reduce((s,p)=>s+(+p.reach||0),0) + media.reduce((s,m)=>s+(+m.reach||0),0),
+      reg: ev ? (+ev.reg||0) : 0, attend: ev ? (+ev.attend||0) : 0,
+      total: posts.length + media.length + kols.length + (ev ? 1 : 0),
+    };
+  }).filter(c => c.total > 0).sort((a,b) => b.reach - a.reach);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  主管簡報：一鍵產出會議上報用的 PPT
+//  數字全部取自 buildInsightFacts()，這裡不做任何額外計算。
+// ═══════════════════════════════════════════════════════════
+let _execFacts = null;
+
+function _execPeriodOptions() {
+  const set = new Set();
+  ['posts','events','media','kols','linePosts','seoArticles','videoItems'].forEach(k =>
+    (store[k]||[]).forEach(r => { const d = String(r && (r.date||r.month) || '').slice(0,7); if (/^\d{4}-\d{2}$/.test(d)) set.add(d); }));
+  const arr = [...set].sort().reverse();
+  if (!arr.length) arr.push(new Date().toISOString().slice(0,7));
+  return arr;
+}
+
+function renderExecReport() {
+  const selP = document.getElementById('execPeriod');
+  const selK = document.getElementById('execKind');
+  if (!selP) return;
+  if (!selP.options.length) {
+    selP.innerHTML = _execPeriodOptions().map(m => '<option value="'+m+'">'+m.replace('-',' 年 ')+' 月</option>').join('');
+  }
+  const kind = (selK && selK.value) || 'month';
+  const ym = selP.value || _execPeriodOptions()[0];
+
+  const wrap = document.getElementById('execReportBody');
+  wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:13px;">計算中…</div>';
+
+  setTimeout(() => {
+    const f = _execFacts = buildInsightFacts(kind, ym);
+    const pct = v => v == null ? '—' : (v >= 0 ? '+' : '') + Math.round(v*100) + '%';
+    const num = n => (n||0).toLocaleString();
+
+    const levelStyle = {
+      confirmed:   { bg:'#E4F1EA', bd:'#006341', c:'#006341', tag:'已驗證' },
+      observed:    { bg:'#FFF6DC', bd:'#8A6800', c:'#8A6800', tag:'觀察中' },
+      descriptive: { bg:'#EEF5FF', bd:'#1E40AF', c:'#1E40AF', tag:'現況' },
+      caveat:      { bg:'#FBE9EA', bd:'#C0313D', c:'#C0313D', tag:'資料限制' },
+    };
+
+    wrap.innerHTML =
+      // 總覽
+      '<div style="background:linear-gradient(135deg,#064E2C 0%,#1a8454 100%);border-radius:14px;padding:22px 24px;color:#fff;margin-bottom:16px;">'
+      +  '<div style="font-size:12px;opacity:.85;">' + f.period.label + '　行銷成效總覽</div>'
+      +  '<div style="display:flex;gap:32px;flex-wrap:wrap;margin-top:10px;">'
+      +    '<div><div style="font-size:30px;font-weight:900;">' + num(f.totals.n) + '</div><div style="font-size:11.5px;opacity:.85;">各管道產出（上期 ' + num(f.totals.prevN) + '）</div></div>'
+      +    '<div><div style="font-size:30px;font-weight:900;">' + num(f.totals.reach) + '</div><div style="font-size:11.5px;opacity:.85;">合計觸及（上期 ' + num(f.totals.prevReach) + '）</div></div>'
+      +    '<div><div style="font-size:30px;font-weight:900;">' + num(Math.round(f.posts.medianReach)) + '</div><div style="font-size:11.5px;opacity:.85;">貼文中位觸及</div></div>'
+      +  '</div></div>'
+
+      // 各管道
+      + '<div class="table-card" style="margin-bottom:16px;"><div class="table-wrap"><table>'
+      + '<thead><tr><th>傳達管道</th><th>本期件數</th><th>上期</th><th>增減</th><th>本期觸及</th><th>增減</th></tr></thead><tbody>'
+      + f.volume.filter(v => v.n || v.prevN).map(v =>
+          '<tr><td style="font-weight:600;">'+v.label+'</td>'
+          + '<td class="text-mono">'+v.n+'</td><td class="text-mono" style="color:var(--text-muted);">'+v.prevN+'</td>'
+          + '<td class="text-mono" style="color:'+(v.dN>0?'var(--brand)':v.dN<0?'#C0313D':'var(--text-muted)')+';">'+(v.dN>0?'+':'')+v.dN+'</td>'
+          + '<td class="text-mono">'+(v.reach?num(v.reach):'—')+'</td>'
+          + '<td class="text-mono" style="color:'+(v.pctReach>0?'var(--brand)':v.pctReach<0?'#C0313D':'var(--text-muted)')+';">'+(v.pctReach==null?'—':pct(v.pctReach))+'</td></tr>').join('')
+      + '</tbody></table></div></div>'
+
+      // 判讀
+      + '<h3 style="font-size:15px;font-weight:800;margin:20px 0 10px;">自動判讀</h3>'
+      + (f.findings.length ? f.findings.map(x => {
+          const s = levelStyle[x.level] || levelStyle.descriptive;
+          return '<div style="background:'+s.bg+';border-left:4px solid '+s.bd+';border-radius:8px;padding:12px 16px;margin-bottom:10px;">'
+            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+            +   '<span style="font-size:10px;font-weight:700;color:'+s.c+';border:1px solid '+s.bd+'55;border-radius:3px;padding:1px 6px;">'+s.tag+'</span>'
+            +   '<b style="font-size:13.5px;color:#1A2820;">'+x.title+'</b></div>'
+            + '<div style="font-size:12.5px;color:#33473D;line-height:1.65;">'+x.text+'</div>'
+            + (x.evidence ? '<div style="font-size:11px;color:#5A7A6A;margin-top:4px;font-family:ui-monospace,monospace;">'+x.evidence+'</div>' : '')
+            + (x.note ? '<div style="font-size:11px;color:#5A7A6A;margin-top:4px;">'+x.note+'</div>' : '')
+            + '</div>';
+        }).join('') : '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">本期資料不足，無法產生判讀。</div>')
+
+      // 建議
+      + '<h3 style="font-size:15px;font-weight:800;margin:20px 0 10px;">建議走向</h3>'
+      + (f.recommendations.length ? f.recommendations.map((r,i) =>
+          '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:10px;">'
+          + '<div style="font-size:13.5px;font-weight:700;color:#1A2820;">'+(i+1)+'. '+r.text+'</div>'
+          + '<div style="font-size:12px;color:#33473D;margin-top:4px;">依據：'+r.rationale+'</div>'
+          + '<div style="font-size:11.5px;color:#5A7A6A;margin-top:3px;">'+r.verify+'</div></div>').join('')
+        : '<div style="padding:16px;color:var(--text-muted);font-size:13px;">尚無建議。</div>')
+
+      // 內容類型
+      + (f.posts.byCat.length ? '<h3 style="font-size:15px;font-weight:800;margin:20px 0 10px;">內容類型成效（依中位觸及排序）</h3>'
+        + '<div class="table-card"><div class="table-wrap"><table>'
+        + '<thead><tr><th>類型</th><th>篇數</th><th>中位觸及</th><th>平均觸及</th></tr></thead><tbody>'
+        + f.posts.byCat.map(c => '<tr><td style="font-weight:600;">'+c.cat+'</td><td class="text-mono">'+c.n+'</td>'
+            + '<td class="text-mono highlight">'+num(Math.round(c.median))+'</td>'
+            + '<td class="text-mono" style="color:var(--text-muted);">'+num(Math.round(c.mean))+'</td></tr>').join('')
+        + '</tbody></table></div></div>' : '')
+
+      // 資料品質
+      + '<h3 style="font-size:15px;font-weight:800;margin:20px 0 10px;">資料品質</h3>'
+      + '<div class="table-card"><div class="table-wrap"><table>'
+      + '<thead><tr><th>欄位</th><th>完整度</th><th>影響</th></tr></thead><tbody>'
+      + f.quality.map(q => {
+          const p = q.pct == null ? null : Math.round(q.pct*100);
+          const col = p == null ? 'var(--text-muted)' : p >= 90 ? 'var(--brand)' : p >= 50 ? '#8A6800' : '#C0313D';
+          return '<tr><td>'+q.field+'</td><td class="text-mono" style="color:'+col+';font-weight:700;">'+(p==null?'—':p+'%')+' <span style="color:var(--text-muted);font-weight:400;">('+q.filled+'/'+q.total+')</span></td>'
+            + '<td style="font-size:12px;color:var(--text-muted);">'+(p==null?'本期無資料':p>=90?'可用於分析':p>=50?'僅供參考，需標註樣本':'不足以支撐結論')+'</td></tr>';
+        }).join('')
+      + '</tbody></table></div></div>';
+  }, 30);
+}
+
+async function exportExecPptx() {
+  if (!_execFacts) { showToast('請先產生報告內容'); return; }
+  const f = _execFacts;
+  showToast('簡報產生中…');
+  try { await _loadScript(_CDN_PPTX); } catch(e) { showToast('PPT 函式庫載入失敗，請確認網路'); return; }
+  try {
+    const G='064E2C', L='6EC300', SUB='5A7A6A', MUT='90A89E', INK='1A2820';
+    const pptx = new PptxGenJS();
+    const num = n => (n||0).toLocaleString();
+    const head = (s, title) => {
+      s.background = { color:'FFFFFF' };
+      s.addText(title, { x:0.6, y:0.35, w:10.8, h:0.7, fontSize:24, bold:true, color:G });
+      s.addShape(pptx.ShapeType.rect, { x:0.62, y:1.02, w:1.3, h:0.07, fill:{ color:L } });
+      try { s.addImage({ data:KTGH_LOGO, x:10.95, y:0.4, w:1.75, h:0.30 }); } catch(e){}
+    };
+    const th = t => ({ text:t, options:{ bold:true, color:G, fill:{ color:'ECFDF5' } } });
+    const tblOpt = { x:0.6, y:1.4, w:12.1, fontSize:13, color:INK,
+                     border:{ type:'solid', color:'DDE8E3', pt:1 }, valign:'middle' };
+    const SX = ['壹','貳','參','肆','伍','陸','柒','捌','玖']; let sx = 0;
+    const SEC = () => SX[sx++];
+    let s;
+
+    // 封面
+    s = pptx.addSlide(); s.background = { color:'F3F9F6' };
+    try { s.addImage({ data:KTGH_LOGO, x:5.37, y:0.9, w:2.6, h:0.446 }); } catch(e){}
+    s.addText('行銷成效報告', { x:0.5, y:2.3, w:12.33, h:0.5, fontSize:18, color:SUB, align:'center' });
+    s.addText(f.period.label, { x:0.5, y:2.9, w:12.33, h:1.2, fontSize:44, bold:true, color:G, align:'center' });
+    s.addText('各管道合計 ' + num(f.totals.n) + ' 則　·　合計觸及 ' + num(f.totals.reach),
+      { x:0.5, y:4.3, w:12.33, h:0.5, fontSize:16, color:SUB, align:'center' });
+    s.addText('光田綜合醫院　行銷企劃組', { x:0.5, y:6.6, w:12.33, h:0.4, fontSize:12, color:MUT, align:'center' });
+
+    // 本期總覽
+    s = pptx.addSlide(); head(s, SEC() + '、本期總覽');
+    const volRows = [[th('傳達管道'), th('本期'), th('上期'), th('增減'), th('本期觸及')]].concat(
+      f.volume.filter(v => v.n || v.prevN).map(v =>
+        [v.label, String(v.n), String(v.prevN), (v.dN > 0 ? '+' : '') + v.dN, v.reach ? num(v.reach) : '—']));
+    volRows.push([{ text:'合計', options:{ bold:true, fill:{color:'F1F8F4'} } },
+                  { text:String(f.totals.n), options:{ bold:true, fill:{color:'F1F8F4'} } },
+                  { text:String(f.totals.prevN), options:{ bold:true, fill:{color:'F1F8F4'} } },
+                  { text:(f.totals.n - f.totals.prevN > 0 ? '+' : '') + (f.totals.n - f.totals.prevN), options:{ bold:true, fill:{color:'F1F8F4'} } },
+                  { text:num(f.totals.reach), options:{ bold:true, fill:{color:'F1F8F4'} } }]);
+    s.addTable(volRows, { ...tblOpt, colW:[3.5,1.8,1.8,1.8,3.2] });
+
+    // 重點發現
+    const confirmed = f.findings.filter(x => x.level === 'confirmed');
+    const others    = f.findings.filter(x => x.level !== 'confirmed');
+    s = pptx.addSlide(); head(s, SEC() + '、重點發現');
+    if (confirmed.length) {
+      let y = 1.5;
+      confirmed.slice(0, 4).forEach((x, i) => {
+        s.addShape(pptx.ShapeType.rect, { x:0.6, y:y, w:0.07, h:1.05, fill:{ color:G } });
+        s.addText((i+1) + '. ' + x.title, { x:0.85, y:y, w:11.8, h:0.38, fontSize:16, bold:true, color:G, valign:'top' });
+        s.addText(x.text, { x:0.85, y:y+0.38, w:11.8, h:0.44, fontSize:13, color:INK, valign:'top' });
+        if (x.evidence) s.addText(x.evidence, { x:0.85, y:y+0.80, w:11.8, h:0.25, fontSize:11, color:MUT, valign:'top' });
+        y += 1.3;
+      });
+    } else {
+      s.addText('本期尚無達統計顯著的發現。\n\n這代表目前樣本不足以區分差異與隨機波動，並非沒有變化。',
+        { x:0.6, y:1.6, w:12.1, h:2, fontSize:15, color:SUB, lineSpacingMultiple:1.4, valign:'top' });
+    }
+
+    // 觀察中 / 現況
+    if (others.length) {
+      s = pptx.addSlide(); head(s, SEC() + '、觀察中與現況說明');
+      let y = 1.5;
+      others.slice(0, 5).forEach(x => {
+        const tag = x.level === 'observed' ? '［觀察中］' : x.level === 'caveat' ? '［資料限制］' : '［現況］';
+        const col = x.level === 'observed' ? '8A6800' : x.level === 'caveat' ? 'C0313D' : SUB;
+        s.addText(tag + ' ' + x.title, { x:0.6, y:y, w:12.1, h:0.34, fontSize:14, bold:true, color:col, valign:'top' });
+        s.addText(x.text + (x.evidence ? '（' + x.evidence + '）' : ''),
+          { x:0.6, y:y+0.34, w:12.1, h:0.52, fontSize:12, color:INK, valign:'top' });
+        y += 1.02;
+      });
+    }
+
+    // 內容類型成效
+    if (f.posts.byCat.length) {
+      s = pptx.addSlide(); head(s, SEC() + '、內容類型成效');
+      const rows = [[th('類型'), th('篇數'), th('中位觸及'), th('平均觸及')]].concat(
+        f.posts.byCat.map(c => [c.cat, String(c.n), num(Math.round(c.median)), num(Math.round(c.mean))]));
+      s.addTable(rows, { ...tblOpt, colW:[4.6,2.0,2.8,2.7] });
+      s.addText('一律以中位數判讀。平均數會被單篇爆款拉高，不適合作為決策依據。',
+        { x:0.6, y:6.5, w:12.1, h:0.4, fontSize:11, color:MUT });
+    }
+
+    // 活動
+    if (f.events.n) {
+      s = pptx.addSlide(); head(s, SEC() + '、活動辦理');
+      const rows = [[th('活動名稱'), th('日期'), th('類型'), th('報名'), th('出席'), th('滿意度')]].concat(
+        f.events.list.slice(0, 10).map(e =>
+          [String(e.name||'').slice(0,26), e.date||'—', e.type||'—',
+           String(e.reg||'—'), String(e.attend||'—'), e.sat ? e.sat.toFixed(1) : '—']));
+      s.addTable(rows, { ...tblOpt, colW:[4.3,1.9,1.9,1.3,1.3,1.4] });
+      const line = '本期 ' + f.events.n + ' 場' +
+        (f.events.attendRate != null ? '，出席率 ' + Math.round(f.events.attendRate*100) + '%' : '') +
+        (f.events.satN ? '，滿意度中位數 ' + f.events.medianSat.toFixed(1) + '（' + f.events.satN + ' 場有填）' : '');
+      s.addText(line, { x:0.6, y:6.5, w:12.1, h:0.4, fontSize:12, color:SUB });
+    }
+
+    // 檔期成果
+    if (f.campaigns && f.campaigns.length) {
+      s = pptx.addSlide(); head(s, SEC() + '、檔期成果');
+      const rows = [[th('檔期'), th('FB 貼文'), th('媒體'), th('KOL'), th('合計觸及')]].concat(
+        f.campaigns.slice(0, 10).map(c =>
+          [String(c.name).slice(0,26), String(c.posts), String(c.media), String(c.kols), num(c.reach)]));
+      s.addTable(rows, { ...tblOpt, colW:[5.0,1.9,1.7,1.6,1.9] });
+    }
+
+    // 建議走向
+    s = pptx.addSlide(); head(s, SEC() + '、建議走向');
+    if (f.recommendations.length) {
+      let y = 1.5;
+      f.recommendations.slice(0, 4).forEach((r, i) => {
+        s.addShape(pptx.ShapeType.rect, { x:0.6, y:y, w:0.07, h:1.15, fill:{ color:L } });
+        s.addText((i+1) + '. ' + r.text, { x:0.85, y:y, w:11.8, h:0.4, fontSize:16, bold:true, color:G, valign:'top' });
+        s.addText('依據：' + r.rationale, { x:0.85, y:y+0.40, w:11.8, h:0.42, fontSize:12, color:INK, valign:'top' });
+        s.addText(r.verify, { x:0.85, y:y+0.82, w:11.8, h:0.3, fontSize:11, color:MUT, valign:'top' });
+        y += 1.4;
+      });
+    }
+
+    // 附錄：判讀方式與資料品質
+    s = pptx.addSlide(); head(s, SEC() + '、附錄：判讀方式與資料品質');
+    s.addText([
+      { text:'判讀方式\n', options:{ bold:true, fontSize:14, color:G } },
+      { text:'一律以中位數比較，避免單篇爆款拉偏平均。組間差異以置換檢定（5,000 次）計算 p 值，'
+           + 'p < 0.05 才列為「已驗證」，否則一律標示「觀察中」，不寫成結論。\n\n', options:{ fontSize:12, color:INK } },
+      { text:'本報告的限制\n', options:{ bold:true, fontSize:14, color:G } },
+      { text:'單期對單期的增減屬描述性比較，不代表趨勢。所有差異皆為相關性，非因果；'
+           + '若要確認因果需另行設計 A/B 測試。建議事項為待驗證假設，應於下期回檢。\n', options:{ fontSize:12, color:INK } },
+    ], { x:0.6, y:1.4, w:12.1, h:2.6, lineSpacingMultiple:1.3, valign:'top' });
+
+    const qRows = [[th('欄位'), th('完整度'), th('可用性')]].concat(
+      f.quality.map(q => {
+        const p = q.pct == null ? null : Math.round(q.pct*100);
+        return [q.field, (p==null?'—':p+'%') + '（'+q.filled+'/'+q.total+'）',
+                p==null?'本期無資料':p>=90?'可用於分析':p>=50?'僅供參考':'不足以支撐結論'];
+      }));
+    s.addTable(qRows, { ...tblOpt, y:4.2, colW:[3.2,3.4,5.5], fontSize:11 });
+
+    const fname = '光田行銷成效報告_' + f.period.label.replace(/\s/g,'') + '.pptx';
+    await pptx.writeFile({ fileName: fname });
+    showToast('簡報已下載：' + fname);
+  } catch(e) {
+    console.error(e);
+    showToast('簡報產生失敗：' + e.message);
+  }
+}
 
 // ═══════════════════════════════════════════════════════════
 //  跨管道標籤模組

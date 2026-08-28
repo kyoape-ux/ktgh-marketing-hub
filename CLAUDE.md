@@ -77,10 +77,26 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 - `quickTagRow(chKey, idx)` / `tagCellHtml()`：列表內直接改標籤。
 - 跨管道統計支援**關鍵字模式**（同時比對標籤與標題），沒上標籤的資料也搜得到。
 
+## 檔期（Campaign）與判讀引擎
+
+**檔期主檔** `store.campaigns`。各筆資料沿用既有的 `campaign` 欄位（存**檔期名稱**），
+所以既有的 Campaign 成果看板不必改就吃得到。改檔期名稱時 `saveCampaign()` 會一併搬移歸屬。
+選檔期會透過 `inheritCampaignTags()` 自動帶入檔期標籤——這是減少重複填寫的核心。
+
+**判讀引擎** `buildInsightFacts(kind, ym)` 產出事實表；所有數字都在這裡算完。
+
+- 一律用**中位數**比較，平均會被爆款拉歪
+- 組間差異用 `_permTestMedian()` 置換檢定（樣本小又偏態，不能用 t 檢定）
+- `p < 0.05` 才標 `confirmed`，否則降級成 `observed`，**永遠不寫成結論**
+- 之後接 AI 時，**AI 只讀事實表，不得自己算任何數字**——否則會生出不存在的數字
+
+`exportExecPptx()` 只讀事實表產生簡報，沿用 `KTGH_LOGO` 與既有 PPT 樣式。
+
 ## 待辦
 
 - [x] P0 止血：Drive JSON 主資料流、容量偵測、停用 GET 寫入（v4）
 - [x] 跨管道標籤：關鍵字自動補標籤、批次上標籤、匯入帶標籤、關鍵字反查、標籤管理報表
+- [x] 檔期主檔 + 主管簡報（自動判讀→一鍵 PPT）
 - [ ] P1 匯入改造：欄位對應彈窗 + Metricool preset + 互動數拆細
 - [ ] 標籤待補：LINE 貼文表單改掉 6 個 prompt；KOL 納入跨管道統計
 - [ ] P2 AI 大腦：`ktgh-hub-ai` Worker（沿用影音企劃中心的 `chat()` 轉接器，Gemini 免費層）
