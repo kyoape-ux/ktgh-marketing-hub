@@ -1260,7 +1260,6 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
               <col style="width:96px">   <!-- 圖片風格 -->
               <col style="width:76px"><col style="width:66px"><col style="width:66px">
               <col style="width:74px"><col style="width:74px">
-              <col style="width:44px">   <!-- 連結 -->
               <col style="width:112px">  <!-- 操作 -->
             </colgroup>
             <thead>
@@ -1274,7 +1273,6 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
                 <th>互動</th>
                 <th title="總點擊 ÷ 觸及">點擊率%</th>
                 <th title="（心情+留言+分享）÷ 觸及">互動率%</th>
-                <th>連結</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -4770,7 +4768,12 @@ function renderPostsList() {
     return `<tr>
       <td class="text-mono" style="white-space:nowrap;">${p.date}</td>
       <td style="line-height:1.45;font-size:12.5px;">
-        <div style="overflow-wrap:anywhere;">${p.title}</div>
+        <div style="overflow-wrap:anywhere;">${p.url
+          ? `<a href="${p.url}" target="_blank" rel="noopener" title="在 Facebook 開啟這篇貼文"
+               style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--border);"
+               onmouseover="this.style.color='var(--brand)';this.style.borderBottomColor='var(--brand)';"
+               onmouseout="this.style.color='inherit';this.style.borderBottomColor='var(--border)';">${p.title}</a>`
+          : `<span title="這篇沒有貼文連結（重新匯入來源檔可補上）">${p.title}</span>`}</div>
         <div style="margin-top:5px;">${tagCellHtml('posts', i, p.tags)}</div>
       </td>
       <td>${catBadge(p.cat)}</td>
@@ -4780,13 +4783,12 @@ function renderPostsList() {
       <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
       <td class="text-mono">${ctr}%</td>
       <td class="text-mono">${er}%</td>
-      <td>${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--brand);display:inline-flex;align-items:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>` : '—'}</td>
       <td style="white-space:nowrap;">
         <button class="action-btn edit" onclick="openPostModal(${i})">編輯</button>
         <button class="action-btn del" onclick="deletePost(${i})" style="margin-left:4px;">刪除</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="11"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><p>暫無資料</p></div></td></tr>';
+  }).join('') || '<tr><td colspan="10"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><p>暫無資料</p></div></td></tr>';
 }
 
 function phaseBadge(phase) {
