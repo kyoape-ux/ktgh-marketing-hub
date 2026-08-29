@@ -93,7 +93,14 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 ## 兩種來源格式
 
 **Meta 後台匯出（xlsx，中文欄名）**——觸及完整，但沒有貼文連結以外的明細。
-> ★ **發佈時間是美西時區，不是台北時間。** 實測同一篇貼文 FB 後台寫 07-01 03:00、
+> ★ **時區依來源自動判斷**（`_analyzeRowsAndOpenMappingModal` 設 `_importTZ`）：
+> 有「發佈時間」中文欄 = Meta 後台 → `pacific`（+15 小時）；
+> 檔名是 `facebook-/instagram-/youtube-…` = Metricool → `taipei`（不換算）。
+> **預設是 taipei**，只有確定是 Meta 後台才換算——判斷錯會讓整批日期差一天。
+> `_serialToDateStr()` 在 taipei 模式必須直接取 UTC 牆上日期，
+> **不可以再走 Intl 時區轉換**，否則會被 +8 小時推到隔天。
+>
+> ★ **Meta 後台的發佈時間是美西時區，不是台北時間。** 實測同一篇貼文 FB 後台寫 07-01 03:00、
 > Metricool（台北）寫 07-01 18:00，固定差 15 小時。台北 00:00–15:00 發的貼文
 > 直接取序號日期會少一天。`_serialToDateStr()` 負責換算，`_importTZ` 可切換。
 > 讀 xlsx 時**不可用 `cellDates:true`**，那會先轉成瀏覽器本地時區的 Date，換算就套不上。
@@ -107,6 +114,13 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 否則「粉絲專頁名稱」會因為含有「名稱」而搶走 title。
 一個系統欄位只能被一個來源欄位認領（先出現的贏），明細欄如
 `Reactions - like`、`Reach (Organic)`、`日期`（值是「總期間」）會自動略過。
+
+> ★ **FB Reels 歸「貼文」不歸「影片庫」**：`facebook-reels_*.csv` 判成 fb 類型，
+> 存成 `type='影片'` + `img_type='Reels'`。影片庫留給 YT / IG / TikTok。
+> ★ `typeBadge()` 沒有值時顯示「未標示」，**不可以 fallback 成「相片」**——
+> 那會把 Reels 和影片謊報成相片。
+> ★ `_openImportMappingModal()` 每次都要先 `document.querySelectorAll('#importMapModal').forEach(el=>el.remove())`，
+> 否則一次拖多檔時 DOM 會有多組同 id 的 `impMap_N`，欄位對應整個錯位。
 
 ## 跨管道標籤
 

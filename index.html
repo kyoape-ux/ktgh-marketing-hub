@@ -4707,7 +4707,12 @@ function typeBadge(type, imgType) {
     '相片':      { cls:'badge-purple', icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z', label:'相片' },
     '影片':      { cls:'badge-blue',   icon:'M15 10l4.553-2.069A1 1 0 0 1 21 8.82v6.36a1 1 0 0 1-1.447.89L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z', label:'影片' },
   };
-  const c = cfg[it] || cfg['相片'];
+  // ★ 沒有值就誠實顯示「未標示」。原本 fallback 到 cfg['相片']，
+  //   會讓 Reels 或影片被寫成相片——那是憑空捏造資料。
+  if (!it) {
+    return '<span class="badge" style="background:#F1F5F9;color:#64748B;border:1px dashed #CBD5E1;">未標示</span>';
+  }
+  const c = cfg[it] || { cls:'badge-purple', icon:cfg['相片'].icon, label:String(it) };
   return `<span class="badge ${c.cls}" style="display:inline-flex;align-items:center;gap:3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="${c.icon}"/></svg> ${c.label}</span>`;
 }
 
@@ -5268,9 +5273,10 @@ function handleFileUpload(input) {
           date:   dateStr,
           title,
           type:   (get('貼文類型')||'').includes('影片') ? '影片' : '相片',
+          // 圖片風格：影片可以推斷，相片分不出「社群圖文／實拍」——留空由人補，不要預設
           img_type: (get('貼文類型')||'').toLowerCase().includes('reel') ? 'Reels'
                   : (get('貼文類型')||'').includes('影片') ? '一般影片'
-                  : '社群圖文',   // FB export 無法區分實拍/美編，預設社群圖文，可手動改
+                  : '',
           cat:    autoTag(title),
           reach:  toInt(get('觸及人數')),
           click:  toInt(get('總點擊次數')),
@@ -9864,6 +9870,7 @@ const SMART_FIELD_DICT = {
                 'postlink','post link','permalink','永久連結','reel link','post url'],
   tags:        ['tags','標籤','category','類別','類型','topic','tag','標籤(逗號)','分類'],
   note:        ['note','備註','description','說明','remarks','memo','補充'],
+  img_type:    ['img_type','圖片風格','素材形式','素材類型','版位'],
   // 影片相關
   platform:    ['platform','平台','channel','管道','發布平台','社群平台'],
   // ★ 這裡原本包含 '觸及','reach','曝光'，導致 Reach 欄位被判成影片的觀看數，
@@ -9976,6 +9983,15 @@ function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
     { type:'seo',   score: 0, label:'SEO 文章', requiredFields:['date','title','keyword'] },
   ];
 
+  // ── 時區自動判斷 ──────────────────────────────────────
+  // Meta 後台匯出（有「發佈時間」這個中文欄）的時間是美西，要 +15 小時換成台北。
+  // Metricool 匯出（facebook-/instagram-/youtube-… 開頭）本來就是台北時間，不可再換。
+  // 判斷錯會讓整批日期差一天，所以預設「不換算」，只有確定是 Meta 後台才換。
+  const looksMetaBackend = inputCols.some(c => /^發佈時間$/.test(String(c).trim()))
+                        && inputCols.some(c => /^(觸及人數|心情、留言和分享次數|永久連結)$/.test(String(c).trim()));
+  const looksMetricool = /^(facebook|instagram|youtube|tiktok|threads)-/i.test(filename);
+  _importTZ = (looksMetaBackend && !looksMetricool) ? 'pacific' : 'taipei';
+
   // 自動匹配每個輸入欄位
   const autoMap = {};
   const platformDetected = new Set();
@@ -10039,8 +10055,10 @@ function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
   if (platformDetected.size >= 1) candidates[0].score += platformDetected.size * 2;
   // 檔名輔助
   // Metricool 匯出的檔名很規律，優先用它判型（比欄位猜測可靠得多）
-  if (/^facebook-posts/i.test(filename))                    candidates[1].score += 20;
-  if (/^(facebook-reels|instagram-|youtube-|tiktok-)/i.test(filename)) candidates[0].score += 20;
+  // FB Reels 是粉專貼文的一種形式（系統的「圖片風格」就有 Reels），
+  // 應該進貼文庫而不是影片庫；影片庫留給 YT / IG / TikTok。
+  if (/^facebook-(posts|reels)/i.test(filename))            candidates[1].score += 20;
+  if (/^(instagram-|youtube-|tiktok-|threads-)/i.test(filename)) candidates[0].score += 20;
   if (/影片|video|reels|youtube/i.test(filename)) candidates[0].score += 5;
   if (/event|活動|講座/i.test(filename)) candidates[2].score += 5;
   if (/media|媒體|新聞|報導/i.test(filename)) candidates[3].score += 5;
@@ -10065,7 +10083,7 @@ function _openImportMappingModal(ctx) {
   // 對 video 類型，systemFields 是 'date,title,tags,note'，加上平台特殊
   const sysFieldOpts = {
     video: ['date','title','platform','views','engage','duration','tags','url','note'],
-    fb:    ['date','title','cat','reach','click','engage','likes','comments','shares','impressions','engage_rate','spend','tags','url','note'],
+    fb:    ['date','title','type','img_type','cat','reach','click','engage','likes','comments','shares','impressions','engage_rate','spend','tags','url','note'],
     event: ['date','title','type','campus','reg','attend','speaker','sat','reach','budget','expense','tags','note'],
     media: ['date','mediaName','mediaType','section','title','nature','reach','url','tags','note'],
     seo:   ['date','dept','title','keyword','rank','searchVolume','prevRank','prevSearchVolume','url','tags','note'],
@@ -10075,7 +10093,8 @@ function _openImportMappingModal(ctx) {
   // 每個輸入欄位給選單
   // 選單顯示中文，不然同事看到 date / reach / engage 根本不知道是什麼
   const FIELD_LABEL = {
-    date:'發佈日期', title:'標題／內容', cat:'內容分類', type:'類型',
+    date:'發佈日期', title:'標題／內容', cat:'內容分類',
+    type:'貼文類型（相片／影片）', img_type:'圖片風格（社群圖文／實拍／Reels）',
     reach:'觸及人數', impressions:'曝光次數', click:'總點擊次數', spend:'廣告花費',
     engage_rate:'互動率 %（不是次數）',
     engage:'互動數（心情+留言+分享）', likes:'心情／按讚數', comments:'留言數', shares:'分享數',
@@ -10130,8 +10149,8 @@ function _openImportMappingModal(ctx) {
     +   '<b>系統判斷類型：</b>'+best.label+'（匹配分數最高）'
     +   '<div style="margin-top:8px;font-size:12px;">發佈時間時區：'
     +     '<select id="impTZ" onchange="_importTZ=this.value;_renderImportQualityNote();" style="padding:3px 8px;border-radius:6px;border:1px solid var(--border);font-size:12px;">'
-    +       '<option value="pacific">美西（Meta 後台匯出的預設，會 +15 小時換成台北）</option>'
-    +       '<option value="taipei">檔案已經是台北時間（Metricool 等）</option>'
+    +       '<option value="pacific"' + (_importTZ==='pacific'?' selected':'') + '>美西（Meta 後台匯出，會 +15 小時換成台北）</option>'
+    +       '<option value="taipei"' + (_importTZ==='taipei'?' selected':'') + '>檔案已經是台北時間（Metricool 等）</option>'
     +     '</select>'
     +     '<span style="color:var(--text-muted);margin-left:8px;">只影響 Excel 日期序號；已經是文字日期的不受影響。</span>'
     +   '</div>'
@@ -10154,6 +10173,11 @@ function _openImportMappingModal(ctx) {
     +   '<button class="btn btn-outline" onclick="_previewMappedRows()">預覽前 3 筆</button>'
     +   '<button class="btn btn-primary" onclick="_confirmMappingImport()">確認匯入</button>'
     + '</div></div></div>';
+  // ★ 先清掉上一個對應彈窗。每次都 appendChild 一個新的 #importMapModal，
+  //   舊的沒移除的話 DOM 裡會有多組同 id 的 impMap_N，
+  //   getElementById 只會抓到第一個（前一個檔案的），欄位對應就整個錯位。
+  //   一次拖多個檔案時必定踩到。
+  document.querySelectorAll('#importMapModal').forEach(el => el.remove());
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   document.body.appendChild(tmp.firstElementChild);
@@ -10273,6 +10297,21 @@ function _applyMapping(silent) {
         else if (m.systemField === 'tags') obj.tags = String(v||'').split(/[,;；，]/).map(s=>s.trim()).filter(Boolean);
         else obj[m.systemField] = String(v||'').trim();
       });
+      // 貼文形式：來源檔的寫法不一，統一成系統用語
+      //  · Metricool 是英文 album / photo / video / reel
+      //  · Meta 後台是中文「相片」「影片」（分不出 Reels）
+      //  · Reels 在 Metricool 是獨立的匯出檔 facebook-reels_*.csv，用檔名判定
+      const rawType = String(obj.type || '').trim();
+      const isReelFile = /reels?/i.test(String((ctx && ctx.filename) || ''));
+      if (isReelFile || /^reel/i.test(rawType)) {
+        obj.type = '影片'; obj.img_type = 'Reels';
+      } else if (/^video$/i.test(rawType) || rawType.includes('影片')) {
+        obj.type = '影片'; if (!obj.img_type) obj.img_type = '一般影片';
+      } else if (/^(album|photo)$/i.test(rawType) || rawType.includes('相片')) {
+        obj.type = '相片';
+        // 圖片風格（社群圖文／實拍）來源檔看不出來，留空由人補，不要亂猜
+      }
+
       // Metricool 把互動拆成 Reactions / Comments / Shares 三欄，系統的 engage 是三者相加。
       // 有拆細欄位時一律以相加為準——來源檔的 Engagement 欄是率不是次數，不能用。
       const sum = (obj.likes||0) + (obj.comments||0) + (obj.shares||0);
@@ -10324,19 +10363,24 @@ function _isExcelSerial(v) {
 function _serialToDateStr(serial, tz) {
   const n = Number(serial);
   if (!Number.isFinite(n)) return '';
-  // 先把序號當成 UTC 牆上時間
-  const asIfUTC = new Date(Math.round((n - 25569) * 86400000));
-  if (isNaN(asIfUTC)) return '';
-  let instant = asIfUTC;
-  if ((tz || _importTZ) === 'pacific') {
-    // 判斷當時美西是夏令(PDT,-7)還是標準(PST,-8)
-    let abbr = 'PDT';
-    try {
-      abbr = new Intl.DateTimeFormat('en-US', { timeZone:'America/Los_Angeles', timeZoneName:'short' })
-        .formatToParts(asIfUTC).find(x => x.type === 'timeZoneName').value;
-    } catch(e) {}
-    instant = new Date(asIfUTC.getTime() + (abbr === 'PST' ? 8 : 7) * 3600000);
+  // 序號代表的是「牆上時間」，這裡用 UTC 當容器承載它（不代表它是 UTC 時刻）
+  const wall = new Date(Math.round((n - 25569) * 86400000));
+  if (isNaN(wall)) return '';
+  const z = x => String(x).padStart(2, '0');
+
+  if ((tz || _importTZ) !== 'pacific') {
+    // 檔案本身就是台北時間 → 直接取牆上日期，不可以再做任何時區換算，
+    // 否則會被 +8 小時推到隔天。
+    return wall.getUTCFullYear() + '-' + z(wall.getUTCMonth()+1) + '-' + z(wall.getUTCDate());
   }
+
+  // 美西牆上時間 → 先還原成真正的 UTC 時刻，再轉成台北日期
+  let abbr = 'PDT';
+  try {
+    abbr = new Intl.DateTimeFormat('en-US', { timeZone:'America/Los_Angeles', timeZoneName:'short' })
+      .formatToParts(wall).find(x => x.type === 'timeZoneName').value;
+  } catch(e) {}
+  const instant = new Date(wall.getTime() + (abbr === 'PST' ? 8 : 7) * 3600000);
   try {
     return new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Taipei',
       year:'numeric', month:'2-digit', day:'2-digit' }).format(instant);
