@@ -1252,11 +1252,21 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           </div>
         </div>
         <div class="table-wrap">
-          <table>
+          <table style="table-layout:fixed;width:100%;min-width:1040px;">
+            <colgroup>
+              <col style="width:92px">   <!-- 發佈日期：固定寬度，日期不換行 -->
+              <col>                      <!-- 標題摘要（含標籤）：吃掉剩餘空間 -->
+              <col style="width:88px">   <!-- 內容標籤 -->
+              <col style="width:96px">   <!-- 圖片風格 -->
+              <col style="width:76px"><col style="width:66px"><col style="width:66px">
+              <col style="width:74px"><col style="width:74px">
+              <col style="width:44px">   <!-- 連結 -->
+              <col style="width:112px">  <!-- 操作 -->
+            </colgroup>
             <thead>
               <tr>
                 <th>發佈日期</th>
-                <th>標題摘要</th>
+                <th>標題摘要／標籤</th>
                 <th>內容標籤</th>
                 <th>圖片風格</th>
                 <th>觸及</th>
@@ -1264,7 +1274,6 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
                 <th>互動</th>
                 <th title="總點擊 ÷ 觸及">點擊率%</th>
                 <th title="（心情+留言+分享）÷ 觸及">互動率%</th>
-                <th>標籤</th>
                 <th>連結</th>
                 <th>操作</th>
               </tr>
@@ -4713,7 +4722,8 @@ function typeBadge(type, imgType) {
   // ★ 沒有值就誠實顯示「未標示」。原本 fallback 到 cfg['相片']，
   //   會讓 Reels 或影片被寫成相片——那是憑空捏造資料。
   if (!it) {
-    return '<span class="badge" style="background:#F1F5F9;color:#64748B;border:1px dashed #CBD5E1;">未標示</span>';
+    return '<span class="badge" title="來源檔沒有提供貼文形式，或匯入時沒對應到「貼文類型」欄位。重新匯入來源檔，或按「編輯」手動選擇即可補上。"'
+      + ' style="background:#F1F5F9;color:#64748B;border:1px dashed #CBD5E1;cursor:help;">待補</span>';
   }
   const c = cfg[it] || { cls:'badge-purple', icon:cfg['相片'].icon, label:String(it) };
   return `<span class="badge ${c.cls}" style="display:inline-flex;align-items:center;gap:3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="${c.icon}"/></svg> ${c.label}</span>`;
@@ -4758,8 +4768,11 @@ function renderPostsList() {
     const ctr = p.reach ? ((p.click||0)/p.reach*100).toFixed(2) : '0.00';
     const er  = p.reach ? ((p.engage||0)/p.reach*100).toFixed(2) : '0.00';
     return `<tr>
-      <td class="text-mono">${p.date}</td>
-      <td style="max-width:220px;line-height:1.4;font-size:12.5px">${p.title}</td>
+      <td class="text-mono" style="white-space:nowrap;">${p.date}</td>
+      <td style="line-height:1.45;font-size:12.5px;">
+        <div style="overflow-wrap:anywhere;">${p.title}</div>
+        <div style="margin-top:5px;">${tagCellHtml('posts', i, p.tags)}</div>
+      </td>
       <td>${catBadge(p.cat)}</td>
       <td>${typeBadge(p.type, p.img_type)}${phaseBadge(p.phase)}</td>
       <td class="text-mono highlight">${(p.reach||0).toLocaleString()}</td>
@@ -4767,14 +4780,13 @@ function renderPostsList() {
       <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
       <td class="text-mono">${ctr}%</td>
       <td class="text-mono">${er}%</td>
-      <td>${tagCellHtml('posts', i, p.tags)}</td>
       <td>${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--brand);display:inline-flex;align-items:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>` : '—'}</td>
       <td style="white-space:nowrap;">
         <button class="action-btn edit" onclick="openPostModal(${i})">編輯</button>
         <button class="action-btn del" onclick="deletePost(${i})" style="margin-left:4px;">刪除</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="12"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><p>暫無資料</p></div></td></tr>';
+  }).join('') || '<tr><td colspan="11"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><p>暫無資料</p></div></td></tr>';
 }
 
 function phaseBadge(phase) {
@@ -13053,7 +13065,7 @@ function tagCellHtml(chKey, idx, tags) {
            ';border:1px solid ' + c + '44;border-radius:9px;font-size:10.5px;margin:1px 2px 1px 0;white-space:nowrap;">' + _tgEsc(t) + '</span>';
   }).join('');
   const moreTxt = more > 0 ? '<span style="font-size:10.5px;color:var(--text-muted);">+' + more + '</span>' : '';
-  return '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px;max-width:180px;">' + chips + moreTxt +
+  return '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:3px;">' + chips + moreTxt +
     '<button class="action-btn edit" data-perm="edit" onclick="quickTagRow(\'' + chKey + '\',' + idx + ')" ' +
     'title="設定標籤" style="padding:1px 7px;font-size:11px;margin-left:2px;">' + ((tags||[]).length ? '改' : '＋') + '</button></div>';
 }
