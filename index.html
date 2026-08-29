@@ -1176,7 +1176,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
                 <th>觸及人數</th>
                 <th>總點擊</th>
                 <th>互動</th>
-                <th>互動率</th>
+                <th title="總點擊 ÷ 觸及">點擊率</th>
+                <th title="（心情+留言+分享）÷ 觸及">互動率</th>
               </tr>
             </thead>
             <tbody id="topPostsTbody">
@@ -1261,7 +1262,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
                 <th>觸及</th>
                 <th>點擊</th>
                 <th>互動</th>
-                <th>互動率%</th>
+                <th title="總點擊 ÷ 觸及">點擊率%</th>
+                <th title="（心情+留言+分享）÷ 觸及">互動率%</th>
                 <th>標籤</th>
                 <th>連結</th>
                 <th>操作</th>
@@ -4672,8 +4674,9 @@ function renderOverview() {
       <td class="text-mono">${(p.click||0).toLocaleString()}</td>
       <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
       <td class="text-mono">${ctr}%</td>
+      <td class="text-mono">${er}%</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="9"><div class="empty"><p>暫無貼文資料，請匯入 FB 數據或新增貼文</p></div></td></tr>';
+  }).join('') || '<tr><td colspan="10"><div class="empty"><p>暫無貼文資料，請匯入 FB 數據或新增貼文</p></div></td></tr>';
 }
 
 function monthLabel(m) {
@@ -4751,7 +4754,9 @@ function renderPostsList() {
   _postsFilteredRows = sorted.map(({ p }) => p);
 
   document.getElementById('postsListTbody').innerHTML = sorted.map(({ p, i }) => {
-    const rate = p.reach ? ((p.click||0)/p.reach*100).toFixed(2) : '0.00';
+    // ★ 這兩個是不同的指標。原本只算點擊率卻標成「互動率」，會誤導判讀。
+    const ctr = p.reach ? ((p.click||0)/p.reach*100).toFixed(2) : '0.00';
+    const er  = p.reach ? ((p.engage||0)/p.reach*100).toFixed(2) : '0.00';
     return `<tr>
       <td class="text-mono">${p.date}</td>
       <td style="max-width:220px;line-height:1.4;font-size:12.5px">${p.title}</td>
@@ -4760,7 +4765,8 @@ function renderPostsList() {
       <td class="text-mono highlight">${(p.reach||0).toLocaleString()}</td>
       <td class="text-mono">${(p.click||0).toLocaleString()}</td>
       <td class="text-mono">${(p.engage||0).toLocaleString()}</td>
-      <td class="text-mono">${rate}%</td>
+      <td class="text-mono">${ctr}%</td>
+      <td class="text-mono">${er}%</td>
       <td>${tagCellHtml('posts', i, p.tags)}</td>
       <td>${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--brand);display:inline-flex;align-items:center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>` : '—'}</td>
       <td style="white-space:nowrap;">
@@ -4768,7 +4774,7 @@ function renderPostsList() {
         <button class="action-btn del" onclick="deletePost(${i})" style="margin-left:4px;">刪除</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="11"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><p>暫無資料</p></div></td></tr>';
+  }).join('') || '<tr><td colspan="12"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><p>暫無資料</p></div></td></tr>';
 }
 
 function phaseBadge(phase) {
