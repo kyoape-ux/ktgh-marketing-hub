@@ -9983,14 +9983,7 @@ function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
     { type:'seo',   score: 0, label:'SEO 文章', requiredFields:['date','title','keyword'] },
   ];
 
-  // ── 時區自動判斷 ──────────────────────────────────────
-  // Meta 後台匯出（有「發佈時間」這個中文欄）的時間是美西，要 +15 小時換成台北。
-  // Metricool 匯出（facebook-/instagram-/youtube-… 開頭）本來就是台北時間，不可再換。
-  // 判斷錯會讓整批日期差一天，所以預設「不換算」，只有確定是 Meta 後台才換。
-  const looksMetaBackend = inputCols.some(c => /^發佈時間$/.test(String(c).trim()))
-                        && inputCols.some(c => /^(觸及人數|心情、留言和分享次數|永久連結)$/.test(String(c).trim()));
-  const looksMetricool = /^(facebook|instagram|youtube|tiktok|threads)-/i.test(filename);
-  _importTZ = (looksMetaBackend && !looksMetricool) ? 'pacific' : 'taipei';
+  _detectImportTZ(inputCols, filename);
 
   // 自動匹配每個輸入欄位
   const autoMap = {};
@@ -10195,7 +10188,8 @@ function _refreshMappingDropdowns() {
   // 重 set ctx.best.type
   ctx.best = ctx.candidates.find(c => c.type === newType) || ctx.best;
   // 重新打開 modal（先移除舊的）
-  document.getElementById('importMapModal').remove();
+  const _old = document.getElementById('importMapModal');
+  if (_old) _old.remove();
   _openImportMappingModal(ctx);
   // 還原使用者選擇
   setTimeout(() => {
@@ -10389,6 +10383,18 @@ function _serialToDateStr(serial, tz) {
   }
 }
 
+// 依來源判斷時區。Meta 後台匯出（有「發佈時間」中文欄）是美西，要 +15 小時換成台北；
+// Metricool 匯出（facebook-/instagram-/youtube-… 開頭）本來就是台北，不可再換。
+// 判斷錯會讓整批日期差一天，所以預設「不換算」，只有確定是 Meta 後台才換。
+function _detectImportTZ(inputCols, filename) {
+  const cols = (inputCols || []).map(c => String(c).trim());
+  const looksMetaBackend = cols.some(c => /^發佈時間$/.test(c))
+                        && cols.some(c => /^(觸及人數|心情、留言和分享次數|永久連結)$/.test(c));
+  const looksMetricool = /^(facebook|instagram|youtube|tiktok|threads)-/i.test(String(filename||''));
+  _importTZ = (looksMetaBackend && !looksMetricool) ? 'pacific' : 'taipei';
+  return _importTZ;
+}
+
 function _normDate(d) {
   // Excel 序號（Meta 後台匯出的發佈時間就是這種）
   if (_isExcelSerial(d)) return _serialToDateStr(d);
@@ -10564,7 +10570,10 @@ function _confirmMappingImport() {
     localStorage.setItem('ktgh_import_tpl_v1', JSON.stringify(templates));
   }
 
-  document.getElementById('importMapModal').remove();
+  // 自動套用模板時沒有開過對應視窗，這裡會是 null——不加保護就會拋
+  // 「Cannot read properties of null (reading 'remove')」而整批匯入失敗。
+  const _mapModal = document.getElementById('importMapModal');
+  if (_mapModal) _mapModal.remove();
   showToast('✓ 已匯入：新增 '+added+'、更新 '+updated+' 筆');
 
   // 更新匯入 log
@@ -10934,6 +10943,7 @@ function _processQuickImportFile(file) {
           if (autoTpl && autoTpl.matched) {
             // 完全相同欄位 → 直接寫入 store，不開 modal
             window._importCtx = { rows, filename, inputCols: Object.keys(rows[0]||{}).map(k=>k.replace(/^﻿/,'').trim()) };
+            _detectImportTZ(window._importCtx.inputCols, filename);   // 自動套用也要判時區，否則日期會差一天
             // 把 mapping 寫入 DOM-style 暫存（用 hidden select 模擬）
             const tmpDiv = document.createElement('div');
             tmpDiv.style.display = 'none';
@@ -11061,6 +11071,7 @@ function _processQuickImportFile(file) {
           const autoTpl = _tryAutoApplyTemplate(bestRows, filename);
           if (autoTpl && autoTpl.matched) {
             window._importCtx = { rows: bestRows, filename, inputCols: Object.keys(bestRows[0]||{}).map(k=>k.replace(/^﻿/,'').trim()) };
+            _detectImportTZ(window._importCtx.inputCols, filename);   // 自動套用也要判時區，否則日期會差一天
             const tmpDiv = document.createElement('div'); tmpDiv.style.display = 'none';
             window._importCtx.inputCols.forEach((col, i) => {
               const opt = document.createElement('select'); opt.id = 'impMap_'+i;

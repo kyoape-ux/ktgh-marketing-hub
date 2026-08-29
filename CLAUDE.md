@@ -119,6 +119,10 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 > 存成 `type='影片'` + `img_type='Reels'`。影片庫留給 YT / IG / TikTok。
 > ★ `typeBadge()` 沒有值時顯示「未標示」，**不可以 fallback 成「相片」**——
 > 那會把 Reels 和影片謊報成相片。
+> ★ **自動套用模板（`_tryAutoApplyTemplate`）那條路不會開對應視窗**，
+> 所以 `_confirmMappingImport()` 移除 `#importMapModal` 前一定要判 null，
+> 否則第二次匯入相同格式就會爆「Cannot read properties of null」。
+> 同理，那條路也要自己呼叫 `_detectImportTZ()`，不然時區判斷會沿用上次的值。
 > ★ `_openImportMappingModal()` 每次都要先 `document.querySelectorAll('#importMapModal').forEach(el=>el.remove())`，
 > 否則一次拖多檔時 DOM 會有多組同 id 的 `impMap_N`，欄位對應整個錯位。
 
