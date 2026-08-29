@@ -5219,9 +5219,11 @@ function handleFileUpload(input) {
   reader.onload = function(e) {
     try {
       const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data, { type: 'array', cellDates: true });
+      // ★ 不要用 cellDates —— 那會把序號轉成瀏覽器本地時區的 Date，
+      //   美西→台北的換算就套不上去了。保留原始序號交給 _normDate 處理。
+      const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
 
       const existingKeys = new Set(
         store.posts.map(p => (p.date || '') + '|' + (p.title || '').slice(0, 20))
@@ -5246,19 +5248,11 @@ function handleFileUpload(input) {
         if (!title) return;
 
         // Parse date
-        let rawDate = get('發佈時間');
-        let dateStr = '';
-        if (rawDate) {
-          const d = new Date(rawDate);
-          if (!isNaN(d)) {
-            dateStr = d.toISOString().slice(0, 10);
-          } else {
-            // Try common TW formats: 2026/3/1 or 2026-3-1
-            const m = rawDate.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
-            if (m) dateStr = `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
-          }
-        }
-        if (!dateStr) return;
+        // ★ 原本用 new Date(...).toISOString() 取日期，那是 UTC，
+        //   台北時間早上發的貼文會變成前一天。統一走 _normDate（含美西→台北換算）。
+        const rawDate = row['發佈時間'] !== undefined ? row['發佈時間'] : get('發佈時間');
+        const dateStr = _normDate(rawDate);
+        if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
 
         const dedupeKey = dateStr + '|' + title.slice(0, 20);
         if (existingKeys.has(dedupeKey)) { skipped.push(title); return; }
@@ -5290,7 +5284,8 @@ function handleFileUpload(input) {
         showToast('欄位名稱不是 FB 中文後台格式，改用欄位對應…');
         try {
           const ws2 = wb.Sheets[wb.SheetNames[0]];
-          const raw = XLSX.utils.sheet_to_json(ws2, { defval:'', raw:false });
+          // raw:true 保留 Excel 序號；raw:false 會變成 "7/1/26 19:00" 字串，時區資訊就丟了
+          const raw = XLSX.utils.sheet_to_json(ws2, { defval:'', raw:true });
           if (raw.length && _analyzeRowsAndOpenMappingModal(raw, (file && file.name) || 'import.csv', 'xlsx')) return;
         } catch(e2) { console.error(e2); }
         showToast('未找到可解析的貼文資料，請確認檔案內容');
@@ -9853,7 +9848,10 @@ async function handleQuickImportFiles(files) {
 // ═══════════════════════════════════════════
 const SMART_FIELD_DICT = {
   // 通用
-  date:        ['date','日期','發布日期','上線日','上線日期','刊登日','publish_date','publishdate','published_at','刊登','日期(yyyy-mm)','日期(yyyy/mm)','日期(yyyy-mm-dd)','發稿日','日'],
+  // ★「發佈時間」要排在「日期」前面被認出來：Meta 後台匯出同時有這兩欄，
+  //   而「日期」那欄的值是「總期間」之類的標籤，不是真的日期。
+  date:        ['發佈時間','發布時間','發文時間','貼文時間','posted','post time','publish time',
+                'date','日期','發布日期','上線日','上線日期','刊登日','publish_date','publishdate','published_at','刊登','日期(yyyy-mm)','日期(yyyy/mm)','日期(yyyy-mm-dd)','發稿日','日'],
   title:       ['title','標題','影片標題','名稱','主題','影片名稱','影片名','video_title','name','文章標題','貼文標題','報導標題','活動名稱','題目',
                 'content','貼文內容','內容','message','說明','caption'],
   dept:        ['dept','科別','department','部門','負責科別','所屬科別','專科','科'],
@@ -9884,13 +9882,13 @@ const SMART_FIELD_DICT = {
   shares:      ['shares','分享','分享數','share','分享次數','shared','shares - total'],
   impressions: ['impressions','曝光','曝光數','曝光次數','views (impressions)'],
   spend:       ['spent','spend','花費','廣告花費','投放金額','ad_spend','cost'],
-  cat:         ['cat','分類','category','內容類型','內容分類','貼文類型','文章類型'],
+  cat:         ['cat','分類','category','內容類型','內容分類','文章類型'],
   // 活動
   reg:         ['reg','報名','報名人數','registration','sign_up','報名數','預約人數'],
   attend:      ['attend','出席','出席人數','attendance','實到人數','到場人數','出席數'],
   sat:         ['sat','滿意度','滿意','satisfaction','評分'],
   campus:      ['campus','院區','分院','location'],
-  type:        ['type','類型','活動類型','event_type','分類','種類'],
+  type:        ['type','類型','活動類型','event_type','種類','貼文類型','媒體形式'],
   speaker:     ['speaker','講者','主講','主講者','speaker_name','講師'],
   budget:      ['budget','預算','預算金額','planned_cost'],
   expense:     ['expense','實際支出','支出','支出金額','實際花費','cost'],
@@ -9977,7 +9975,23 @@ function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
   // 自動匹配每個輸入欄位
   const autoMap = {};
   const platformDetected = new Set();
+
+  // 這些是匯出檔的附帶欄位，不是成效資料，直接排除免得誤搶
+  const META_COL = /^(貼文編號|粉絲專頁編號|粉絲專頁名稱|多文發佈貼文|是分享的貼文|語言|贊助內容狀態|說明文字類型|資料留言|時間長度（秒）|post ?id|page ?id|id|thumbnail|image)$/i;
+
+  // 先做完全相符，再做部分相符
+  const exactOf = col => {
+    const norm = _normalizeFieldName(col);
+    for (const f of Object.keys(SMART_FIELD_DICT)) {
+      if ((SMART_FIELD_DICT[f]||[]).some(sy => _normalizeFieldName(sy) === norm)) return f;
+    }
+    return null;
+  };
+  const preTaken = new Set();
+  inputCols.forEach(col => { if (!META_COL.test(String(col).trim())) { const e = exactOf(col); if (e) preTaken.add(e); } });
+
   inputCols.forEach(col => {
+    if (META_COL.test(String(col).trim())) { autoMap[col] = { systemField: null }; return; }
     const platformField = _detectPlatformField(col);
     if (platformField) {
       autoMap[col] = { platform: platformField.platform, role: platformField.role };
@@ -9985,7 +9999,13 @@ function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
       candidates[0].score += 3; // video
       return;
     }
-    const sys = _guessSystemField(col);
+    const exact = exactOf(col);
+    // 只有完全相符、或這個欄位沒有別的欄位完全相符時，才接受部分相符的結果
+    let sys = exact;
+    if (!sys) {
+      const guess = _guessSystemField(col);
+      if (guess && !preTaken.has(guess)) sys = guess;
+    }
     if (sys) {
       autoMap[col] = { systemField: sys };
       // 累積每種類型分數
@@ -10104,6 +10124,13 @@ function _openImportMappingModal(ctx) {
     + '<div style="background:#EFF6FF;border-left:3px solid #1E40AF;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A;line-height:1.7;">'
     +   '<b>偵測到：</b>'+filename+' 共 '+rows.length+' 筆資料、'+inputCols.length+' 個欄位<br>'
     +   '<b>系統判斷類型：</b>'+best.label+'（匹配分數最高）'
+    +   '<div style="margin-top:8px;font-size:12px;">發佈時間時區：'
+    +     '<select id="impTZ" onchange="_importTZ=this.value;_renderImportQualityNote();" style="padding:3px 8px;border-radius:6px;border:1px solid var(--border);font-size:12px;">'
+    +       '<option value="pacific">美西（Meta 後台匯出的預設，會 +15 小時換成台北）</option>'
+    +       '<option value="taipei">檔案已經是台北時間（Metricool 等）</option>'
+    +     '</select>'
+    +     '<span style="color:var(--text-muted);margin-left:8px;">只影響 Excel 日期序號；已經是文字日期的不受影響。</span>'
+    +   '</div>'
     +   '<span id="impQualityNote"></span>'
     +   (platformDetected.size ? '<br><b>偵測到平台：</b>' + [...platformDetected].join('、') : '')
     + '</div>'
@@ -10276,7 +10303,47 @@ function _applyMapping(silent) {
   return results;
 }
 
+// ═══════════════════════════════════════════════════════════
+//  Meta 後台匯出的時間是「美西時區」，不是台北時間
+//  實測：同一篇貼文，FB 後台寫 07-01 03:00，Metricool（台北）寫 07-01 18:00，
+//  固定差 15 小時（PDT）。台北時間 00:00–15:00 發的貼文，直接取序號日期會少一天。
+//  再加上舊程式用 toISOString()（UTC）取日期，等於又推回去一次。
+// ═══════════════════════════════════════════════════════════
+let _importTZ = 'pacific';   // 'pacific' = Meta 後台預設；'taipei' = 檔案已是台北時間
+
+function _isExcelSerial(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 20000 && n < 80000 && String(v).trim() !== '';
+}
+
+// Excel 序號 → 台北日期 yyyy-mm-dd
+function _serialToDateStr(serial, tz) {
+  const n = Number(serial);
+  if (!Number.isFinite(n)) return '';
+  // 先把序號當成 UTC 牆上時間
+  const asIfUTC = new Date(Math.round((n - 25569) * 86400000));
+  if (isNaN(asIfUTC)) return '';
+  let instant = asIfUTC;
+  if ((tz || _importTZ) === 'pacific') {
+    // 判斷當時美西是夏令(PDT,-7)還是標準(PST,-8)
+    let abbr = 'PDT';
+    try {
+      abbr = new Intl.DateTimeFormat('en-US', { timeZone:'America/Los_Angeles', timeZoneName:'short' })
+        .formatToParts(asIfUTC).find(x => x.type === 'timeZoneName').value;
+    } catch(e) {}
+    instant = new Date(asIfUTC.getTime() + (abbr === 'PST' ? 8 : 7) * 3600000);
+  }
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Taipei',
+      year:'numeric', month:'2-digit', day:'2-digit' }).format(instant);
+  } catch(e) {
+    return instant.toISOString().slice(0,10);
+  }
+}
+
 function _normDate(d) {
+  // Excel 序號（Meta 後台匯出的發佈時間就是這種）
+  if (_isExcelSerial(d)) return _serialToDateStr(d);
   if (!d) return '';
   if (d instanceof Date && !isNaN(d)) {
     const z = n => String(n).padStart(2,'0');
@@ -10937,7 +11004,8 @@ function _processQuickImportFile(file) {
         let bestRows = []; let bestSheet = '';
         for (const sn of sheets) {
           const ws = wb.Sheets[sn];
-          const rows = XLSX.utils.sheet_to_json(ws, { defval:'', raw:false });
+          // raw:true 保留 Excel 序號，_normDate 才能做美西→台北換算
+          const rows = XLSX.utils.sheet_to_json(ws, { defval:'', raw:true });
           if (rows.length > bestRows.length) { bestRows = rows; bestSheet = sn; }
         }
         if (bestRows.length) {
