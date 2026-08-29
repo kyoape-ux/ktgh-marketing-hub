@@ -126,6 +126,9 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 一個系統欄位只能被一個來源欄位認領（先出現的贏），明細欄如
 `Reactions - like`、`Reach (Organic)`、`日期`（值是「總期間」）會自動略過。
 
+> ★ **Reels 從永久連結判定**：Meta 後台的「貼文類型」只有相片／影片，分不出 Reels，
+> 但 `facebook.com/reel/` 的連結分得出來。實測七月 28 筆，
+> 「連結含 /reel/」與「類型=影片」完全一致（28/28）。兩條匯入路徑都有做這個判定。
 > ★ **FB Reels 歸「貼文」不歸「影片庫」**：`facebook-reels_*.csv` 判成 fb 類型，
 > 存成 `type='影片'` + `img_type='Reels'`。影片庫留給 YT / IG / TikTok。
 > ★ `typeBadge()` 沒有值時顯示「未標示」，**不可以 fallback 成「相片」**——

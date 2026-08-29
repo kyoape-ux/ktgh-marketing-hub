@@ -5292,9 +5292,10 @@ function handleFileUpload(input) {
         parsed.push({
           date:   dateStr,
           title,
-          type:   (get('貼文類型')||'').includes('影片') ? '影片' : '相片',
-          // 圖片風格：影片可以推斷，相片分不出「社群圖文／實拍」——留空由人補，不要預設
-          img_type: (get('貼文類型')||'').toLowerCase().includes('reel') ? 'Reels'
+          type:   (get('貼文類型')||'').includes('影片') || /facebook\.com\/reel\//i.test(get('永久連結')) ? '影片' : '相片',
+          // 圖片風格：Meta 的「貼文類型」分不出 Reels，但永久連結的 /reel/ 分得出來。
+          //   相片則分不出「社群圖文／實拍」——留空由人補，不要預設。
+          img_type: (/facebook\.com\/reel\//i.test(get('永久連結')) || (get('貼文類型')||'').toLowerCase().includes('reel')) ? 'Reels'
                   : (get('貼文類型')||'').includes('影片') ? '一般影片'
                   : '',
           cat:    autoTag(title),
@@ -10317,7 +10318,11 @@ function _applyMapping(silent) {
       //  · Reels 在 Metricool 是獨立的匯出檔 facebook-reels_*.csv，用檔名判定
       const rawType = String(obj.type || '').trim();
       const isReelFile = /reels?/i.test(String((ctx && ctx.filename) || ''));
-      if (isReelFile || /^reel/i.test(rawType)) {
+      // ★ Meta 後台的「貼文類型」只有相片／影片，分不出 Reels，
+      //   但永久連結分得出來：/reel/ 就是 Reels、/posts/ 就是一般貼文。
+      //   實測七月 28 筆，「連結含 /reel/」與「類型=影片」完全一致。
+      const isReelUrl = /facebook\.com\/reel\//i.test(String(obj.url || ''));
+      if (isReelFile || isReelUrl || /^reel/i.test(rawType)) {
         obj.type = '影片'; obj.img_type = 'Reels';
       } else if (/^video$/i.test(rawType) || rawType.includes('影片')) {
         obj.type = '影片'; if (!obj.img_type) obj.img_type = '一般影片';
