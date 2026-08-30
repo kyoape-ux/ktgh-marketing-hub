@@ -1252,7 +1252,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           </div>
         </div>
         <div class="table-wrap">
-          <table style="table-layout:fixed;width:100%;min-width:1040px;">
+          <table style="table-layout:fixed;width:100%;min-width:1064px;">
             <colgroup>
               <col style="width:92px">   <!-- 發佈日期：固定寬度，日期不換行 -->
               <col>                      <!-- 標題摘要（含標籤）：吃掉剩餘空間 -->
@@ -1260,7 +1260,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
               <col style="width:96px">   <!-- 圖片風格 -->
               <col style="width:76px"><col style="width:66px"><col style="width:66px">
               <col style="width:74px"><col style="width:74px">
-              <col style="width:112px">  <!-- 操作 -->
+              <col style="width:136px">  <!-- 操作：按鈕 92 + 間距 4 + 左右內距 32 = 128，留 8px 餘裕 -->
             </colgroup>
             <thead>
               <tr>
@@ -13098,8 +13098,9 @@ function tagCellHtml(chKey, idx, tags) {
   const list = all.slice(0, 6);
   const more = all.length - list.length;
   const chips = list.map(t =>
-    '<span style="display:inline-block;padding:1px 7px;background:var(--bg);color:var(--text-sub);'
-    + 'border:1px solid var(--border);border-radius:4px;font-size:10.5px;white-space:nowrap;">' + _tgEsc(t) + '</span>').join('');
+    // 淺綠底 + 深綠字，取自光田 CI 的院本色 #006341 家族
+    '<span style="display:inline-block;padding:1px 7px;background:#E4F1EA;color:#0A5F3C;'
+    + 'border:1px solid #B5DAC7;border-radius:4px;font-size:10.5px;white-space:nowrap;">' + _tgEsc(t) + '</span>').join('');
   const moreTxt = more > 0
     ? '<span title="' + _tgEsc(all.slice(6).join('、')) + '" style="font-size:10.5px;color:var(--text-muted);">+' + more + '</span>'
     : '';
