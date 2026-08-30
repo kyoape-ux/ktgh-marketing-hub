@@ -13258,6 +13258,27 @@ function crossTagPeriodMatcher(value) {
   return () => true;
 }
 
+// 期間位移：算出「上一期」或「去年同期」的期間值
+function crossTagPeriodShift(value, mode) {
+  if (!value || value === 'all') return '';
+  if (value.indexOf('Y:') === 0) {
+    const y = +value.slice(2);
+    return 'Y:' + (mode === 'yoy' ? y - 1 : y - 1);   // 年的上一期就是去年
+  }
+  if (value.indexOf('Q:') === 0) {
+    const [y, q] = value.slice(2).split('-Q').map(Number);
+    if (mode === 'yoy') return 'Q:' + (y - 1) + '-Q' + q;
+    return q === 1 ? 'Q:' + (y - 1) + '-Q4' : 'Q:' + y + '-Q' + (q - 1);
+  }
+  if (value.indexOf('M:') === 0) {
+    const [y, m] = value.slice(2).split('-').map(Number);
+    const z = n => String(n).padStart(2, '0');
+    if (mode === 'yoy') return 'M:' + (y - 1) + '-' + z(m);
+    return m === 1 ? 'M:' + (y - 1) + '-12' : 'M:' + y + '-' + z(m - 1);
+  }
+  return '';
+}
+
 function crossTagPeriodLabel(value) {
   if (!value || value === 'all') return '全部期間';
   if (value.indexOf('Y:') === 0) return value.slice(2) + ' 年';
@@ -13709,24 +13730,71 @@ function openTagReport(tagName) {
 function _generateCrossTagReport(opts) {
   opts = opts || {};
   const _oSec = (id) => _hasSec(opts, id);
+
+  // ★ 跨管道查詢有「關鍵字」與「標籤」兩種模式，報告以前只讀標籤下拉，
+  //   用關鍵字查完按產生報告會卡在「請先選擇一個標籤」，整條路是斷的。
   const sel = document.getElementById('crossTagSelect');
-  const tagName = sel && sel.value;
-  if (!tagName) { showToast('請先選擇一個標籤'); return; }
+  const kw  = (document.getElementById('crossTagKeyword')?.value || '').trim();
+  const tagName = (sel && sel.value) || '';
+  if (!tagName && !kw) { showToast('請先輸入關鍵字或選擇一個標籤'); return; }
+  const subject = kw || tagName;
+  const isKw = !!kw;
+
+  // 期間以設定視窗選的為準；沒有才沿用頁面上的下拉
   const periodSel = document.getElementById('crossTagPeriod');
-  const period = (periodSel && periodSel.value) || 'all';
+  const period = opts.ctPeriod || (periodSel && periodSel.value) || 'all';
   const periodLabel = crossTagPeriodLabel(period);
   const inP = crossTagPeriodMatcher(period);
-  const tagObj = (store.mediaTags||[]).find(t => t.name === tagName);
 
-  const postsHit  = (store.posts||[]).filter(p => !p.deleted_at && (p.tags||[]).includes(tagName) && inP(p.date));
-  const eventsHit = (store.events||[]).filter(e => !e.deleted_at && (e.tags||[]).includes(tagName) && inP(e.date));
-  const mediaHit  = (store.media||[]).filter(m => !m.deleted_at && (m.tags||[]).includes(tagName) && inP(m.date));
-  const clinicHit = (store.mediaItems||[]).filter(m => !m.deleted_at && (m.tags||[]).some(t => t === tagName || (tagObj && t === tagObj.id)) && inP(m.month));
-  const lineHit   = (store.linePosts||[]).filter(p => !p.deleted_at && (p.tags||[]).includes(tagName) && inP(p.date));
-  const seoHit    = (store.seoArticles||[]).filter(a => !a.deleted_at && (a.tags||[]).includes(tagName) && inP(a.date));
-  const videoAll  = (store.videoItems||[]).filter(v => !v.deleted_at && (v.tags||[]).includes(tagName) && inP(v.date));
+  // 對比期間
+  const cmpMode = (period === 'all') ? '' : (opts.ctCompare || '');
+  const cmpPeriod = cmpMode ? crossTagPeriodShift(period, cmpMode) : '';
+  const cmpLabel = cmpPeriod ? crossTagPeriodLabel(cmpPeriod) : '';
+  const inC = cmpPeriod ? crossTagPeriodMatcher(cmpPeriod) : null;
+
+  const tagObj = (store.mediaTags||[]).find(t => t.name === tagName);
+  const kwLow = kw.toLowerCase();
+  // 比對規則和「跨管道查詢」畫面完全一致，才不會畫面一套、報告另一套
+  const match = (row, text) => {
+    const rowTags = Array.isArray(row.tags) ? row.tags : [];
+    if (isKw) {
+      return rowTags.some(t => String(t).toLowerCase().includes(kwLow))
+          || String(text || '').toLowerCase().includes(kwLow);
+    }
+    return rowTags.some(t => t === tagName || (tagObj && t === tagObj.id));
+  };
+  const txtOf = {
+    post:  p => p.title,
+    event: e => [e.name, e.purpose, e.content, e.note, e.speaker].filter(Boolean).join(' '),
+    media: m => [m.title, m.name, m.section].filter(Boolean).join(' '),
+    clinic:m => [m.title, m.dept].filter(Boolean).join(' '),
+    line:  p => p.title,
+    seo:   a => [a.title, a.keyword, a.dept].filter(Boolean).join(' '),
+    video: v => v.title,
+  };
+  const pick = (arr, txt, dateOf, matcher) =>
+    (arr||[]).filter(r => r && !r.deleted_at && match(r, txt(r)) && matcher(dateOf(r)));
+
+  const postsHit  = pick(store.posts,       txtOf.post,   r=>r.date,  inP);
+  const eventsHit = pick(store.events,      txtOf.event,  r=>r.date,  inP);
+  const mediaHit  = pick(store.media,       txtOf.media,  r=>r.date,  inP);
+  const clinicHit = pick(store.mediaItems,  txtOf.clinic, r=>r.month, inP);
+  const lineHit   = pick(store.linePosts,   txtOf.line,   r=>r.date,  inP);
+  const seoHit    = pick(store.seoArticles, txtOf.seo,    r=>r.date,  inP);
+  const videoAll  = pick(store.videoItems,  txtOf.video,  r=>r.date,  inP);
   const ytHit     = videoAll.filter(v => v.platform === 'YouTube');
   const igHit     = videoAll.filter(v => v.platform === 'Instagram');
+
+  // 對比期間的筆數（只比次數，指標定義不同的欄位不硬湊）
+  const cmpCounts = inC ? {
+    posts:  pick(store.posts,      txtOf.post,   r=>r.date,  inC).length,
+    events: pick(store.events,     txtOf.event,  r=>r.date,  inC).length,
+    media:  pick(store.media,      txtOf.media,  r=>r.date,  inC).length,
+    clinic: pick(store.mediaItems, txtOf.clinic, r=>r.month, inC).length,
+    line:   pick(store.linePosts,  txtOf.line,   r=>r.date,  inC).length,
+    seo:    pick(store.seoArticles,txtOf.seo,    r=>r.date,  inC).length,
+    video:  pick(store.videoItems, txtOf.video,  r=>r.date,  inC).length,
+  } : null;
 
   const totalCount = postsHit.length + eventsHit.length + mediaHit.length + clinicHit.length + lineHit.length + seoHit.length + videoAll.length;
 
@@ -13771,11 +13839,26 @@ function _generateCrossTagReport(opts) {
   cardsHtml += '</div>';
 
   // Channel coverage bar
+  const CMP_KEY = { 'FB 粉專貼文':'posts', '活動 / 講座':'events', '新聞媒體曝光':'media',
+                    '門診表題材':'clinic', 'LINE 貼文':'line', 'SEO 文章':'seo',
+                    'YouTube 影片':'video', 'Instagram 影片':'video' };
   let coverHtml = '<h2>'+svgIcon('bar-chart',16)+' 各傳達管道執行次數</h2>';
   channels.forEach(c => {
-    const pct = Math.round(c.count / maxC * 100);
+    const pct = maxC ? Math.round(c.count / maxC * 100) : 0;
+    // ★ 0 次不要硬畫 3% 的色塊，那會讓「0 次」文字被擠成兩行，也讓人誤以為有量
+    const inner = c.count > 0
+      ? '<div class="bar-fill" style="width:'+Math.max(pct,8)+'%;background:linear-gradient(90deg,'+c.color+','+c.color+'cc);">'+c.count+' 次</div>'
+      : '<div class="bar-zero">0 次</div>';
+    let delta = '';
+    if (cmpCounts) {
+      const prev = cmpCounts[CMP_KEY[c.name]] || 0;
+      const d = c.count - prev;
+      const col = d > 0 ? '#1a8454' : (d < 0 ? '#C0313D' : '#999');
+      delta = '<div class="bar-delta" style="color:'+col+';">'
+            + (d > 0 ? '+' : '') + d + '<span style="color:#aaa;font-weight:400;"> (前 '+prev+')</span></div>';
+    }
     coverHtml += '<div class="bar-row"><div class="bar-label">'+esc(c.name)+'</div>'
-      + '<div class="bar-track"><div class="bar-fill" style="width:'+Math.max(pct,3)+'%;background:linear-gradient(90deg,'+c.color+','+c.color+'cc);">'+c.count+' 次</div></div></div>';
+      + '<div class="bar-track">'+inner+'</div>' + delta + '</div>';
   });
 
   // Detail tables builder
@@ -13825,7 +13908,7 @@ function _generateCrossTagReport(opts) {
   const w = window.open('', '_blank', 'width=1040,height=820,scrollbars=yes');
   if (!w) { showToast('請允許彈出視窗'); return; }
 
-  const htmlStr = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>推廣報告 - '+esc(tagName)+'</title>'
+  const htmlStr = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>推廣報告 - '+esc(subject)+'</title>'
     + '<style>'
     + "@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');"
     + '*{margin:0;padding:0;box-sizing:border-box;}'
@@ -13848,22 +13931,30 @@ function _generateCrossTagReport(opts) {
     + '.kpi-label{font-size:11px;color:#666;margin-bottom:4px;font-weight:600;}'
     + '.kpi-val{font-size:26px;font-weight:900;line-height:1.1;}'
     + '.kpi-sub{font-size:11px;color:#888;margin-top:4px;}'
-    + 'table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:8px;}'
-    + 'th{background:#ECFDF5;padding:7px 8px;text-align:left;font-weight:700;font-size:11px;color:#1B4332;border-bottom:2px solid #1a8454;}'
-    + 'td{padding:6px 8px;border-bottom:1px solid #EEE;}'
+    // ★ 沒有 table-layout:fixed 時，一條 118 字元的貼文永久連結會把整張表撐爆，
+    //   其他欄被壓到一個字一行。固定版面 + 允許長字串斷行才不會跑版。
+    + 'table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:11.5px;margin-bottom:8px;}'
+    + 'th{background:#ECFDF5;padding:7px 8px;text-align:left;font-weight:700;font-size:11px;color:#1B4332;border-bottom:2px solid #1a8454;white-space:nowrap;}'
+    + 'td{padding:6px 8px;border-bottom:1px solid #EEE;overflow-wrap:anywhere;vertical-align:top;}'
+    + 'td a{color:#1a8454;}'
     + '.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}'
     + '.bar-label{width:120px;text-align:right;font-size:11px;font-weight:700;color:#555;}'
     + '.bar-track{flex:1;height:22px;background:#ECFDF5;border-radius:4px;overflow:hidden;}'
-    + '.bar-fill{height:100%;border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;}'
+    + '.bar-fill{height:100%;border-radius:4px;color:#fff;font-size:10px;display:flex;align-items:center;padding-left:8px;font-weight:700;white-space:nowrap;}'
+    + '.bar-zero{height:100%;display:flex;align-items:center;padding-left:8px;font-size:10px;color:#aaa;font-weight:700;}'
+    + '.bar-delta{width:96px;text-align:right;font-size:10.5px;font-weight:700;white-space:nowrap;}'
     + '.footer{margin-top:32px;padding-top:14px;border-top:1px solid #eee;text-align:center;font-size:11px;color:#999;}'
     + '@media print{body{background:#fff;padding:0;} .toolbar{display:none;} .page{box-shadow:none;border-radius:0;padding:24px 32px;max-width:none;}}'
     + '</style></head><body>'
     + '<div class="toolbar"><button class="btn-print" onclick="window.print()">'+svgIcon('printer',13)+' 列印 / 存 PDF</button><button class="btn-close" onclick="window.close()">關閉</button></div>'
     + '<div class="page">'
     + '<div class="hdr"><h1>'+svgIcon('megaphone',22)+' 標籤推廣成果報告</h1>'
-    + '<div class="meta">產出時間：'+new Date().toLocaleString('zh-TW')+'<br>篩選期間：'+esc(periodLabel)+'</div></div>'
-    + '<div class="hero"><div class="label">推廣主題標籤</div>'
-    + '<div class="tag">#'+esc(tagName)+'</div>'
+    + '<div class="meta">產出時間：'+new Date().toLocaleString('zh-TW')
+    +   '<br>統計期間：<b>'+esc(periodLabel)+'</b>'
+    +   (cmpLabel ? '<br>對比期間：'+esc(cmpLabel)+'（'+(cmpMode==='yoy'?'去年同期':'上一期')+'）' : '')
+    + '</div></div>'
+    + '<div class="hero"><div class="label">'+(isKw ? '關鍵字查詢' : '推廣主題標籤')+'</div>'
+    + '<div class="tag">'+(isKw ? esc(subject) : '#'+esc(subject))+'</div>'
     + '<div class="stat">跨傳達管道共執行 <b>'+totalCount+'</b> 次｜累計曝光觸及 <b>'+totalReach.toLocaleString()+'</b></div></div>'
     + (_oSec('kpi') ? ('<h2>'+svgIcon('pin',16)+' 各傳達管道執行概覽</h2>' + cardsHtml) : '')
     + (_oSec('bar') ? coverHtml : '')
@@ -14030,6 +14121,8 @@ function openReportFilterModal(reportType, reportKey, onConfirm) {
   ) : '';
 
   const chartType = saved.chartType || 'bar';
+  const savedCtPeriod = saved.ctPeriod || '';
+  const savedCtCompare = saved.ctCompare || '';
 
   const html = '<div class="modal-overlay open" id="reportFilterModal">'
     + '<div class="modal-box" style="max-width:640px;">'
@@ -14042,7 +14135,29 @@ function openReportFilterModal(reportType, reportKey, onConfirm) {
     +     '<button type="button" class="btn btn-outline" style="font-size:11px;padding:3px 10px;" onclick="document.querySelectorAll(\'#reportFilterModal input[data-section]\').forEach(e=>e.checked=false);">全不選</button>'
     +   '</div>'
     + '</div>'
-    + (availMonths.length ? (
+    + (reportType === 'crossTag' ? (
+        // 標籤報告吃的是「統計期間」，不是 GA4 月度資料，
+        // 原本沿用 GA4 那組基準/比對月份，對這份報告完全不生效，只會誤導。
+        '<div style="padding:12px;background:#F9FAFB;border-radius:8px;margin-bottom:12px;">'
+        + '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">② 統計期間</div>'
+        + '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'
+        +   '<label style="font-size:12px;">期間：<select id="rfCtPeriod">'
+        +     (function(){
+                // 預設沿用「跨管道查詢」畫面上目前選的期間，其次才是上次的設定
+                const cur = (document.getElementById('crossTagPeriod')||{}).value || savedCtPeriod || 'all';
+                return buildCrossTagPeriodOptions().replace('value="'+cur+'"', 'value="'+cur+'" selected');
+              })()
+        +   '</select></label>'
+        +   '<label style="font-size:12px;">對比：<select id="rfCtCompare">'
+        +     ['','prev','yoy'].map(function(v){
+                return '<option value="'+v+'"'+(v===savedCtCompare?' selected':'')+'>'
+                     + ({'':'不對比','prev':'上一期','yoy':'去年同期'})[v] + '</option>';
+              }).join('')
+        +   '</select></label>'
+        +   '<span style="font-size:11px;color:#888;">選「全部期間」時無法對比</span>'
+        + '</div></div>'
+      ) : '')
+    + (reportType !== 'crossTag' && availMonths.length ? (
         '<div style="padding:12px;background:#F9FAFB;border-radius:8px;margin-bottom:12px;">'
         + '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">② 時間比對（適用 GA4 月度資料）</div>'
         + '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">'
@@ -14054,7 +14169,7 @@ function openReportFilterModal(reportType, reportKey, onConfirm) {
       ) : '')
     + itemPoolHtml
     + '<div style="padding:12px;background:#F9FAFB;border-radius:8px;margin-bottom:12px;">'
-    +   '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">④ 主要圖表類型</div>'
+    +   '<div style="font-size:12px;font-weight:700;margin-bottom:8px;">'+(itemCompareOpts?'④':'③')+' 主要圖表類型</div>'
     +   '<div style="display:flex;gap:10px;">'
     +     ['bar','line','pie'].map(t => '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="rfChart" value="'+t+'"'+(t===chartType?' checked':'')+'> '+({bar:'長條圖',line:'折線圖',pie:'圓餅圖'}[t])+'</label>').join('')
     +   '</div>'
@@ -14074,8 +14189,10 @@ function openReportFilterModal(reportType, reportKey, onConfirm) {
     const basePeriod = (document.getElementById('rfBase')||{}).value || '';
     const comparePeriod = (document.getElementById('rfCompare')||{}).value || '';
     const chartType = (modal.querySelector('input[name="rfChart"]:checked')||{}).value || 'bar';
-    const opts = { sections:new Set(sections), items, basePeriod, comparePeriod, chartType };
-    try { localStorage.setItem(saveKey, JSON.stringify({ sections, items, basePeriod, comparePeriod, chartType })); } catch(e){}
+    const ctPeriod  = (document.getElementById('rfCtPeriod')||{}).value || '';
+    const ctCompare = (document.getElementById('rfCtCompare')||{}).value || '';
+    const opts = { sections:new Set(sections), items, basePeriod, comparePeriod, chartType, ctPeriod, ctCompare };
+    try { localStorage.setItem(saveKey, JSON.stringify({ sections, items, basePeriod, comparePeriod, chartType, ctPeriod, ctCompare })); } catch(e){}
     modal.remove();
     onConfirm(opts);
   };
