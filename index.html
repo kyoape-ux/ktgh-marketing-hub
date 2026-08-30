@@ -13874,13 +13874,30 @@ function _generateCrossTagReport(opts) {
   coverHtml += emptyNote;
 
   // Detail tables builder
-  const tbl = (title, items, cols, rowMap) => {
+  // 標題帶連結：連結本身不佔一欄（原本一條 118 字元的網址會吃掉四分之一版面），
+  // 點標題就能開原文，空出來的位置拿去放實際成效。
+  const linkText = (text, url) => url
+    ? { html: '<a href="'+String(url).replace(/"/g,'&quot;')+'" target="_blank" rel="noopener">'+esc(text||'—')+'</a>' }
+    : (text || '—');
+  // 數值欄回傳帶標記的物件，讓 tbl() 幫它靠右並用等寬數字，文字欄不受影響
+  const cell = v => ({ text: v, n: true });
+  const pctOf = (n, d) => cell(d ? ((+n||0)/d*100).toFixed(1)+'%' : '—');
+  const num = n => cell((+n||0).toLocaleString());
+
+  const tbl = (title, items, cols, rowMap, colW) => {
     if (!items.length) return '';
     let h = '<h2>'+title+'<span style="color:#888;font-weight:400;font-size:13px;">（'+items.length+' 筆）</span></h2>';
-    h += '<table><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>';
+    h += '<table>';
+    if (colW) h += '<colgroup>'+colW.map(w=>'<col style="width:'+w+'">').join('')+'</colgroup>';
+    const probe = items.length ? rowMap(items[0]) : [];
+    h += '<thead><tr>'+cols.map((c,i)=>'<th'+((probe[i]&&probe[i].n)?' style="text-align:right;"':'')+'>'+c+'</th>').join('')+'</tr></thead><tbody>';
     items.forEach(it => {
       const r = rowMap(it);
-      h += '<tr>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>';
+      h += '<tr>' + r.map(v => {
+        if (v && v.html !== undefined) return '<td>' + v.html + '</td>';
+        if (v && v.n) return '<td class="n">' + esc(v.text) + '</td>';
+        return '<td>' + esc(v) + '</td>';
+      }).join('') + '</tr>';
     });
     h += '</tbody></table>';
     return h;
@@ -13888,34 +13905,42 @@ function _generateCrossTagReport(opts) {
 
   const detailHtml =
     (_oSec('fb') ? tbl('FB 粉專貼文明細', postsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
-        ['日期','類型','標題','觸及','互動','互動率','連結'],
-        p => [p.date||'', p.cat||'—', p.title||'—', (p.reach||0).toLocaleString(), (p.engage||0).toLocaleString(),
-              (p.reach? ((p.engage||0)/p.reach*100).toFixed(1)+'%':'—'), p.link||p.url||'—']) : '') +
+        ['日期','內容分類','標題（點擊開啟原文）','觸及','點擊','互動','點擊率','互動率'],
+        p => [p.date||'', p.cat||'—', linkText(p.title, p.url||p.link),
+              num(p.reach), num(p.click), num(p.engage),
+              pctOf(p.click, p.reach), pctOf(p.engage, p.reach)],
+        ['84px','82px','auto','66px','60px','60px','62px','62px']) : '') +
     (_oSec('event') ? tbl('活動 / 講座明細', eventsHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
-        ['日期','活動名稱','類型','院區','報名','出席','講者','FB觸及','備註'],
-        e => [e.date||'', e.name||'—', e.type||'—', e.campus||'—', (e.reg||0), (e.attend||0), e.speaker||'—', (e.reach||0).toLocaleString(), e.note||'']) : '') +
+        ['日期','活動名稱','類型','院區','報名','出席','出席率','滿意度','曝光'],
+        e => [e.date||'', e.name||'—', e.type||'—', e.campus||'—', cell(+e.reg||0), cell(+e.attend||0),
+              cell(+e.reg ? Math.round((+e.attend||0)/(+e.reg)*100)+'%' : '—'),
+              cell(+e.sat ? (+e.sat).toFixed(1) : '—'), num(e.reach)],
+        ['84px','auto','78px','72px','54px','54px','60px','58px','70px']) : '') +
     (_oSec('media') ? tbl('新聞媒體曝光明細', mediaHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
-        ['日期','媒體名稱','類型','報導標題','觸及','連結'],
-        m => [m.date||'', m.name||'—', m.type||'—', m.title||'—', (m.reach||0).toLocaleString(), m.url||m.link||'—']) : '') +
+        ['日期','媒體名稱','類型','報導標題（點擊開啟原文）','性質','觸及'],
+        m => [m.date||'', m.name||'—', m.type||'—', linkText(m.title, m.url||m.link), m.nature||'—', num(m.reach)],
+        ['84px','120px','78px','auto','76px','70px']) : '') +
     (_oSec('clinic') ? tbl('門診表題材刊登', clinicHit.sort((a,b)=>(b.month||'').localeCompare(a.month||'')),
-        ['月份','頁碼','題材','科別','負責人','備註'],
-        m => [m.month||'', m.page||'—', m.title||'—', m.dept||'—', m.owner||'—', m.note||'']) : '') +
+        ['月份','頁碼','題材','科別','負責人'],
+        m => [m.month||'', cell(m.page||'—'), m.title||'—', m.dept||'—', m.owner||'—'],
+        ['76px','54px','auto','96px','80px']) : '') +
     (_oSec('line') ? tbl('LINE 貼文明細', lineHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
-        ['日期','類型','標題','觸及','點擊','CTR','備註'],
-        p => [p.date||'', p.type||'—', p.title||'—', (p.reach||0).toLocaleString(), (p.click||0).toLocaleString(),
-              (p.reach? ((p.click||0)/p.reach*100).toFixed(1)+'%':'—'), p.note||'']) : '') +
+        ['日期','類型','標題','觸及','點擊','點擊率'],
+        p => [p.date||'', p.type||'—', p.title||'—', num(p.reach), num(p.click), pctOf(p.click, p.reach)],
+        ['84px','82px','auto','70px','64px','64px']) : '') +
     (_oSec('yt') ? tbl('YouTube 影片明細', ytHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
-        ['日期','影片標題','觀看','互動','互動率','連結'],
-        v => [v.date||'', v.title||'—', (v.views||0).toLocaleString(), (v.engage||0).toLocaleString(),
-              (v.views? ((v.engage||0)/v.views*100).toFixed(1)+'%':'—'), v.external_url||'—']) : '') +
+        ['日期','影片標題（點擊開啟原文）','觀看','互動','互動率'],
+        v => [v.date||'', linkText(v.title, v.external_url), num(v.views), num(v.engage), pctOf(v.engage, v.views)],
+        ['84px','auto','76px','66px','66px']) : '') +
     (_oSec('ig') ? tbl('Instagram 影片明細', igHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
-        ['日期','影片標題','觀看','互動','互動率','連結'],
-        v => [v.date||'', v.title||'—', (v.views||0).toLocaleString(), (v.engage||0).toLocaleString(),
-              (v.views? ((v.engage||0)/v.views*100).toFixed(1)+'%':'—'), v.external_url||'—']) : '') +
+        ['日期','影片標題（點擊開啟原文）','觀看','互動','互動率'],
+        v => [v.date||'', linkText(v.title, v.external_url), num(v.views), num(v.engage), pctOf(v.engage, v.views)],
+        ['84px','auto','76px','66px','66px']) : '') +
     (_oSec('seo') ? tbl('SEO 文章明細', seoHit.sort((a,b)=>(b.date||'').localeCompare(a.date||'')),
-        ['日期','科別','文章標題','關鍵字','排名','月搜尋量','連結'],
-        a => [a.date||'', a.dept||'—', a.title||'—', a.keyword||'—', a.rank||'—',
-              (a.searchVolume? (+a.searchVolume).toLocaleString():'—'), a.url||'—']) : '');
+        ['日期','科別','文章標題（點擊開啟原文）','關鍵字','排名','月搜尋量'],
+        a => [a.date||'', a.dept||'—', linkText(a.title, a.url), a.keyword||'—', cell(a.rank||'—'),
+              a.searchVolume ? num(a.searchVolume) : cell('—')],
+        ['84px','88px','auto','110px','56px','76px']) : '');
 
   const w = window.open('', '_blank', 'width=1040,height=820,scrollbars=yes');
   if (!w) { showToast('請允許彈出視窗'); return; }
@@ -13949,6 +13974,7 @@ function _generateCrossTagReport(opts) {
     + 'th{background:#ECFDF5;padding:7px 8px;text-align:left;font-weight:700;font-size:11px;color:#1B4332;border-bottom:2px solid #1a8454;white-space:nowrap;}'
     + 'td{padding:6px 8px;border-bottom:1px solid #EEE;overflow-wrap:anywhere;vertical-align:top;}'
     + 'td a{color:#1a8454;}'
+    + 'td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}'
     + '.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}'
     + '.bar-label{width:120px;text-align:right;font-size:11px;font-weight:700;color:#555;}'
     + '.bar-track{flex:1;height:22px;background:#ECFDF5;border-radius:4px;overflow:hidden;}'
