@@ -1700,7 +1700,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
             </div>
             <div class="form-group">
               <label style="font-size:12px;font-weight:600;color:var(--text-sub);">跨管道標籤（逗號分隔）</label>
-              <input type="text" id="ev-tags" list="crossTagDatalist" placeholder="例：GWD全球健康日, 健康講座">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input type="text" id="ev-tags" list="crossTagDatalist" placeholder="例：GWD全球健康日, 健康講座" style="flex:1;">
+                <button type="button" class="btn btn-outline" onclick="pickTagsInto('ev-tags')" style="white-space:nowrap;">從標籤庫選</button>
+              </div>
             </div>
             <div class="form-group" style="margin-top:10px;">
               <label>所屬檔期（選填，選了會自動帶入檔期標籤）</label>
@@ -1809,7 +1812,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
         </div>
         <div class="form-group" style="margin-bottom:16px;">
           <label>跨傳達管道標籤（可多選，逗號分隔）</label>
-          <input type="text" id="md-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" id="md-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西" style="flex:1;">
+            <button type="button" class="btn btn-outline" onclick="pickTagsInto('md-tags')" style="white-space:nowrap;">從標籤庫選</button>
+          </div>
         </div>
         <div style="display:flex;gap:10px;">
           <button class="btn btn-primary" onclick="addMedia()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> 儲存媒體記錄</button>
@@ -2627,7 +2633,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     </div>
     <div class="form-group" style="margin-top:4px;">
       <label>跨傳達管道標籤（可多選，用逗號分隔；例：LDCT, 達文西）</label>
-      <input type="text" id="pm-tags" list="crossTagDatalist" placeholder="輸入標籤名稱，逗號分隔">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="pm-tags" list="crossTagDatalist" placeholder="輸入標籤名稱，逗號分隔" style="flex:1;">
+        <button type="button" class="btn btn-outline" onclick="pickTagsInto('pm-tags')" style="white-space:nowrap;">從標籤庫選</button>
+      </div>
       <div id="pm-tags-preview" style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;"></div>
     </div>
     <input type="hidden" id="pm-idx" value="-1">
@@ -2710,7 +2719,10 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       </div>
       <div class="form-group" style="grid-column:1/-1">
         <label>跨傳達管道標籤（可多選，逗號分隔）</label>
-        <input type="text" id="em-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="em-tags" list="crossTagDatalist" placeholder="例：LDCT, 健檢, 達文西" style="flex:1;">
+          <button type="button" class="btn btn-outline" onclick="pickTagsInto('em-tags')" style="white-space:nowrap;">從標籤庫選</button>
+        </div>
       </div>
       <div class="form-group">
         <label>所屬檔期（選填）</label>
@@ -11923,6 +11935,21 @@ function openCampaignModal(idx) {
   openModal('campaignMasterModal');
 }
 
+// 任何標籤輸入框都能叫出標籤庫挑選器
+function pickTagsInto(inputId) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  openTagPicker({
+    title: '選擇標籤',
+    subtitle: '從全系統共用的標籤庫挑選，也可以直接在欄位裡打字（逗號分隔）',
+    preselected: inp.value.split(/[,，;；]/).map(x => x.trim()).filter(Boolean),
+    onApply: (tags) => {
+      inp.value = tags.join(', ');
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  });
+}
+
 function pickCampaignTags() {
   const inp = document.getElementById('cm-tags');
   openTagPicker({
@@ -13062,19 +13089,21 @@ function batchTagFiltered(chKey, getFilteredRows) {
 }
 
 // 列表用的標籤欄
+// 列表裡的標籤只負責「顯示」，不放編輯入口——
+// 每列一顆「改/＋」按鈕在視覺上很吵，編輯標籤到「編輯」視窗裡做就好。
+// 樣式也統一成一種淡色，不再每個標籤各自帶色又帶框。
 function tagCellHtml(chKey, idx, tags) {
-  const list = (tags || []).slice(0, 4);
-  const more = (tags || []).length - list.length;
-  const chips = list.map(t => {
-    const tg = (store.mediaTags || []).find(x => x.name === t);
-    const c = (tg && tg.color) || '#1a8454';
-    return '<span style="display:inline-block;padding:1px 7px;background:' + c + '1A;color:' + c +
-           ';border:1px solid ' + c + '44;border-radius:9px;font-size:10.5px;margin:1px 2px 1px 0;white-space:nowrap;">' + _tgEsc(t) + '</span>';
-  }).join('');
-  const moreTxt = more > 0 ? '<span style="font-size:10.5px;color:var(--text-muted);">+' + more + '</span>' : '';
-  return '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:3px;">' + chips + moreTxt +
-    '<button class="action-btn edit" data-perm="edit" onclick="quickTagRow(\'' + chKey + '\',' + idx + ')" ' +
-    'title="設定標籤" style="padding:1px 7px;font-size:11px;margin-left:2px;">' + ((tags||[]).length ? '改' : '＋') + '</button></div>';
+  const all = tags || [];
+  if (!all.length) return '';
+  const list = all.slice(0, 6);
+  const more = all.length - list.length;
+  const chips = list.map(t =>
+    '<span style="display:inline-block;padding:1px 7px;background:var(--bg);color:var(--text-sub);'
+    + 'border:1px solid var(--border);border-radius:4px;font-size:10.5px;white-space:nowrap;">' + _tgEsc(t) + '</span>').join('');
+  const moreTxt = more > 0
+    ? '<span title="' + _tgEsc(all.slice(6).join('、')) + '" style="font-size:10.5px;color:var(--text-muted);">+' + more + '</span>'
+    : '';
+  return '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;">' + chips + moreTxt + '</div>';
 }
 
 // ═══════════════════════════════════════════
