@@ -1169,7 +1169,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
             <thead>
               <tr>
                 <th>#</th>
-                <th>月份</th>
+                <th style="white-space:nowrap;">發布日期</th>
                 <th>標題摘要</th>
                 <th>類型標籤</th>
                 <th>貼文類型</th>
@@ -4676,34 +4676,114 @@ function renderOverview() {
       </div>`;
   }
 
-  // Dynamic insights
+  // ═══ 可靠分析（取代舊的「內容類型平均觸及」與「最強組合排行」）═══
+  // 舊版兩張卡片不可靠的三個原因：
+  //   1. 用平均觸及 — 單篇爆文就能把整組拉高，看到的不是「典型表現」
+  //   2. cat 欄位大多沒填，實際上都落在「其他」，等於在比較空氣
+  //   3. 「類型 × 內容」組合只要 2 篇就排名，2 篇的平均本來就是雜訊
+  // 改成：中位數基準線 + 置換檢定，講得出「這個差異是不是雜訊」
   const insightGrid = document.getElementById('insightGrid');
   if (insightGrid) {
-    // Category avg reach
-    const byCat = {};
-    posts.forEach(p => { const c = p.cat||'其他'; if(!byCat[c]) byCat[c]={reach:0,count:0,engage:0}; byCat[c].reach+=(p.reach||0); byCat[c].count++; byCat[c].engage+=(p.engage||0); });
-    const catEntries = Object.entries(byCat).map(([cat,v])=>({cat,avg:Math.round(v.reach/v.count),count:v.count,er:v.reach?(v.engage/v.reach*100).toFixed(1):'0'})).sort((a,b)=>b.avg-a.avg);
-    const catHtml = catEntries.slice(0,6).map(c => `<div class="insight-item"><div class="name">${c.cat} <small style="color:var(--text-muted)">(${c.count}篇)</small></div><div class="value">${c.avg.toLocaleString()} <small style="color:var(--text-muted)">ER ${c.er}%</small></div></div>`).join('');
+    const reaches = posts.map(p => +p.reach || 0).filter(v => v > 0);
+    const nR = reaches.length;
 
-    // Top combinations (img_type × cat)
-    const combos = {};
-    posts.forEach(p => { const it = p.img_type||p.type||'相片'; const c = p.cat||'其他'; const k = `${it} × ${c}`; if(!combos[k]) combos[k]={reach:0,count:0}; combos[k].reach+=(p.reach||0); combos[k].count++; });
-    const comboEntries = Object.entries(combos).filter(([,v])=>v.count>=2).map(([k,v])=>({k,avg:Math.round(v.reach/v.count),count:v.count})).sort((a,b)=>b.avg-a.avg);
-    const rankLabels = [{t:'S 最強',c:'var(--brand)'},{t:'A 強',c:'#2A9D6B'},{t:'B 中上',c:'var(--gold)'},{t:'C 普通',c:'var(--text-muted)'},{t:'D 待優化',c:'var(--warn)'}];
-    const comboHtml = comboEntries.slice(0,5).map((c,i) => {
-      const r = rankLabels[Math.min(i, rankLabels.length-1)];
-      return `<div class="insight-item"><div class="name">${c.k} <small style="color:var(--text-muted)">(${c.count}篇 avg ${c.avg.toLocaleString()})</small></div><div class="value text-mono" style="color:${r.c};font-weight:800;">${r.t}</div></div>`;
-    }).join('');
+    let cardA;
+    if (nR < 4) {
+      cardA = '<div class="insight-item"><div class="name">有效樣本僅 ' + nR + ' 篇，不足以推估水準</div><div class="value">—</div></div>';
+    } else {
+      const med = _median(reaches), q1 = _quantile(reaches, 0.25), q3 = _quantile(reaches, 0.75);
+      const mean = Math.round(reaches.reduce((a, b) => a + b, 0) / nR);
+      const max = Math.max(...reaches);
+      const skew = med ? Math.round((mean - med) / med * 100) : 0;
+      const row = (name, val, sub) =>
+        '<div class="insight-item"><div class="name">' + name
+        + (sub ? ' <small style="color:var(--text-muted)">' + sub + '</small>' : '')
+        + '</div><div class="value text-mono">' + val + '</div></div>';
+      cardA = row('典型表現（中位數）', med.toLocaleString(), '一半的貼文在此之上')
+        + row('達標線', q3.toLocaleString(), '進入前 25% 需要的觸及')
+        + row('警戒線', q1.toLocaleString(), '低於此為後 25%')
+        + row('本期最高', max.toLocaleString(), '第 1 名')
+        + row('有效樣本', nR + ' 篇', nR < 10 ? '樣本偏少，判讀請保守' : '')
+        + '<div style="margin-top:12px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:11.5px;color:var(--text-sub);line-height:1.65;">'
+        + '平均觸及 <b class="text-mono">' + mean.toLocaleString() + '</b>'
+        + (skew > 15
+            ? '，比中位數高 <b>' + skew + '%</b>— 被少數爆文拉高，用它訂目標會設得過高。'
+            : '，與中位數接近，本期沒有單篇獨大的情形。')
+        + '</div>';
+    }
 
-    insightGrid.innerHTML = `
-      <div class="insight-card">
-        <h4 style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> 內容類型平均觸及 & 互動率</h4>
-        ${catHtml}
-      </div>
-      <div class="insight-card">
-        <h4 style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> 最強組合排行（貼文類型 × 內容）</h4>
-        ${comboHtml || '<div class="insight-item"><div class="name">資料不足（需每組合至少2篇）</div><div class="value">—</div></div>'}
-      </div>`;
+    // ── 置換檢定：把「看起來有差」跟「真的有差」分開 ──
+    const VERDICT = (t, nA, nB) => {
+      if (nA < 5 || nB < 5) return { t: '樣本不足', c: 'var(--text-muted)', note: '每組需 5 篇以上' };
+      if (t.p === null)      return { t: '樣本不足', c: 'var(--text-muted)', note: t.reason || '' };
+      if (t.p < 0.05)        return { t: '確有差異', c: 'var(--brand)',      note: 'p=' + t.p.toFixed(3) + '，可以當作決策依據' };
+      if (t.p < 0.20)        return { t: '方向性參考', c: 'var(--gold)',     note: 'p=' + t.p.toFixed(3) + '，有傾向但還不夠確定' };
+      return { t: '看不出差異', c: 'var(--text-muted)', note: 'p=' + t.p.toFixed(3) + '，差距在隨機波動範圍內' };
+    };
+    const cmp = [];
+    const addCmp = (label, arrA, labA, arrB, labB) => {
+      const A = arrA.map(p => +p.reach || 0).filter(v => v > 0);
+      const B = arrB.map(p => +p.reach || 0).filter(v => v > 0);
+      if (!A.length || !B.length) return;
+      const t = (A.length >= 2 && B.length >= 2) ? _permTestMedian(A, B) : { p: null, reason: '樣本不足' };
+      const v = VERDICT(t, A.length, B.length);
+      const mA = _median(A), mB = _median(B);
+      const hi = mA >= mB ? labA : labB;
+      const diff = Math.min(mA, mB) ? Math.round(Math.abs(mA - mB) / Math.min(mA, mB) * 100) : 0;
+      cmp.push(
+        '<div style="padding:10px 0;border-bottom:1px solid var(--border);">'
+        + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">'
+        +   '<div style="font-size:13px;color:var(--text);">' + label + '</div>'
+        +   '<div style="font-weight:800;font-size:12.5px;color:' + v.c + ';white-space:nowrap;">' + v.t + '</div>'
+        + '</div>'
+        + '<div style="margin-top:4px;font-size:11.5px;color:var(--text-muted);line-height:1.6;">'
+        +   '<span class="text-mono">' + labA + ' ' + mA.toLocaleString() + '</span>（' + A.length + '篇）'
+        +   ' vs <span class="text-mono">' + labB + ' ' + mB.toLocaleString() + '</span>（' + B.length + '篇）'
+        +   (v.t === '確有差異' ? '　→ <b style="color:var(--text-sub)">' + hi + '高 ' + diff + '%</b>' : '')
+        +   '<br>' + v.note
+        + '</div></div>'
+      );
+    };
+
+    const isVid = p => /影片|reel|video/i.test(String(p.img_type || p.type || ''));
+    addCmp('影片／Reels vs 相片', posts.filter(isVid), '影片', posts.filter(p => !isVid(p) && (p.img_type || p.type)), '相片');
+
+    // 本期 vs 前期：用未篩選的全量資料，才比得到「上個月」
+    const allP = activePosts();
+    const allMonths = [...new Set(allP.map(p => (p.date || '').slice(0, 7)).filter(m => m.length === 7))].sort();
+    if (currentMonth !== 'all' && /^\d{4}-\d{2}$/.test(currentMonth)) {
+      const i = allMonths.indexOf(currentMonth);
+      if (i > 0) addCmp('本月 vs 上月',
+        allP.filter(p => (p.date || '').slice(0, 7) === currentMonth), monthLabel(currentMonth),
+        allP.filter(p => (p.date || '').slice(0, 7) === allMonths[i - 1]), monthLabel(allMonths[i - 1]));
+    } else if (allMonths.length >= 6) {
+      const recent = allMonths.slice(-3), earlier = allMonths.slice(-6, -3);
+      addCmp('近 3 個月 vs 前 3 個月',
+        allP.filter(p => recent.includes((p.date || '').slice(0, 7))), '近期',
+        allP.filter(p => earlier.includes((p.date || '').slice(0, 7))), '前期');
+    }
+
+    // 兩個最大內容類型（樣本夠才比，避免拿 2 篇排名）
+    const byBig = {};
+    posts.forEach(p => { const c = bigCat(p.cat); (byBig[c] = byBig[c] || []).push(p); });
+    const bigTop = Object.entries(byBig).filter(([c, a]) => c !== '未分類' && a.length >= 5)
+      .sort((a, b) => b[1].length - a[1].length).slice(0, 2);
+    if (bigTop.length === 2) addCmp('主要內容類型對比', bigTop[0][1], bigTop[0][0], bigTop[1][1], bigTop[1][0]);
+
+    const untagged = posts.filter(p => bigCat(p.cat) === '未分類').length;
+    const cardB = (cmp.join('') || '<div class="insight-item"><div class="name">可比較的組別都不足 5 篇，暫時無法做檢定</div><div class="value">—</div></div>')
+      + '<div style="margin-top:12px;font-size:11px;color:var(--text-muted);line-height:1.6;">'
+      + '以中位數比較、隨機重排 5,000 次檢定。「看不出差異」代表差距可能只是運氣，不要據此改方向。'
+      + (untagged ? '<br>目前有 <b>' + untagged + '</b> 篇未分類，補上內容分類後這裡的比較會更有用。' : '')
+      + '</div>';
+
+    insightGrid.innerHTML =
+      '<div class="insight-card">'
+      + '<h4 style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="12" y2="6"/><line x1="3" y1="18" x2="16" y2="18"/></svg> 觸及水準與目標基準線</h4>'
+      + cardA + '</div>'
+      + '<div class="insight-card">'
+      + '<h4 style="display:flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v18"/><path d="M15 3v18"/><path d="M3 9h18"/><path d="M3 15h18"/></svg> 差異檢定：哪些差距是真的</h4>'
+      + cardB + '</div>';
   }
 
   // Period label
@@ -4720,7 +4800,7 @@ function renderOverview() {
     const rank = i + 1;
     return `<tr>
       <td>${rank}</td>
-      <td><span class="badge badge-gray">${monthLabel(p.month)}</span></td>
+      <td style="white-space:nowrap;">${fullDateCell(p.date)}</td>
       <td style="max-width:260px;line-height:1.4">${p.title}</td>
       <td>${catBadge(p.cat)}</td>
       <td>${typeBadge(p.type, p.img_type)}${phaseBadge(p.phase)}</td>
@@ -4733,14 +4813,22 @@ function renderOverview() {
   }).join('') || '<tr><td colspan="10"><div class="empty"><p>暫無貼文資料，請匯入 FB 數據或新增貼文</p></div></td></tr>';
 }
 
+// Top 10 要看得出「哪一天發的」，只給月份判斷不了節慶檔期或連假效應
+function fullDateCell(d) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d||''));
+  if (!m) return '<span style="color:var(--text-muted);font-size:12px;">未填日期</span>';
+  const wd = ['日','一','二','三','四','五','六'][new Date(+m[1], +m[2]-1, +m[3]).getDay()];
+  return '<span class="text-mono" style="font-size:12.5px;font-weight:600;">' + m[1] + '/' + m[2] + '/' + m[3] + '</span>'
+       + '<span style="color:var(--text-muted);font-size:11px;margin-left:5px;">週' + wd + '</span>';
+}
+
 function monthLabel(m) {
-  const map = {
-    '2026-03':'3月','2026-02':'2月','2026-01':'1月',
-    '2025-12':'12月','2025-11':'11月','2025-10':'10月',
-    '2025-09':'9月','2025-08':'8月','2025-07':'7月',
-    '2025-06':'6月','2025-05':'5月','2025-04':'4月',
-  };
-  return map[m] || m;
+  // 以前是寫死的對照表，只涵蓋 2025-04～2026-03，之後的月份會直接露出「2026-07」
+  // 這種原始值，同一欄裡「12月」跟「2026-07」混在一起。
+  const mm = /^(\d{4})-(\d{2})$/.exec(String(m||''));
+  if (!mm) return m || '';
+  const nowY = new Date().getFullYear();
+  return (+mm[1] === nowY ? '' : mm[1] + '年 ') + (+mm[2]) + '月';
 }
 
 function catBadge(cat) {
