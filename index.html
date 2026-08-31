@@ -9910,12 +9910,15 @@ async function handleQuickImportFiles(files) {
     log.innerHTML = '<div style="color:#DC2626;">XLSX 套件未載入</div>';
     return;
   }
+  files = Array.from(files || []);
+  window._importBatchTpl = {};   // 每一批重新開始，不沿用上一批的對應
+
   const results = [];
-  for (const file of files) {
-    const item = await _processQuickImportFile(file);
-    results.push(item);
+  const paint = (doing) => {
     log.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;">'
-      + '<div style="font-size:13px;font-weight:700;margin-bottom:8px;">匯入紀錄</div>'
+      + '<div style="font-size:13px;font-weight:700;margin-bottom:8px;">匯入紀錄'
+      + (files.length > 1 ? ' <span style="font-weight:500;color:#666;">（共 '+files.length+' 個檔案，已完成 '+results.length+'）</span>' : '')
+      + '</div>'
       + results.map(r =>
           '<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #F1F5F9;font-size:12px;align-items:center;">'
           + (r.ok ? '<span style="color:#16A34A;">✓</span>' : '<span style="color:#DC2626;">✗</span>')
@@ -9924,10 +9927,25 @@ async function handleQuickImportFiles(files) {
           + '<span style="flex:1;color:#666;">'+r.msg+'</span>'
           + '</div>'
         ).join('')
-      + '<div style="margin-top:14px;text-align:center;">'
-      + '<button class="btn btn-primary" onclick="switchSection(\'warroom\',\'dashboard\');renderWarRoom();">跳到總覽首頁查看分析</button>'
-      + '</div>'
+      + (doing
+          ? '<div style="display:flex;gap:10px;padding:8px 0;font-size:12px;align-items:center;color:#0369A1;">'
+            + '<span>●</span><span style="font-weight:600;">'+doing+'</span>'
+            + '<span style="flex:1;">處理中…若跳出欄位對應視窗，確認後才會接著處理下一個檔案</span></div>'
+          : '')
+      + (doing ? '' :
+          '<div style="margin-top:14px;text-align:center;">'
+        + '<button class="btn btn-primary" onclick="switchSection(\'warroom\',\'dashboard\');renderWarRoom();">跳到總覽首頁查看分析</button>'
+        + '</div>')
       + '</div>';
+  };
+
+  // 一次只處理一個檔案，並且等對應視窗確認/取消後才換下一個。
+  // （舊版不等，第二個檔案會把第一個的視窗蓋掉，前面的檔案全部靜靜消失。）
+  for (const file of files) {
+    paint(file.name);
+    const item = await _processQuickImportFile(file);
+    results.push(item);
+    paint('');
   }
 }
 
@@ -10047,11 +10065,19 @@ function _detectPlatformField(inputName) {
 
 // 智慧匯入：分析 row 結構並產生映射預覽
 // data type 推測 + 自動匹配 + 預覽 modal
-function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
+function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType, onDone) {
   // sourceType: 'csv' | 'json' | 'xlsx'
   if (!rows || !rows.length) return false;
-  const sample = rows[0];
-  const inputCols = Object.keys(sample).map(k => k.replace(/^﻿/,'').trim()).filter(Boolean);
+
+  // ★ 有些 Excel 檔會被整張設成表格，多出上萬個空欄（欄1、欄2…到 16384）。
+  //   照單全收的話對應視窗要畫上萬列下拉，瀏覽器直接卡死，看起來就像「沒反應」。
+  //   只留下「至少有一列填了值」的欄位。
+  const probe = rows.slice(0, 50);
+  const allCols = Object.keys(rows[0]).map(k => k.replace(/^﻿/,'').trim()).filter(Boolean);
+  const inputCols = allCols.filter(c =>
+    probe.some(r => { const v = r[c]; return v !== undefined && v !== null && String(v).trim() !== ''; }));
+  const droppedCols = allCols.length - inputCols.length;
+  if (!inputCols.length) return false;
 
   // 推測資料類型（priority order）
   const candidates = [
@@ -10069,7 +10095,9 @@ function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
   const platformDetected = new Set();
 
   // 這些是匯出檔的附帶欄位，不是成效資料，直接排除免得誤搶
-  const META_COL = /^(貼文編號|粉絲專頁編號|粉絲專頁名稱|多文發佈貼文|是分享的貼文|語言|贊助內容狀態|說明文字類型|資料留言|時間長度（秒）|post ?id|page ?id|id|thumbnail|image)$/i;
+  // ★「廣告曝光次數」「廣告 CPM」「收益估計值」是純廣告欄位，沒下廣告的貼文一律空白。
+  //   若把它當成「曝光」自動帶入，整份自然觸及的報表會出現一堆 0 曝光，看起來像數據壞掉。
+  const META_COL = /^(貼文編號|粉絲專頁編號|粉絲專頁名稱|多文發佈貼文|是分享的貼文|語言|贊助內容狀態|說明文字類型|資料留言|時間長度（秒）|廣告曝光次數|廣告 ?CPM ?（美元）|收益估計值 ?（美元）|post ?id|page ?id|id|thumbnail|image)$/i;
 
   // 先做完全相符，再做部分相符
   const exactOf = col => {
@@ -10140,7 +10168,7 @@ function _analyzeRowsAndOpenMappingModal(rows, filename, sourceType) {
   const best = candidates.sort((a,b) => b.score-a.score)[0];
 
   // 開預覽 modal
-  _openImportMappingModal({ rows, filename, inputCols, autoMap, candidates, best, platformDetected });
+  _openImportMappingModal({ rows, filename, inputCols, autoMap, candidates, best, platformDetected, droppedCols, onDone });
   return true;
 }
 
@@ -10226,6 +10254,8 @@ function _openImportMappingModal(ctx) {
     +     '</select>'
     +     '<span style="color:var(--text-muted);margin-left:8px;">只影響 Excel 日期序號；已經是文字日期的不受影響。</span>'
     +   '</div>'
+    +   (ctx.droppedCols ? '<div style="margin-top:6px;font-size:11.5px;color:#8A6800;">已自動略過 '
+          + ctx.droppedCols + ' 個完全空白的欄位（Excel 表格常會多出這些）。</div>' : '')
     +   '<span id="impQualityNote"></span>'
     +   (platformDetected.size ? '<br><b>偵測到平台：</b>' + [...platformDetected].join('、') : '')
     + '</div>'
@@ -10241,7 +10271,7 @@ function _openImportMappingModal(ctx) {
     + '</div>'
     + '<div id="impPreview" style="margin-top:14px;font-size:11.5px;color:#666;"></div>'
     + '<div class="modal-footer">'
-    +   '<button class="btn btn-outline" onclick="document.getElementById(\'importMapModal\').remove()">取消</button>'
+    +   '<button class="btn btn-outline" onclick="_cancelMappingImport()">取消</button>'
     +   '<button class="btn btn-outline" onclick="_previewMappedRows()">預覽前 3 筆</button>'
     +   '<button class="btn btn-primary" onclick="_confirmMappingImport()">確認匯入</button>'
     + '</div></div></div>';
@@ -10250,6 +10280,8 @@ function _openImportMappingModal(ctx) {
   //   getElementById 只會抓到第一個（前一個檔案的），欄位對應就整個錯位。
   //   一次拖多個檔案時必定踩到。
   document.querySelectorAll('#importMapModal').forEach(el => el.remove());
+  // 這個檔案處理完（確認或取消）要通知排隊中的下一個檔案
+  window._importOnDone = ctx.onDone || null;
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
   document.body.appendChild(tmp.firstElementChild);
@@ -10548,9 +10580,21 @@ function _renderImportQualityNote() {
     : '<div style="margin-top:10px;font-size:12px;color:#065F46;">資料檢查通過，沒有發現品質問題。</div>';
 }
 
+function _cancelMappingImport() {
+  const m = document.getElementById('importMapModal');
+  if (m) m.remove();
+  const cb = window._importOnDone; window._importOnDone = null;
+  if (cb) cb({ ok:false, detected:'已取消', msg:'使用者取消匯入' });
+}
+
 function _confirmMappingImport() {
   if (!requireEdit()) return;
-  const ctx = window._importCtx; if (!ctx) return;
+  const ctx = window._importCtx;
+  if (!ctx) {   // 不能就這樣 return，否則排隊中的下一個檔案會永遠等不到
+    const cb = window._importOnDone; window._importOnDone = null;
+    if (cb) cb({ ok:false, detected:'錯誤', msg:'找不到匯入資料' });
+    return;
+  }
   const type = document.getElementById('impTargetType').value;
   const records = _applyMapping(false);
   if (!records.length) {
@@ -10659,6 +10703,19 @@ function _confirmMappingImport() {
   if (_mapModal) _mapModal.remove();
   showToast('✓ 已匯入：新增 '+added+'、更新 '+updated+' 筆');
 
+  // 同一批次裡欄位組合相同的後續檔案，直接沿用這次的對應，不必再確認一次
+  try {
+    const _m = {};
+    ctx.inputCols.forEach((col, i) => { _m[col] = document.getElementById('impMap_'+i)?.value; });
+    if (Object.values(_m).some(v => v && v !== '__ignore__')) {
+      window._importBatchTpl = window._importBatchTpl || {};
+      window._importBatchTpl[ctx.inputCols.slice().sort().join(',')] = { type, mapping:_m };
+    }
+  } catch(e){}
+
+  const _doneCb = window._importOnDone; window._importOnDone = null;
+  if (_doneCb) _doneCb({ ok:true, detected:({video:'影片',fb:'FB 貼文',event:'活動',media:'媒體',seo:'SEO 文章'}[type]||type), msg:'新增 '+added+'、更新 '+updated+' 筆' });
+
   // 更新匯入 log
   const log = document.getElementById('quickImportLog');
   if (log) {
@@ -10669,9 +10726,12 @@ function _confirmMappingImport() {
 // 嘗試從已儲存模板自動套用
 function _tryAutoApplyTemplate(rows, filename) {
   try {
+    const cols = Object.keys(rows[0]||{}).map(k => k.replace(/^﻿/,'').trim()).sort().join(',');
+    // 先看這一批次裡剛剛確認過的對應（例如一次拖 7 個月份的報表）
+    const batch = window._importBatchTpl && window._importBatchTpl[cols];
+    if (batch) return { matched:true, type:batch.type, mapping:batch.mapping };
     const templates = JSON.parse(localStorage.getItem('ktgh_import_tpl_v1') || '{}');
     if (!Object.keys(templates).length) return false;
-    const cols = Object.keys(rows[0]||{}).map(k => k.replace(/^﻿/,'').trim()).sort().join(',');
     for (const k of Object.keys(templates)) {
       const [type, tplCols] = k.split('|');
       if (tplCols === cols) {
@@ -10989,6 +11049,7 @@ function _esc(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','
 
 function _processQuickImportFile(file) {
   return new Promise(resolve => {
+    window._importOnDone = null;   // 清掉上一個檔案殘留的回呼
     const filename = file.name;
     const isCSV = /\.csv$/i.test(filename);
     const isJSON = /\.json$/i.test(filename);
@@ -11045,9 +11106,12 @@ function _processQuickImportFile(file) {
             tmpDiv.remove();
             return resolve({ ok:true, filename, detected:'自動套用模板 ('+autoTpl.type+')', msg:'已依先前模板匯入 '+rows.length+' 筆' });
           }
-          // 開啟智慧映射 modal — 使用者確認後才寫入 store
-          _analyzeRowsAndOpenMappingModal(rows, filename, isJSON?'json':'csv');
-          return resolve({ ok:true, filename, detected:'待確認', msg:'已偵測 '+rows.length+' 筆，請於彈窗確認欄位對應' });
+          // 開啟智慧映射 modal — 必須等使用者確認/取消才算這個檔案處理完，
+          // 否則多檔匯入時下一個檔案會把這個視窗蓋掉，前面的檔案全部靜靜消失。
+          const okOpen = _analyzeRowsAndOpenMappingModal(rows, filename, isJSON?'json':'csv',
+            res => resolve(Object.assign({ filename, detected:'待確認' }, res)));
+          if (!okOpen) return resolve({ ok:false, filename, detected:'未知', msg:'無法解析欄位' });
+          return;
         } catch(err) {
           return resolve({ ok:false, filename, detected:'錯誤', msg:err.message });
         }
@@ -11171,9 +11235,11 @@ function _processQuickImportFile(file) {
             tmpDiv.remove();
             return resolve({ ok:true, filename, detected:'自動套用模板 ('+autoTpl.type+')', msg:'已依先前模板匯入 '+bestRows.length+' 筆' });
           }
-          // 跳出智慧映射 modal
-          _analyzeRowsAndOpenMappingModal(bestRows, filename, 'xlsx');
-          return resolve({ ok:true, filename, detected:'待確認 (XLSX)', msg:'已偵測「'+bestSheet+'」'+bestRows.length+' 筆，請於彈窗確認欄位對應' });
+          // 跳出智慧映射 modal，並等使用者確認/取消
+          const okOpen2 = _analyzeRowsAndOpenMappingModal(bestRows, filename, 'xlsx',
+            res => resolve(Object.assign({ filename, detected:'待確認' }, res)));
+          if (!okOpen2) return resolve({ ok:false, filename, detected:'未知', msg:'「'+bestSheet+'」找不到可用欄位' });
+          return;
         }
         // 真的找不到任何資料
         resolve({ ok:false, filename, detected, msg });

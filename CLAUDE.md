@@ -199,3 +199,17 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 - `window.BUILTIN_POSTS`：91 篇內建貼文資料，不可刪減或改結構
 - 匯出月報邏輯（`exportReport()`）：已驗證，不要重構
 - 雲端主資料層（`cloudBoot` / `runCloudSave` / `_stateMeta`）：含衝突偵測與存檔確認，不要簡化
+
+### 匯入：多檔佇列（2026-08 修）
+- `_processQuickImportFile()` **必須等對應視窗確認/取消才 resolve**。它以前開完視窗就回傳，
+  配上 `_openImportMappingModal()` 開頭的「移除舊視窗」，一次拖 7 個檔案時後面的檔案會把前面的
+  視窗一個個蓋掉，最後只剩最後一個 — 使用者看到的就是「匯入了但沒反應」。
+  改法：`_analyzeRowsAndOpenMappingModal(rows, filename, type, onDone)` 把 onDone 存進
+  `window._importOnDone`，由 `_confirmMappingImport()` / `_cancelMappingImport()` 觸發。
+  → **任何新的提前 return 路徑都要記得呼叫 `window._importOnDone`，否則整個佇列會卡死。**
+- `window._importBatchTpl` = 同一批次內欄位組合相同的檔案自動沿用對應，每批開始時清空。
+- **空欄要先剔除**：Excel 若被設成「表格」，`sheet_to_json` 會吐出到 16384 欄（欄1…欄16352）。
+  照單全收 = 對應視窗畫上萬列下拉 = 瀏覽器凍住。`_analyzeRowsAndOpenMappingModal` 只保留
+  前 50 列裡至少有一格有值的欄位。（實例：`2026年 06.xlsx`，32 個真欄位 + 16352 個空欄）
+- `META_COL` 排除清單含 `廣告曝光次數 / 廣告 CPM / 收益估計值` — 這些是純廣告欄位，
+  自然觸及的貼文一律空白，自動對應到「曝光」會讓整份報表看起來像壞掉。
