@@ -2132,6 +2132,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
             <option value="device">設備 / 技術</option>
             <option value="nature">性質</option>
             <option value="audience">目標族群</option>
+            <option value="doctor">醫師</option>
             <option value="project">專案</option>
             <option value="other">其他</option>
           </select>
@@ -2302,16 +2303,22 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
     <!-- ══ 跨傳達管道 — 標籤統計 ══ -->
     <div class="section" id="sec-crosstag-stats">
       <div style="background:#EEF7F2;border-left:4px solid #1a8454;padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:12.5px;line-height:1.7;color:#1B4332;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.9.8 1 1.5 1 2.3v1h6v-1c0-.8.1-1.5 1-2.3A7 7 0 0 0 12 2z"/></svg> <b>使用情境</b>：想知道「達文西」這個主題我們總共宣傳了多少，直接在<b>關鍵字</b>欄打「達文西」，就會列出 FB 貼文、活動/講座、新聞曝光、門診表、LINE、SEO、YT/IG 各做了幾次、累積觸及與成效。關鍵字會同時比對標籤與標題，所以還沒上標籤的資料也搜得到。
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.9.8 1 1.5 1 2.3v1h6v-1c0-.8.1-1.5 1-2.3A7 7 0 0 0 12 2z"/></svg> <b>使用情境</b>：想知道「達文西」總共宣傳了多少，直接在<b>關鍵字</b>欄打「達文西」，就會列出各管道做了幾次與成效（關鍵字同時比對標籤與標題，還沒上標籤的資料也搜得到）。<br>
+        <b>條件可以疊加</b>：按「＋ 加入標籤」選<b>神經內科</b>就是該科所有宣傳；再加上醫師<b>楊清鎮</b>並選「符合全部」，就只剩該科這位醫師做過的。
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <label style="font-size:12px;font-weight:600;color:var(--text-sub);">關鍵字：</label>
         <input type="text" id="crossTagKeyword" oninput="renderCrossTagStats()" placeholder="例：達文西、LDCT、骨鬆"
           style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:180px;font-family:inherit;">
-        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">或選標籤：</label>
-        <select id="crossTagSelect" onchange="document.getElementById('crossTagKeyword').value='';renderCrossTagStats()" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:200px;">
-          <option value="">-- 請選擇標籤 --</option>
+        <label style="font-size:12px;font-weight:600;color:var(--text-sub);">標籤條件：</label>
+        <span id="ctTagChips" style="display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center;"></span>
+        <button class="btn btn-outline" onclick="ctPickTags()" style="font-size:12px;padding:6px 12px;">＋ 加入標籤</button>
+        <select id="ctMatchMode" onchange="renderCrossTagStats()" title="兩個以上條件時的比對方式"
+          style="padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:12.5px;">
+          <option value="all">符合全部（例：神經內科 ＋ 楊清鎮）</option>
+          <option value="any">符合任一</option>
         </select>
+        <select id="crossTagSelect" style="display:none;"><option value=""></option></select>
         <select id="crossTagPeriod" onchange="renderCrossTagStats()" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;min-width:160px;">
           <option value="all">全部期間</option>
         </select>
@@ -2337,6 +2344,7 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
             <option value="nature">性質</option>
             <option value="culture">健康人文藝術活動</option>
             <option value="audience">族群</option>
+            <option value="doctor">醫師</option>
             <option value="project">專案 / 議題</option>
             <option value="other">其他</option>
           </select>
@@ -7452,7 +7460,7 @@ function renderClinicItems() {
 function renderClinicTags() {
   const wrap = document.getElementById('clinicTagList');
   if (!wrap) return;
-  const cats = { dept:'科別', center:'中心', disease:'疾病', device:'儀器', tech:'技術', checkup:'高級健檢', nature:'性質', culture:'健康人文藝術活動', audience:'族群', project:'專案', other:'其他' };
+  const cats = { dept:'科別', center:'中心', disease:'疾病', device:'儀器', tech:'技術', checkup:'高級健檢', nature:'性質', culture:'健康人文藝術活動', audience:'族群', doctor:'醫師', project:'專案', other:'其他' };
   const grouped = {};
   (store.mediaTags||[]).forEach(t => { if (!grouped[t.category]) grouped[t.category] = []; grouped[t.category].push(t); });
   wrap.innerHTML = Object.keys(cats).filter(k => grouped[k]).map(k => {
@@ -7470,7 +7478,7 @@ function clinicAddTag() {
   const cat = document.getElementById('newTagCategory').value;
   if (!name) { showToast('請輸入標籤名稱'); return; }
   if ((store.mediaTags||[]).some(t => t.name === name)) { showToast('標籤已存在'); return; }
-  const colorMap = { dept:'#1a8454', center:'#1D4ED8', disease:'#DC2626', device:'#7C3AED', tech:'#6D28D9', checkup:'#0891B2', nature:'#F59E0B', culture:'#D97706', audience:'#DB2777', project:'#059669', other:'#6B7280' };
+  const colorMap = { dept:'#1a8454', center:'#1D4ED8', disease:'#DC2626', device:'#7C3AED', tech:'#6D28D9', checkup:'#0891B2', nature:'#F59E0B', culture:'#D97706', audience:'#DB2777', doctor:'#0F766E', project:'#059669', other:'#6B7280' };
   store.mediaTags = store.mediaTags || [];
   store.mediaTags.push({ id: 't_'+Date.now(), name, category: cat, color: colorMap[cat]||'#6B7280' });
   saveStore();
@@ -13036,7 +13044,7 @@ function renderTagPicker() {
   const kw = (_tagPicker.filter || '').trim().toLowerCase();
   const catLabel = { dept:'科別', center:'中心', disease:'疾病', device:'儀器', tech:'技術',
                      checkup:'高級健檢', nature:'性質', culture:'健康人文藝術活動',
-                     audience:'族群', project:'專案/議題', other:'其他' };
+                     audience:'族群', doctor:'醫師', project:'專案/議題', other:'其他' };
   const tags = (store.mediaTags || []).filter(t => !t.deleted_at)
                  .filter(t => !kw || t.name.toLowerCase().includes(kw));
   const byCat = {};
@@ -13209,7 +13217,7 @@ function renderCrossTagLibrary() {
   (store.linePosts||[]).filter(x=>!x.deleted_at).forEach(p => (p.tags||[]).forEach(t => { if(usage[t]) usage[t].linePosts++; }));
   (store.seoArticles||[]).filter(x=>!x.deleted_at).forEach(a => (a.tags||[]).forEach(t => { if(usage[t]) usage[t].seo++; }));
   (store.videoItems||[]).filter(x=>!x.deleted_at).forEach(v => (v.tags||[]).forEach(t => { if(usage[t]) usage[t].video++; }));
-  const catLabel = { dept:'科別', center:'中心', disease:'疾病', device:'儀器', tech:'技術', checkup:'高級健檢', nature:'性質', culture:'健康人文藝術活動', audience:'族群', project:'專案/議題', other:'其他' };
+  const catLabel = { dept:'科別', center:'中心', disease:'疾病', device:'儀器', tech:'技術', checkup:'高級健檢', nature:'性質', culture:'健康人文藝術活動', audience:'族群', doctor:'醫師', project:'專案/議題', other:'其他' };
   const byCat = {};
   tags.forEach(t => { const c = t.category || 'other'; if (!byCat[c]) byCat[c] = []; byCat[c].push(t); });
   const catOrder = Object.keys(catLabel);
@@ -13371,13 +13379,41 @@ function crossTagPeriodLabel(value) {
   return '全部期間';
 }
 
+// 跨管道查詢的標籤條件（可多個）。mode: all = 全部符合、any = 任一符合
+let _ctTags = [];
+
+function ctPickTags() {
+  openTagPicker({
+    title: '選擇標籤條件',
+    subtitle: '可一次選多個。例如「神經內科」＋「楊清鎮」，再把比對方式設成「符合全部」，就只剩該科這位醫師的宣傳。',
+    preselected: _ctTags.slice(),
+    applyLabel: '套用條件',
+    onApply: (tags) => { _ctTags = tags.slice(); renderCrossTagStats(); }
+  });
+}
+function ctRemoveTag(name) {
+  _ctTags = _ctTags.filter(t => t !== name);
+  renderCrossTagStats();
+}
+function ctRenderChips() {
+  const box = document.getElementById('ctTagChips');
+  if (!box) return;
+  box.innerHTML = _ctTags.length
+    ? _ctTags.map(t =>
+        '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 6px 3px 9px;background:#E4F1EA;color:#0A5F3C;'
+        + 'border:1px solid #B5DAC7;border-radius:14px;font-size:12px;">' + _tgEsc(t)
+        + '<button onclick="ctRemoveTag(\'' + _tgEsc(t).replace(/'/g,"\\'") + '\')" title="移除這個條件"'
+        + ' style="background:none;border:none;color:#0A5F3C;cursor:pointer;font-size:14px;line-height:1;padding:0 2px;">×</button></span>').join('')
+    : '<span style="font-size:12px;color:var(--text-muted);">（未設定，顯示全部）</span>';
+  const modeSel = document.getElementById('ctMatchMode');
+  if (modeSel) modeSel.style.display = _ctTags.length > 1 ? '' : 'none';
+}
+
 function renderCrossTagStats() {
-  // populate tag select
-  const sel = document.getElementById('crossTagSelect');
-  if (!sel) return;
+  const box = document.getElementById('ctTagChips');
+  if (!box) return;
   const tags = (store.mediaTags || []).filter(t => !t.deleted_at);
-  const current = sel.value;
-  sel.innerHTML = '<option value="">-- 請選擇標籤 --</option>' + tags.map(t => `<option value="${t.name}"${t.name===current?' selected':''}>${t.name}</option>`).join('');
+  ctRenderChips();
   // populate period select
   const perSel = document.getElementById('crossTagPeriod');
   if (perSel) {
@@ -13389,8 +13425,9 @@ function renderCrossTagStats() {
   const wrap = document.getElementById('crossTagContent');
   if (!wrap) return;
   const kw = (document.getElementById('crossTagKeyword')?.value || '').trim();
-  const tagName = sel.value;
-  if (!tagName && !kw) {
+  const mode = (document.getElementById('ctMatchMode')?.value) || 'all';
+  const tagName = _ctTags[0] || '';
+  if (!_ctTags.length && !kw) {
     wrap.innerHTML = '<div style="padding:60px;text-align:center;color:var(--text-muted);font-size:13px;">'
       + '輸入關鍵字，或選擇一個標籤開始分析。<br>'
       + '<span style="font-size:12px;">關鍵字會同時比對標籤與標題，還沒上標籤的資料也搜得到。</span></div>';
@@ -13401,16 +13438,22 @@ function renderCrossTagStats() {
 
   // 關鍵字模式：同時比對標籤與標題文字；標籤模式：只比對標籤
   const kwLow = kw.toLowerCase();
-  const tagObj = tags.find(t => t.name === tagName);
+  // 門診表的 tags 可能存的是 ID，兩種都要認
+  const idOf = n => (tags.find(t => t.name === n) || {}).id;
+  const hasTag = (rowTags, n) => rowTags.some(t => t === n || t === idOf(n));
   const hit = (row, text) => {
     const rowTags = Array.isArray(row.tags) ? row.tags : [];
+    // 關鍵字與標籤條件是「而且」：兩個都設就兩個都要符合
     if (kw) {
-      return rowTags.some(t => String(t).toLowerCase().includes(kwLow))
-          || String(text || '').toLowerCase().includes(kwLow);
+      const okKw = rowTags.some(t => String(t).toLowerCase().includes(kwLow))
+                || String(text || '').toLowerCase().includes(kwLow);
+      if (!okKw) return false;
     }
-    // 門診表的 tags 可能存的是 ID，兩種都認
-    return rowTags.some(t => t === tagName || (tagObj && t === tagObj.id));
+    if (!_ctTags.length) return true;
+    return mode === 'any' ? _ctTags.some(n => hasTag(rowTags, n))
+                          : _ctTags.every(n => hasTag(rowTags, n));
   };
+  const condLabel = _ctTags.length ? _ctTags.join(mode === 'any' ? '　或　' : '　＋　') : '';
 
   // Collect matching items per channel
   const postsHit = (store.posts||[]).filter(p => !p.deleted_at && hit(p, p.title) && inPeriod(p.date));
@@ -13426,7 +13469,7 @@ function renderCrossTagStats() {
   const totalCount = postsHit.length + eventsHit.length + mediaHit.length + clinicHit.length + linePostsHit.length + seoHit.length + videoHit.length;
   if (!totalCount) {
     wrap.innerHTML = `<div style="padding:60px;text-align:center;color:var(--text-muted);font-size:13px;">`
-      + (kw ? `找不到含有「${_tgEsc(kw)}」的資料。` : `此標籤在選定期間內尚無任何傳達管道記錄。`)
+      + (kw ? `找不到含有「${_tgEsc(kw)}」的資料。` : `「${_tgEsc(condLabel)}」在選定期間內尚無任何傳達管道記錄。`)
       + `<br><span style="font-size:12px;">若資料還沒上標籤，可到「標籤管理」按「自動補標籤」一次補完。</span></div>`;
     return;
   }
@@ -13459,8 +13502,14 @@ function renderCrossTagStats() {
 
   wrap.innerHTML = `
     <div style="background:linear-gradient(135deg,#064E2C 0%,#1a8454 100%);border-radius:14px;padding:24px;color:#fff;margin-bottom:18px;">
-      <div style="font-size:12px;opacity:.85;margin-bottom:4px;">${kw ? '關鍵字搜尋' : '標籤'}</div>
-      <div style="font-size:28px;font-weight:900;margin-bottom:4px;">${kw ? _tgEsc(kw) : '#' + tagName}</div>
+      <div style="font-size:12px;opacity:.85;margin-bottom:4px;">${
+        kw && condLabel ? '關鍵字＋標籤條件'
+        : (kw ? '關鍵字搜尋'
+        : (_ctTags.length > 1 ? ('標籤組合（' + (mode === 'any' ? '符合任一' : '符合全部') + '）') : '標籤'))
+      }</div>
+      <div style="font-size:28px;font-weight:900;margin-bottom:4px;">${
+        [kw ? _tgEsc(kw) : '', condLabel ? _tgEsc(condLabel) : ''].filter(Boolean).join('　｜　')
+      }</div>
       <div style="font-size:13px;opacity:.9;">跨傳達管道共執行 <b style="font-size:18px;">${totalCount}</b> 次</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:20px;">
@@ -13783,11 +13832,11 @@ function importVideoData() {
 //  跨傳達管道：標籤一鍵推廣報告（A4 / 可列印）
 // ═══════════════════════════════════════════
 function openCrossTagReport() {
-  const sel = document.getElementById('crossTagSelect');
-  const kw  = (document.getElementById('crossTagKeyword')?.value || '').trim();
-  const tagName = (sel && sel.value) || '';
-  if (!tagName && !kw) { showToast('請先輸入關鍵字或選擇一個標籤'); return; }
-  openReportFilterModal('crossTag', tagName || kw, (opts) => _generateCrossTagReport(opts));
+  const kw = (document.getElementById('crossTagKeyword')?.value || '').trim();
+  if (!_ctTags.length && !kw) { showToast('請先輸入關鍵字或加入標籤條件'); return; }
+  const mode = (document.getElementById('ctMatchMode')?.value) || 'all';
+  const key = _ctTags.length ? _ctTags.join(mode === 'any' ? '或' : '＋') : kw;
+  openReportFilterModal('crossTag', key, (opts) => _generateCrossTagReport(opts));
 }
 
 // 從標籤管理頁直接調出某個標籤的推廣報告
@@ -13795,13 +13844,7 @@ function openTagReport(tagName) {
   switchSection('crosstag', 'stats');
   const kwEl = document.getElementById('crossTagKeyword');
   if (kwEl) kwEl.value = '';
-  const sel = document.getElementById('crossTagSelect');
-  if (sel) {
-    if (![...sel.options].some(o => o.value === tagName)) {
-      sel.insertAdjacentHTML('beforeend', '<option value="' + _tgEsc(tagName) + '">' + _tgEsc(tagName) + '</option>');
-    }
-    sel.value = tagName;
-  }
+  _ctTags = [tagName];          // 從標籤庫點進來就是單一條件
   renderCrossTagStats();
 }
 
@@ -13811,12 +13854,14 @@ function _generateCrossTagReport(opts) {
 
   // ★ 跨管道查詢有「關鍵字」與「標籤」兩種模式，報告以前只讀標籤下拉，
   //   用關鍵字查完按產生報告會卡在「請先選擇一個標籤」，整條路是斷的。
-  const sel = document.getElementById('crossTagSelect');
-  const kw  = (document.getElementById('crossTagKeyword')?.value || '').trim();
-  const tagName = (sel && sel.value) || '';
-  if (!tagName && !kw) { showToast('請先輸入關鍵字或選擇一個標籤'); return; }
-  const subject = kw || tagName;
-  const isKw = !!kw;
+  const kw = (document.getElementById('crossTagKeyword')?.value || '').trim();
+  const mode = (document.getElementById('ctMatchMode')?.value) || 'all';
+  const condTags = _ctTags.slice();
+  if (!condTags.length && !kw) { showToast('請先輸入關鍵字或加入標籤條件'); return; }
+  const tagName = condTags[0] || '';
+  const condLabel = condTags.length ? condTags.join(mode === 'any' ? '　或　' : '　＋　') : '';
+  const subject = [kw, condLabel].filter(Boolean).join('　｜　');
+  const isKw = !!kw && !condTags.length;
 
   // 期間以設定視窗選的為準；沒有才沿用頁面上的下拉
   const periodSel = document.getElementById('crossTagPeriod');
@@ -13830,16 +13875,21 @@ function _generateCrossTagReport(opts) {
   const cmpLabel = cmpPeriod ? crossTagPeriodLabel(cmpPeriod) : '';
   const inC = cmpPeriod ? crossTagPeriodMatcher(cmpPeriod) : null;
 
-  const tagObj = (store.mediaTags||[]).find(t => t.name === tagName);
+  const allTags = (store.mediaTags||[]).filter(t => !t.deleted_at);
+  const idOf = n => (allTags.find(t => t.name === n) || {}).id;
+  const hasTag = (rowTags, n) => rowTags.some(t => t === n || t === idOf(n));
   const kwLow = kw.toLowerCase();
   // 比對規則和「跨管道查詢」畫面完全一致，才不會畫面一套、報告另一套
   const match = (row, text) => {
     const rowTags = Array.isArray(row.tags) ? row.tags : [];
-    if (isKw) {
-      return rowTags.some(t => String(t).toLowerCase().includes(kwLow))
-          || String(text || '').toLowerCase().includes(kwLow);
+    if (kw) {
+      const okKw = rowTags.some(t => String(t).toLowerCase().includes(kwLow))
+                || String(text || '').toLowerCase().includes(kwLow);
+      if (!okKw) return false;
     }
-    return rowTags.some(t => t === tagName || (tagObj && t === tagObj.id));
+    if (!condTags.length) return true;
+    return mode === 'any' ? condTags.some(n => hasTag(rowTags, n))
+                          : condTags.every(n => hasTag(rowTags, n));
   };
   const txtOf = {
     post:  p => p.title,
@@ -14070,8 +14120,11 @@ function _generateCrossTagReport(opts) {
     +   '<br>統計期間：<b>'+esc(periodLabel)+'</b>'
     +   (cmpLabel ? '<br>對比期間：'+esc(cmpLabel)+'（'+(cmpMode==='yoy'?'去年同期':'上一期')+'）' : '')
     + '</div></div>'
-    + '<div class="hero"><div class="label">'+(isKw ? '關鍵字查詢' : '推廣主題標籤')+'</div>'
-    + '<div class="tag">'+(isKw ? esc(subject) : '#'+esc(subject))+'</div>'
+    + '<div class="hero"><div class="label">'
+    +   (condTags.length > 1 ? ('標籤組合（'+(mode==='any'?'符合任一':'符合全部')+'）')
+        : (isKw ? '關鍵字查詢' : '推廣主題標籤'))
+    + '</div>'
+    + '<div class="tag">'+((isKw || condTags.length > 1) ? esc(subject) : '#'+esc(subject))+'</div>'
     + '<div class="stat">跨傳達管道共執行 <b>'+totalCount+'</b> 次｜累計曝光觸及 <b>'+totalReach.toLocaleString()+'</b></div></div>'
     + (_oSec('kpi') ? ('<h2>'+svgIcon('pin',16)+' 各傳達管道執行概覽</h2>' + cardsHtml) : '')
     + (_oSec('bar') ? coverHtml : '')

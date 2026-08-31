@@ -151,6 +151,10 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 - `batchTagFiltered(chKey, getRows)`：以「目前列表篩選結果」為選取範圍批次上標籤。
 - `quickTagRow(chKey, idx)` / `tagCellHtml()`：列表內直接改標籤。
 - 跨管道統計支援**關鍵字模式**（同時比對標籤與標題），沒上標籤的資料也搜得到。
+- **標籤條件可疊加**：`_ctTags` 存多個標籤，`ctMatchMode` 決定符合全部(AND)或任一(OR)。
+  關鍵字與標籤條件之間永遠是 AND。查詢畫面與推廣報告**共用同一套比對邏輯**，
+  改一邊就要改另一邊，否則畫面一套、報告另一套。
+- 標籤類別有 **`doctor`（醫師）**。原本沒有這個類別，同事只能把醫師名字丟進「專案/議題」。
 
 ## 檔期（Campaign）與判讀引擎
 
