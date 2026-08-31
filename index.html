@@ -2352,7 +2352,8 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
           <button class="btn btn-primary" data-perm="edit" onclick="openAutoTagModal()">自動補標籤</button>
-          <span style="font-size:12px;color:var(--text-muted);flex:1;min-width:200px;">掃描所有管道的標題，用標籤庫的詞自動比對出建議標籤。會先給你預覽，可逐項取消。</span>
+          <button class="btn btn-outline" data-perm="edit" onclick="openDoctorTagModal()">從活動講者建醫師標籤</button>
+          <span style="font-size:12px;color:var(--text-muted);flex:1;min-width:200px;">「自動補標籤」掃描各管道標題比對標籤庫的詞；「從活動講者建醫師標籤」從活動的講者欄位解析出醫師姓名。兩者都會先給預覽。</span>
         </div>
       </div>
       <div id="crossTagLibraryList"></div>
@@ -2935,6 +2936,24 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
       <button class="btn btn-outline" onclick="closeModal('tagPickerModal')">取消</button>
       <button class="btn btn-outline" id="tagPickerApply2Btn" onclick="applyTagPicker2()" style="display:none;"></button>
       <button class="btn btn-primary" id="tagPickerApplyBtn" onclick="applyTagPicker()">套用</button>
+    </div>
+  </div>
+</div>
+
+<!-- DOCTOR TAG MODAL（從活動講者建立醫師標籤）-->
+<div class="modal-overlay" id="doctorTagModal">
+  <div class="modal-box" style="max-width:760px;">
+    <h3>從活動講者建立醫師標籤</h3>
+    <div id="doctorTagSummary" style="font-size:13px;line-height:1.7;margin:-10px 0 12px;"></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button class="btn btn-outline" onclick="setAllDoctorPick(true)" style="font-size:12px;padding:4px 12px;">全選</button>
+      <button class="btn btn-outline" onclick="setAllDoctorPick(false)" style="font-size:12px;padding:4px 12px;">全不選</button>
+      <span style="font-size:11.5px;color:var(--text-muted);align-self:center;">滑鼠移到名字上可看他出現在哪些活動</span>
+    </div>
+    <div id="doctorTagBody" style="max-height:46vh;overflow-y:auto;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('doctorTagModal')">取消</button>
+      <button class="btn btn-primary" onclick="applyDoctorPlan()">建立標籤並標記活動</button>
     </div>
   </div>
 </div>
@@ -12816,6 +12835,140 @@ window.addEventListener('resize', () => {
   const el = document.getElementById('deckPreviewBody');
   if (el && el.children.length) _fitDeckPreview(el);
 });
+
+
+// ═══════════════════════════════════════════════════════════
+//  從活動的「講者」欄位建立醫師標籤
+//  講者格式很雜：「兒童醫學部 鄔翔帆醫師、營養室 楊淑雯主任」「黃俊雄醫師」
+//  「心臟科、營養科」（只有科別沒有人）「奇美代表」（外部單位）…
+//  規則：一定要有職稱才算人；先剝掉前面的單位，再取職稱前的中文姓名。
+// ═══════════════════════════════════════════════════════════
+const DOC_TITLES = ['副院長','院長','部長','副主任','主任','主治醫師','醫師',
+  '臨床心理師','諮商心理師','心理師','物理治療師','職能治療師','語言治療師',
+  '個管師','營養師','護理師','社工師','藥師','技術師','技師','老師','教練','專員',
+  'PT','OT','ST','RD','CDE'];
+const DOC_TITLE_RE = new RegExp('(' + DOC_TITLES.join('|') + ')$');
+const DOC_UNIT_RE  = /^[一-鿿A-Za-z0-9]{1,14}(部|科|室|中心|門診|基金會|學會|協會|醫院|診所|組|社)\s*/;
+const DOC_NAME_RE  = /([一-鿿]{2,4})$/;
+const DOC_SKIP_RE  = /代表|外聘|測試|名師|團隊|各科|等人|嘉賓|KOL/;
+// 剝完單位後仍可能剩下這些通用詞，不是人名
+const DOC_STOP = new Set(['瑜珈','臨床','現場','專家','講師','名師','團隊','嘉賓','代表',
+                          '老師','主任','醫師','營養','心理','物理','職能','語言']);
+
+function parseSpeakerNames(speaker) {
+  const out = [];
+  String(speaker || '').split(/[、，,／/]+/).forEach(part => {
+    let p = String(part).replace(/（[^）]*）|\([^)]*\)/g, '').trim();
+    if (!p || DOC_SKIP_RE.test(p)) return;
+    const m = DOC_TITLE_RE.exec(p);
+    if (!m) return;                       // 沒職稱，多半只是科別
+    let stem = p.slice(0, m.index).trim();
+    let prev = null;
+    while (stem !== prev) {               // 單位可能疊好幾層
+      prev = stem;
+      stem = stem.replace(DOC_UNIT_RE, '').trim();
+    }
+    stem = stem.replace(/[A-Za-z0-9\s]+/g, '');   // 去掉英數（例：ALL IN 高紹庭營養師）
+    const nm = DOC_NAME_RE.exec(stem);
+    if (!nm) return;
+    const name = nm[1];
+    if (name.length < 2 || DOC_STOP.has(name)) return;
+    if (!out.includes(name)) out.push(name);
+  });
+  return out;
+}
+
+// 掃描所有活動，整理出「醫師 → 出現在哪些活動」
+let _docPlan = [];
+
+function buildDoctorPlan() {
+  const known = new Set((store.mediaTags || []).filter(t => !t.deleted_at).map(t => t.name));
+  const byName = {};
+  activeEvents().forEach(e => {
+    parseSpeakerNames(e.speaker).forEach(n => {
+      (byName[n] = byName[n] || { name:n, events:[], isNew: !known.has(n) }).events.push(e);
+    });
+  });
+  return Object.values(byName).sort((a,b) => b.events.length - a.events.length);
+}
+
+function openDoctorTagModal() {
+  if (!requireEdit()) return;
+  _docPlan = buildDoctorPlan().map(d => ({ ...d, on: true }));
+  renderDoctorTagModal();
+  openModal('doctorTagModal');
+}
+
+function renderDoctorTagModal() {
+  const body = document.getElementById('doctorTagBody');
+  const sum  = document.getElementById('doctorTagSummary');
+  if (!body) return;
+  const evTotal = activeEvents().filter(e => e.speaker).length;
+  const on = _docPlan.filter(d => d.on);
+  const newCnt = _docPlan.filter(d => d.isNew).length;
+
+  sum.innerHTML = _docPlan.length
+    ? '掃描 <b>' + evTotal + '</b> 場有填講者的活動，找出 <b>' + _docPlan.length + '</b> 位人員（其中 '
+      + newCnt + ' 位是標籤庫還沒有的）。目前勾選 <b>' + on.length + '</b> 位。<br>'
+      + '<span style="color:var(--text-muted);font-size:12px;">會建立成「醫師」類別的標籤，'
+      + '並把該活動加上對應的醫師標籤。只新增，不會動到既有標籤。點名字可取消個別人員。</span>'
+    : '沒有從講者欄位解析出人員。講者要有職稱（醫師／主任／老師…）才認得出來。';
+
+  if (!_docPlan.length) { body.innerHTML = ''; return; }
+
+  body.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:6px;">'
+    + _docPlan.map((d,i) => {
+        const c = d.on ? '#0F766E' : 'var(--text-muted)';
+        return '<button type="button" onclick="toggleDoctorPick(' + i + ')" '
+          + 'title="' + _tgEsc(d.events.map(e => (e.date||'') + ' ' + (e.name||'')).slice(0,6).join('\n')) + '" '
+          + 'style="cursor:pointer;font-family:inherit;font-size:12px;padding:4px 10px;border-radius:14px;'
+          + 'border:1.5px solid ' + (d.on ? '#0F766E' : 'var(--border)') + ';'
+          + 'background:' + (d.on ? '#E3F3F1' : 'transparent') + ';color:' + c + ';'
+          + 'text-decoration:' + (d.on ? 'none' : 'line-through') + ';">'
+          + _tgEsc(d.name) + ' <span style="opacity:.65;">' + d.events.length + ' 場</span>'
+          + (d.isNew ? '' : ' <span style="opacity:.55;font-size:10px;">已存在</span>')
+          + '</button>';
+      }).join('')
+    + '</div>';
+}
+
+function toggleDoctorPick(i) {
+  if (_docPlan[i]) { _docPlan[i].on = !_docPlan[i].on; renderDoctorTagModal(); }
+}
+function setAllDoctorPick(on) {
+  _docPlan.forEach(d => { d.on = on; });
+  renderDoctorTagModal();
+}
+
+function applyDoctorPlan() {
+  if (!requireEdit()) return;
+  const picked = _docPlan.filter(d => d.on);
+  if (!picked.length) { showToast('沒有勾選任何人員'); return; }
+  const evCount = new Set(picked.flatMap(d => d.events)).size;
+  if (!confirm('將建立 ' + picked.length + ' 個「醫師」標籤，並為 ' + evCount
+    + ' 場活動加上對應的醫師標籤。\n\n（只新增，不會移除既有標籤；會先建立還原點）')) return;
+
+  takeSnapshot('建立醫師標籤前');
+  if (!store.mediaTags) store.mediaTags = [];
+  let added = 0;
+  picked.forEach(d => {
+    if (!store.mediaTags.some(t => !t.deleted_at && t.name === d.name)) {
+      store.mediaTags.push({
+        id: 'tag_doc_' + d.name, name: d.name, category: 'doctor',
+        color: '#0F766E', created_at: new Date().toISOString(),
+      });
+      added++;
+    }
+    d.events.forEach(e => {
+      const cur = Array.isArray(e.tags) ? e.tags.slice() : [];
+      if (!cur.includes(d.name)) { cur.push(d.name); e.tags = cur; }
+    });
+  });
+  saveStore();
+  closeModal('doctorTagModal');
+  _refreshTagViews();
+  showToast('已新增 ' + added + ' 個醫師標籤，並標記 ' + evCount + ' 場活動');
+}
 
 // ═══════════════════════════════════════════════════════════
 //  跨管道標籤模組
