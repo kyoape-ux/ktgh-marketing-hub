@@ -231,7 +231,11 @@ Drive 上的 `ktgh_marketing_state.json` 是**唯一真實來源**，Google Shee
 - **看成效** 只放「跨管道、不綁單一平台」的頁（總覽首頁、跨管道查詢）。
 - **各管道列表與統計** 放每個管道自己的列表與數據（FB／LINE／影音／官網／SEO／活動／新聞）。
   儀表板與列表屬於同一管道就放一起，不要因為叫「儀表板」就丟去看成效。
-- **門診表題材**（`clinic-items` / `clinic-matrix`）是門診表的題材規劃，不是成效資料，自成一組。
+- **門診表題材**（`clinic-items`）：門診表是傳達管道之一，所以歸在「各管道列表與統計」。
+  原本的「題材列表」與「主題統計」是同一份 `store.mediaItems` 的兩個視圖，已合併成一頁：
+  上方主題統計吃**已篩選**的結果，下方列表可切「卡片／表格」（`_clinicView`，存 `ktgh_clinic_view`）。
+  `renderClinicMatrix()` 保留成 `renderClinicItems()` 的別名，既有呼叫點不必全改；
+  月份一律讀 `clinicItemMonthFilter`（`''` = 全年），`clinicMatrixMonth` 已不存在。
 - 新增頁面時先問「這頁綁定單一管道嗎」：綁 → 各管道；不綁且是給人看結論 → 看成效。
 - `restoreNavState()` 的預設收合清單比對的是 **群組 data-key**（entry/perf/channel/clinic/report/config/adv），
   舊版寫成 warroom/fb/event 這種區塊名稱，永遠對不上，導致每一組都被收起來。已修，
