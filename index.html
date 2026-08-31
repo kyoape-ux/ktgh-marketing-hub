@@ -1553,14 +1553,16 @@ window.BUILTIN_GSC_KEYWORDS = [{"topic":"攝護腺肥大","keyword":"攝護腺",
           <select id="evTagFilter" onchange="renderEvents()" style="height:32px;padding:0 10px;border:1px solid #d0ddd6;border-radius:6px;font-size:13px;background:#fff;"><option value="">所有標籤</option></select>
           <span id="evCountLabel" style="font-size:12px;color:var(--text-muted);margin-left:auto;"></span>
           <button class="btn btn-outline" onclick="clearEvFilters()" style="height:32px;font-size:12px;padding:0 10px;">清除篩選</button>
-          <button class="btn btn-outline" data-perm="edit" onclick="batchTagFiltered('events', () => _evFilteredRows)" title="為目前篩選出的活動一次加上標籤" style="height:32px;font-size:12px;padding:0 10px;">批次加標籤</button>
+          <span id="batchCount_events" style="font-size:12px;color:var(--brand);font-weight:700;"></span>
+          <button class="btn btn-outline" data-perm="edit" onclick="clearBatchSel('events')" title="取消所有勾選" style="height:32px;font-size:12px;padding:0 10px;">清除勾選</button>
+          <button class="btn btn-outline" data-perm="edit" onclick="batchTagFiltered('events', () => _evFilteredRows)" title="勾選幾列就改幾列；沒勾選就套用到目前篩選的全部" style="height:32px;font-size:12px;padding:0 10px;">批次改標籤</button>
           <button class="btn btn-outline" onclick="switchSection('event','dashboard')" title="出席率、滿意度、類型分布等整體分析" style="height:32px;font-size:12px;padding:0 10px;">成效分析</button>
           <button class="btn" onclick="openChannelReport('event')" style="height:32px;font-size:12px;padding:0 10px;background:#F59E0B;color:#fff;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 產生報表</button>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>活動日期</th><th>活動名稱</th><th>類型</th><th>院區</th><th>報名</th><th>出席</th><th>出席率</th><th>FB觸及</th><th>滿意度</th><th>標籤</th><th>備註</th><th>操作</th></tr>
+              <tr><th style="width:34px;padding-right:0;"><input type="checkbox" id="batchAll_events" title="全選／取消目前列出的活動" onclick="toggleBatchAll('events', this.checked, _evShownIdx)"></th><th>活動日期</th><th>活動名稱</th><th>類型</th><th>院區</th><th>報名</th><th>出席</th><th>出席率</th><th>FB觸及</th><th>滿意度</th><th>標籤</th><th>備註</th><th>操作</th></tr>
             </thead>
             <tbody id="eventListTbody"></tbody>
           </table>
@@ -4841,6 +4843,7 @@ function clearEvFilters() {
 }
 
 let _evFilteredRows = [];
+let _evShownIdx = [];
 
 function renderEvents() {
   const tbody = document.getElementById('eventListTbody');
@@ -4867,15 +4870,16 @@ function renderEvents() {
   if (search)           filtered = filtered.filter(({e}) => (e.name||'').toLowerCase().includes(search));
   if (tagF)             filtered = filtered.filter(({e}) => (e.tags||[]).includes(tagF));
 
-  // 供「批次加標籤」使用：目前篩選出來的那幾筆
+  // 供批次改標籤使用：目前篩選出來的那幾筆，以及它們在 store 裡的索引
   _evFilteredRows = filtered.map(({e}) => e);
+  _evShownIdx = filtered.map(({i}) => i);
 
   // ── 計數標籤 ──
   const countEl = document.getElementById('evCountLabel');
   if (countEl) countEl.textContent = `共 ${filtered.length} / ${activeEvents().length} 筆`;
 
   if (!filtered.length) {
-    tbody.innerHTML = '<tr><td colspan="12"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p>' + (store.events.length ? '找不到符合條件的活動' : '尚未新增活動記錄') + '</p></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="13"><div class="empty"><div class="empty-icon" style="color:var(--text-muted);opacity:0.4;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><p>' + (store.events.length ? '找不到符合條件的活動' : '尚未新增活動記錄') + '</p></div></td></tr>';
     return;
   }
   tbody.innerHTML = filtered.map(({e,i}) => {
@@ -4891,6 +4895,9 @@ function renderEvents() {
       return `<span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-flex;gap:1px;color:${satColor};">${starSvg.repeat(filled)}</span><span style="display:inline-flex;gap:1px;color:#D4D4D4;">${emptySvg.repeat(empty)}</span><span style="font-size:12px;font-weight:700;color:${satColor};margin-left:2px;">${e.sat}</span></span>`;
     })() : '<span style="color:var(--text-muted);">—</span>';
     return `<tr>
+      <td style="padding-right:0;"><input type="checkbox" data-batch="events" value="${i}"
+          ${_batchSel.events && _batchSel.events.has(i) ? 'checked' : ''}
+          onclick="toggleBatchRow('events', ${i}, this.checked)"></td>
       <td class="text-mono">${e.date}</td>
       <td style="font-weight:600">${e.name}${e.budget>0?`<br><small style="font-weight:400;color:${e.expense>e.budget?'var(--warn)':'var(--brand)'}">預算${e.budget.toLocaleString()}元${e.expense>0?' / 支出'+e.expense.toLocaleString()+'元':''}</small>`:''}</td>
       <td><span class="badge badge-blue">${e.type}</span></td>
